@@ -107,6 +107,7 @@ A conversational trip planning flow where the agent does the legwork:
 - GPX import from AllTrails/Wikiloc (no public APIs, but both export GPX files)
 - Google Maps saved list import (paste a shared list URL, pull all pins + notes into the app)
 - OpenStreetMap trail data (free, open, no API restrictions)
+- Agent orchestration layer (see detailed breakdown below)
 
 **Not yet covered — worth adding later:**
 - Fire ban alerts by region
@@ -199,6 +200,19 @@ A conversational trip planning flow where the agent does the legwork:
 - Grocery integration: if the meal planner generates a shopping list, suggests the best store on your route
 - Ice strategy: "Nearest ice is Ingles in Old Fort, 35 min from camp. Buy 2 bags — your cooler holds ice ~36 hours"
 - Return trip planning: "You'll have enough fuel to get home without stopping"
+
+**Agent Orchestration Layer:**
+- A "manager" layer that routes each task to the right AI model based on complexity and cost
+- Not every task needs the most powerful (and expensive) model
+- Model routing strategy:
+  - **Haiku** (cheapest, fastest): data extraction, EXIF parsing, form filling, simple lookups, checklist generation
+  - **Sonnet** (mid-tier): gear identification from photos, packing list generation, meal planning, weather summaries, basic Q&A
+  - **Opus** (most capable): Voice Ghostwriter interviews, complex multi-step trip planning with research, journal writing, nuanced recommendations
+- The orchestrator evaluates the incoming task and spins up the appropriate agent
+- Could also support multiple providers (not just Anthropic) if other models are better/cheaper for specific tasks
+- Keeps token costs down and response times fast — no point paying for Opus to parse a GPS coordinate
+- Logging and tracking: monitor which models handle which tasks, actual cost per feature, response quality
+- This is the architecture that makes the AI features sustainable long-term, not just a demo
 
 This is the "killer feature" — the thing that makes Camp Commander more than an inventory tracker. It's a camping concierge that handles the annoying stuff too.
 
