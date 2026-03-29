@@ -25,3 +25,11 @@ Thumbs.db
 # Prisma
 prisma/*.db
 prisma/*.db-journal
+
+# Large media files (photos/videos stored locally, not in git)
+*.MOV
+*.mov
+*.mp4
+*.MP4
+*.heic
+*.HEIC
