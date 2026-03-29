@@ -16,16 +16,21 @@
 - [x] Database schema defined (GearItem, Vehicle, VehicleMod, Location, Trip, PackingItem)
 - [x] Mobile-responsive layout shell with nav
 - [x] Home page with module cards
+- [x] Database seeded — genesis spot (Linville Gorge) + Santa Fe vehicle
+- [x] Genesis spot photos/videos saved to 00_Context/photos/genesis-spot/
+- [x] GPS coordinates confirmed via EXIF extraction (35.8783, -81.9094)
+- [x] GPT scouting notes saved (linville_gorge_car_camping_scouting_notes.md)
+- [x] New feature ideas captured: User Guide Finder, Voice Ghostwriter
 
 ## What's Next (Phase 1 — Foundation)
 - [ ] Build gear inventory CRUD (add, view, edit, delete)
 - [ ] Build vehicle profile page
-- [ ] Seed vehicle data from docs/vehicle-profile.md
 
 ## Open Questions
 - Google Maps API key — Will needs to set one up (free tier is plenty for personal use)
 - Google Photos integration — will explore API options when we get to Phase 2
-- Claude API key — Will needs one for Phase 3 (gear identification, chat)
+- Claude API key — Will needs one for Phase 3 (gear identification, chat, Voice Ghostwriter)
+- Speech API choice for Voice Ghostwriter — Web Speech API (free) vs Whisper (better)
 
 ## Known Blockers
 - None currently

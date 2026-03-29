@@ -22,3 +22,35 @@ All notable changes to Camp Commander are tracked here.
 
 ### Status at End of Session
 - See `docs/STATUS.md` for pickup instructions
+
+## 2026-03-29 — Session 2: Foundation Build
+
+### Created
+- Next.js 16 app with TypeScript, Tailwind, App Router (Turbopack)
+- Prisma schema with 6 models: GearItem, Vehicle, VehicleMod, Location, Trip, PackingItem
+- SQLite database with initial migration
+- Mobile-responsive layout shell with sticky nav (stone/amber theme)
+- Home page with 4 module cards (Gear, Vehicle, Spots, Trips)
+- Database seed script (`prisma/seed.ts`) — genesis spot + Santa Fe vehicle
+- Prisma client singleton (`lib/db.ts`)
+- Genesis spot photos saved to `00_Context/photos/genesis-spot/`
+
+### Data Seeded
+- **Location:** South Rim of Linville Gorge (35.8783, -81.9094) — dispersed, rated 5/5, Starlink strong, cell weak
+- **Vehicle:** 2022 Hyundai Santa Fe Hybrid — full specs from vehicle-profile.md
+
+### Feature Ideas Captured
+- **User Guide Finder** — auto-search and save product manuals when adding gear (added to PLAN.md)
+- **Voice Ghostwriter** — voice-first journaling, agent interviews you and drafts the entry (added to IDEAS.md)
+
+### Decisions Made
+- **SQLite for now** — Prisma makes the switch to Postgres a one-liner when deploying to Vercel
+- **Build for scale** — no shortcuts that need rework later; forward-compatible architecture choices
+- **Large media excluded from git** — MOV/HEIC/MP4 in .gitignore, only PNGs committed
+- **EXIF extraction works** — GPS coords confirmed from iPhone 14 Pro videos; will auto-extract location from photos in Phase 2
+- **Branching strategy** — main stays stable, feature branches for development going forward
+
+### Status at End of Session
+- Phase 1 foundation complete
+- Next: gear inventory CRUD, vehicle profile page
+- See `docs/STATUS.md` for pickup instructions

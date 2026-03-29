@@ -51,3 +51,27 @@ Key behaviors:
 **Recommendation:** Start with a built-in chat UI in the web app (we control everything), but design the message handling so it could plug into Telegram later. Telegram's bot API is dead simple and free.
 
 ---
+
+### Voice Ghostwriter
+**Added:** 2026-03-29 (Session 2)
+**Context:** Will wants to talk to the app like he's on the phone with a ghostwriter. It interviews him about his adventure, then writes the journal entry for him.
+
+A voice-first journaling feature — you talk, the agent listens, asks great follow-ups, and writes:
+1. **You tap a button** and start talking — "Hey, I'm sitting on the south rim of Linville Gorge right now..."
+2. **Agent listens and responds with voice** — like a real conversation, not dictation. It asks follow-ups: "What's the view like? What surprised you about the spot? How'd you find it?"
+3. **Draws out the good stuff:** Sensory details, mood, the story behind the trip — things you'd never bother typing but will happily say out loud
+4. **Context-aware questions:** Knows your location, gear, weather, trip history. "You mentioned weak cell signal — how's Starlink holding up out here?"
+5. **Drafts a polished journal entry:** Your voice and story, shaped into something worth reading later
+6. **You review and save** — entry attaches to the trip/location in the app
+
+This is the core Fablr insight applied to camping: people have stories worth capturing, they just won't sit down and write them. Make it a conversation and the stories flow naturally.
+
+**Tech considerations:**
+- Speech-to-text: Web Speech API (free, browser-native) or Whisper API (better accuracy)
+- Text-to-speech for agent responses: Browser native or ElevenLabs/OpenAI TTS
+- Claude API for the conversational interview + journal drafting
+- Works on phone via the PWA — tap and talk from the campsite
+
+Replaces/absorbs the earlier "Voice Trip Debrief" idea — same concept but better defined. The debrief was "on the drive home," this is anytime — at camp, on a hike, wherever.
+
+---
