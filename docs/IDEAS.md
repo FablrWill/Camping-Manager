@@ -75,3 +75,130 @@ This is the core Fablr insight applied to camping: people have stories worth cap
 Replaces/absorbs the earlier "Voice Trip Debrief" idea — same concept but better defined. The debrief was "on the drive home," this is anytime — at camp, on a hike, wherever.
 
 ---
+
+### AI Trip Planning Agent
+**Added:** 2026-03-29 (Session 2)
+**Context:** Will wants the agent to actively help plan trips — not just track them, but research and recommend.
+
+A conversational trip planning flow where the agent does the legwork:
+
+**Campsite Discovery:**
+- "I have Friday-Sunday free, find me a spot within 2 hours of Asheville"
+- Searches dispersed camping databases, public land maps, recreation.gov
+- Cross-references with Will's saved spots and preferences
+- Factors in vehicle capabilities (ground clearance, AWD, no heavy towing)
+- Checks for Starlink viability (open sky, elevation)
+
+**Weather & Conditions:**
+- Pulls forecast for trip dates and location
+- Flags deal-breakers (heavy rain, freezing temps, high winds)
+- Suggests gear adjustments based on conditions ("Pack the extra tarp, rain is likely Saturday afternoon")
+
+**Smart Packing:**
+- Generates a packing list from Will's gear inventory based on trip type, duration, weather, and location
+- Knows what fits in the Santa Fe and flags overpacking
+- Remembers what worked/didn't from past trips ("You forgot the headlamp last time")
+
+**Research Capabilities Needed:**
+- Weather API (OpenWeatherMap, NOAA, or similar)
+- Campsite databases (recreation.gov API, freecampsites.net, iOverlander, Campendium)
+- Road/trail condition sources
+- Web search for location-specific info (regulations, fire bans, seasonal closures)
+- GPX import from AllTrails/Wikiloc (no public APIs, but both export GPX files)
+- OpenStreetMap trail data (free, open, no API restrictions)
+
+**Not yet covered — worth adding later:**
+- Fire ban alerts by region
+- Water sources and how much to bring per day
+- First aid / nearest hospital / emergency info per location
+- Campsite setup checklist with photos of past setups
+- Gear maintenance reminders (clean stove, reseal tent, charge EcoFlow before trip)
+- Cost tracking per trip (gas, permits, groceries, gear)
+- Dog planning (getting one soon — changes packing, campsite rules, trail access)
+- Power budget calculator (see detailed breakdown below)
+- Fuel & last stop planner (see detailed breakdown below)
+- Sun/moon/dark sky info (sunrise/sunset, golden hour, moon phase, Bortle class)
+- Wildlife & safety protocols by location (bear country, flash flood risk, snake season)
+- Camp kit presets (Weekend Warrior, Remote Office, Extended Stay — customize once, reuse)
+- Shareable trip reports (journal + photos + route = sendable summary or personal archive)
+- Personal signal map (logs cell + Starlink quality at every campsite over time)
+- Seasonal ratings (a spot can be 5 stars in fall, 2 stars in summer)
+- Wear planning (weather-based clothing recommendations)
+- Gear lending tracker (who borrowed what and when)
+- Buddy trip mode (share trip, split packing list, no duplicate gear between cars)
+- Road trip layer (scenic stops, food, rest areas along the route to camp)
+- Vehicle pre-trip checklist (tire pressure, oil, coolant — terrain-aware)
+- Auto-tag photos to trips via EXIF GPS + date matching
+- Leave No Trace pack-out checklist (location-specific, before you drive away)
+- Altitude awareness (affects cooking, sleep, hydration at higher elevations)
+- Gear ROI tracker (cost per trip, helps justify purchases)
+- Post-trip auto-review (what you forgot, what you didn't use, campsite rating — feeds back into future trips)
+
+**How it works:**
+1. Will says "Plan me a trip" or "What's good this weekend?"
+2. Agent asks a few questions (dates, distance, vibe — remote vs established, etc.)
+3. Agent researches options and presents 2-3 recommendations with reasoning
+4. Will picks one, agent generates the full trip plan + packing list
+5. Trip saves to the app with all details
+
+**Permit & Registration Handling:**
+- Agent checks if the spot requires a permit, pass, or registration
+- Fills out online forms on Will's behalf (recreation.gov, USFS permits, state park reservations)
+- Handles the submission so Will doesn't have to navigate bureaucratic websites
+- Saves confirmation/permit details to the trip record
+- Knows Will's info (name, vehicle, group size) so he never re-enters it
+- Alerts for time-sensitive permits ("Linville Gorge wilderness permits open 30 days out — want me to grab one?")
+
+**Meal Planning:**
+- Agent builds a full meal plan for the trip (breakfast, lunch, dinner, snacks) based on duration and group size
+- Generates a consolidated shopping list — no duplicates, organized by store section
+- Provides recipes tailored to Will's cooking gear (knows if he has a camp stove, skillet, pot, cooler, etc.)
+- Separates prep into **at-home** (marinate, chop, pre-cook) vs **at-camp** (assemble, heat, cook)
+- Factors in practical constraints: no refrigeration after day 2, one-burner stove, limited water, cleanup difficulty
+- Suggests meals that get better over a fire vs ones that work on a camp stove
+- Learns preferences over time ("Will doesn't do freeze-dried meals" or "always wants coffee first thing")
+- Packing integration: cooking gear from the gear inventory gets added to the trip packing list automatically
+
+**Safety Float Plan:**
+- Once a trip is planned, agent generates a trip summary: where you're going, GPS coordinates, route, expected arrival, expected return date/time
+- Send it to predetermined emergency contacts (text, email, or both) with one tap
+- Contacts are saved in the app — family, friends, whoever should know where you are
+- Includes practical details: nearest town, ranger station, cell coverage expectations
+- Optional: "I'm back safe" message to contacts when you return
+- Optional: if Will doesn't check in by expected return time, contacts get an alert
+- The kind of thing you'd scribble on a note and leave on the kitchen counter — but automated and with GPS coordinates
+
+**Offline-First Design:**
+- The app must work without cell or internet — trip plans, packing lists, meal plans, recipes, maps, and permits all available offline
+- PWA with service worker caching — everything downloaded before you leave
+- Trip data synced locally: GPS coordinates, directions, campsite notes, recipes, gear checklists
+- Offline maps for the trip area (download the region before departure)
+- When connection returns, sync any new data (journal entries, photos, location logs) back to the server
+- Pre-trip "Download for Offline" step that grabs everything you'll need
+- Gear manuals and user guides (PDFs) cached locally — if the User Guide Finder saved it, it's available offline
+- This isn't a nice-to-have — it's a hard requirement. No signal = no app is a dealbreaker.
+
+**Power Budget Calculator:**
+- Tracks all power sources: EcoFlow Delta 2 (1,024Wh), solar panels, vehicle 12V system
+- Tracks all power consumers: Starlink Mini, laptop, phone, lights, speaker, etc.
+- Each device in gear inventory gets a wattage rating and typical hours/day of use
+- Agent calculates per-trip: "3 nights × your usage = 2,800Wh needed. You have 1,024Wh + 400W solar panel generating ~1,600Wh over 3 days (weather-adjusted) = you're good" or "you'll need to recharge via car once"
+- Weather-aware: cloudy forecast = less solar, adjusts the math automatically
+- Solar input estimates based on panel wattage, location latitude, time of year, and forecast cloud cover
+- Canopy/shade factor: "Your campsite is heavily wooded — expect 40% solar efficiency"
+- Suggests power management: "Run Starlink only during work hours to stretch the battery"
+- Tracks actual usage over time to improve estimates ("You actually use 15% less than rated")
+- Pre-trip reminder: "Charge your EcoFlow — last charge was 12 days ago"
+
+**Fuel & Last Stop Planner:**
+- Route-aware: knows the drive to your campsite and what's along the way
+- Flags last gas station, grocery store, ice, hardware store, cell coverage point before the backcountry
+- Fuel calculator: trip distance vs Santa Fe's fuel economy vs tank size
+- "You'll use ~6 gallons getting there. Fill up at the Shell in Marion (23 mi from camp) — next gas is 45 miles past camp"
+- Grocery integration: if the meal planner generates a shopping list, suggests the best store on your route
+- Ice strategy: "Nearest ice is Ingles in Old Fort, 35 min from camp. Buy 2 bags — your cooler holds ice ~36 hours"
+- Return trip planning: "You'll have enough fuel to get home without stopping"
+
+This is the "killer feature" — the thing that makes Camp Commander more than an inventory tracker. It's a camping concierge that handles the annoying stuff too.
+
+---
