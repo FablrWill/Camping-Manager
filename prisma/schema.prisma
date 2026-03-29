@@ -1,0 +1,112 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model GearItem {
+  id          String   @id @default(cuid())
+  name        String
+  brand       String?
+  category    String   // shelter, sleep, cook, power, clothing, tools, vehicle
+  description String?
+  condition   String?  // new, good, fair, worn, broken
+  weight      Float?   // in pounds
+  photoUrl    String?
+  storageLocation String?
+  isWishlist  Boolean  @default(false)
+  purchaseUrl String?
+  price       Float?
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  packingItems PackingItem[]
+}
+
+model Vehicle {
+  id              String   @id @default(cuid())
+  name            String   // e.g. "2022 Santa Fe Hybrid"
+  year            Int?
+  make            String?
+  model           String?
+  drivetrain      String?
+  fuelEconomy     String?
+  groundClearance Float?
+  towingCapacity  Int?
+  cargoVolume     Float?   // cu ft behind 2nd row
+  cargoLength     Float?   // inches, seats folded
+  cargoWidth      Float?   // inches between wheel wells
+  notes           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  mods    VehicleMod[]
+  trips   Trip[]
+}
+
+model VehicleMod {
+  id          String   @id @default(cuid())
+  vehicleId   String
+  name        String
+  description String?
+  installedAt DateTime?
+  cost        Float?
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  vehicle Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+}
+
+model Location {
+  id            String   @id @default(cuid())
+  name          String
+  latitude      Float?
+  longitude     Float?
+  type          String?  // dispersed, campground, overlook, water_access
+  description   String?
+  rating        Int?     // 1-5
+  roadCondition String?
+  clearanceNeeded String?
+  cellSignal    String?  // none, weak, moderate, strong
+  starlinkSignal String? // none, weak, moderate, strong
+  waterAccess   Boolean  @default(false)
+  photoUrl      String?
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  trips Trip[]
+}
+
+model Trip {
+  id          String   @id @default(cuid())
+  name        String
+  startDate   DateTime
+  endDate     DateTime
+  locationId  String?
+  vehicleId   String?
+  notes       String?
+  weatherNotes String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  location    Location? @relation(fields: [locationId], references: [id])
+  vehicle     Vehicle?  @relation(fields: [vehicleId], references: [id])
+  packingItems PackingItem[]
+}
+
+model PackingItem {
+  id       String  @id @default(cuid())
+  tripId   String
+  gearId   String
+  packed   Boolean @default(false)
+  notes    String?
+
+  trip Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  gear GearItem @relation(fields: [gearId], references: [id], onDelete: Cascade)
+}

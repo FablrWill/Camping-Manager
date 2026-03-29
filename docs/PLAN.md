@@ -11,6 +11,7 @@ A personal camping assistant that knows my gear, my vehicle, and my favorite spo
 - **Wish list:** Gear I want, with links and price tracking
 - **Packing lists:** Auto-generate based on trip type, duration, weather
 - **Categories:** Shelter, sleep, cook, power/tech, clothing, tools, vehicle-specific
+- **User guide finder:** When adding gear via photo or link, auto-search the web for the product's user guide/manual and save it locally (PDF)
 
 ### 2. Vehicle Profile
 - **Specs:** 2022 Hyundai Santa Fe Hybrid — cargo dimensions, payload, fuel economy, ground clearance
