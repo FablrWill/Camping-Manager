@@ -23,7 +23,7 @@ A personal car camping assistant — hybrid conversational agent + traditional w
 
 **Core modules:** Gear tracker, vehicle profile, trip planner, location journal, map & timeline, chat interface.
 
-**Tech stack:** Next.js 14 + Tailwind + SQLite/Prisma + TypeScript. Deploy to Vercel eventually.
+**Tech stack:** Next.js 16 + Tailwind + SQLite/Prisma + TypeScript. Deploy to Vercel eventually.
 
 ## Will's Setup
 - **Vehicle:** 2022 Hyundai Santa Fe Hybrid (AWD, no roof rack yet)

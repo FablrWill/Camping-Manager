@@ -14,7 +14,7 @@ All notable changes to Camp Commander are tracked here.
 - `docs/GOALS.md` — project goals and success criteria
 
 ### Decisions Made
-- **Tech stack:** Next.js 14 (App Router) + Tailwind + SQLite/Prisma + TypeScript
+- **Tech stack:** Next.js 16 (App Router) + Tailwind + SQLite/Prisma + TypeScript
 - **Maps:** Google Maps (Will is familiar with it)
 - **AI:** Claude API for gear identification and conversational agent
 - **Deployment:** Local dev first, Vercel later

@@ -4,7 +4,7 @@
 A personal car camping assistant and travel guide built as a mobile-friendly web app. Built by Will Sink to manage gear, plan trips, track locations, and learn Claude Code.
 
 ## Tech Stack
-- **Framework:** Next.js 14 (App Router) — mobile-first responsive design
+- **Framework:** Next.js 16 (App Router) — mobile-first responsive design
 - **Styling:** Tailwind CSS
 - **Database:** SQLite via Prisma (local-first, easy to migrate later)
 - **Maps:** Google Maps JavaScript API (or Leaflet/OpenStreetMap if API key is a hassle)

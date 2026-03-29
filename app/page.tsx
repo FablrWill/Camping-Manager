@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function Home() {
   return (
     <div className="space-y-8">
@@ -7,41 +9,41 @@ export default function Home() {
       </section>
 
       <div className="grid grid-cols-2 gap-4">
-        <a
+        <Link
           href="/gear"
           className="bg-white rounded-xl p-6 shadow-sm border border-stone-200 hover:border-amber-400 transition-colors text-center"
         >
           <div className="text-3xl mb-2">🎒</div>
           <h3 className="font-semibold text-stone-700">Gear</h3>
           <p className="text-sm text-stone-400 mt-1">Inventory &amp; wish list</p>
-        </a>
+        </Link>
 
-        <a
+        <Link
           href="/vehicle"
           className="bg-white rounded-xl p-6 shadow-sm border border-stone-200 hover:border-amber-400 transition-colors text-center"
         >
           <div className="text-3xl mb-2">🚙</div>
           <h3 className="font-semibold text-stone-700">Vehicle</h3>
           <p className="text-sm text-stone-400 mt-1">Specs &amp; mods</p>
-        </a>
+        </Link>
 
-        <a
+        <Link
           href="/locations"
           className="bg-white rounded-xl p-6 shadow-sm border border-stone-200 hover:border-amber-400 transition-colors text-center"
         >
           <div className="text-3xl mb-2">📍</div>
           <h3 className="font-semibold text-stone-700">Spots</h3>
           <p className="text-sm text-stone-400 mt-1">Saved locations</p>
-        </a>
+        </Link>
 
-        <a
+        <Link
           href="/trips"
           className="bg-white rounded-xl p-6 shadow-sm border border-stone-200 hover:border-amber-400 transition-colors text-center"
         >
           <div className="text-3xl mb-2">🏕️</div>
           <h3 className="font-semibold text-stone-700">Trips</h3>
           <p className="text-sm text-stone-400 mt-1">Plan &amp; journal</p>
-        </a>
+        </Link>
       </div>
     </div>
   );

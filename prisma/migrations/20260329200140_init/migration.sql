@@ -96,3 +96,15 @@ CREATE TABLE "PackingItem" (
     CONSTRAINT "PackingItem_tripId_fkey" FOREIGN KEY ("tripId") REFERENCES "Trip" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT "PackingItem_gearId_fkey" FOREIGN KEY ("gearId") REFERENCES "GearItem" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
+
+-- CreateIndex
+CREATE INDEX "VehicleMod_vehicleId_idx" ON "VehicleMod"("vehicleId");
+
+-- CreateIndex
+CREATE INDEX "PackingItem_tripId_idx" ON "PackingItem"("tripId");
+
+-- CreateIndex
+CREATE INDEX "PackingItem_gearId_idx" ON "PackingItem"("gearId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "PackingItem_tripId_gearId_key" ON "PackingItem"("tripId", "gearId");

@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import Link from "next/link";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -24,11 +25,11 @@ export default function RootLayout({
           <nav className="max-w-4xl mx-auto flex items-center justify-between">
             <h1 className="text-lg font-bold tracking-tight">Camp Commander</h1>
             <div className="flex gap-4 text-sm">
-              <a href="/" className="hover:text-amber-300 transition-colors">Home</a>
-              <a href="/gear" className="hover:text-amber-300 transition-colors">Gear</a>
-              <a href="/vehicle" className="hover:text-amber-300 transition-colors">Vehicle</a>
-              <a href="/locations" className="hover:text-amber-300 transition-colors">Spots</a>
-              <a href="/trips" className="hover:text-amber-300 transition-colors">Trips</a>
+              <Link href="/" className="hover:text-amber-300 transition-colors">Home</Link>
+              <Link href="/gear" className="hover:text-amber-300 transition-colors">Gear</Link>
+              <Link href="/vehicle" className="hover:text-amber-300 transition-colors">Vehicle</Link>
+              <Link href="/locations" className="hover:text-amber-300 transition-colors">Spots</Link>
+              <Link href="/trips" className="hover:text-amber-300 transition-colors">Trips</Link>
             </div>
           </nav>
         </header>
