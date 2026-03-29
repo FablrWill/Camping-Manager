@@ -105,6 +105,7 @@ A conversational trip planning flow where the agent does the legwork:
 - Road/trail condition sources
 - Web search for location-specific info (regulations, fire bans, seasonal closures)
 - GPX import from AllTrails/Wikiloc (no public APIs, but both export GPX files)
+- Google Maps saved list import (paste a shared list URL, pull all pins + notes into the app)
 - OpenStreetMap trail data (free, open, no API restrictions)
 
 **Not yet covered — worth adding later:**

@@ -33,6 +33,7 @@ Every feature mapped to a build phase. This is the organized version of IDEAS.md
 | Personal signal map | ❌ | Log cell + Starlink quality per spot over time |
 | Seasonal ratings | ❌ | Rate spots differently by time of year |
 | GPX import | ❌ | Import trails from AllTrails/Wikiloc exports |
+| Google Maps list import | ❌ | Paste a shared list URL, pull all pins + notes into the app |
 
 ---
 
