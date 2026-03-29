@@ -3,6 +3,14 @@
 ## What Happened
 Will's first Claude Code session. He was sitting at a campsite near Asheville — his first-ever car camping trip — and decided to build a camping assistant app called Camp Commander. Dual purpose: learn Claude Code (same tooling his brother Jim uses for Fablr) and build something personally useful.
 
+## The Genesis Spot
+- **Location:** South rim of Linville Gorge, NC
+- **Coordinates:** 35.8781400, -81.9092862
+- **Date:** 2026-03-29
+- **Scene:** Laptop on a camp table overlooking Hawksbill Mountain and the gorge. Bluebird day, early spring, bare trees. Bluetooth speaker, water bottle, EcoFlow + Starlink setup. Working from the Santa Fe.
+- **Photos:** Will took 4 photos from the spot — save them to `00_Context/photos/genesis-spot/` when you get a chance.
+- **Vibe:** "Today is the genesis of this project and it couldn't be more beautiful"
+
 ## Who Will Is
 - 42, living in Asheville NC, co-founding Fablr.ai with brother Jim
 - Strong ADHD — needs scannable content, bullets over paragraphs, no fluff
