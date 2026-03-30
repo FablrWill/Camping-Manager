@@ -247,6 +247,348 @@ async function main() {
     },
   });
 
+  // ── SHELTER (from Session 10 gear inventory) ──
+  await prisma.gearItem.upsert({
+    where: { id: "gear-alvantor-tent" },
+    update: {},
+    create: {
+      id: "gear-alvantor-tent",
+      name: "Alvantor SUV Tailgate Tent",
+      brand: "Alvantor",
+      category: "shelter",
+      description: "Instant pop-up tent that attaches to SUV tailgate. Creates enclosed living/sleeping space off the back of the vehicle. UV protection, instant setup in seconds.",
+      condition: "new",
+      purchaseUrl: "https://www.amazon.com/dp/B0F6N493PL",
+      notes: "Setup guide: https://www.alvantor.com/pages/alvantor-pop-up-bed-tent-set-up-and-take-down-instructions",
+    },
+  });
+
+  await prisma.gearItem.upsert({
+    where: { id: "gear-luno-mattress" },
+    update: {},
+    create: {
+      id: "gear-luno-mattress",
+      name: "Luno AIR Pro Vehicle Mattress",
+      brand: "Luno",
+      category: "shelter",
+      description: "Inflatable SUV cargo-area mattress. Sleeps 2 up to 6'2\". Solo zipper for solo mode, head support bridge attachments, puncture-proof fabric, included 12V pump.",
+      condition: "new",
+      price: 349.99,
+      purchaseUrl: "https://lunolife.com/products/air-pro-vehicle-mattress",
+      notes: "User manual: https://lunolife.gorgias.help/en-US/articles/product-user-manuals-48804 — First use: inflate fully and leave inflated 48 hours before first trip.",
+    },
+  });
+
+  // ── SLEEP (from Session 10) ──
+  await prisma.gearItem.upsert({
+    where: { id: "gear-heated-blanket" },
+    update: {},
+    create: {
+      id: "gear-heated-blanket",
+      name: "12V Heated Car Blanket",
+      brand: "Unknown",
+      category: "sleep",
+      description: "12V flannel electric blanket for in-vehicle use. 59\"×39\", 9 heat settings, 3 timer settings. Plugs into car 12V outlet.",
+      condition: "new",
+      purchaseUrl: "https://www.amazon.com/dp/B0FHDQG7LS",
+    },
+  });
+
+  await prisma.gearItem.upsert({
+    where: { id: "gear-kingcamp-blanket" },
+    update: {},
+    create: {
+      id: "gear-kingcamp-blanket",
+      name: "KingCamp Ultralight Camping Blanket",
+      brand: "KingCamp",
+      category: "sleep",
+      description: "Packable down-alternative puffy blanket. 69\"×53\", snap buttons to wear as a poncho or use as a quilt. Weatherproof, charcoal color.",
+      condition: "new",
+      purchaseUrl: "https://www.amazon.com/dp/B0DRVTJS7L",
+    },
+  });
+
+  await prisma.gearItem.upsert({
+    where: { id: "gear-hikenture-pillow" },
+    update: {},
+    create: {
+      id: "gear-hikenture-pillow",
+      name: "Hikenture Ultralight Inflatable Pillow",
+      brand: "Hikenture",
+      category: "sleep",
+      description: "Lightweight inflatable camp pillow with removable washable cover. Provides neck and lumbar support. Grey.",
+      condition: "new",
+      purchaseUrl: "https://www.amazon.com/dp/B0896WCB5D",
+    },
+  });
+
+  // ── POWER (from Session 10) ──
+  await prisma.gearItem.upsert({
+    where: { id: "gear-jackery-240" },
+    update: {},
+    create: {
+      id: "gear-jackery-240",
+      name: "Jackery Explorer 240 v2",
+      brand: "Jackery",
+      category: "power",
+      description: "256Wh LiFePO4 portable power station. 300W AC output, 100W USB-C, 1-hour fast charge. Compact backup / secondary power unit.",
+      condition: "new",
+      purchaseUrl: "https://www.amazon.com/dp/B0D2L1B7PK",
+      notes: "User manual: https://r.jackery.net/productGuide/Jackery%20Explorer%20240%20v2%20Portable%20Power%20Station%20User%20Manual.pdf",
+      wattage: 300,
+      hasBattery: false,
+    },
+  });
+
+  await prisma.gearItem.upsert({
+    where: { id: "gear-anker-powercore" },
+    update: {},
+    create: {
+      id: "gear-anker-powercore",
+      name: "Anker PowerCore Reserve 192Wh",
+      brand: "Anker",
+      category: "power",
+      description: "60,000mAh / 192Wh power bank. 87W output, USB-C×2 + USB-A×2 + XT60. Built-in retractable light with SOS mode, smart digital display.",
+      condition: "good",
+      price: 99.98,
+      purchaseUrl: "https://www.amazon.com/dp/B0BV23LTXZ",
+      notes: "User guide: https://support.anker.com/s/article/Anker-548-Power-Bank-PowerCore-Reserve-192Wh-User-Guide-A1294",
+      hasBattery: false,
+    },
+  });
+
+  await prisma.gearItem.upsert({
+    where: { id: "gear-dokio-solar-150" },
+    update: {},
+    create: {
+      id: "gear-dokio-solar-150",
+      name: "DOKIO 150W Foldable Solar Panel Kit",
+      brand: "DOKIO",
+      category: "power",
+      description: "150W monocrystalline foldable solar panel. 21\"×20\" folded, 7.3 lbs. Includes standalone controller and USB port.",
+      condition: "new",
+      weight: 7.3,
+      purchaseUrl: "https://www.amazon.com/dp/B07Y8CT1W9",
+      notes: "User manual: https://manuals.plus/asin/B07CG8KV33",
+      wattage: 150,
+      hasBattery: false,
+    },
+  });
+
+  await prisma.gearItem.upsert({
+    where: { id: "gear-fehuatenda-solar-100" },
+    update: {},
+    create: {
+      id: "gear-fehuatenda-solar-100",
+      name: "Fehuatenda 100W Solar Panel",
+      brand: "Fehuatenda",
+      category: "power",
+      description: "100W foldable solar panel. IP67 waterproof, single-crystal silicon, QC3.0. 25\"L×4\"W×26\"H, 2.5 lbs.",
+      condition: "new",
+      weight: 2.5,
+      purchaseUrl: "https://www.amazon.com/dp/B0DZWTR6W5",
+      notes: "Currently unavailable on Amazon as of March 2026.",
+      wattage: 100,
+      hasBattery: false,
+    },
+  });
+
+  await prisma.gearItem.upsert({
+    where: { id: "gear-starlink-power-cable" },
+    update: {},
+    create: {
+      id: "gear-starlink-power-cable",
+      name: "Starlink Mini USB-C to DC Power Cable",
+      brand: "slimall",
+      category: "power",
+      description: "10ft/3M USB-C to DC barrel cable for powering Starlink Mini from a USB-C power bank. Waterproof gasket connector, 20V PD compatible.",
+      condition: "new",
+      price: 8.98,
+      purchaseUrl: "https://www.amazon.com/dp/B0DZXS47XP",
+    },
+  });
+
+  await prisma.gearItem.upsert({
+    where: { id: "gear-usb-fans" },
+    update: {},
+    create: {
+      id: "gear-usb-fans",
+      name: "Wathai 40mm USB Mini Fans (2-pack)",
+      brand: "Wathai",
+      category: "power",
+      description: "2× 40mm×10mm USB 5V mini fans with speed control. Used for ventilation/cooling inside the vehicle.",
+      condition: "new",
+      purchaseUrl: "https://www.amazon.com/dp/B088TGQVJZ",
+      wattage: 2,
+      hasBattery: false,
+    },
+  });
+
+  await prisma.gearItem.upsert({
+    where: { id: "gear-fan-controller" },
+    update: {},
+    create: {
+      id: "gear-fan-controller",
+      name: "bestmoument USB Fan Speed Controller",
+      brand: "bestmoument",
+      category: "power",
+      description: "6.6ft USB extension cable with inline speed controller. 3-speed adjustment, wireless remote with 19.7ft range, 2H/4H/8H auto shutoff timer.",
+      condition: "new",
+      price: 9.79,
+      purchaseUrl: "https://www.amazon.com/dp/B0F2DPG71R",
+    },
+  });
+
+  // ── TOOLS (from Session 10) ──
+  await prisma.gearItem.upsert({
+    where: { id: "gear-folding-saw" },
+    update: {},
+    create: {
+      id: "gear-folding-saw",
+      name: "REXBETI Folding Saw",
+      brand: "REXBETI",
+      category: "tools",
+      description: "11\" SK-5 steel extra-long folding hand saw. Heavy-duty for dry wood and pruning.",
+      condition: "new",
+      purchaseUrl: "https://www.amazon.com/dp/B07BLQBN8X",
+    },
+  });
+
+  await prisma.gearItem.upsert({
+    where: { id: "gear-fire-extinguisher" },
+    update: {},
+    create: {
+      id: "gear-fire-extinguisher",
+      name: "AmzBoom Fire Extinguisher Spray (2-pack)",
+      brand: "AmzBoom",
+      category: "tools",
+      description: "2× compact fire extinguisher spray. A/B/C/K rated, eco-friendly formula, prevents reignition. Each includes mounting bracket.",
+      condition: "new",
+      purchaseUrl: "https://www.amazon.com/dp/B0DH5CM2CC",
+    },
+  });
+
+  await prisma.gearItem.upsert({
+    where: { id: "gear-water-pump" },
+    update: {},
+    create: {
+      id: "gear-water-pump",
+      name: "USB Rechargeable Water Jug Pump",
+      brand: "Unknown",
+      category: "tools",
+      description: "USB-rechargeable electric pump for 2–5 gallon water jugs. Automatic pump with 2-switch control.",
+      condition: "new",
+      purchaseUrl: "https://www.amazon.com/dp/B086WK8JNJ",
+      hasBattery: true,
+    },
+  });
+
+  await prisma.gearItem.upsert({
+    where: { id: "gear-first-aid" },
+    update: {},
+    create: {
+      id: "gear-first-aid",
+      name: "Travel First Aid Kit (300-piece)",
+      brand: "1st Aid",
+      category: "tools",
+      description: "300-piece compact first aid kit in red hard case. Includes bandages, burn dressing, scissors, and more.",
+      condition: "new",
+      price: 17.99,
+      purchaseUrl: "https://www.amazon.com/dp/B0C5J8MVDD",
+    },
+  });
+
+  await prisma.gearItem.upsert({
+    where: { id: "gear-tire-inflator" },
+    update: {},
+    create: {
+      id: "gear-tire-inflator",
+      name: "AstroAI Tire Inflator L7S",
+      brand: "AstroAI",
+      category: "tools",
+      description: "Cordless portable air compressor. 150 PSI, dual digital display, 12V battery powered, LED lights.",
+      condition: "new",
+      price: 23.99,
+      purchaseUrl: "https://www.amazon.com/dp/B0DKJK869T",
+      notes: "User manual: https://www.astroai.com/user-manual/up/1000499198",
+      hasBattery: true,
+    },
+  });
+
+  await prisma.gearItem.upsert({
+    where: { id: "gear-camp-table" },
+    update: {},
+    create: {
+      id: "gear-camp-table",
+      name: "VILLEY Folding Camp Table",
+      brand: "VILLEY",
+      category: "tools",
+      description: "Ultralight aluminum folding camp table with carry bag. 2.05 lbs, 66 lb capacity, 16\"×13\"×12\" (medium). Green.",
+      condition: "new",
+      weight: 2.05,
+      purchaseUrl: "https://www.amazon.com/dp/B09STL29DQ",
+    },
+  });
+
+  await prisma.gearItem.upsert({
+    where: { id: "gear-fairy-lights" },
+    update: {},
+    create: {
+      id: "gear-fairy-lights",
+      name: "Minetom Twinkle Fairy Lights",
+      brand: "Minetom",
+      category: "tools",
+      description: "33ft / 100 LED USB string lights with remote and timer. 8 lighting modes, waterproof. For tent/campsite ambiance.",
+      condition: "new",
+      purchaseUrl: "https://www.amazon.com/dp/B0CN2DMCKF",
+    },
+  });
+
+  await prisma.gearItem.upsert({
+    where: { id: "gear-wall-sconces" },
+    update: {},
+    create: {
+      id: "gear-wall-sconces",
+      name: "Adetu LED Wall Sconces (2-pack)",
+      brand: "Adetu",
+      category: "tools",
+      description: "2× rechargeable cordless LED wall lights. RGB + 3 color temperatures, dimmable, magnetic 360° rotation, USB rechargeable.",
+      condition: "new",
+      price: 19.99,
+      purchaseUrl: "https://www.amazon.com/dp/B0CPLJQVDH",
+      hasBattery: true,
+    },
+  });
+
+  await prisma.gearItem.upsert({
+    where: { id: "gear-flood-lights" },
+    update: {},
+    create: {
+      id: "gear-flood-lights",
+      name: "RGBW Bluetooth Flood Lights (2-pack)",
+      brand: "Unknown",
+      category: "tools",
+      description: "2× 30W outdoor RGBW smart flood lights. 3000 lumens, Bluetooth controlled, 2700K warm white + 16M colors, IP66 waterproof, music sync.",
+      condition: "new",
+      purchaseUrl: "https://www.amazon.com/dp/B07W6SHBV5",
+    },
+  });
+
+  // ── VEHICLE (from Session 10) ──
+  await prisma.gearItem.upsert({
+    where: { id: "gear-dog-seat-cover" },
+    update: {},
+    create: {
+      id: "gear-dog-seat-cover",
+      name: "Yuntec Dog Car Seat Cover",
+      brand: "Yuntec",
+      category: "vehicle",
+      description: "Waterproof non-slip back seat cover for dogs/pets. Fits most cars, trucks, and SUVs. Works with middle armrest. Black.",
+      condition: "new",
+      purchaseUrl: "https://www.amazon.com/dp/B07YHQNFVL",
+    },
+  });
+
   // Wishlist items
   await prisma.gearItem.upsert({
     where: { id: "gear-wish-nemo-roamer" },
@@ -438,7 +780,7 @@ async function main() {
   console.log("Seeded successfully:", {
     vehicle: santaFe.name,
     mods: 3,
-    gearItems: 11,
+    gearItems: 33,
     locations: 4,
     trips: 4,
   });
