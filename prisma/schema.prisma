@@ -183,6 +183,7 @@ model Trip {
   weatherNotes String?
   currentBatteryPct  Float?    // last known EcoFlow battery %, entered during live mode
   batteryUpdatedAt   DateTime? // when currentBatteryPct was last set
+  mealPlanGeneratedAt DateTime? // set when Claude generates a meal plan for this trip
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

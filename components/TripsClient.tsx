@@ -15,6 +15,7 @@ import PackingList from '@/components/PackingList'
 import MealPlan from '@/components/MealPlan'
 import PowerBudget from '@/components/PowerBudget'
 import type { DayForecast, WeatherAlert } from '@/lib/weather'
+import { formatDateRange, daysUntil, tripNights } from '@/lib/trip-utils'
 
 interface TripData {
   id: string
@@ -42,31 +43,6 @@ interface TripsClientProps {
   vehicles: { id: string; name: string }[]
 }
 
-function formatDateRange(start: string, end: string): string {
-  const s = new Date(start)
-  const e = new Date(end)
-  const opts: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' }
-
-  if (s.getFullYear() !== e.getFullYear()) {
-    return `${s.toLocaleDateString('en-US', { ...opts, year: 'numeric' })} – ${e.toLocaleDateString('en-US', { ...opts, year: 'numeric' })}`
-  }
-  if (s.getMonth() === e.getMonth()) {
-    return `${s.toLocaleDateString('en-US', opts)} – ${e.getDate()}, ${s.getFullYear()}`
-  }
-  return `${s.toLocaleDateString('en-US', opts)} – ${e.toLocaleDateString('en-US', opts)}, ${s.getFullYear()}`
-}
-
-function daysUntil(dateStr: string): number {
-  const now = new Date()
-  const target = new Date(dateStr)
-  return Math.ceil((target.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
-}
-
-function tripNights(start: string, end: string): number {
-  const s = new Date(start)
-  const e = new Date(end)
-  return Math.ceil((e.getTime() - s.getTime()) / (1000 * 60 * 60 * 24))
-}
 
 type TripCategory = 'upcoming' | 'past'
 
