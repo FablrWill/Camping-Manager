@@ -70,6 +70,17 @@ These are the highest-priority tasks based on the user journey defined in `docs/
 
 ## Phase 3 — Intelligence & Agent Features
 
+### Smart Campsite
+| Task | Status | Notes |
+|------|--------|-------|
+| Smart device fields on GearItem model | ❌ Ready | `isSmartDevice`, `deviceRole`, `connectionType`, `haIntegration`, `appRequired` — all nullable, Prisma migration |
+| Smart device UI in gear inventory | ❌ Ready | Filter + badge for smart devices; connection/HA fields in add/edit form |
+| Campsite setup checklist in trip planning | ❌ Ready | Trip prep step pulling smart devices from gear inventory |
+| Claude device suggestions | ❌ Planned | Suggest automations + kit gaps based on device inventory. Pull HA docs via Context7 at build time. |
+| HA bridge — status dashboard | ❌ Planned | Local HA REST/WebSocket. Blocked until HA hardware is set up (~mid-April 2026). |
+| HA automation templates | ❌ Planned | Camping-specific YAML automations generated for HA |
+
+### Other Phase 3
 | Task | Status | Notes |
 |------|--------|-------|
 | AI trip recommendations | ❌ Planned | "Find me a spot within 2hrs of Asheville this weekend" |
