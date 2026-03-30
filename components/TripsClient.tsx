@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import WeatherCard from '@/components/WeatherCard'
 import PackingList from '@/components/PackingList'
+import MealPlan from '@/components/MealPlan'
 import PowerBudget from '@/components/PowerBudget'
 import type { DayForecast, WeatherAlert } from '@/lib/weather'
 
@@ -264,6 +265,7 @@ export default function TripsClient({ initialTrips, locations, vehicles }: Trips
           {!isPast && (
             <div className="mt-3 space-y-3">
               <PackingList tripId={trip.id} tripName={trip.name} />
+              <MealPlan tripId={trip.id} tripName={trip.name} />
               <PowerBudget tripId={trip.id} tripName={trip.name} />
             </div>
           )}

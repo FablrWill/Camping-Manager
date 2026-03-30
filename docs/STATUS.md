@@ -29,7 +29,8 @@
 13. **Session 11a** (2026-03-30) — Seed dev database + spots dark mode polish.
 14. **Session 11b** (2026-03-30) — Claude API packing list generator — first AI feature.
 15. **Session 12** (2026-03-30) — Meal planning implementation plan (planning only, no code).
-16. **Session 14** (2026-03-30) — Power budget calculator — planning + live mode.
+16. **Session 13** (2026-03-30) — Meal planning full implementation: AI generator, API route, MealPlan UI component.
+17. **Session 14** (2026-03-30) — Power budget calculator — planning + live mode.
 
 ## Key Files
 - `TASKS.md` — What's done, what's next, where to start

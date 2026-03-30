@@ -42,8 +42,8 @@ Every feature mapped to a build phase.
 |---------|--------|-------|
 | **Trip creation UI** | ✅ Done | Date range, destination, vehicle, notes. Countdown, active ribbon. |
 | **Weather integration** | ✅ Done | Open-Meteo (free, no key). Auto-fetches for upcoming trips. Camping alerts (rain, cold, wind, UV). |
-| **Claude API: packing list generator** | ❌ Ready | Trip details + gear inventory → smart packing list |
-| **Claude API: meal planning + shopping list** | ❌ Ready | Full meal plan per trip. Home prep vs. camp cooking. |
+| **Claude API: packing list generator** | ✅ Done | Trip details + gear inventory + weather → categorized packing list with progress tracking |
+| **Claude API: meal planning + shopping list** | ✅ Done | Full meal plan per trip. Home/camp prep tags. Shopping list by store section. Copy-to-clipboard. |
 | **Power budget calculator** | ❌ Ready | EcoFlow + solar + devices. Weather-adjusted solar estimates. |
 | **Executive trip prep flow** | ❌ Ready | Single view: weather → packing → meals → checklist |
 

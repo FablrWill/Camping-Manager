@@ -9,6 +9,7 @@ All notable changes to Outland OS are tracked here.
 | Session | Date | Summary |
 |---------|------|---------|
 | [14](changelog/session-14.md) | 2026-03-30 | Power Budget Calculator — planning + live mode |
+| [13](changelog/session-13.md) | 2026-03-30 | Meal Planning — full implementation (AI generator, API route, UI component) |
 | [12](changelog/session-12.md) | 2026-03-30 | Meal Planning Implementation Plan (planning session) |
 | [11b](changelog/session-11b.md) | 2026-03-30 | Claude API Packing List Generator — first AI feature |
 | [11a](changelog/session-11a.md) | 2026-03-30 | Seed Dev Database + Spots Dark Mode Polish |

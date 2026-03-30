@@ -14,7 +14,7 @@ These are the highest-priority tasks based on the user journey defined in `docs/
 
 2. ~~**Claude API integration + packing list generator**~~ ✅ Done (Session 11) — First AI feature. Anthropic SDK installed. Claude generates categorized packing list from trip details + gear inventory + weather. Editable checklist with progress bar. "Generate with Claude" CTA on upcoming trip cards.
 
-3. **Meal planning with shopping list** — Implementation plan complete (`docs/plans/meal-planning.md`). Claude generates a full meal plan for the trip duration. Shopping list organized by store section. Home prep vs. camp cooking split. Ready to build.
+3. ~~**Meal planning with shopping list**~~ ✅ Done (Session 13) — Claude generates full meal plan with day-by-day meals, prep tags (At Home/At Camp), shopping list by store section, prep timeline, copy-to-clipboard.
 
 4. ~~**Power budget calculator**~~ ✅ Done (Session 14) — Planning mode + live mode. Weather-adjusted solar, charge reminders, day-by-day battery trajectory, live status with alerts. Photo scanning + HA auto-update planned (Phase 3).
 
