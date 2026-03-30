@@ -1,19 +1,28 @@
 # Camp Commander — Task Tracker
 
-> **Last updated:** 2026-03-30 (Session 6 — Frontend Design)
+> **Last updated:** 2026-03-30 (Session 7 — User Journey + Roadmap)
 > **Start here** if you're picking up after a break.
+> **North star:** `docs/USER-JOURNEY.md` — read this before building anything new.
 
 ---
 
 ## Up Next
 
-These are the highest-priority tasks ready to build now. Pick one and go.
+These are the highest-priority tasks based on the user journey defined in `docs/USER-JOURNEY.md`. Build in this order.
 
-1. **Auto-tag photos to trips/locations** — Match photos to saved locations via GPS proximity + timestamp overlap.
+1. **Weather integration** — Fetch forecast for a trip's location and dates. OpenWeatherMap or NOAA. Feeds into packing list and prep flow. *(Trip creation UI already built — Session 6)*
 
-2. **Seed the dev database** — Run seed script in worktree so the dashboard, vehicle page, and trips page show real data during development.
+2. **Claude API integration + packing list generator** — First AI feature. Pass trip details + gear inventory to Claude → smart packing list. Needs Claude API key. See Open Questions.
 
-3. **Polish spots page for dark mode** — The map page still needs dark mode class updates on its control bar and stats footer.
+3. **Meal planning with shopping list** — Claude generates a full meal plan for the trip duration. Shopping list organized by store section. Home prep vs. camp cooking split.
+
+4. **Power budget calculator** — EcoFlow + solar + devices. Weather-adjusted solar estimates.
+
+5. **Executive trip prep flow** — Single "prepare this trip" view: weather → packing → meals → checklist. The Wednesday-before-Saturday experience.
+
+### Housekeeping (do alongside or after)
+- **Seed the dev database** — so dashboard, vehicle, and trips pages show real data
+- **Polish spots page dark mode** — control bar and stats footer still need dark mode classes
 
 ---
 
@@ -59,24 +68,18 @@ These are the highest-priority tasks ready to build now. Pick one and go.
 
 ---
 
-## Phase 3 — Intelligence
+## Phase 3 — Intelligence & Agent Features
 
 | Task | Status | Notes |
 |------|--------|-------|
-| **NC camping knowledge base** | ❌ Ready | PDF ingestion, deep research, RAG architecture. Planning session first. |
+| AI trip recommendations | ❌ Planned | "Find me a spot within 2hrs of Asheville this weekend" |
+| Voice Ghostwriter / trip debrief | ❌ Planned | Voice-first journaling on the drive home |
+| Chat interface | ❌ Planned | Messenger-style interaction with the agent |
+| NC camping knowledge base (RAG) | ❌ Planned | Architecture planned. Corpus ready in data/. Vectra + FTS5 hybrid retrieval. |
 | Gear photo identification | ❌ Planned | Snap a photo → Claude identifies brand/type/specs |
-| Link/screenshot → gear import | ❌ Planned | Paste Amazon URL or screenshot → auto-populate gear form |
-| Wishlist deal finder | ❌ Planned | Search eBay API, Google Shopping, FB Marketplace for wishlist items |
-| User guide finder | ❌ Planned | Auto-search web for product manuals, save PDF |
-| **Nearby trails & recreation API** | ❌ Planned | Query OSM Overpass, NPS, Recreation.gov, USDA Forest Service for trails, campsites, and points of interest near a location. Display as map layers. |
-| AI trip planning agent | ❌ Planned | Campsite discovery, research, recommendations |
-| Smart packing lists | ❌ Planned | Based on trip type, duration, weather, gear |
-| Meal planning | ❌ Planned | Recipes, shopping list, home prep vs camp cooking |
-| Weather integration | ❌ Planned | Forecasts for trip dates/location |
-| Power budget calculator | ❌ Planned | EcoFlow + solar + devices, weather-adjusted |
-| Voice Ghostwriter | ❌ Planned | Voice-first journaling — agent interviews, writes entry |
-| Chat interface | ❌ Planned | Messenger-style interaction |
-| Safety float plan | ❌ Planned | Trip summary sent to emergency contacts |
+| Safety float plan | ❌ Planned | Send trip summary to emergency contacts |
+| Nearby trails & recreation API | ❌ Planned | OSM, NPS, Recreation.gov near a saved location |
+| Fuel & last stop planner | ❌ Planned | Route-aware: last gas, grocery, ice before backcountry |
 | *...and more in FEATURE-PHASES.md* | | |
 
 ---
@@ -91,10 +94,12 @@ These are the highest-priority tasks ready to build now. Pick one and go.
 
 ---
 
-## Open Questions
+## Open Questions / Blockers
 
-- **Claude API key** — Will needs one for Phase 3 features and for enrich_screenshots.py
-- **Speech API** — Web Speech API (free) vs Whisper (better) for Voice Ghostwriter
+- **Claude API key** ⚠️ — Needed NOW for packing list + meal planning (Phase 2 must-haves). Also needed for enrich_screenshots.py.
+- **OpenAI API key** — Needed for KB embeddings (Phase 3, not urgent)
+- **Weather API key** — OpenWeatherMap free tier works. Needed for weather integration (Phase 2 #1).
+- **Speech API** — Web Speech API (free) vs Whisper (better) for Voice Ghostwriter (Phase 3)
 
 ---
 
