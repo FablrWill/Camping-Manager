@@ -107,17 +107,27 @@ def identify_map_location(client, image_path: str) -> dict | None:
             }],
         )
 
+        if not response.content or not hasattr(response.content[0], "text"):
+            print(f"    Unexpected API response format")
+            return None
+
         text = response.content[0].text.strip()
 
         # Try to extract JSON from the response
-        if text.startswith("{"):
-            return json.loads(text)
-        # Sometimes the model wraps it in markdown code blocks
-        if "```" in text:
-            json_str = text.split("```")[1]
-            if json_str.startswith("json"):
-                json_str = json_str[4:]
-            return json.loads(json_str.strip())
+        try:
+            if text.startswith("{"):
+                return json.loads(text)
+            # Sometimes the model wraps it in markdown code blocks
+            if "```" in text:
+                parts = text.split("```")
+                if len(parts) >= 2:
+                    json_str = parts[1]
+                    if json_str.startswith("json"):
+                        json_str = json_str[4:]
+                    return json.loads(json_str.strip())
+        except json.JSONDecodeError:
+            print(f"    Could not parse API response as JSON")
+            return None
 
         return None
 
@@ -144,6 +154,7 @@ Cost: ~$0.003 per image with claude-sonnet-4-20250514. 100 images ≈ $0.30.
     parser.add_argument("--confidence", default="medium", choices=["high", "medium", "low"], help="Minimum confidence to accept (default: medium)")
     parser.add_argument("--limit", type=int, help="Only process first N no-GPS photos")
     parser.add_argument("--force", action="store_true", help="Re-process photos that already have visionAttempted: true")
+    parser.add_argument("--takeout-root", help="Path to Takeout folder (needed if imagePath values are relative)")
 
     args = parser.parse_args()
 
@@ -169,6 +180,9 @@ Cost: ~$0.003 per image with claude-sonnet-4-20250514. 100 images ≈ $0.30.
     with open(photos_path, "r", encoding="utf-8") as f:
         photos = json.load(f)
 
+    # Resolve takeout root for relative image paths
+    takeout_root = Path(args.takeout_root).resolve() if args.takeout_root else None
+
     # Find candidates
     min_confidence_idx = CONFIDENCE_LEVELS.index(args.confidence)
     candidates = []
@@ -186,12 +200,14 @@ Cost: ~$0.003 per image with claude-sonnet-4-20250514. 100 images ≈ $0.30.
         if photo.get("visionAttempted") and not args.force:
             continue
 
-        # Check if image file exists
+        # Resolve image path — try absolute first, then relative to takeout root
         image_path = Path(photo["imagePath"])
+        if not image_path.is_absolute() and takeout_root:
+            image_path = takeout_root / image_path
         if not image_path.exists():
             continue
 
-        candidates.append((i, photo))
+        candidates.append((i, photo, str(image_path)))
 
     if args.limit:
         candidates = candidates[:args.limit]
@@ -206,8 +222,8 @@ Cost: ~$0.003 per image with claude-sonnet-4-20250514. 100 images ≈ $0.30.
 
     if args.dry_run:
         print("\n[DRY RUN] Would process these files:")
-        for _, photo in candidates:
-            print(f"  {photo['title']} ({photo['imagePath']})")
+        for _, photo, resolved_path in candidates:
+            print(f"  {photo['title']} ({resolved_path})")
         return
 
     # Initialize API client
@@ -220,10 +236,10 @@ Cost: ~$0.003 per image with claude-sonnet-4-20250514. 100 images ≈ $0.30.
     not_maps = 0
     errors = 0
 
-    for idx, (photo_idx, photo) in enumerate(candidates):
+    for idx, (photo_idx, photo, resolved_path) in enumerate(candidates):
         print(f"\n[{idx + 1}/{len(candidates)}] {photo['title']}")
 
-        result = identify_map_location(client, photo["imagePath"])
+        result = identify_map_location(client, resolved_path)
 
         if result is None:
             photos[photo_idx]["visionAttempted"] = True

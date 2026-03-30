@@ -97,7 +97,7 @@ def parse_sidecar(json_path: Path, takeout_root: Path) -> dict | None:
         "year": dt.year,
         "month": dt.month,
         "day": dt.day,
-        "dateLabel": dt.strftime("%b %-d, %Y"),
+        "dateLabel": f"{dt.strftime('%b')} {dt.day}, {dt.year}",
         "imagePath": image_path,
         "googleUrl": google_url,
         "locationSource": location_source,

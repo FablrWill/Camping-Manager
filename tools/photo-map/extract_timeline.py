@@ -73,6 +73,7 @@ def extract_semantic(takeout_folder: Path) -> tuple[list, list]:
             break
 
     if not semantic_dir:
+        print("  Warning: Semantic Location History directory not found — place visits and activity segments will be empty", file=sys.stderr)
         return [], []
 
     place_visits = []

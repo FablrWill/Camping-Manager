@@ -28,8 +28,17 @@ Every feature mapped to a build phase. This is the organized version of IDEAS.md
 | Map view of all saved locations | ✅ Done | Leaflet/OpenStreetMap, no API key needed |
 | Photo upload with EXIF extraction | ✅ Done | GPS auto-extracted, compressed to ~100KB |
 | Photo map pins with popups | ✅ Done | Click to see photo, date, altitude |
-| Marker clustering | ✅ Done | Handles large photo sets cleanly |
-| Filter bar (photos/spots/all) | ✅ Done | |
+| Marker clustering | ✅ Done | leaflet.markercluster for large photo sets |
+| Layer toggles | ✅ Done | Photos / Spots / Path / Places + dark mode |
+| Google Takeout import tools | ✅ Done | Python scripts in tools/photo-map/ |
+| Timeline models & import APIs | ✅ Done | TimelinePoint, PlaceVisit, ActivitySegment |
+| GPS path visualization | ✅ Done | Color-coded polylines by activity type |
+| Place visit markers | ✅ Done | Pulsing circles with name, duration, time |
+| Day picker + date filtering | ✅ Done | Day summary card with distance, photos, places |
+| Path animation | ✅ Done | Replay GPS trail with adjustable speed (1x–16x) |
+| Dark mode | ✅ Done | CartoDB Dark Matter tiles |
+| Vision AI screenshot enrichment | ✅ Done | Claude Sonnet identifies locations from map screenshots |
+| Color-coded photo markers | ✅ Done | Blue=EXIF, green=vision exact, orange=approximate |
 | Location save/edit with map pin | ❌ | Drop a pin to save a new spot |
 | Auto-tag photos to trips/locations | ❌ | Match via EXIF GPS + date |
 | Basic trip creation | ❌ | Dates, location, vehicle, notes |

@@ -9,7 +9,7 @@
 | Styling | Tailwind CSS | Fast, mobile-first, no CSS files to manage |
 | Database | SQLite via Prisma | Local-first, zero config. Switch to Postgres is a one-line change in Prisma when deploying to Vercel |
 | ORM | Prisma | Abstracts the database — app code works with any DB. Migrations, type-safe queries |
-| Maps | Google Maps JS API (planned) | Will is familiar with it. Free tier is plenty |
+| Maps | Leaflet + OpenStreetMap | Free, no API key, no rate limits. CartoDB Dark Matter for dark mode |
 | AI | Claude API (planned) | Gear identification, trip planning, Voice Ghostwriter, conversational agent |
 | Speech | TBD — Web Speech API or Whisper | Voice Ghostwriter feature. Web Speech is free/browser-native, Whisper is more accurate |
 | TTS | TBD — Browser native or ElevenLabs | Agent voice responses for Voice Ghostwriter |
@@ -18,7 +18,7 @@
 
 ## Database Schema
 
-### Current Models (6)
+### Current Models (9)
 
 **GearItem** — Everything you own or want for camping
 - Categories: shelter, sleep, cook, power, clothing, tools, vehicle
@@ -48,6 +48,26 @@
 - Which gear is packed for which trip
 - Tracks packed status (checkbox)
 
+**Photo** — GPS-tagged photos on the map
+- Nullable lat/lon (supports unplaced photos)
+- locationSource: "exif" or "vision" (AI-inferred)
+- Vision enrichment fields: locationConfidence, visionApproximate, locationDescription
+- Links to Location and Trip
+
+**TimelinePoint** — Raw GPS breadcrumbs from Google Maps Location History
+- lat/lon, altitude, timestamp, activityType
+- Imported via tools/photo-map/extract_timeline.py
+
+**PlaceVisit** — Named place visits from Google Timeline
+- Name, address, lat/lon, start/end timestamps, duration
+- Confidence level from Google's data
+
+**ActivitySegment** — Movement segments between places
+- Activity type (HIKING, IN_VEHICLE, CYCLING, etc.)
+- Start/end coordinates and timestamps
+- Waypoints stored as JSON string
+- Distance in meters
+
 ### Schema Design Principles
 - **IDs are strings (cuid)** — works with any database, no auto-increment issues
 - **Relations use onDelete: Cascade** where appropriate — delete a trip, its packing items go too
@@ -59,10 +79,18 @@
 
 ```
 /app              — Next.js App Router pages and layouts
+  /api/photos     — Photo CRUD and upload endpoints
+  /api/timeline   — Timeline data query endpoint (with date filtering)
+  /api/import     — Bulk import endpoints for Takeout data (photos, timeline)
+  /spots          — Interactive map page (server + client components)
 /components       — Reusable React components
+  SpotMap.tsx     — Leaflet map with clustering, paths, animation, layers
+  PhotoUpload.tsx — Drag-drop photo upload with EXIF feedback
 /lib              — Utilities, database client, API helpers
 /prisma           — Schema, migrations, seed script
-/public           — Static assets (icons, images)
+/public           — Static assets (icons, images, uploaded photos)
+/tools            — Standalone utility scripts
+  /photo-map      — Google Takeout extraction + vision enrichment (Python)
 /docs             — Project documentation
 /00_Context       — Will's personal context, photos, reference material
 ```
@@ -94,6 +122,6 @@ User → Form Submit → API Route → Prisma → SQLite → Redirect
 
 ## What Will Change
 - **SQLite → Postgres** when deploying to Vercel (one-line Prisma config change)
-- **Add more models** as features are built (JournalEntry, MealPlan, FloatPlan, PowerDevice, EmergencyContact)
+- **Add more models** as features are built (JournalEntry, MealPlan, FloatPlan, PowerDevice, EmergencyContact). Already added: Photo, TimelinePoint, PlaceVisit, ActivitySegment
 - **Add Claude API integration** in Phase 3
 - **Add service worker** for offline support in Phase 4

@@ -72,8 +72,7 @@ All notable changes to Camp Commander are tracked here.
 - `app/page.tsx` — Spots card link updated to `/spots`, added container padding directly
 
 ### Dependencies Added
-- `leaflet`, `react-leaflet`, `@types/leaflet` — map rendering
-- `react-leaflet-cluster` — marker clustering
+- `leaflet`, `@types/leaflet` — map rendering (raw Leaflet API, not react-leaflet wrapper)
 - `exif-parser` — EXIF GPS extraction
 - `sharp` — image compression
 
@@ -87,4 +86,41 @@ All notable changes to Camp Commander are tracked here.
 - Phase 2 photo map complete
 - Linville Gorge pin visible on load; upload geotagged photos to add pins
 - Next: location save/edit with pin drop, gear inventory CRUD
+- See `docs/STATUS.md` for pickup instructions
+
+## 2026-03-30 — Session 4: Interactive Timeline Map + Google Takeout Import
+
+### Created
+- `tools/photo-map/extract_photos.py` — Extract GPS metadata from Google Photos Takeout sidecars
+- `tools/photo-map/extract_timeline.py` — Extract GPS path + place visits from Location History (streaming parser for large files)
+- `tools/photo-map/enrich_screenshots.py` — Claude Sonnet vision AI identifies locations from map screenshots
+- `tools/photo-map/README.md` — Full setup guide, usage, troubleshooting
+- `app/api/import/photos/route.ts` — Bulk import photos from Takeout JSON
+- `app/api/import/timeline/route.ts` — Bulk import timeline data (path points, place visits, activity segments)
+- `app/api/timeline/route.ts` — Serve timeline data to frontend with date filtering
+- Prisma models: `TimelinePoint`, `PlaceVisit`, `ActivitySegment`
+- Migration: `add_timeline_models_and_photo_enhancements`
+
+### Changed
+- `components/SpotMap.tsx` — Complete rewrite: marker clustering (leaflet.markercluster), color-coded activity path polylines, place visit markers with pulse animation, dark mode tiles (CartoDB Dark Matter), layer toggles, path animation with speed control, forwardRef for imperative API
+- `app/spots/spots-client.tsx` — Added: day picker with date filtering, day summary card, layer toggles (photos/spots/path/places), animation controls (play/stop/speed slider), dark mode toggle, timeline data fetching, unplaced photos count
+- `app/spots/page.tsx` — Queries new Photo fields (locationSource, locationConfidence, visionApproximate, googleUrl)
+- `app/api/photos/route.ts` — Returns new enrichment fields
+- `prisma/schema.prisma` — Photo model: nullable lat/lon, locationSource, locationDescription, locationConfidence, visionApproximate, googleUrl fields
+
+### Dependencies Changed
+- Added: `leaflet.markercluster`, `@types/leaflet.markercluster`
+- Removed: `react-leaflet`, `react-leaflet-cluster` (unused — SpotMap uses raw Leaflet API)
+
+### Decisions Made
+- **Google Takeout import** added alongside direct upload — both approaches supported now
+- **Timeline data in SQLite** — bulk import via API, not parsed on-the-fly in the browser
+- **tools/ directory** for standalone Python scripts — keeps Next.js app root clean
+- **Activity color coding** — hiking=green, driving=red, cycling=blue, kayaking=teal, flying=purple
+- **Photo marker colors** by source — blue=EXIF GPS, green=vision exact, orange=vision approximate
+
+### Status at End of Session
+- Timeline visualization fully working on /spots page
+- Python extraction tools ready for Google Takeout data
+- Next: location save/edit, gear inventory CRUD, or start using real Takeout data
 - See `docs/STATUS.md` for pickup instructions

@@ -7,7 +7,7 @@ A personal car camping assistant and travel guide built as a mobile-friendly web
 - **Framework:** Next.js 16 (App Router) — mobile-first responsive design
 - **Styling:** Tailwind CSS
 - **Database:** SQLite via Prisma (local-first, easy to migrate later)
-- **Maps:** Google Maps JavaScript API (or Leaflet/OpenStreetMap if API key is a hassle)
+- **Maps:** Leaflet + OpenStreetMap (free, no API key needed)
 - **Auth:** None for now (single user)
 - **AI:** Claude API for gear identification, trip recommendations, conversational agent
 - **Hosting:** Local dev for now, designed for easy deployment to Vercel later
@@ -15,10 +15,15 @@ A personal car camping assistant and travel guide built as a mobile-friendly web
 ## Project Structure
 ```
 /app              — Next.js app router pages
-/components       — React components
+  /api/photos     — Photo CRUD and upload
+  /api/timeline   — Timeline data with date filtering
+  /api/import     — Bulk import from Google Takeout
+  /spots          — Interactive map page
+/components       — React components (SpotMap, PhotoUpload)
 /lib              — Utilities, database client, API helpers
-/prisma           — Database schema and migrations
-/public           — Static assets
+/prisma           — Database schema and migrations (9 models)
+/public           — Static assets + uploaded photos
+/tools/photo-map  — Python scripts for Google Takeout extraction + AI enrichment
 /docs             — Project documentation, planning, specs
 /00_Context       — Will's personal context files (voice, style, working rules)
 ```
