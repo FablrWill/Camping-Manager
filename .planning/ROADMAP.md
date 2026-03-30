@@ -41,7 +41,10 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. User can tap any status indicator and navigate directly to that sub-feature (weather, packing list, meal plan, power budget)
   3. User can return from any sub-feature to the executive prep view without losing their place
   4. User can access the executive prep view from the trip card on the home dashboard
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 02-01-PLAN.md — Backend foundation: schema migration, prep types/registry, prep API, packing persistence, meal plan tracking
+- [ ] 02-02-PLAN.md — Frontend: prep page UI with collapsible sections, traffic light badges, entry point links from dashboard and trips page
 **UI hint**: yes
 
 ### Phase 3: Knowledge Base
@@ -88,7 +91,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Validation | 0/TBD | Not started | - |
-| 2. Executive Trip Prep | 0/TBD | Not started | - |
+| 2. Executive Trip Prep | 0/2 | Planning complete | - |
 | 3. Knowledge Base | 0/TBD | Not started | - |
 | 4. Chat Agent | 0/TBD | Not started | - |
 | 5. Intelligence Features | 0/TBD | Not started | - |
