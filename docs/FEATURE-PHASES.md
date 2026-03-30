@@ -61,6 +61,21 @@ Every feature mapped to a build phase.
 ## Phase 3 — Intelligence & Agent Features
 *Smarter trip planning, voice features, deeper AI integration*
 
+### Smart Campsite
+*Home Assistant as control plane. App adds camping context, setup guidance, and Claude suggestions on top.*
+
+| Feature | Status | Notes |
+|---------|--------|-------|
+| Smart device fields on gear model | ❌ Ready | Add `isSmartDevice`, `deviceRole`, `connectionType`, `haIntegration`, `appRequired` fields to GearItem. All nullable. |
+| Smart device UI in gear inventory | ❌ Ready | Filter/badge for smart devices. Connection type + HA integration status visible in list and detail views. |
+| Campsite setup checklist (trip planning) | ❌ Ready | Trip prep step: which smart devices are in your kit, setup order, connection checklist. Pulls from gear inventory. |
+| Claude device suggestions | ❌ Planned | Given your smart device inventory, suggest useful automations and gaps in your kit. Uses Context7 for HA docs at build time. |
+| HA bridge — status dashboard | ❌ Planned | Connect to local HA instance via REST/WebSocket API. Show simplified campsite-at-a-glance view (sensors, lights, camera). |
+| HA automation templates | ❌ Planned | Pre-built camping automations (lights at sunset, motion alerts, temp logging). Generated YAML for HA, not built in the app. |
+
+> **Hardware note:** Will has dedicated HA hardware (official HA device, likely Yellow or Green + USB radio adapter). HA setup starting from scratch. Hardware in Durham — picking up ~mid-April 2026. Build device registry now; bridge later once HA is running.
+
+### Other Phase 3 Features
 | Feature | Status | Notes |
 |---------|--------|-------|
 | AI trip recommendations | ❌ Planned | "Find me a spot within 2 hrs of Asheville this weekend" |
