@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to Camp Commander are tracked here.
+All notable changes to Outland OS are tracked here.
 
 ## 2026-03-30 — Session 6: Frontend Design System & Page Build-Out
 

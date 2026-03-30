@@ -1,7 +1,7 @@
 # Session 1 Summary — 2026-03-29
 
 ## What Happened
-Will's first Claude Code session. He was sitting at a campsite near Asheville — his first-ever car camping trip — and decided to build a camping assistant app called Camp Commander. Dual purpose: learn Claude Code (same tooling his brother Jim uses for Fablr) and build something personally useful.
+Will's first Claude Code session. He was sitting at a campsite near Asheville — his first-ever car camping trip — and decided to build a camping assistant app called Outland OS. Dual purpose: learn Claude Code (same tooling his brother Jim uses for Fablr) and build something personally useful.
 
 ## The Genesis Spot
 - **Location:** South rim of Linville Gorge, NC

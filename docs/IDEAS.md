@@ -1,4 +1,4 @@
-# Feature Ideas — Camp Commander
+# Feature Ideas — Outland OS
 
 A running list of ideas. Not committed to the roadmap — just captured so nothing gets lost.
 
@@ -214,6 +214,6 @@ A conversational trip planning flow where the agent does the legwork:
 - Logging and tracking: monitor which models handle which tasks, actual cost per feature, response quality
 - This is the architecture that makes the AI features sustainable long-term, not just a demo
 
-This is the "killer feature" — the thing that makes Camp Commander more than an inventory tracker. It's a camping concierge that handles the annoying stuff too.
+This is the "killer feature" — the thing that makes Outland OS more than an inventory tracker. It's a camping concierge that handles the annoying stuff too.
 
 ---

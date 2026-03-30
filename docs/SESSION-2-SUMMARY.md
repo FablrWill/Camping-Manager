@@ -1,7 +1,7 @@
 # Session 2 Summary — 2026-03-29
 
 ## What Happened
-Foundation build session. Scaffolded the entire Next.js app, set up the database, seeded real data, and had a massive brainstorm session that defined what Camp Commander is really going to be.
+Foundation build session. Scaffolded the entire Next.js app, set up the database, seeded real data, and had a massive brainstorm session that defined what Outland OS is really going to be.
 
 ## What We Built
 - **Next.js 16** with TypeScript, Tailwind, App Router (Turbopack)

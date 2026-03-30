@@ -22,7 +22,7 @@ async function main() {
       starlinkSignal: "strong",
       waterAccess: false,
       notes:
-        "Genesis spot for Camp Commander project. Bluebird day, early spring, bare trees. Laptop on camp table overlooking the gorge. EcoFlow + Starlink setup. Discovery-driven road — best sites are further along and slightly tucked away.",
+        "Genesis spot for Outland OS project. Bluebird day, early spring, bare trees. Laptop on camp table overlooking the gorge. EcoFlow + Starlink setup. Discovery-driven road — best sites are further along and slightly tucked away.",
     },
   });
 

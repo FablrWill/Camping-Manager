@@ -1,4 +1,4 @@
-# Camp Commander — Task Tracker
+# Outland OS — Task Tracker
 
 > **Last updated:** 2026-03-30 (Session 7 — User Journey + Roadmap)
 > **Start here** if you're picking up after a break.

@@ -1,4 +1,4 @@
-# Camp Commander — Project Instructions
+# Outland OS — Project Instructions
 
 ## What This Is
 A personal car camping assistant and travel guide built as a mobile-friendly web app. Built by Will Sink to manage gear, plan trips, track locations, and learn Claude Code.

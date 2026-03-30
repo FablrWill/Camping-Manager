@@ -43,7 +43,7 @@ export default function DashboardClient({
       {/* Hero */}
       <section className="text-center py-6">
         <h2 className="text-2xl font-bold text-stone-800 dark:text-stone-100 tracking-tight">
-          Camp Commander
+          Outland OS
         </h2>
         <p className="text-stone-500 dark:text-stone-400 text-sm mt-1">
           Your gear. Your rig. Your spots.

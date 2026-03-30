@@ -3,7 +3,7 @@
 
 Walks the Takeout directory, finds all photo JSON sidecar files, extracts
 GPS coordinates and metadata, and outputs a photos.json file suitable for
-import into Camp Commander's map view.
+import into Outland OS's map view.
 
 Usage:
     python extract_photos.py <takeout_folder> [--output photos.json]

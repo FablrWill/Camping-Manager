@@ -1,6 +1,6 @@
 # Photo Map — Google Takeout Import Tools
 
-Extract GPS-tagged photos and timeline data from Google Takeout exports for use with Camp Commander's interactive map.
+Extract GPS-tagged photos and timeline data from Google Takeout exports for use with Outland OS's interactive map.
 
 ## What This Does
 
@@ -10,7 +10,7 @@ Three Python scripts that process your Google Takeout data:
 2. **extract_timeline.py** — Extracts your GPS breadcrumb trail and place visits from Google Maps Location History
 3. **enrich_screenshots.py** — Uses Claude's vision AI to identify locations from map screenshots that have no GPS data
 
-The output JSON files can be imported into Camp Commander via the `/api/import/photos` and `/api/import/timeline` endpoints.
+The output JSON files can be imported into Outland OS via the `/api/import/photos` and `/api/import/timeline` endpoints.
 
 ## Prerequisites
 
@@ -70,7 +70,7 @@ This produces two files:
 **Options:**
 - `--date 2024-06-15` — extract only a single day (no downsampling)
 
-## Step 5: Import Into Camp Commander
+## Step 5: Import Into Outland OS
 
 Use the API endpoints to bulk-import the extracted data:
 

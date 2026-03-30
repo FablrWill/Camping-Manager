@@ -5,7 +5,7 @@ import { Moon, Sun } from 'lucide-react'
 import { useTheme } from './ThemeProvider'
 
 const PAGE_TITLES: Record<string, string> = {
-  '/': 'Camp Commander',
+  '/': 'Outland OS',
   '/gear': 'Gear',
   '/vehicle': 'Vehicle',
   '/spots': 'Spots',
@@ -16,7 +16,7 @@ export default function TopHeader() {
   const pathname = usePathname()
   const { resolvedTheme, toggleTheme } = useTheme()
 
-  const title = PAGE_TITLES[pathname] || 'Camp Commander'
+  const title = PAGE_TITLES[pathname] || 'Outland OS'
 
   return (
     <header className="sticky top-0 z-40 bg-white/80 dark:bg-stone-950/80 backdrop-blur-lg border-b border-stone-200 dark:border-stone-800">

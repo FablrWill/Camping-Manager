@@ -1,4 +1,4 @@
-# Camp Commander — Project Plan
+# Outland OS — Project Plan
 
 ## Vision
 A personal camping assistant that knows my gear, my vehicle, and my favorite spots. Part inventory tracker, part trip planner, part adventure journal — powered by Claude.

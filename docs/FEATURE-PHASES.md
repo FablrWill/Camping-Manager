@@ -1,4 +1,4 @@
-# Feature Phases — Camp Commander
+# Feature Phases — Outland OS
 
 Every feature mapped to a build phase.
 

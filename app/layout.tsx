@@ -3,12 +3,12 @@ import "./globals.css";
 import AppShell from "@/components/AppShell";
 
 export const metadata: Metadata = {
-  title: "Camp Commander",
+  title: "Outland OS",
   description: "Personal car camping assistant and travel guide",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Camp Commander",
+    title: "Outland OS",
   },
 };
 

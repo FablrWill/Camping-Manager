@@ -1,4 +1,4 @@
-# Architecture — Camp Commander
+# Architecture — Outland OS
 
 ## Tech Stack
 

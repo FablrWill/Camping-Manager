@@ -1,4 +1,4 @@
-# Goals — Camp Commander
+# Goals — Outland OS
 
 ## Primary Goals
 

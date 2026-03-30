@@ -2,7 +2,7 @@ import { prisma } from '@/lib/db'
 import GearClient from '@/components/GearClient'
 
 export const metadata = {
-  title: 'Gear — Camp Commander',
+  title: 'Gear — Outland OS',
 }
 
 export default async function GearPage() {

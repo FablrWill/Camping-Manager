@@ -1,4 +1,4 @@
-# Project Status — Camp Commander
+# Project Status — Outland OS
 
 ## Quick Pickup
 > **Last session:** 2026-03-30 (Session 7)

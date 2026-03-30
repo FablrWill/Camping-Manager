@@ -1,4 +1,4 @@
-# API Keys & External Services — Camp Commander
+# API Keys & External Services — Outland OS
 
 All keys go in `.env` (never committed to git). This doc tracks what we need and when.
 

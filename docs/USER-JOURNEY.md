@@ -1,4 +1,4 @@
-# User Journey — Camp Commander
+# User Journey — Outland OS
 
 > **Source:** Voice interview with Will, 2026-03-30 (Session 7)
 > **Purpose:** Defines what the app actually needs to do. Use this to prioritize features.

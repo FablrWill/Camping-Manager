@@ -1,8 +1,8 @@
-# Camp Commander — Style Guide
+# Outland OS — Style Guide
 
 ## Design Philosophy
 
-Camp Commander is a **personal tool used outdoors** — on a phone, at a campsite, sometimes at night, sometimes in bright sun. Every design decision flows from that context.
+Outland OS is a **personal tool used outdoors** — on a phone, at a campsite, sometimes at night, sometimes in bright sun. Every design decision flows from that context.
 
 **Principles:**
 - **Mobile-first, thumb-friendly** — primary use is phone in hand
