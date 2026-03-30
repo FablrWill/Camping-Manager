@@ -96,9 +96,9 @@ These are the highest-priority tasks based on the user journey defined in `docs/
 
 ## Open Questions / Blockers
 
-- **Claude API key** ⚠️ — Needed NOW for packing list + meal planning (Phase 2 must-haves). Also needed for enrich_screenshots.py.
+- **Claude API key** ✅ — Configured in `.env` (2026-03-30). Packing list, meal planning, and enrich_screenshots.py are unblocked.
+- **Weather API key** — NOT NEEDED. Switched to Open-Meteo (free, no key required). See `docs/AUDIT.md`.
 - **OpenAI API key** — Needed for KB embeddings (Phase 3, not urgent)
-- **Weather API key** — OpenWeatherMap free tier works. Needed for weather integration (Phase 2 #1).
 - **Speech API** — Web Speech API (free) vs Whisper (better) for Voice Ghostwriter (Phase 3)
 
 ---

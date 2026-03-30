@@ -27,6 +27,6 @@
 - `docs/ARCHITECTURE.md` — Tech stack, schema, project structure
 
 ## Known Blockers
-- **Claude API key** ⚠️ — Required for packing list, meal planning (Phase 2 must-haves)
-- **OpenWeatherMap API key** — Required for weather integration (Phase 2 #1 task)
-- Both are free tier — get these before the next build session
+- **Claude API key** ✅ — Configured in `.env` (2026-03-30). AI features unblocked.
+- **Weather API key** — NOT NEEDED. Switched to Open-Meteo (free, no key). See `docs/AUDIT.md`.
+- No blockers remaining for Phase 2 "Up Next" tasks.
