@@ -8,6 +8,7 @@ All notable changes to Outland OS are tracked here.
 
 | Session | Date | Summary |
 |---------|------|---------|
+| [12](changelog/session-12.md) | 2026-03-30 | Meal Planning Implementation Plan (planning session) |
 | [11b](changelog/session-11b.md) | 2026-03-30 | Claude API Packing List Generator — first AI feature |
 | [11a](changelog/session-11a.md) | 2026-03-30 | Seed Dev Database + Spots Dark Mode Polish |
 | [10](changelog/session-10.md) | 2026-03-30 | Gear Data Recovery + Housekeeping |

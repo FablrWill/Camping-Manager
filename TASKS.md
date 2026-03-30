@@ -1,6 +1,6 @@
 # Outland OS — Task Tracker
 
-> **Last updated:** 2026-03-30 (Sessions 11a + 11b — Seed Data, Spots Dark Mode, Packing List Generator)
+> **Last updated:** 2026-03-30 (Session 12 — Meal Planning Plan)
 > **Start here** if you're picking up after a break.
 > **North star:** `docs/USER-JOURNEY.md` — read this before building anything new.
 
@@ -14,7 +14,7 @@ These are the highest-priority tasks based on the user journey defined in `docs/
 
 2. ~~**Claude API integration + packing list generator**~~ ✅ Done (Session 11) — First AI feature. Anthropic SDK installed. Claude generates categorized packing list from trip details + gear inventory + weather. Editable checklist with progress bar. "Generate with Claude" CTA on upcoming trip cards.
 
-3. **Meal planning with shopping list** — Claude generates a full meal plan for the trip duration. Shopping list organized by store section. Home prep vs. camp cooking split.
+3. **Meal planning with shopping list** — Implementation plan complete (`docs/plans/meal-planning.md`). Claude generates a full meal plan for the trip duration. Shopping list organized by store section. Home prep vs. camp cooking split. Ready to build.
 
 4. **Power budget calculator** — EcoFlow + solar + devices. Weather-adjusted solar estimates.
 

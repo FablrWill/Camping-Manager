@@ -1,7 +1,7 @@
 # Project Status — Outland OS
 
 ## Quick Pickup
-> **Last session:** 2026-03-30 (Session 11)
+> **Last session:** 2026-03-30 (Session 12)
 > **Current phase:** Phase 2 — Trip Prep (the core loop)
 > **App name:** Outland OS
 > **Task tracker:** See `TASKS.md` in project root — start there.
@@ -25,6 +25,10 @@
 9. **Session 7** (2026-03-30) — User journey defined via voice interview. Roadmap rewritten.
 10. **Session 8** (2026-03-30) — All branches merged. Style guide updated. App renamed to Outland OS.
 11. **Session 9** (2026-03-30) — Full project audit, weather integration, API hardening, smart campsite spec.
+12. **Session 10** (2026-03-30) — Gear data recovery + housekeeping.
+13. **Session 11a** (2026-03-30) — Seed dev database + spots dark mode polish.
+14. **Session 11b** (2026-03-30) — Claude API packing list generator — first AI feature.
+15. **Session 12** (2026-03-30) — Meal planning implementation plan (planning only, no code).
 
 ## Key Files
 - `TASKS.md` — What's done, what's next, where to start
