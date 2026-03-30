@@ -34,3 +34,10 @@ prisma/*.db-journal
 *.MP4
 *.heic
 *.HEIC
+
+# DropBox processing inbox (contents are transient, not tracked)
+DropBox/*
+!DropBox/.gitkeep
+
+# Archive (personal reference files, not tracked)
+archive/
