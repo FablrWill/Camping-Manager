@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 02-executive-trip-prep 02-01-PLAN.md
-last_updated: "2026-03-30T21:50:35.875Z"
+stopped_at: "Checkpoint: Task 3 human-verify — 02-02-PLAN.md"
+last_updated: "2026-03-30T21:56:07.032Z"
 last_activity: 2026-03-30
 progress:
   total_phases: 5
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 2
-  completed_plans: 1
+  completed_plans: 2
   percent: 0
 ---
 
@@ -66,6 +66,7 @@ Recent decisions affecting current work:
 - [Roadmap]: parseClaudeJSON<T> + Zod utility is Phase 1 prerequisite for all AI routes
 - [Phase 02-executive-trip-prep]: PrepStatus uses extensible string key (not union) so adding sections doesn't require type changes
 - [Phase 02-executive-trip-prep]: Section registry pattern: PREP_SECTIONS config drives both API and UI — adding a section requires no JSX changes
+- [Phase 02-executive-trip-prep]: CSS collapse (not conditional render) keeps sub-components mounted — avoids re-fetching on section collapse/expand
 
 ### Pending Todos
 
@@ -80,6 +81,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-30T21:50:35.871Z
-Stopped at: Completed 02-executive-trip-prep 02-01-PLAN.md
+Last session: 2026-03-30T21:56:05.972Z
+Stopped at: Checkpoint: Task 3 human-verify — 02-02-PLAN.md
 Resume file: None

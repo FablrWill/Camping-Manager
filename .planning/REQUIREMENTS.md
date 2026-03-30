@@ -11,9 +11,9 @@
 
 ### Executive Trip Prep
 - [x] **PREP-01**: User can view a single "am I ready?" screen for an upcoming trip that shows weather, packing status, meal plan status, and power budget status
-- [ ] **PREP-02**: User can navigate from the executive prep view to each sub-feature (weather details, packing list, meal plan, power budget) and back
+- [x] **PREP-02**: User can navigate from the executive prep view to each sub-feature (weather details, packing list, meal plan, power budget) and back
 - [x] **PREP-03**: Executive prep view shows clear ready/not-ready indicators for each category
-- [ ] **PREP-04**: User can access the executive prep flow from the trip card on the home page
+- [x] **PREP-04**: User can access the executive prep flow from the trip card on the home page
 
 ### Knowledge Base (RAG)
 - [ ] **RAG-01**: System has a curated NC camping knowledge corpus ingested with vector embeddings and full-text search indexes
