@@ -1,6 +1,6 @@
 # Outland OS — Task Tracker
 
-> **Last updated:** 2026-03-30 (Session 9 — Audit + Weather Integration)
+> **Last updated:** 2026-03-30 (Session 10 — Gear Recovery + Housekeeping)
 > **Start here** if you're picking up after a break.
 > **North star:** `docs/USER-JOURNEY.md` — read this before building anything new.
 
