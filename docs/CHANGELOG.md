@@ -2,6 +2,63 @@
 
 All notable changes to Outland OS are tracked here.
 
+## 2026-03-30 — Session 8: Merge All Branches + App Rename
+
+### No Code Written — Integration & Housekeeping
+
+### What We Did
+- Reviewed all parallel session output and identified gaps
+- Merged 3 branches into main: KB architecture session, `pedantic-hellman` (frontend), `thirsty-hawking` (planning)
+- Resolved TASKS.md conflict: user journey priorities win over KB and frontend session priorities
+- Added trip prep component specs to STYLE-GUIDE.md (weather card, packing list, meal plan, power budget, AI response patterns, trip prep flow layout)
+- Reviewed and confirmed TripsClient.tsx as a solid foundation — one noted gap (all trip cards need to be tappable, not just past trips)
+- **Renamed app from "Camp Commander" to "Outland OS"** — updated all source files, docs, scripts, seed data, style guide, and plans
+
+### Files Updated
+- All `*.ts`, `*.tsx`, `*.md`, `*.py` in project root — "Camp Commander" → "Outland OS"
+- `docs/STYLE-GUIDE.md` — added full trip prep component spec section
+- `TASKS.md` — final resolved priorities from merged branches
+- `docs/CHANGELOG.md`, `docs/STATUS.md` — session history updated
+
+### Key Decision
+- **Outland OS** — new app name, effective immediately
+
+### Status at End of Session
+- main is clean and up to date
+- All branches merged
+- Next: get Claude API key + OpenWeatherMap key, then build weather integration (TASKS.md #1)
+
+---
+
+## 2026-03-30 — Session 7: User Journey + Roadmap Rewrite
+
+### No Code Written — Planning Session
+
+### What We Did
+- Will completed a voice interview with an LLM to define the primary user loop
+- Defined before/during/after trip experience
+- Identified must-have features vs. nice-to-haves
+- Set a clear "definition of done enough"
+- Rewrote TASKS.md and FEATURE-PHASES.md based on the output
+
+### Key Decisions
+- **Phase 3 AI features pulled forward** — packing list, meal planning, weather are now Phase 2 must-haves
+- **Trip creation UI is the immediate next task** — it's the anchor for all trip prep features
+- **Claude API key is now a blocker** — needed to start building the core value
+- **Timeline/path animation deprioritized** — great work, not core to the user journey
+- **Vehicle profile page is low priority** — data exists, page can wait
+
+### Files Created/Updated
+- `docs/USER-JOURNEY.md` — new file, captures the voice interview output
+- `docs/FEATURE-PHASES.md` — full rewrite with new priorities
+- `TASKS.md` — new "Up Next" aligned to user journey
+
+### Status at End of Session
+- Roadmap is clear. Next build session starts with trip creation UI.
+- See `docs/USER-JOURNEY.md` for the north star.
+
+---
+
 ## 2026-03-30 — Session 6: Frontend Design System & Page Build-Out
 
 ### Created
