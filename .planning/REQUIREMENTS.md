@@ -71,11 +71,33 @@
 
 ## Traceability
 
-(Populated by roadmap)
-
 | REQ-ID | Phase | Plan | Status |
 |--------|-------|------|--------|
-| | | | |
+| VAL-01 | Phase 1 | TBD | Pending |
+| VAL-02 | Phase 1 | TBD | Pending |
+| VAL-03 | Phase 1 | TBD | Pending |
+| VAL-04 | Phase 1 | TBD | Pending |
+| VAL-05 | Phase 1 | TBD | Pending |
+| PREP-01 | Phase 2 | TBD | Pending |
+| PREP-02 | Phase 2 | TBD | Pending |
+| PREP-03 | Phase 2 | TBD | Pending |
+| PREP-04 | Phase 2 | TBD | Pending |
+| RAG-01 | Phase 3 | TBD | Pending |
+| RAG-02 | Phase 3 | TBD | Pending |
+| RAG-03 | Phase 3 | TBD | Pending |
+| RAG-04 | Phase 3 | TBD | Pending |
+| CHAT-01 | Phase 4 | TBD | Pending |
+| CHAT-02 | Phase 4 | TBD | Pending |
+| CHAT-03 | Phase 4 | TBD | Pending |
+| CHAT-04 | Phase 4 | TBD | Pending |
+| REC-01 | Phase 5 | TBD | Pending |
+| REC-02 | Phase 5 | TBD | Pending |
+| REC-03 | Phase 5 | TBD | Pending |
+| VOICE-01 | Phase 5 | TBD | Pending |
+| VOICE-02 | Phase 5 | TBD | Pending |
+| VOICE-03 | Phase 5 | TBD | Pending |
+| VOICE-04 | Phase 5 | TBD | Pending |
+| VOICE-05 | Phase 5 | TBD | Pending |
 
 ---
-*Last updated: 2026-03-30 after initialization*
+*Last updated: 2026-03-30 after roadmap creation*
