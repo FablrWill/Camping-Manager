@@ -34,3 +34,6 @@ prisma/*.db-journal
 *.MP4
 *.heic
 *.HEIC
+
+# User-uploaded photos (stored locally, referenced in DB)
+public/photos/
