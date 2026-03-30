@@ -62,6 +62,7 @@ These are the highest-priority tasks ready to build now. Pick one and go.
 
 | Task | Status | Notes |
 |------|--------|-------|
+| **NC camping knowledge base** | ❌ Ready | PDF ingestion, deep research, RAG architecture. Planning session first. |
 | Gear photo identification | ❌ Planned | Snap a photo → Claude identifies brand/type/specs |
 | Link/screenshot → gear import | ❌ Planned | Paste Amazon URL or screenshot → auto-populate gear form |
 | Wishlist deal finder | ❌ Planned | Search eBay API, Google Shopping, FB Marketplace for wishlist items |
