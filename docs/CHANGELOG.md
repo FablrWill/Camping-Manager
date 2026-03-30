@@ -125,6 +125,36 @@ All notable changes to Camp Commander are tracked here.
 - Next: location save/edit, gear inventory CRUD, or start using real Takeout data
 - See `docs/STATUS.md` for pickup instructions
 
+## 2026-03-30 — Session 6: Project Review + Planning Pause
+
+### No Code Written — Planning Session
+
+### What We Did
+- Full project critique: reviewed all 5 sessions of work against the original goals
+- Identified the core gap: the app has modules (gear, map, photos) but no coherent user journey
+- Identified scope creep: Google Takeout timeline visualization is impressive but not the priority
+- Identified that Phase 3 (AI/Claude API) is the whole point — and it's untouched
+- Wrote a voice interview prompt for Will to use with an LLM to define the user journey
+
+### Key Findings
+- **Missing:** A primary loop — what does Will *do* with this app before/during/after a trip?
+- **Missing:** The Trip model has been in the DB since Session 2 but has no UI
+- **Premature:** Timeline/path animation was built before the core trip flow
+- **Untouched:** All Phase 3 AI features, which are the actual value proposition
+- **Risk:** Parallel frontend design session may be designing screens for an undefined flow
+
+### Decision Made
+- Pause feature building
+- Will is doing a voice interview with an LLM to define the user journey
+- Output: a structured document with must-haves, nice-to-haves, and definition of "done enough"
+- That document will be used to rewrite the roadmap before next build session
+
+### Status at End of Session
+- No code changes — working tree clean
+- Next: Will brings back user journey doc → rewrite TASKS.md + FEATURE-PHASES.md → resume building with clear direction
+
+---
+
 ## 2026-03-30 — Session 5: Location Pin Drop + Gear CRUD
 
 ### Created

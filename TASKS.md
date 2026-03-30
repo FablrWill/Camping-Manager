@@ -5,9 +5,18 @@
 
 ---
 
-## Up Next
+## ⚠️ Planning Pause — Read Before Building
 
-These are the highest-priority tasks ready to build now. Pick one and go.
+**Session 6 (2026-03-30):** We did a full project review. The finding: the app has good modules but no defined user journey. Before resuming, Will is completing a voice interview with an LLM to define what the app needs to do before/during/after a camping trip.
+
+**What to do when Will returns:**
+1. Read the user journey document Will brings back
+2. Rewrite "Up Next" and reprioritize FEATURE-PHASES.md based on it
+3. Then resume building
+
+---
+
+## Up Next (on hold — pending user journey doc)
 
 1. **Vehicle profile page** — Display and edit the Santa Fe specs and mods. Vehicle + VehicleMod models exist, seed data is in the DB. Needs: a read-only profile view, then an edit mode.
 
