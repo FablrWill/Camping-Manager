@@ -17,6 +17,9 @@ interface GearItem {
   purchaseUrl: string | null
   price: number | null
   notes: string | null
+  wattage: number | null
+  hoursPerDay: number | null
+  hasBattery: boolean
   createdAt: string
   updatedAt: string
 }

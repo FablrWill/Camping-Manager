@@ -78,7 +78,7 @@ async function main() {
   // ──────────────────────────────────────────────
   await prisma.gearItem.upsert({
     where: { id: "gear-ecoflow-delta2" },
-    update: {},
+    update: { hasBattery: false },
     create: {
       id: "gear-ecoflow-delta2",
       name: "EcoFlow Delta 2",
@@ -91,12 +91,13 @@ async function main() {
       price: 999,
       storageLocation: "Rear cargo, left side",
       notes: "Primary power source for the basecamp setup.",
+      hasBattery: false, // classified as the main battery source, not a consumer
     },
   });
 
   await prisma.gearItem.upsert({
     where: { id: "gear-ecoflow-solar-220" },
-    update: {},
+    update: { wattage: 220, hasBattery: false },
     create: {
       id: "gear-ecoflow-solar-220",
       name: "EcoFlow 220W Bifacial Solar Panel",
@@ -109,12 +110,14 @@ async function main() {
       price: 499,
       storageLocation: "Rear cargo, rolled against left wall",
       notes: "Set up facing south-southeast. Prop at 45° with included kickstand.",
+      wattage: 220,
+      hasBattery: false,
     },
   });
 
   await prisma.gearItem.upsert({
     where: { id: "gear-starlink-mini" },
-    update: {},
+    update: { wattage: 30, hoursPerDay: 12, hasBattery: false },
     create: {
       id: "gear-starlink-mini",
       name: "Starlink Mini",
@@ -127,6 +130,9 @@ async function main() {
       price: 599,
       storageLocation: "Rear cargo, top shelf bin",
       notes: "Portability plan required ($50/mo). Pairs with Delta 2 via XT60 cable.",
+      wattage: 30,       // average of 20–40W range
+      hoursPerDay: 12,   // on most of the day
+      hasBattery: false,
     },
   });
 
@@ -222,7 +228,7 @@ async function main() {
 
   await prisma.gearItem.upsert({
     where: { id: "gear-garmin-inreach-mini2" },
-    update: {},
+    update: { wattage: 1, hoursPerDay: 24, hasBattery: true },
     create: {
       id: "gear-garmin-inreach-mini2",
       name: "Garmin inReach Mini 2",
@@ -235,6 +241,9 @@ async function main() {
       price: 350,
       storageLocation: "Glovebox / on person",
       notes: "Freedom plan: $15/mo active, $5/mo suspend. Always bring on backcountry trips.",
+      wattage: 1,
+      hoursPerDay: 24,
+      hasBattery: true,  // internal battery — remind to charge before trips
     },
   });
 

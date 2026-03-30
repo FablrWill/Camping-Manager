@@ -52,6 +52,9 @@ export async function PUT(
         purchaseUrl: body.purchaseUrl || null,
         price: body.price ? parseFloat(body.price) : null,
         notes: body.notes || null,
+        wattage: body.wattage ? parseFloat(body.wattage) : null,
+        hoursPerDay: body.hoursPerDay ? parseFloat(body.hoursPerDay) : null,
+        hasBattery: body.hasBattery ?? false,
       },
     })
 

@@ -16,6 +16,9 @@ interface GearItem {
   purchaseUrl: string | null
   price: number | null
   notes: string | null
+  wattage: number | null
+  hoursPerDay: number | null
+  hasBattery: boolean
 }
 
 interface CategoryOption {
@@ -67,6 +70,9 @@ export default function GearForm({
       purchaseUrl: form.get('purchaseUrl') || null,
       price: form.get('price') || null,
       notes: form.get('notes') || null,
+      wattage: form.get('wattage') || null,
+      hoursPerDay: form.get('hoursPerDay') || null,
+      hasBattery: form.get('hasBattery') === 'on',
     }
 
     try {
@@ -201,6 +207,61 @@ export default function GearForm({
                 className="w-full px-3 py-2.5 rounded-lg border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-400 dark:focus:ring-amber-500"
               />
             </div>
+          </div>
+
+          {/* Power fields: wattage + hours/day */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label htmlFor="gear-wattage" className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
+                Power draw (W)
+              </label>
+              <input
+                id="gear-wattage"
+                name="wattage"
+                type="number"
+                step="0.1"
+                min="0"
+                defaultValue={item?.wattage ?? ''}
+                placeholder="e.g. 30"
+                className="w-full px-3 py-2.5 rounded-lg border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-400 dark:focus:ring-amber-500"
+              />
+            </div>
+            <div>
+              <label htmlFor="gear-hours" className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
+                Hours/day
+              </label>
+              <input
+                id="gear-hours"
+                name="hoursPerDay"
+                type="number"
+                step="0.5"
+                min="0"
+                max="24"
+                defaultValue={item?.hoursPerDay ?? ''}
+                placeholder="e.g. 6"
+                className="w-full px-3 py-2.5 rounded-lg border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-400 dark:focus:ring-amber-500"
+              />
+            </div>
+          </div>
+
+          {/* hasBattery checkbox */}
+          <div>
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input
+                name="hasBattery"
+                type="checkbox"
+                defaultChecked={item?.hasBattery ?? false}
+                className="mt-0.5 w-4 h-4 accent-emerald-600 shrink-0"
+              />
+              <div>
+                <span className="text-sm font-medium text-stone-700 dark:text-stone-300">
+                  Has internal battery
+                </span>
+                <p className="text-xs text-stone-400 dark:text-stone-500 mt-0.5">
+                  Adds this device to the &quot;Charge Before You Go&quot; checklist on trip cards
+                </p>
+              </div>
+            </label>
           </div>
 
           {/* Storage location */}

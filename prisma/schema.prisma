@@ -21,6 +21,9 @@ model GearItem {
   purchaseUrl String?
   price       Float?
   notes       String?
+  wattage     Float?   // power draw in watts (consumers) or peak output (solar panel)
+  hoursPerDay Float?   // default daily usage hours; falls back to lookup table if null
+  hasBattery  Boolean  @default(false) // has internal rechargeable battery — reminder to charge before trips
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -178,6 +181,8 @@ model Trip {
   vehicleId   String?
   notes       String?
   weatherNotes String?
+  currentBatteryPct  Float?    // last known EcoFlow battery %, entered during live mode
+  batteryUpdatedAt   DateTime? // when currentBatteryPct was last set
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

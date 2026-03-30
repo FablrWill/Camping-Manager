@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import WeatherCard from '@/components/WeatherCard'
 import PackingList from '@/components/PackingList'
+import PowerBudget from '@/components/PowerBudget'
 import type { DayForecast, WeatherAlert } from '@/lib/weather'
 
 interface TripData {
@@ -259,10 +260,11 @@ export default function TripsClient({ initialTrips, locations, vehicles }: Trips
             </div>
           )}
 
-          {/* Packing list for upcoming trips */}
+          {/* AI prep tools for upcoming trips */}
           {!isPast && (
-            <div className="mt-3">
+            <div className="mt-3 space-y-3">
               <PackingList tripId={trip.id} tripName={trip.name} />
+              <PowerBudget tripId={trip.id} tripName={trip.name} />
             </div>
           )}
         </div>
