@@ -1,0 +1,245 @@
+'use client'
+
+import Link from 'next/link'
+import { Backpack, Car, MapPin, Tent, ChevronRight, Plus } from 'lucide-react'
+
+interface DashboardStats {
+  gearCount: number
+  wishlistCount: number
+  locationCount: number
+  photoCount: number
+  vehicleMods: number
+  totalWeight: number
+}
+
+interface RecentGearItem {
+  id: string
+  name: string
+  category: string
+  brand: string | null
+  condition: string | null
+  updatedAt: string
+}
+
+const CATEGORY_EMOJI: Record<string, string> = {
+  shelter: '⛺',
+  sleep: '🛏️',
+  cook: '🍳',
+  power: '🔋',
+  clothing: '🧥',
+  tools: '🔧',
+  vehicle: '🚙',
+}
+
+export default function DashboardClient({
+  stats,
+  recentGear,
+}: {
+  stats: DashboardStats
+  recentGear: RecentGearItem[]
+}) {
+  return (
+    <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
+      {/* Hero */}
+      <section className="text-center py-6">
+        <h2 className="text-2xl font-bold text-stone-800 dark:text-stone-100 tracking-tight">
+          Camp Commander
+        </h2>
+        <p className="text-stone-500 dark:text-stone-400 text-sm mt-1">
+          Your gear. Your rig. Your spots.
+        </p>
+      </section>
+
+      {/* Quick stats row */}
+      <section className="grid grid-cols-2 gap-3">
+        <Link
+          href="/gear"
+          className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-700 p-4 hover:border-amber-400 dark:hover:border-amber-500 transition-colors"
+        >
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-8 h-8 rounded-lg bg-amber-50 dark:bg-amber-900/30 flex items-center justify-center">
+              <Backpack size={18} className="text-amber-600 dark:text-amber-400" />
+            </div>
+            <span className="text-xs font-medium text-stone-500 dark:text-stone-400 uppercase tracking-wider">
+              Gear
+            </span>
+          </div>
+          <p className="text-2xl font-bold text-stone-900 dark:text-stone-50">
+            {stats.gearCount}
+          </p>
+          <p className="text-xs text-stone-400 dark:text-stone-500 mt-0.5">
+            {stats.totalWeight > 0
+              ? `${stats.totalWeight.toFixed(1)} lb total`
+              : 'items tracked'}
+          </p>
+        </Link>
+
+        <Link
+          href="/spots"
+          className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-700 p-4 hover:border-amber-400 dark:hover:border-amber-500 transition-colors"
+        >
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center">
+              <MapPin size={18} className="text-emerald-600 dark:text-emerald-400" />
+            </div>
+            <span className="text-xs font-medium text-stone-500 dark:text-stone-400 uppercase tracking-wider">
+              Spots
+            </span>
+          </div>
+          <p className="text-2xl font-bold text-stone-900 dark:text-stone-50">
+            {stats.locationCount}
+          </p>
+          <p className="text-xs text-stone-400 dark:text-stone-500 mt-0.5">
+            {stats.photoCount} photos
+          </p>
+        </Link>
+
+        <Link
+          href="/vehicle"
+          className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-700 p-4 hover:border-amber-400 dark:hover:border-amber-500 transition-colors"
+        >
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-8 h-8 rounded-lg bg-sky-50 dark:bg-sky-900/30 flex items-center justify-center">
+              <Car size={18} className="text-sky-600 dark:text-sky-400" />
+            </div>
+            <span className="text-xs font-medium text-stone-500 dark:text-stone-400 uppercase tracking-wider">
+              Vehicle
+            </span>
+          </div>
+          <p className="text-2xl font-bold text-stone-900 dark:text-stone-50">
+            Santa Fe
+          </p>
+          <p className="text-xs text-stone-400 dark:text-stone-500 mt-0.5">
+            {stats.vehicleMods} mod{stats.vehicleMods !== 1 ? 's' : ''}
+          </p>
+        </Link>
+
+        <Link
+          href="/trips"
+          className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-700 p-4 hover:border-amber-400 dark:hover:border-amber-500 transition-colors"
+        >
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-8 h-8 rounded-lg bg-orange-50 dark:bg-orange-900/30 flex items-center justify-center">
+              <Tent size={18} className="text-orange-600 dark:text-orange-400" />
+            </div>
+            <span className="text-xs font-medium text-stone-500 dark:text-stone-400 uppercase tracking-wider">
+              Trips
+            </span>
+          </div>
+          <p className="text-2xl font-bold text-stone-900 dark:text-stone-50">
+            0
+          </p>
+          <p className="text-xs text-stone-400 dark:text-stone-500 mt-0.5">
+            plan your next trip
+          </p>
+        </Link>
+      </section>
+
+      {/* Wishlist callout */}
+      {stats.wishlistCount > 0 && (
+        <Link
+          href="/gear"
+          className="flex items-center justify-between bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl px-4 py-3 hover:border-amber-400 dark:hover:border-amber-600 transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <span className="text-xl">🎁</span>
+            <div>
+              <p className="text-sm font-medium text-amber-900 dark:text-amber-200">
+                {stats.wishlistCount} item{stats.wishlistCount !== 1 ? 's' : ''} on wish list
+              </p>
+              <p className="text-xs text-amber-700 dark:text-amber-400">
+                Tap to browse your gear wants
+              </p>
+            </div>
+          </div>
+          <ChevronRight size={18} className="text-amber-400" />
+        </Link>
+      )}
+
+      {/* Recent gear */}
+      {recentGear.length > 0 && (
+        <section>
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider">
+              Recently Updated Gear
+            </h3>
+            <Link
+              href="/gear"
+              className="text-xs text-amber-600 dark:text-amber-500 font-medium hover:text-amber-700 dark:hover:text-amber-400"
+            >
+              See all
+            </Link>
+          </div>
+          <div className="space-y-2">
+            {recentGear.map((item) => (
+              <Link
+                key={item.id}
+                href="/gear"
+                className="flex items-center gap-3 bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-700 p-3 hover:border-amber-400 dark:hover:border-amber-500 transition-colors"
+              >
+                <span className="text-lg">{CATEGORY_EMOJI[item.category] ?? '📦'}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-stone-900 dark:text-stone-50 truncate">
+                    {item.name}
+                  </p>
+                  <p className="text-xs text-stone-400 dark:text-stone-500">
+                    {item.brand || item.category}
+                  </p>
+                </div>
+                <ChevronRight size={16} className="text-stone-300 dark:text-stone-600 shrink-0" />
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Quick actions */}
+      <section>
+        <h3 className="text-sm font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider mb-3">
+          Quick Actions
+        </h3>
+        <div className="grid grid-cols-2 gap-3">
+          <Link
+            href="/gear"
+            className="flex items-center gap-2 bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-700 p-3 hover:border-amber-400 dark:hover:border-amber-500 transition-colors"
+          >
+            <div className="w-8 h-8 rounded-lg bg-amber-600 dark:bg-amber-500 flex items-center justify-center">
+              <Plus size={16} className="text-white dark:text-stone-900" />
+            </div>
+            <span className="text-sm font-medium text-stone-700 dark:text-stone-300">Add Gear</span>
+          </Link>
+
+          <Link
+            href="/spots"
+            className="flex items-center gap-2 bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-700 p-3 hover:border-amber-400 dark:hover:border-amber-500 transition-colors"
+          >
+            <div className="w-8 h-8 rounded-lg bg-emerald-600 dark:bg-emerald-500 flex items-center justify-center">
+              <MapPin size={16} className="text-white dark:text-stone-900" />
+            </div>
+            <span className="text-sm font-medium text-stone-700 dark:text-stone-300">Save Spot</span>
+          </Link>
+
+          <Link
+            href="/trips"
+            className="flex items-center gap-2 bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-700 p-3 hover:border-amber-400 dark:hover:border-amber-500 transition-colors"
+          >
+            <div className="w-8 h-8 rounded-lg bg-orange-600 dark:bg-orange-500 flex items-center justify-center">
+              <Tent size={16} className="text-white dark:text-stone-900" />
+            </div>
+            <span className="text-sm font-medium text-stone-700 dark:text-stone-300">Plan Trip</span>
+          </Link>
+
+          <Link
+            href="/spots"
+            className="flex items-center gap-2 bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-700 p-3 hover:border-amber-400 dark:hover:border-amber-500 transition-colors"
+          >
+            <div className="w-8 h-8 rounded-lg bg-sky-600 dark:bg-sky-500 flex items-center justify-center">
+              <MapPin size={16} className="text-white dark:text-stone-900" />
+            </div>
+            <span className="text-sm font-medium text-stone-700 dark:text-stone-300">View Map</span>
+          </Link>
+        </div>
+      </section>
+    </div>
+  )
+}

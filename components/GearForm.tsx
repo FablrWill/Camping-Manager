@@ -79,16 +79,16 @@ export default function GearForm({
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 flex items-end sm:items-center justify-center">
-      <div className="bg-white rounded-t-2xl sm:rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-xl">
+    <div className="fixed inset-0 z-50 bg-black/50 dark:bg-black/70 flex items-end sm:items-center justify-center animate-fade-in">
+      <div className="bg-white dark:bg-stone-900 rounded-t-2xl sm:rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-xl animate-slide-up">
         {/* Header */}
-        <div className="sticky top-0 bg-white border-b border-stone-200 px-4 py-3 flex items-center justify-between rounded-t-2xl z-10">
-          <h2 className="text-lg font-bold text-stone-900">
+        <div className="sticky top-0 bg-white dark:bg-stone-900 border-b border-stone-200 dark:border-stone-700 px-4 py-3 flex items-center justify-between rounded-t-2xl z-10">
+          <h2 className="text-lg font-bold text-stone-900 dark:text-stone-50">
             {item ? 'Edit Gear' : 'Add Gear'}
           </h2>
           <button
             onClick={onClose}
-            className="text-stone-400 hover:text-stone-600 text-2xl leading-none p-1"
+            className="text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 text-2xl leading-none p-1"
           >
             &times;
           </button>
@@ -97,7 +97,7 @@ export default function GearForm({
         <form onSubmit={handleSubmit} className="p-4 space-y-4">
           {/* Name — required */}
           <div>
-            <label htmlFor="gear-name" className="block text-sm font-medium text-stone-700 mb-1">
+            <label htmlFor="gear-name" className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
               Name *
             </label>
             <input
@@ -107,13 +107,13 @@ export default function GearForm({
               required
               defaultValue={item?.name ?? ''}
               placeholder="e.g. REI Half Dome 2 Plus"
-              className="w-full px-3 py-2.5 rounded-lg border border-stone-300 bg-white text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-400"
+              className="w-full px-3 py-2.5 rounded-lg border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-400 dark:focus:ring-amber-500"
             />
           </div>
 
           {/* Category — required */}
           <div>
-            <label htmlFor="gear-category" className="block text-sm font-medium text-stone-700 mb-1">
+            <label htmlFor="gear-category" className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
               Category *
             </label>
             <select
@@ -136,7 +136,7 @@ export default function GearForm({
 
           {/* Brand */}
           <div>
-            <label htmlFor="gear-brand" className="block text-sm font-medium text-stone-700 mb-1">
+            <label htmlFor="gear-brand" className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
               Brand
             </label>
             <input
@@ -145,13 +145,13 @@ export default function GearForm({
               type="text"
               defaultValue={item?.brand ?? ''}
               placeholder="e.g. REI Co-op"
-              className="w-full px-3 py-2.5 rounded-lg border border-stone-300 bg-white text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-400"
+              className="w-full px-3 py-2.5 rounded-lg border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-400 dark:focus:ring-amber-500"
             />
           </div>
 
           {/* Condition */}
           <div>
-            <label htmlFor="gear-condition" className="block text-sm font-medium text-stone-700 mb-1">
+            <label htmlFor="gear-condition" className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
               Condition
             </label>
             <select
@@ -172,7 +172,7 @@ export default function GearForm({
           {/* Weight + Price row */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label htmlFor="gear-weight" className="block text-sm font-medium text-stone-700 mb-1">
+              <label htmlFor="gear-weight" className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
                 Weight (lb)
               </label>
               <input
@@ -183,11 +183,11 @@ export default function GearForm({
                 min="0"
                 defaultValue={item?.weight ?? ''}
                 placeholder="0.00"
-                className="w-full px-3 py-2.5 rounded-lg border border-stone-300 bg-white text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-400"
+                className="w-full px-3 py-2.5 rounded-lg border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-400 dark:focus:ring-amber-500"
               />
             </div>
             <div>
-              <label htmlFor="gear-price" className="block text-sm font-medium text-stone-700 mb-1">
+              <label htmlFor="gear-price" className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
                 Price ($)
               </label>
               <input
@@ -198,14 +198,14 @@ export default function GearForm({
                 min="0"
                 defaultValue={item?.price ?? ''}
                 placeholder="0.00"
-                className="w-full px-3 py-2.5 rounded-lg border border-stone-300 bg-white text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-400"
+                className="w-full px-3 py-2.5 rounded-lg border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-400 dark:focus:ring-amber-500"
               />
             </div>
           </div>
 
           {/* Storage location */}
           <div>
-            <label htmlFor="gear-storage" className="block text-sm font-medium text-stone-700 mb-1">
+            <label htmlFor="gear-storage" className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
               Storage Location
             </label>
             <input
@@ -214,13 +214,13 @@ export default function GearForm({
               type="text"
               defaultValue={item?.storageLocation ?? ''}
               placeholder="e.g. Garage bin #3, Car trunk"
-              className="w-full px-3 py-2.5 rounded-lg border border-stone-300 bg-white text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-400"
+              className="w-full px-3 py-2.5 rounded-lg border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-400 dark:focus:ring-amber-500"
             />
           </div>
 
           {/* Purchase URL */}
           <div>
-            <label htmlFor="gear-url" className="block text-sm font-medium text-stone-700 mb-1">
+            <label htmlFor="gear-url" className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
               Purchase Link
             </label>
             <input
@@ -229,13 +229,13 @@ export default function GearForm({
               type="url"
               defaultValue={item?.purchaseUrl ?? ''}
               placeholder="https://www.amazon.com/..."
-              className="w-full px-3 py-2.5 rounded-lg border border-stone-300 bg-white text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-400"
+              className="w-full px-3 py-2.5 rounded-lg border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-400 dark:focus:ring-amber-500"
             />
           </div>
 
           {/* Notes */}
           <div>
-            <label htmlFor="gear-notes" className="block text-sm font-medium text-stone-700 mb-1">
+            <label htmlFor="gear-notes" className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
               Notes
             </label>
             <textarea
@@ -244,13 +244,13 @@ export default function GearForm({
               rows={3}
               defaultValue={item?.notes ?? ''}
               placeholder="Any notes about this item..."
-              className="w-full px-3 py-2.5 rounded-lg border border-stone-300 bg-white text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-400 resize-none"
+              className="w-full px-3 py-2.5 rounded-lg border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-400 dark:focus:ring-amber-500 resize-none"
             />
           </div>
 
           {/* Error */}
           {error && (
-            <p className="text-red-600 text-sm font-medium">{error}</p>
+            <p className="text-red-600 dark:text-red-400 text-sm font-medium">{error}</p>
           )}
 
           {/* Actions */}
@@ -259,7 +259,7 @@ export default function GearForm({
               <button
                 type="button"
                 onClick={onDelete}
-                className="px-4 py-2.5 rounded-lg text-red-600 hover:bg-red-50 font-medium transition-colors"
+                className="px-4 py-2.5 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 font-medium transition-colors"
               >
                 Delete
               </button>
@@ -268,14 +268,14 @@ export default function GearForm({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2.5 rounded-lg border border-stone-300 text-stone-700 font-medium hover:bg-stone-50 transition-colors"
+              className="px-4 py-2.5 rounded-lg border border-stone-300 dark:border-stone-600 text-stone-700 dark:text-stone-300 font-medium hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="px-6 py-2.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-medium disabled:opacity-50 transition-colors"
+              className="px-6 py-2.5 rounded-lg bg-amber-600 hover:bg-amber-700 dark:bg-amber-500 dark:hover:bg-amber-400 text-white dark:text-stone-900 font-medium disabled:opacity-50 transition-colors"
             >
               {saving ? 'Saving...' : item ? 'Update' : 'Add'}
             </button>

@@ -2,6 +2,44 @@
 
 All notable changes to Camp Commander are tracked here.
 
+## 2026-03-30 — Session 6: Frontend Design System & Page Build-Out
+
+### Created
+- **Style Guide** (`docs/STYLE-GUIDE.md`) — comprehensive design system: color tokens (light + dark), typography scale, spacing grid, component specs, navigation patterns, accessibility guidelines
+- **CSS Design Tokens** (`globals.css`) — CSS custom properties for all colors/shadows/radii, `.dark` class overrides, animations (slide-up, fade-in), skeleton loading, safe area support
+- **UI Component Library** (`components/ui/`):
+  - `Button` — 4 variants (primary/secondary/danger/ghost), 3 sizes, loading spinner
+  - `Card` + `CardHeader` + `CardTitle` + `CardDescription` — flexible card containers
+  - `Badge` — 8 variants including condition-mapped colors
+  - `Input` + `Textarea` + `Select` — form primitives with labels, errors, hints
+  - `Modal` + `ConfirmDialog` — bottom sheet (mobile) / centered (desktop)
+  - `Chip` + `ChipRow` — filter chips with scrollable container
+  - `EmptyState` — emoji + message + optional CTA
+  - `PageHeader` — title + subtitle + action slot
+  - `StatCard` — metric display with icon + label + value + subtext
+- **ThemeProvider** — React context for dark mode: respects `prefers-color-scheme`, persists to `localStorage`, no flash of wrong theme via inline script
+- **Bottom Navigation** (`BottomNav.tsx`) — 5-tab bar with Lucide icons, active state highlighting, iPhone safe area padding
+- **Top Header** (`TopHeader.tsx`) — glassmorphic blur header with dynamic page title + dark mode toggle
+- **AppShell** — wraps ThemeProvider + TopHeader + BottomNav around all pages
+- **Dashboard** (`DashboardClient.tsx`) — live stats grid (gear count/weight, spots/photos, vehicle, trips), wishlist callout, recent gear, quick action grid
+- **Vehicle Page** — hero card with gradient, specs list (fuel economy, clearance, towing), expandable cargo dimensions, mods CRUD with cost/date tracking
+- **Trips Page** — trip creation form (name, dates, location, vehicle, notes), upcoming/past sections, countdown timer, active trip ribbon, night count
+- **Vehicle API** — GET/POST vehicles, GET/PUT single vehicle, POST mods
+
+### Changed
+- Root `layout.tsx` — removed old top nav bar, added theme-aware `<html>` class, viewport-fit cover for iPhone, theme-color meta tags
+- Home `page.tsx` — now server component fetching live DB stats instead of static cards
+- `GearClient.tsx` — full dark mode support across toggle, search, chips, cards, empty state, delete confirmation
+- `GearForm.tsx` — dark mode on all form inputs, labels, buttons, modal chrome
+- Installed `lucide-react` for consistent icon system
+
+### Design Decisions
+- **Bottom nav over top nav** — standard mobile pattern, keeps thumb in reach zone, frees top for context-specific info
+- **Stone/amber palette** — earthy, warm, outdoor-appropriate. Stone for neutrals, amber for accents/CTAs
+- **Dark mode from day one** — camping at night means red-shifted UI matters. Full dark theme with system preference detection.
+- **Component library** — reusable primitives ensure consistency as pages multiply. Not over-abstracted — just the patterns we use repeatedly.
+- **System fonts** — no external font loads. Performance > aesthetics for a tool app.
+
 ## 2026-03-29 — Session 1: Project Kickoff
 
 ### Created

@@ -1,6 +1,6 @@
 # Camp Commander — Task Tracker
 
-> **Last updated:** 2026-03-30 (Session 5)
+> **Last updated:** 2026-03-30 (Session 6 — Frontend Design)
 > **Start here** if you're picking up after a break.
 
 ---
@@ -9,11 +9,11 @@
 
 These are the highest-priority tasks ready to build now. Pick one and go.
 
-1. **Vehicle profile page** — Display and edit the Santa Fe specs and mods. Vehicle + VehicleMod models exist, seed data is in the DB. Needs: a read-only profile view, then an edit mode.
+1. **Auto-tag photos to trips/locations** — Match photos to saved locations via GPS proximity + timestamp overlap.
 
-2. **Auto-tag photos to trips/locations** — Match photos to saved locations via GPS proximity + timestamp overlap.
+2. **Seed the dev database** — Run seed script in worktree so the dashboard, vehicle page, and trips page show real data during development.
 
-3. **Basic trip creation** — Date range, location, vehicle, notes. Trip model exists.
+3. **Polish spots page for dark mode** — The map page still needs dark mode class updates on its control bar and stats footer.
 
 ---
 
@@ -23,11 +23,12 @@ These are the highest-priority tasks ready to build now. Pick one and go.
 |------|--------|-------|
 | Project structure + scaffolding | ✅ Done | Next.js 16, TypeScript, Tailwind, Prisma, SQLite |
 | Database schema (9 models) | ✅ Done | GearItem, Vehicle, VehicleMod, Location, Trip, PackingItem, Photo, TimelinePoint, PlaceVisit, ActivitySegment |
-| Mobile layout shell + nav | ✅ Done | Sticky nav, stone/amber theme |
-| Home page with module cards | ✅ Done | 4 cards: Gear, Vehicle, Spots, Trips |
+| Mobile layout shell + nav | ✅ Done | **Redesigned Session 6:** Bottom tab bar (Lucide icons), glassmorphic top header, dark mode toggle |
+| Home page dashboard | ✅ Done | **Redesigned Session 6:** Live stats (gear count, weight, spots, photos), recent gear, quick actions, wishlist callout |
 | Seed data | ✅ Done | Genesis spot (Linville Gorge) + Santa Fe vehicle |
-| **Gear inventory CRUD** | ✅ Done | List, add, edit, delete, wishlist toggle, category filters, search. |
-| **Vehicle profile page** | ❌ Ready | Display + edit Santa Fe specs and mods. Model + seed data exist. |
+| **Gear inventory CRUD** | ✅ Done | List, add, edit, delete, wishlist toggle, category filters, search. **Dark mode added Session 6.** |
+| **Vehicle profile page** | ✅ Done | **Built Session 6:** Hero card with gradient, specs list, expandable cargo dimensions, mods CRUD with cost tracking |
+| **Style guide + design system** | ✅ Done | **Session 6:** docs/STYLE-GUIDE.md, CSS custom properties, component library (Button, Card, Badge, Input, Modal, Chip, EmptyState, PageHeader, StatCard) |
 
 ---
 
@@ -49,8 +50,8 @@ These are the highest-priority tasks ready to build now. Pick one and go.
 | Color-coded photo markers | ✅ Done | Blue=EXIF, green=vision exact, orange=approximate |
 | Vision AI screenshot enrichment | ✅ Done | Claude Sonnet reads map screenshots for location |
 | **Location save/edit with pin drop** | ✅ Done | Click map → slide-up form → CRUD API. Edit via popup button. visitedAt date/time field. |
+| **Trip planning page** | ✅ Done | **Built Session 6:** Create trips with date range, location, vehicle. Upcoming/past sections, countdown, active trip ribbon. |
 | **Auto-tag photos to trips/locations** | ❌ Ready | Match via GPS proximity + timestamp overlap |
-| **Basic trip creation** | ❌ Ready | Date range, location, vehicle, notes. Trip model exists. |
 | Personal signal map | ❌ Planned | Log cell + Starlink quality per spot over time |
 | Seasonal ratings | ❌ Planned | Rate spots differently by time of year |
 | GPX import | ❌ Planned | Import trails from AllTrails/Wikiloc exports |
