@@ -1,6 +1,6 @@
 # Camp Commander — Task Tracker
 
-> **Last updated:** 2026-03-30 (Session 4)
+> **Last updated:** 2026-03-29 (Session 5)
 > **Start here** if you're picking up after a break.
 
 ---
@@ -9,11 +9,11 @@
 
 These are the highest-priority tasks ready to build now. Pick one and go.
 
-1. **Gear inventory CRUD** — Add, view, edit, delete gear items. This is the core Phase 1 feature that's been waiting. The GearItem model already exists in Prisma with fields for name, brand, category, condition, weight, etc. Needs: list page, add form, edit form, delete confirmation. Mobile-first.
+1. **Vehicle profile page** — Display and edit the Santa Fe specs and mods. Vehicle + VehicleMod models exist, seed data is in the DB. Needs: a read-only profile view, then an edit mode.
 
-2. **Vehicle profile page** — Display and edit the Santa Fe specs and mods. Vehicle + VehicleMod models exist, seed data is in the DB. Needs: a read-only profile view, then an edit mode.
+2. **Location save/edit with map pin drop** — Click the map on /spots to drop a pin and save a new location. The Location model exists. SpotMap already has an `onMapClick` prop wired up. Needs: a save form that appears when you click, writes to the DB.
 
-3. **Location save/edit with map pin drop** — Click the map on /spots to drop a pin and save a new location. The Location model exists. SpotMap already has an `onMapClick` prop wired up. Needs: a save form that appears when you click, writes to the DB.
+3. **Gear intelligence** — Paste an Amazon link or screenshot → Claude identifies the product and pre-fills the add form. Deal finder for wishlist items (eBay API, Google Shopping). Requires Claude API key. See Phase 3.
 
 ---
 
@@ -26,7 +26,7 @@ These are the highest-priority tasks ready to build now. Pick one and go.
 | Mobile layout shell + nav | ✅ Done | Sticky nav, stone/amber theme |
 | Home page with module cards | ✅ Done | 4 cards: Gear, Vehicle, Spots, Trips |
 | Seed data | ✅ Done | Genesis spot (Linville Gorge) + Santa Fe vehicle |
-| **Gear inventory CRUD** | ❌ Ready | List, add, edit, delete gear items. Model exists. |
+| **Gear inventory CRUD** | ✅ Done | List, add, edit, delete, wishlist toggle, category filters, search. |
 | **Vehicle profile page** | ❌ Ready | Display + edit Santa Fe specs and mods. Model + seed data exist. |
 
 ---
@@ -63,6 +63,8 @@ These are the highest-priority tasks ready to build now. Pick one and go.
 | Task | Status | Notes |
 |------|--------|-------|
 | Gear photo identification | ❌ Planned | Snap a photo → Claude identifies brand/type/specs |
+| Link/screenshot → gear import | ❌ Planned | Paste Amazon URL or screenshot → auto-populate gear form |
+| Wishlist deal finder | ❌ Planned | Search eBay API, Google Shopping, FB Marketplace for wishlist items |
 | User guide finder | ❌ Planned | Auto-search web for product manuals, save PDF |
 | AI trip planning agent | ❌ Planned | Campsite discovery, research, recommendations |
 | Smart packing lists | ❌ Planned | Based on trip type, duration, weather, gear |

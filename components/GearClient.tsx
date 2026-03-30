@@ -1,0 +1,397 @@
+'use client'
+
+import { useState, useMemo } from 'react'
+import GearForm from './GearForm'
+
+interface GearItem {
+  id: string
+  name: string
+  brand: string | null
+  category: string
+  description: string | null
+  condition: string | null
+  weight: number | null
+  photoUrl: string | null
+  storageLocation: string | null
+  isWishlist: boolean
+  purchaseUrl: string | null
+  price: number | null
+  notes: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+const CATEGORIES = [
+  { value: 'shelter', label: 'Shelter', emoji: '⛺' },
+  { value: 'sleep', label: 'Sleep', emoji: '🛏️' },
+  { value: 'cook', label: 'Cook', emoji: '🍳' },
+  { value: 'power', label: 'Power', emoji: '🔋' },
+  { value: 'clothing', label: 'Clothing', emoji: '🧥' },
+  { value: 'tools', label: 'Tools', emoji: '🔧' },
+  { value: 'vehicle', label: 'Vehicle', emoji: '🚙' },
+] as const
+
+const CONDITIONS = [
+  { value: 'new', label: 'New' },
+  { value: 'good', label: 'Good' },
+  { value: 'fair', label: 'Fair' },
+  { value: 'worn', label: 'Worn' },
+  { value: 'broken', label: 'Broken' },
+] as const
+
+function getCategoryEmoji(category: string): string {
+  return CATEGORIES.find((c) => c.value === category)?.emoji ?? '📦'
+}
+
+function getCategoryLabel(category: string): string {
+  return CATEGORIES.find((c) => c.value === category)?.label ?? category
+}
+
+function getConditionColor(condition: string | null): string {
+  switch (condition) {
+    case 'new':
+      return 'text-emerald-700 bg-emerald-50'
+    case 'good':
+      return 'text-sky-700 bg-sky-50'
+    case 'fair':
+      return 'text-amber-700 bg-amber-50'
+    case 'worn':
+      return 'text-orange-700 bg-orange-50'
+    case 'broken':
+      return 'text-red-700 bg-red-50'
+    default:
+      return 'text-stone-500 bg-stone-50'
+  }
+}
+
+export default function GearClient({ initialItems }: { initialItems: GearItem[] }) {
+  const [items, setItems] = useState<GearItem[]>(initialItems)
+  const [activeCategory, setActiveCategory] = useState<string | null>(null)
+  const [showWishlist, setShowWishlist] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [editingItem, setEditingItem] = useState<GearItem | null>(null)
+  const [showForm, setShowForm] = useState(false)
+  const [deletingItem, setDeletingItem] = useState<GearItem | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
+
+  // Filter items
+  const filtered = useMemo(() => {
+    return items.filter((item) => {
+      if (item.isWishlist !== showWishlist) return false
+      if (activeCategory && item.category !== activeCategory) return false
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase()
+        return (
+          item.name.toLowerCase().includes(q) ||
+          item.brand?.toLowerCase().includes(q) ||
+          item.notes?.toLowerCase().includes(q)
+        )
+      }
+      return true
+    })
+  }, [items, activeCategory, showWishlist, searchQuery])
+
+  // Group by category for the list view
+  const grouped = useMemo(() => {
+    const groups: Record<string, GearItem[]> = {}
+    for (const item of filtered) {
+      if (!groups[item.category]) groups[item.category] = []
+      groups[item.category].push(item)
+    }
+    // Sort categories in the defined order
+    const order: string[] = CATEGORIES.map((c) => c.value)
+    return Object.entries(groups).sort(
+      ([a], [b]) => order.indexOf(a) - order.indexOf(b)
+    )
+  }, [filtered])
+
+  const ownedCount = items.filter((i) => !i.isWishlist).length
+  const wishlistCount = items.filter((i) => i.isWishlist).length
+
+  async function handleSave(data: Record<string, unknown>) {
+    const isEditing = !!editingItem
+
+    const res = await fetch(
+      isEditing ? `/api/gear/${editingItem.id}` : '/api/gear',
+      {
+        method: isEditing ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...data, isWishlist: showWishlist }),
+      }
+    )
+
+    if (!res.ok) {
+      throw new Error('Failed to save')
+    }
+
+    const saved = await res.json()
+
+    if (isEditing) {
+      setItems((prev) => prev.map((i) => (i.id === saved.id ? saved : i)))
+    } else {
+      setItems((prev) => [...prev, saved])
+    }
+
+    setShowForm(false)
+    setEditingItem(null)
+  }
+
+  async function handleDelete() {
+    if (!deletingItem) return
+    setIsDeleting(true)
+
+    try {
+      const res = await fetch(`/api/gear/${deletingItem.id}`, { method: 'DELETE' })
+      if (!res.ok) throw new Error('Failed to delete')
+      setItems((prev) => prev.filter((i) => i.id !== deletingItem.id))
+      setDeletingItem(null)
+    } catch (err) {
+      console.error(err)
+      alert('Failed to delete item')
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
+  function openEdit(item: GearItem) {
+    setEditingItem(item)
+    setShowForm(true)
+  }
+
+  function openAdd() {
+    setEditingItem(null)
+    setShowForm(true)
+  }
+
+  return (
+    <div className="max-w-4xl mx-auto px-4 py-6">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4">
+        <h1 className="text-2xl font-bold">
+          {showWishlist ? 'Wish List' : 'My Gear'}
+        </h1>
+        <button
+          onClick={openAdd}
+          className="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+        >
+          + Add {showWishlist ? 'Wish' : 'Gear'}
+        </button>
+      </div>
+
+      {/* Owned / Wishlist toggle */}
+      <div className="flex gap-1 mb-4 bg-stone-200 rounded-lg p-1">
+        <button
+          onClick={() => setShowWishlist(false)}
+          className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
+            !showWishlist
+              ? 'bg-white text-stone-900 shadow-sm'
+              : 'text-stone-500 hover:text-stone-700'
+          }`}
+        >
+          Owned ({ownedCount})
+        </button>
+        <button
+          onClick={() => setShowWishlist(true)}
+          className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
+            showWishlist
+              ? 'bg-white text-stone-900 shadow-sm'
+              : 'text-stone-500 hover:text-stone-700'
+          }`}
+        >
+          Wish List ({wishlistCount})
+        </button>
+      </div>
+
+      {/* Search */}
+      <input
+        type="text"
+        placeholder="Search gear..."
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        className="w-full px-3 py-2 mb-4 rounded-lg border border-stone-300 bg-white text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-400"
+      />
+
+      {/* Category filter chips */}
+      <div className="flex gap-2 mb-6 overflow-x-auto pb-1 -mx-4 px-4">
+        <button
+          onClick={() => setActiveCategory(null)}
+          className={`shrink-0 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+            !activeCategory
+              ? 'bg-stone-800 text-white'
+              : 'bg-stone-200 text-stone-600 hover:bg-stone-300'
+          }`}
+        >
+          All
+        </button>
+        {CATEGORIES.map((cat) => {
+          const count = items.filter(
+            (i) => i.category === cat.value && i.isWishlist === showWishlist
+          ).length
+          if (count === 0) return null
+          return (
+            <button
+              key={cat.value}
+              onClick={() =>
+                setActiveCategory(activeCategory === cat.value ? null : cat.value)
+              }
+              className={`shrink-0 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                activeCategory === cat.value
+                  ? 'bg-stone-800 text-white'
+                  : 'bg-stone-200 text-stone-600 hover:bg-stone-300'
+              }`}
+            >
+              {cat.emoji} {cat.label} ({count})
+            </button>
+          )
+        })}
+      </div>
+
+      {/* Gear list grouped by category */}
+      {grouped.length === 0 ? (
+        <div className="text-center py-16 text-stone-400">
+          <p className="text-4xl mb-3">{showWishlist ? '🎁' : '🎒'}</p>
+          <p className="text-lg font-medium">
+            {searchQuery
+              ? 'No items match your search'
+              : showWishlist
+                ? 'Your wish list is empty'
+                : 'No gear yet'}
+          </p>
+          <p className="text-sm mt-1">
+            {!searchQuery && (
+              <button
+                onClick={openAdd}
+                className="text-amber-600 hover:text-amber-700 font-medium"
+              >
+                Add your first {showWishlist ? 'wish list item' : 'piece of gear'}
+              </button>
+            )}
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-6">
+          {grouped.map(([category, categoryItems]) => (
+            <div key={category}>
+              {/* Category header (only if "All" is selected) */}
+              {!activeCategory && (
+                <h2 className="text-sm font-semibold text-stone-500 uppercase tracking-wider mb-2">
+                  {getCategoryEmoji(category)} {getCategoryLabel(category)} ({categoryItems.length})
+                </h2>
+              )}
+              <div className="space-y-2">
+                {categoryItems.map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => openEdit(item)}
+                    className="w-full text-left bg-white rounded-xl border border-stone-200 hover:border-amber-400 p-4 transition-colors"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-semibold text-stone-900 truncate">
+                            {item.name}
+                          </span>
+                          {item.condition && (
+                            <span
+                              className={`text-xs px-2 py-0.5 rounded-full font-medium ${getConditionColor(item.condition)}`}
+                            >
+                              {item.condition}
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-sm text-stone-500">
+                          {item.brand && <span>{item.brand}</span>}
+                          {item.weight && <span>{item.weight} lb</span>}
+                          {item.storageLocation && (
+                            <span>📍 {item.storageLocation}</span>
+                          )}
+                          {item.price && (
+                            <span className={showWishlist ? 'font-medium text-stone-700' : ''}>
+                              ${item.price.toFixed(2)}
+                            </span>
+                          )}
+                        </div>
+                        {item.notes && (
+                          <p className="text-sm text-stone-400 mt-1 line-clamp-1">
+                            {item.notes}
+                          </p>
+                        )}
+                      </div>
+                      {/* Purchase link indicator */}
+                      {item.purchaseUrl && (
+                        <span className="text-stone-300 text-lg shrink-0" title="Has purchase link">
+                          🔗
+                        </span>
+                      )}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Summary footer */}
+      {filtered.length > 0 && (
+        <div className="mt-8 text-center text-sm text-stone-400">
+          {filtered.length} item{filtered.length !== 1 ? 's' : ''}
+          {items.some((i) => i.weight && !i.isWishlist) && !showWishlist && (
+            <>
+              {' · '}
+              {filtered
+                .reduce((sum, i) => sum + (i.weight ?? 0), 0)
+                .toFixed(1)}{' '}
+              lb total
+            </>
+          )}
+        </div>
+      )}
+
+      {/* Add/Edit form modal */}
+      {showForm && (
+        <GearForm
+          item={editingItem}
+          categories={CATEGORIES}
+          conditions={CONDITIONS}
+          onSave={handleSave}
+          onDelete={editingItem ? () => setDeletingItem(editingItem) : undefined}
+          onClose={() => {
+            setShowForm(false)
+            setEditingItem(null)
+          }}
+        />
+      )}
+
+      {/* Delete confirmation */}
+      {deletingItem && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-end sm:items-center justify-center p-4">
+          <div className="bg-white rounded-2xl w-full max-w-sm p-6 shadow-xl">
+            <h3 className="text-lg font-bold text-stone-900 mb-2">
+              Delete {deletingItem.name}?
+            </h3>
+            <p className="text-stone-500 mb-6">
+              This will permanently remove this item from your{' '}
+              {deletingItem.isWishlist ? 'wish list' : 'gear inventory'}.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setDeletingItem(null)}
+                className="flex-1 py-2.5 rounded-lg border border-stone-300 text-stone-700 font-medium hover:bg-stone-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={isDeleting}
+                className="flex-1 py-2.5 rounded-lg bg-red-600 text-white font-medium hover:bg-red-700 disabled:opacity-50 transition-colors"
+              >
+                {isDeleting ? 'Deleting...' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
