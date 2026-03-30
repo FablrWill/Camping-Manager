@@ -149,3 +149,44 @@ All notable changes to Camp Commander are tracked here.
 - Location save/edit fully working on /spots page
 - Gear CRUD built in parallel session
 - Next: vehicle profile page, auto-tag photos, basic trip creation
+
+## 2026-03-30 — Session 6: Knowledge Base Architecture + Corpus Organization
+
+### Planned
+- Full RAG architecture for NC camping knowledge base
+- Hybrid retrieval: Vectra (vector/semantic) + SQLite FTS5 (keyword)
+- Embeddings: OpenAI text-embedding-3-small at 512 dimensions, 800-token chunks with 100-token overlap
+- PDF ingestion pipeline: pdf-parse → chunk → embed → store
+- Chat interface: Claude Sonnet with streaming, source citations, conversation history
+- 5 new Prisma models: KnowledgeSource, KnowledgeChunk, ChatConversation, ChatMessage + FTS5 virtual table
+- New dependencies: @anthropic-ai/sdk, openai, vectra, pdf-parse, tiktoken
+- Full plan saved to `/Users/willis/.claude/plans/harmonic-watching-crown.md`
+
+### Created
+- `data/research/` — knowledge base corpus (7 markdown files, cleaned + frontmatted)
+  - `bear-safety-lnt.md` — Bear safety + Leave No Trace in NC
+  - `campgrounds-by-region.md` — Best campgrounds statewide
+  - `campgrounds-asheville-3hr-radius.md` — Best spots within 3hrs of Asheville
+  - `dispersed-camping-regulations.md` — Dispersed camping rules across all NC public lands
+  - `forest-road-access.md` — Forest road conditions and vehicle access
+  - `seasonal-planning-guide.md` — Month-by-month NC camping guide
+  - `water-and-connectivity.md` — Water sources + cell/Starlink coverage
+  - `RESEARCH-PROMPT.md` — Gemini Deep Research prompt templates (not for ingestion)
+- `data/pdfs/` — PDF corpus for ingestion
+  - `black-mountain-trails-campground.pdf` — Black Mountain trails + campground map
+  - `asheville-western-nc-hikes.pdf` — Asheville & Western NC Hikes guide
+  - `backpackers-handbook-townsend.pdf` — Backpacker's Handbook 3rd ed. (general reference)
+  - `wunc-nc-state-parks-guide.pdf` — WUNC NC State Parks guide
+
+### Decisions Made
+- **Vectra over sqlite-vec** — sqlite-vec is alpha and incompatible with Prisma; Vectra is zero-dep JSON-file store, clean swap to pgvector when deploying to Vercel
+- **OpenAI for embeddings, Claude for chat** — two API keys needed; OpenAI embeddings are $0.02/M tokens, entire corpus under $1
+- **Hybrid retrieval** — 0.7 semantic + 0.3 keyword weighting; FTS5 catches exact campground names and regulation numbers that semantic search misses
+- **Gemini Deep Research for initial corpus** — structured markdown output, ingests same as PDFs; all citation artifacts stripped on import
+- **800-token chunks, 100-token overlap** — balances coherent context vs. embedding dilution for camping reference content
+- **`data/vectors/` gitignored** — Vectra JSON index files are local-only
+
+### Status at End of Session
+- Knowledge base corpus complete and ready to ingest
+- Architecture documented in ARCHITECTURE.md
+- Next build session: schema migration + deps + FTS5 table + Vectra setup (small task), then chunking/embedding utilities

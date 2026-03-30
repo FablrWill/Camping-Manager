@@ -120,6 +120,78 @@ User → Next.js Page → Server Component → Prisma → SQLite
 User → Form Submit → API Route → Prisma → SQLite → Redirect
 ```
 
+## Knowledge Base / RAG System (Phase 3)
+
+The NC camping knowledge base uses a hybrid retrieval architecture to power a chat interface that answers questions grounded in real sources.
+
+### Storage
+- **Vectra** — local JSON-file vector store for semantic search. Zero native deps, zero config. Lives in `data/vectors/` (gitignored). Swaps to `pgvector` column on `KnowledgeChunk` when migrating to Vercel/Postgres.
+- **SQLite FTS5** — full-text keyword search via a virtual table (`knowledge_chunks_fts`). Created with raw SQL migration since Prisma can't manage virtual tables. Catches exact-term queries (campground names, regulation numbers) that semantic search misses.
+
+### Retrieval Flow
+```
+User question → OpenAI embedding
+  → Vectra: top-10 semantic matches
+  → FTS5: top-10 keyword matches
+  → Deduplicate + re-rank (0.7 semantic + 0.3 keyword)
+  → Top 5-8 chunks (~4,000 tokens) → Claude Sonnet
+  → Streaming response with [1][2] citations
+```
+
+### Embedding Strategy
+- Model: `text-embedding-3-small` at 512 dimensions (~$0.02/M tokens)
+- Chunk size: 800 tokens with 100-token overlap
+- Chapter/section titles prepended to each chunk as context headers
+
+### New Models (planned)
+- **KnowledgeSource** — a PDF or research document (title, type, region, category)
+- **KnowledgeChunk** — a chunk of text from a source (content, chapterTitle, pageNumbers, sequence, tokenCount)
+- **ChatConversation** — a conversation thread
+- **ChatMessage** — individual messages with JSON citation arrays
+
+### Corpus
+- `data/research/` — 7 cleaned markdown files (Gemini Deep Research output, citation artifacts stripped)
+- `data/pdfs/` — 4 PDFs (Black Mountain trails, WNC hikes guide, Backpacker's Handbook, WUNC state parks guide)
+- `data/vectors/` — Vectra index files (gitignored, generated at ingest time)
+
+### New Dependencies (planned)
+| Package | Purpose |
+|---------|---------|
+| `@anthropic-ai/sdk` | Claude API — chat + streaming |
+| `openai` | Embeddings only |
+| `vectra` | Local vector store |
+| `pdf-parse` | PDF text extraction (pure JS, no native deps) |
+| `tiktoken` | Accurate token counting for chunking |
+
+### New Env Vars Needed
+- `ANTHROPIC_API_KEY`
+- `OPENAI_API_KEY`
+
+### New File Structure (planned)
+```
+/lib/knowledge/
+  embeddings.ts    — OpenAI embedding utility
+  chunker.ts       — Text splitting with overlap
+  ingest.ts        — PDF/markdown ingestion pipeline
+  retrieve.ts      — Hybrid retrieval (Vectra + FTS5)
+  fts.ts           — FTS5 query helpers
+  vectra.ts        — Vectra index management
+/app/api/
+  chat/route.ts              — Chat endpoint with streaming
+  knowledge/ingest/route.ts  — Ingestion endpoint
+  knowledge/sources/route.ts — Source management
+/app/chat/
+  page.tsx         — Chat page
+  chat-client.tsx  — Messenger-style UI (mobile-first, stone/amber theme)
+/data/
+  research/        — Markdown knowledge files (committed)
+  pdfs/            — PDF source files (committed)
+  vectors/         — Vectra index (gitignored)
+```
+
+### Vercel Migration Path
+When deploying: Vectra → `pgvector` column on `KnowledgeChunk`, FTS5 → Postgres `tsvector/tsquery`. The retrieval abstraction in `lib/knowledge/retrieve.ts` means chat/ingestion/UI code stays untouched.
+
 ## What Will Change
 - **SQLite → Postgres** when deploying to Vercel (one-line Prisma config change)
 - **Add more models** as features are built (JournalEntry, MealPlan, FloatPlan, PowerDevice, EmergencyContact). Already added: Photo, TimelinePoint, PlaceVisit, ActivitySegment
