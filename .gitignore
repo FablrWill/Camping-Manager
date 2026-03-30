@@ -37,3 +37,10 @@ prisma/*.db-journal
 
 # User-uploaded photos (stored locally, referenced in DB)
 public/photos/
+
+# DropBox processing inbox (contents are transient, not tracked)
+DropBox/*
+!DropBox/.gitkeep
+
+# Archive (personal reference files, not tracked)
+archive/

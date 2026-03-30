@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <name>NC Camping Pins</name>
+    <description>Camping pins from Google Maps saved list - March 2026 trip</description>
+
+    <Style id="campsite">
+      <IconStyle>
+        <Icon><href>https://maps.google.com/mapfiles/kml/shapes/campground.png</href></Icon>
+      </IconStyle>
+    </Style>
+    <Style id="overlook">
+      <IconStyle>
+        <Icon><href>https://maps.google.com/mapfiles/kml/shapes/trail.png</href></Icon>
+      </IconStyle>
+    </Style>
+    <Style id="info">
+      <IconStyle>
+        <Icon><href>https://maps.google.com/mapfiles/kml/shapes/info.png</href></Icon>
+      </IconStyle>
+    </Style>
+
+    <Placemark>
+      <name>Campsite - Nebo South</name>
+      <description>Near 1945 Old North Carolina 105, Nebo, NC 28761</description>
+      <styleUrl>#campsite</styleUrl>
+      <Point><coordinates>-81.9254167,35.7981944,0</coordinates></Point>
+    </Placemark>
+
+    <Placemark>
+      <name>Campsite - Nebo</name>
+      <description>Near Old N C Hwy 105, Nebo, NC 28761</description>
+      <styleUrl>#campsite</styleUrl>
+      <Point><coordinates>-81.9351944,35.8043056,0</coordinates></Point>
+    </Placemark>
+
+    <Placemark>
+      <name>Full Cell Service Campsite</name>
+      <description>Full cell service. Near Old N C Hwy 105, Nebo, NC 28761</description>
+      <styleUrl>#campsite</styleUrl>
+      <Point><coordinates>-81.9373333,35.8143056,0</coordinates></Point>
+    </Placemark>
+
+    <Placemark>
+      <name>Overlook</name>
+      <description>Hiking area, 5.0 rated. Old North Carolina 105, Nebo, NC 28761</description>
+      <styleUrl>#overlook</styleUrl>
+      <Point><coordinates>-81.93112,35.8220363,0</coordinates></Point>
+    </Placemark>
+
+    <Placemark>
+      <name>Campsite - Marion North</name>
+      <description>Near Old North Carolina 105, Marion, NC 28752</description>
+      <styleUrl>#campsite</styleUrl>
+      <Point><coordinates>-81.9256905,35.8430911,0</coordinates></Point>
+    </Placemark>
+
+    <Placemark>
+      <name>Campsite - Old NC 105 A</name>
+      <description>Near Old N C Hwy 105, Marion, NC 28752</description>
+      <styleUrl>#campsite</styleUrl>
+      <Point><coordinates>-81.9174585,35.8531858,0</coordinates></Point>
+    </Placemark>
+
+    <Placemark>
+      <name>Campsite - Old NC 105 B</name>
+      <description>Near Old N C Hwy 105, Marion, NC 28752</description>
+      <styleUrl>#campsite</styleUrl>
+      <Point><coordinates>-81.9170528,35.8629986,0</coordinates></Point>
+    </Placemark>
+
+    <Placemark>
+      <name>Campsite - Old NC 105 C</name>
+      <description>Near Old N C Hwy 105, Marion, NC 28752</description>
+      <styleUrl>#campsite</styleUrl>
+      <Point><coordinates>-81.9149,35.8653258,0</coordinates></Point>
+    </Placemark>
+
+    <Placemark>
+      <name>Dope Spot (smaller, on road)</name>
+      <description>Dope spot but smaller and on road. Starlink might not work great.</description>
+      <styleUrl>#campsite</styleUrl>
+      <Point><coordinates>-81.9066234,35.8820084,0</coordinates></Point>
+    </Placemark>
+
+    <Placemark>
+      <name>Great Site - Big Flat</name>
+      <description>Great site. Big. Flat.</description>
+      <styleUrl>#campsite</styleUrl>
+      <Point><coordinates>-81.9119198,35.9028702,0</coordinates></Point>
+    </Placemark>
+
+    <Placemark>
+      <name>Old NC 105 - Gravel Road</name>
+      <description>Gravel road with camp sites</description>
+      <styleUrl>#info</styleUrl>
+      <Point><coordinates>-81.9179249,35.8606086,0</coordinates></Point>
+    </Placemark>
+
+    <Placemark>
+      <name>Wiseman's View</name>
+      <description>Wiseman's View overlook area</description>
+      <styleUrl>#overlook</styleUrl>
+      <Point><coordinates>-81.9044169,35.9003299,0</coordinates></Point>
+    </Placemark>
+
+    <Placemark>
+      <name>Campsite - Newland</name>
+      <description>Near Old N C Hwy 105, Newland, NC 28657</description>
+      <styleUrl>#campsite</styleUrl>
+      <Point><coordinates>-81.9122537,35.9099,0</coordinates></Point>
+    </Placemark>
+
+    <Placemark>
+      <name>Good Spots</name>
+      <description>Good spots for camping</description>
+      <styleUrl>#campsite</styleUrl>
+      <Point><coordinates>-81.93,35.9155,0</coordinates></Point>
+    </Placemark>
+
+    <Placemark>
+      <name>BEST WORKABLE RIDGELINE ZONE</name>
+      <description>BEST WORKABLE RIDGELINE ZONE - this is the money stretch</description>
+      <styleUrl>#campsite</styleUrl>
+      <Point><coordinates>-81.925,35.905,0</coordinates></Point>
+    </Placemark>
+
+    <Placemark>
+      <name>Old NC 105 - Linville Gorge Rim</name>
+      <description>Old NC 105 (Linville Gorge Rim)</description>
+      <styleUrl>#info</styleUrl>
+      <Point><coordinates>-81.9095,35.9336,0</coordinates></Point>
+    </Placemark>
+  </Document>
+</kml>
