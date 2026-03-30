@@ -2,7 +2,7 @@ import { prisma } from "@/lib/db";
 import DashboardClient from "@/components/DashboardClient";
 
 export default async function Home() {
-  const [gearCount, wishlistCount, locationCount, photoCount, vehicleMods, recentGear] =
+  const [gearCount, wishlistCount, locationCount, photoCount, vehicleMods, recentGear, upcomingTrip] =
     await Promise.all([
       prisma.gearItem.count({ where: { isWishlist: false } }),
       prisma.gearItem.count({ where: { isWishlist: true } }),
@@ -20,6 +20,17 @@ export default async function Home() {
           brand: true,
           condition: true,
           updatedAt: true,
+        },
+      }),
+      prisma.trip.findFirst({
+        where: { startDate: { gte: new Date() } },
+        orderBy: { startDate: "asc" },
+        select: {
+          id: true,
+          name: true,
+          startDate: true,
+          endDate: true,
+          location: { select: { name: true } },
         },
       }),
     ]);
@@ -43,6 +54,13 @@ export default async function Home() {
         ...g,
         updatedAt: g.updatedAt.toISOString(),
       }))}
+      upcomingTrip={upcomingTrip ? {
+        id: upcomingTrip.id,
+        name: upcomingTrip.name,
+        startDate: upcomingTrip.startDate.toISOString(),
+        endDate: upcomingTrip.endDate.toISOString(),
+        locationName: upcomingTrip.location?.name ?? null,
+      } : null}
     />
   );
 }

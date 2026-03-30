@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { Backpack, Car, MapPin, Tent, ChevronRight, Plus } from 'lucide-react'
+import { daysUntil } from '@/lib/trip-utils'
 
 interface DashboardStats {
   gearCount: number
@@ -21,6 +22,14 @@ interface RecentGearItem {
   updatedAt: string
 }
 
+interface UpcomingTrip {
+  id: string
+  name: string
+  startDate: string
+  endDate: string
+  locationName: string | null
+}
+
 const CATEGORY_EMOJI: Record<string, string> = {
   shelter: '⛺',
   sleep: '🛏️',
@@ -34,9 +43,11 @@ const CATEGORY_EMOJI: Record<string, string> = {
 export default function DashboardClient({
   stats,
   recentGear,
+  upcomingTrip,
 }: {
   stats: DashboardStats
   recentGear: RecentGearItem[]
+  upcomingTrip: UpcomingTrip | null
 }) {
   return (
     <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
@@ -49,6 +60,28 @@ export default function DashboardClient({
           Your gear. Your rig. Your spots.
         </p>
       </section>
+
+      {/* Upcoming trip card */}
+      {upcomingTrip && (
+        <Link href={`/trips/${upcomingTrip.id}/prep`} className="block">
+          <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-xl p-4 flex items-center justify-between">
+            <div>
+              <p className="text-xs text-amber-600 dark:text-amber-400 font-medium uppercase tracking-wider">
+                Next Trip — {daysUntil(upcomingTrip.startDate)} days away
+              </p>
+              <p className="text-base font-semibold text-stone-900 dark:text-stone-100 mt-0.5">
+                {upcomingTrip.name}
+              </p>
+              {upcomingTrip.locationName && (
+                <p className="text-sm text-stone-500 dark:text-stone-400">{upcomingTrip.locationName}</p>
+              )}
+            </div>
+            <div className="text-amber-600 dark:text-amber-400 shrink-0 ml-3">
+              <ChevronRight size={20} />
+            </div>
+          </div>
+        </Link>
+      )}
 
       {/* Quick stats row */}
       <section className="grid grid-cols-2 gap-3">

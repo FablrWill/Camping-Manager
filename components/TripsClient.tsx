@@ -10,6 +10,7 @@ import {
   Backpack,
   ChevronRight,
 } from 'lucide-react'
+import Link from 'next/link'
 import WeatherCard from '@/components/WeatherCard'
 import PackingList from '@/components/PackingList'
 import MealPlan from '@/components/MealPlan'
@@ -203,6 +204,19 @@ export default function TripsClient({ initialTrips, locations, vehicles }: Trips
                 <p className="text-sm text-stone-400 dark:text-stone-500 mt-2 line-clamp-2">
                   {trip.notes}
                 </p>
+              )}
+
+              {/* Prepare link for upcoming / active trips */}
+              {!isPast && (
+                <div className="mt-2">
+                  <Link
+                    href={`/trips/${trip.id}/prep`}
+                    className="inline-flex items-center gap-1 text-sm font-medium text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    Prepare <ChevronRight size={14} />
+                  </Link>
+                </div>
               )}
             </div>
 
