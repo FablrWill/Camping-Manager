@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 
 export async function GET(request: NextRequest) {
+  try {
   const { searchParams } = new URL(request.url);
   const date = searchParams.get("date"); // YYYY-MM-DD
 
@@ -63,4 +64,8 @@ export async function GET(request: NextRequest) {
     activitySegments: serializedSegments,
     totalPoints: serializedPoints.length,
   });
+  } catch (error) {
+    console.error('Failed to fetch timeline:', error)
+    return NextResponse.json({ error: 'Failed to fetch timeline data' }, { status: 500 })
+  }
 }

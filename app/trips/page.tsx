@@ -5,7 +5,7 @@ export default async function TripsPage() {
   const [trips, locations, vehicles] = await Promise.all([
     prisma.trip.findMany({
       include: {
-        location: { select: { id: true, name: true } },
+        location: { select: { id: true, name: true, latitude: true, longitude: true } },
         vehicle: { select: { id: true, name: true } },
         _count: { select: { packingItems: true, photos: true } },
       },

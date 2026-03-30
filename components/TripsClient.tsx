@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import {
   Plus,
   Calendar,
@@ -10,6 +10,8 @@ import {
   Backpack,
   ChevronRight,
 } from 'lucide-react'
+import WeatherCard from '@/components/WeatherCard'
+import type { DayForecast, WeatherAlert } from '@/lib/weather'
 
 interface TripData {
   id: string
@@ -18,11 +20,17 @@ interface TripData {
   endDate: string
   notes: string | null
   weatherNotes: string | null
-  location: { id: string; name: string } | null
+  location: { id: string; name: string; latitude: number | null; longitude: number | null } | null
   vehicle: { id: string; name: string } | null
   _count: { packingItems: number; photos: number }
   createdAt: string
   updatedAt: string
+}
+
+interface WeatherData {
+  days: DayForecast[]
+  alerts: WeatherAlert[]
+  elevation?: number
 }
 
 interface TripsClientProps {
@@ -63,8 +71,48 @@ export default function TripsClient({ initialTrips, locations, vehicles }: Trips
   const [trips, setTrips] = useState(initialTrips)
   const [showForm, setShowForm] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [formError, setFormError] = useState<string | null>(null)
+  const [weatherByTrip, setWeatherByTrip] = useState<Record<string, WeatherData>>({})
+  const [weatherLoading, setWeatherLoading] = useState<Record<string, boolean>>({})
+  const [weatherErrors, setWeatherErrors] = useState<Record<string, string>>({})
 
   const now = new Date().toISOString()
+
+  // Fetch weather for upcoming trips that have a location with GPS
+  const fetchTripWeather = useCallback(async (trip: TripData) => {
+    if (!trip.location?.latitude || !trip.location?.longitude) return
+    if (weatherByTrip[trip.id] || weatherLoading[trip.id]) return
+
+    // Only fetch for trips within 16 days (Open-Meteo forecast limit)
+    const daysOut = Math.ceil((new Date(trip.startDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+    if (daysOut > 16 || new Date(trip.endDate) < new Date()) return
+
+    setWeatherLoading(prev => ({ ...prev, [trip.id]: true }))
+
+    try {
+      const start = trip.startDate.split('T')[0]
+      const end = trip.endDate.split('T')[0]
+      const params = new URLSearchParams({
+        lat: trip.location.latitude.toString(),
+        lon: trip.location.longitude.toString(),
+        start,
+        end,
+      })
+      const res = await fetch(`/api/weather?${params}`)
+      if (!res.ok) throw new Error('Failed to fetch')
+      const data = await res.json()
+      setWeatherByTrip(prev => ({ ...prev, [trip.id]: data }))
+    } catch {
+      setWeatherErrors(prev => ({ ...prev, [trip.id]: 'Could not load forecast' }))
+    } finally {
+      setWeatherLoading(prev => ({ ...prev, [trip.id]: false }))
+    }
+  }, [weatherByTrip, weatherLoading])
+
+  useEffect(() => {
+    const upcoming = trips.filter(t => t.endDate >= now)
+    upcoming.forEach(fetchTripWeather)
+  }, [trips, now, fetchTripWeather])
   const upcoming = trips.filter((t) => t.endDate >= now)
   const past = trips.filter((t) => t.endDate < now)
 
@@ -82,6 +130,7 @@ export default function TripsClient({ initialTrips, locations, vehicles }: Trips
       notes: (form.get('notes') as string) || null,
     }
 
+    setFormError(null)
     try {
       const res = await fetch('/api/trips', {
         method: 'POST',
@@ -102,7 +151,7 @@ export default function TripsClient({ initialTrips, locations, vehicles }: Trips
       ])
       setShowForm(false)
     } catch {
-      alert('Failed to create trip')
+      setFormError('Failed to create trip. Please try again.')
     } finally {
       setSaving(false)
     }
@@ -192,6 +241,21 @@ export default function TripsClient({ initialTrips, locations, vehicles }: Trips
               <ChevronRight size={18} className="text-stone-300 dark:text-stone-600 shrink-0 mt-1" />
             )}
           </div>
+
+          {/* Weather card for upcoming trips with location */}
+          {!isPast && trip.location?.latitude && (
+            <div className="mt-3">
+              <WeatherCard
+                days={weatherByTrip[trip.id]?.days ?? []}
+                alerts={weatherByTrip[trip.id]?.alerts ?? []}
+                locationName={trip.location.name}
+                dateRange={formatDateRange(trip.startDate, trip.endDate)}
+                elevation={weatherByTrip[trip.id]?.elevation}
+                loading={weatherLoading[trip.id] ?? false}
+                error={weatherErrors[trip.id] ?? null}
+              />
+            </div>
+          )}
         </div>
       </div>
     )
@@ -301,10 +365,15 @@ export default function TripsClient({ initialTrips, locations, vehicles }: Trips
               className="w-full px-3 py-2.5 rounded-lg border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-400 dark:focus:ring-amber-500 resize-none"
             />
           </div>
+          {formError && (
+            <p className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30 rounded-lg px-3 py-2">
+              {formError}
+            </p>
+          )}
           <div className="flex gap-3 pt-1">
             <button
               type="button"
-              onClick={() => setShowForm(false)}
+              onClick={() => { setShowForm(false); setFormError(null) }}
               className="flex-1 py-2.5 rounded-lg border border-stone-300 dark:border-stone-600 text-stone-700 dark:text-stone-300 font-medium hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors"
             >
               Cancel

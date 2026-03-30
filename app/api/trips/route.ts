@@ -2,35 +2,52 @@ import { prisma } from "@/lib/db";
 import { NextResponse } from "next/server";
 
 export async function GET() {
-  const trips = await prisma.trip.findMany({
-    include: {
-      location: { select: { id: true, name: true } },
-      vehicle: { select: { id: true, name: true } },
-      _count: { select: { packingItems: true, photos: true } },
-    },
-    orderBy: { startDate: "desc" },
-  });
-  return NextResponse.json(trips);
+  try {
+    const trips = await prisma.trip.findMany({
+      include: {
+        location: { select: { id: true, name: true, latitude: true, longitude: true } },
+        vehicle: { select: { id: true, name: true } },
+        _count: { select: { packingItems: true, photos: true } },
+      },
+      orderBy: { startDate: "desc" },
+    });
+    return NextResponse.json(trips);
+  } catch (error) {
+    console.error('Failed to fetch trips:', error)
+    return NextResponse.json({ error: 'Failed to fetch trips' }, { status: 500 })
+  }
 }
 
 export async function POST(req: Request) {
-  const data = await req.json();
+  try {
+    const data = await req.json();
 
-  const trip = await prisma.trip.create({
-    data: {
-      name: data.name,
-      startDate: new Date(data.startDate),
-      endDate: new Date(data.endDate),
-      locationId: data.locationId || null,
-      vehicleId: data.vehicleId || null,
-      notes: data.notes || null,
-      weatherNotes: data.weatherNotes || null,
-    },
-    include: {
-      location: { select: { id: true, name: true } },
-      vehicle: { select: { id: true, name: true } },
-      _count: { select: { packingItems: true, photos: true } },
-    },
-  });
-  return NextResponse.json(trip, { status: 201 });
+    if (!data.name || !data.startDate || !data.endDate) {
+      return NextResponse.json(
+        { error: 'Name, startDate, and endDate are required' },
+        { status: 400 }
+      )
+    }
+
+    const trip = await prisma.trip.create({
+      data: {
+        name: data.name,
+        startDate: new Date(data.startDate),
+        endDate: new Date(data.endDate),
+        locationId: data.locationId || null,
+        vehicleId: data.vehicleId || null,
+        notes: data.notes || null,
+        weatherNotes: data.weatherNotes || null,
+      },
+      include: {
+        location: { select: { id: true, name: true, latitude: true, longitude: true } },
+        vehicle: { select: { id: true, name: true } },
+        _count: { select: { packingItems: true, photos: true } },
+      },
+    });
+    return NextResponse.json(trip, { status: 201 });
+  } catch (error) {
+    console.error('Failed to create trip:', error)
+    return NextResponse.json({ error: 'Failed to create trip' }, { status: 500 })
+  }
 }
