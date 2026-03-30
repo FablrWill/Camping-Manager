@@ -8,6 +8,7 @@ All notable changes to Outland OS are tracked here.
 
 | Session | Date | Summary |
 |---------|------|---------|
+| [15](changelog/session-15.md) | 2026-03-30 | Branch cleanup, merge all features, gear consolidation, doc audit |
 | [14](changelog/session-14.md) | 2026-03-30 | Power Budget Calculator — planning + live mode |
 | [13](changelog/session-13.md) | 2026-03-30 | Meal Planning — full implementation (AI generator, API route, UI component) |
 | [12](changelog/session-12.md) | 2026-03-30 | Meal Planning Implementation Plan (planning session) |
