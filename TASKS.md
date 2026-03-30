@@ -5,24 +5,19 @@
 
 ---
 
-## ⚠️ Planning Pause — Read Before Building
+## Up Next
 
-**Session 6 (2026-03-30):** We did a full project review. The finding: the app has good modules but no defined user journey. Before resuming, Will is completing a voice interview with an LLM to define what the app needs to do before/during/after a camping trip.
+These are the highest-priority tasks based on the user journey defined in `docs/USER-JOURNEY.md`. Build in this order.
 
-**What to do when Will returns:**
-1. Read the user journey document Will brings back
-2. Rewrite "Up Next" and reprioritize FEATURE-PHASES.md based on it
-3. Then resume building
+1. **Trip creation UI** — Date range, destination (Location), vehicle, trip type, notes. Trip model already exists. This is the anchor for everything else — packing lists, meals, and weather all attach to a trip.
 
----
+2. **Weather integration** — Fetch forecast for a trip's location and dates. OpenWeatherMap or NOAA. Feeds into packing list and prep flow.
 
-## Up Next (on hold — pending user journey doc)
+3. **Claude API integration + packing list generator** — First AI feature. Pass trip details + gear inventory to Claude → get a smart packing list back. Needs Claude API key configured.
 
-1. **Vehicle profile page** — Display and edit the Santa Fe specs and mods. Vehicle + VehicleMod models exist, seed data is in the DB. Needs: a read-only profile view, then an edit mode.
+4. **Meal planning with shopping list** — Claude generates a full meal plan for the trip duration. Shopping list organized by store section. Factors in home prep vs. camp cooking.
 
-2. **Auto-tag photos to trips/locations** — Match photos to saved locations via GPS proximity + timestamp overlap.
-
-3. **Basic trip creation** — Date range, location, vehicle, notes. Trip model exists.
+5. **Executive trip prep flow** — A single "prepare this trip" view that runs: weather check → packing list → meal plan → checklist. The primary Wednesday-before-Saturday experience.
 
 ---
 

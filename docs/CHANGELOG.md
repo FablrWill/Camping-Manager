@@ -125,6 +125,35 @@ All notable changes to Camp Commander are tracked here.
 - Next: location save/edit, gear inventory CRUD, or start using real Takeout data
 - See `docs/STATUS.md` for pickup instructions
 
+## 2026-03-30 — Session 7: User Journey + Roadmap Rewrite
+
+### No Code Written — Planning Session
+
+### What We Did
+- Will completed a voice interview with an LLM to define the primary user loop
+- Defined before/during/after trip experience
+- Identified must-have features vs. nice-to-haves
+- Set a clear "definition of done enough"
+- Rewrote TASKS.md and FEATURE-PHASES.md based on the output
+
+### Key Decisions
+- **Phase 3 AI features pulled forward** — packing list, meal planning, weather are now Phase 2 must-haves
+- **Trip creation UI is the immediate next task** — it's the anchor for all trip prep features
+- **Claude API key is now a blocker** — needed to start building the core value
+- **Timeline/path animation deprioritized** — great work, not core to the user journey
+- **Vehicle profile page is low priority** — data exists, page can wait
+
+### Files Created/Updated
+- `docs/USER-JOURNEY.md` — new file, captures the voice interview output
+- `docs/FEATURE-PHASES.md` — full rewrite with new priorities
+- `TASKS.md` — new "Up Next" aligned to user journey
+
+### Status at End of Session
+- Roadmap is clear. Next build session starts with trip creation UI.
+- See `docs/USER-JOURNEY.md` for the north star.
+
+---
+
 ## 2026-03-30 — Session 6: Project Review + Planning Pause
 
 ### No Code Written — Planning Session

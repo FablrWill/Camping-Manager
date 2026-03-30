@@ -1,121 +1,112 @@
 # Feature Phases — Camp Commander
 
-Every feature mapped to a build phase. This is the organized version of IDEAS.md.
+Every feature mapped to a build phase.
+
+> **Reprioritized 2026-03-30** based on user journey defined in `docs/USER-JOURNEY.md`.
+> Key change: AI/trip prep features moved from Phase 3 → Phase 2. Build to "done enough" first.
 
 ---
 
-## Phase 1 — Foundation
-*Goal: App skeleton, basic data management, mobile-friendly shell*
+## Phase 1 — Foundation ✅ Complete
+*App skeleton, basic data management, mobile-friendly shell*
 
 | Feature | Status | Notes |
 |---------|--------|-------|
 | Next.js + TypeScript + Tailwind scaffold | ✅ Done | |
 | Prisma + SQLite database | ✅ Done | |
-| Database schema (6 models) | ✅ Done | GearItem, Vehicle, VehicleMod, Location, Trip, PackingItem |
+| Database schema (9 models) | ✅ Done | GearItem, Vehicle, VehicleMod, Location, Trip, PackingItem, Photo, TimelinePoint, PlaceVisit, ActivitySegment |
 | Mobile-responsive layout shell | ✅ Done | Sticky nav, stone/amber theme |
 | Home page with module cards | ✅ Done | |
 | Seed data (genesis spot + Santa Fe) | ✅ Done | |
-| Gear inventory CRUD | ❌ Next | Add, view, edit, delete gear items |
-| Vehicle profile page | ❌ Next | Display + edit Santa Fe specs and mods |
+| Gear inventory CRUD | ✅ Done | List, add, edit, delete, wishlist toggle, category filters, search |
 
 ---
 
-## Phase 2 — Locations & Photos ← CURRENT
-*Goal: Save spots, upload photos, see everything on a map*
+## Phase 2 — Locations, Photos & Trip Prep ← CURRENT
+*Save spots, capture photos, and plan a trip from start to finish*
 
+### Locations & Photos (mostly done)
 | Feature | Status | Notes |
 |---------|--------|-------|
-| Map view of all saved locations | ✅ Done | Leaflet/OpenStreetMap, no API key needed |
-| Photo upload with EXIF extraction | ✅ Done | GPS auto-extracted, compressed to ~100KB |
-| Photo map pins with popups | ✅ Done | Click to see photo, date, altitude |
-| Marker clustering | ✅ Done | leaflet.markercluster for large photo sets |
-| Layer toggles | ✅ Done | Photos / Spots / Path / Places + dark mode |
-| Google Takeout import tools | ✅ Done | Python scripts in tools/photo-map/ |
-| Timeline models & import APIs | ✅ Done | TimelinePoint, PlaceVisit, ActivitySegment |
-| GPS path visualization | ✅ Done | Color-coded polylines by activity type |
-| Place visit markers | ✅ Done | Pulsing circles with name, duration, time |
-| Day picker + date filtering | ✅ Done | Day summary card with distance, photos, places |
-| Path animation | ✅ Done | Replay GPS trail with adjustable speed (1x–16x) |
-| Dark mode | ✅ Done | CartoDB Dark Matter tiles |
-| Vision AI screenshot enrichment | ✅ Done | Claude Sonnet identifies locations from map screenshots |
-| Color-coded photo markers | ✅ Done | Blue=EXIF, green=vision exact, orange=approximate |
-| Location save/edit with map pin | ❌ | Drop a pin to save a new spot |
-| Auto-tag photos to trips/locations | ❌ | Match via EXIF GPS + date |
-| Basic trip creation | ❌ | Dates, location, vehicle, notes |
-| Personal signal map | ❌ | Log cell + Starlink quality per spot over time |
-| Seasonal ratings | ❌ | Rate spots differently by time of year |
-| GPX import | ❌ | Import trails from AllTrails/Wikiloc exports |
-| Google Maps list import | ❌ | Paste a shared list URL, pull all pins + notes into the app |
+| Interactive map with location/photo pins | ✅ Done | Leaflet/OpenStreetMap |
+| Photo upload with EXIF GPS extraction | ✅ Done | Auto-compress to ~100KB |
+| Marker clustering | ✅ Done | |
+| Layer toggles + dark mode | ✅ Done | |
+| Google Takeout import tools | ✅ Done | Python scripts |
+| Timeline: GPS path, place visits, animation | ✅ Done | Day picker, speed control, color-coded paths |
+| Location save/edit with pin drop | ✅ Done | Slide-up form, full CRUD |
+| Auto-tag photos to trips/locations | ❌ Ready | Match via GPS proximity + timestamp |
+
+### Trip Prep (the core — build next)
+| Feature | Status | Notes |
+|---------|--------|-------|
+| **Trip creation UI** | ❌ Ready | Date range, destination, vehicle, type, notes. Model exists. |
+| **Weather integration** | ❌ Ready | Forecast for trip location + dates. OpenWeatherMap or NOAA. |
+| **Claude API: packing list generator** | ❌ Ready | Trip details + gear inventory → smart packing list |
+| **Claude API: meal planning + shopping list** | ❌ Ready | Full meal plan per trip. Home prep vs. camp cooking. |
+| **Power budget calculator** | ❌ Ready | EcoFlow + solar + devices. Weather-adjusted solar estimates. |
+| **Executive trip prep flow** | ❌ Ready | Single view: weather → packing → meals → checklist |
+
+### Lower Priority (Phase 2 bonus)
+| Feature | Status | Notes |
+|---------|--------|-------|
+| Vehicle profile page | ❌ Low | Data exists. Useful but not blocking anything. |
+| Personal signal map | ❌ Planned | Log cell + Starlink quality per spot over time |
+| Seasonal ratings | ❌ Planned | Rate spots differently by time of year |
+| GPX import | ❌ Planned | Import trails from AllTrails/Wikiloc exports |
+| Google Maps list import | ❌ Planned | Paste a shared list URL, pull pins into the app |
 
 ---
 
-## Phase 3 — Intelligence
-*Goal: Claude-powered features — the app gets smart*
+## Phase 3 — Intelligence & Agent Features
+*Smarter trip planning, voice features, deeper AI integration*
 
 | Feature | Status | Notes |
 |---------|--------|-------|
-| Gear photo identification | ❌ | Snap a photo, Claude identifies brand/type/specs |
-| User guide finder | ❌ | Auto-search web for product manuals, save PDF locally |
-| AI trip planning agent | ❌ | Campsite discovery, research, recommendations |
-| Smart packing lists | ❌ | Based on trip type, duration, weather, gear inventory |
-| Camp kit presets | ❌ | Weekend Warrior, Remote Office, Extended Stay |
-| Meal planning | ❌ | Recipes, shopping list, home prep vs camp cooking |
-| Weather integration | ❌ | Forecasts for trip dates/location, gear suggestions |
-| Power budget calculator | ❌ | EcoFlow + solar + devices, weather-adjusted |
-| Fuel & last stop planner | ❌ | Route-aware, last gas/grocery/ice |
-| Permit & registration handling | ❌ | Agent fills out forms, saves confirmations |
-| Safety float plan | ❌ | Trip summary sent to emergency contacts |
-| Voice Ghostwriter | ❌ | Voice-first journaling — agent interviews, writes entry |
-| Chat interface | ❌ | Messenger-style interaction with the agent |
-| Post-trip auto-review | ❌ | What you forgot, what you didn't use — feeds back |
-| Wear planning | ❌ | Weather-based clothing recommendations |
-| Altitude awareness | ❌ | Cooking, sleep, hydration adjustments |
-| Wildlife & safety protocols | ❌ | Location-aware (bear country, flash floods, etc.) |
-| Fire ban alerts | ❌ | By region, affects campfire and cooking planning |
-| Gear maintenance reminders | ❌ | Clean stove, reseal tent, charge EcoFlow |
-| Vehicle pre-trip checklist | ❌ | Tire pressure, oil, coolant — terrain-aware |
+| AI trip recommendations | ❌ Planned | "Find me a spot within 2 hrs of Asheville this weekend" |
+| Voice Ghostwriter / trip debrief | ❌ Planned | Voice-first journaling on the drive home |
+| Chat interface | ❌ Planned | Messenger-style interaction with the agent |
+| Gear photo identification | ❌ Planned | Snap a photo → Claude identifies brand/type/specs |
+| Link/screenshot → gear import | ❌ Planned | Paste Amazon URL → auto-populate gear form |
+| Safety float plan | ❌ Planned | Send trip summary to emergency contacts |
+| Nearby trails & recreation API | ❌ Planned | OSM, NPS, Recreation.gov near a saved location |
+| NC camping knowledge base | ❌ Planned | PDF ingestion + RAG for local area knowledge |
+| Wishlist deal finder | ❌ Planned | eBay, Google Shopping, FB Marketplace for wishlist items |
+| User guide finder | ❌ Planned | Auto-search for product manuals, save PDF |
+| Fuel & last stop planner | ❌ Planned | Route-aware: last gas, grocery, ice before backcountry |
+| Permit & registration handling | ❌ Planned | Agent fills out recreation.gov, USFS permits |
+| Vehicle pre-trip checklist | ❌ Planned | Tire pressure, oil, coolant — terrain-aware |
+| Post-trip auto-review | ❌ Planned | What you forgot, what you didn't use — feeds back |
+| Wear planning | ❌ Planned | Weather-based clothing recommendations |
+| Agent orchestration layer | ❌ Planned | Route tasks to Haiku/Sonnet/Opus by complexity + cost |
 
 ---
 
 ## Phase 4 — Polish & Deploy
-*Goal: Offline support, PWA, deployment, sharing features*
+*Offline support, PWA, deployment*
 
 | Feature | Status | Notes |
 |---------|--------|-------|
-| Offline-first / PWA | ❌ | Service worker, cached data, offline maps |
-| Gear manuals available offline | ❌ | PDFs cached locally for no-signal use |
-| "Download for Offline" pre-trip step | ❌ | Grab maps, plans, recipes before departure |
-| Deploy to Vercel | ❌ | Switch SQLite → Postgres (one-line change) |
-| Trip timeline view | ❌ | Chronological view of all camping trips |
-| Shareable trip reports | ❌ | Journal + photos + route = sendable summary |
-| Road trip layer | ❌ | Scenic stops, food, rest areas along route |
-| Buddy trip mode | ❌ | Shared packing list, split gear between cars |
-| Cost tracking | ❌ | Gas, permits, groceries, gear per trip |
-| Gear ROI tracker | ❌ | Cost per trip, justifies purchases |
-| Gear lending tracker | ❌ | Who borrowed what |
-| Leave No Trace checklist | ❌ | Location-specific pack-out reminders |
-| Dog planning | ❌ | Pet-friendly sites, extra packing, trail rules |
-| Dark sky / sun / moon info | ❌ | Bortle class, sunrise/sunset, moon phase |
-| Water source tracking | ❌ | Nearest water, filtration needs, how much to bring |
-| First aid / emergency info | ❌ | Nearest hospital, emergency contacts by location |
-| Campsite setup guide | ❌ | Personal setup checklist with reference photos |
-
----
-
-## Not Phased Yet
-*Ideas we're tracking but haven't placed*
-
-- Trip Prep Mode as home screen (may become the default Phase 3 UX)
-- Telegram bot integration (depends on chat interface decisions)
-- "I'm back safe" auto-message to contacts
-- Overdue check-in alerts for emergency contacts
+| Offline-first / PWA | ❌ Planned | Service worker, cached data, offline maps |
+| "Download for Offline" pre-trip step | ❌ Planned | Grab maps, plans, recipes before departure |
+| Gear manuals available offline | ❌ Planned | PDFs cached locally for no-signal use |
+| Deploy to Vercel | ❌ Planned | Switch SQLite → Postgres (one-line Prisma change) |
+| Trip timeline view | ❌ Planned | Chronological view of all camping trips |
+| Shareable trip reports | ❌ Planned | Journal + photos + route = sendable summary |
+| Cost tracking | ❌ Planned | Gas, permits, groceries, gear per trip |
+| Gear ROI tracker | ❌ Planned | Cost per trip, justifies purchases |
+| Dark sky / sun / moon info | ❌ Planned | Bortle class, sunrise/sunset, moon phase |
+| Water source tracking | ❌ Planned | Nearest water, filtration needs |
+| Dog planning | ❌ Planned | Pet-friendly sites, packing, trail rules |
+| Leave No Trace checklist | ❌ Planned | Location-specific pack-out reminders |
+| Buddy trip mode | ❌ Planned | Shared packing list, split gear between cars |
+| Gear lending tracker | ❌ Planned | Who borrowed what |
 
 ---
 
 ## Phase Principles
 - **Phase 1** = get the basics working, data in the database
-- **Phase 2** = make it visual and spatial (maps, photos)
-- **Phase 3** = make it smart (Claude does the thinking)
-- **Phase 4** = make it bulletproof and shareable (offline, deploy, social)
-- Features can move between phases as priorities shift
-- Each phase should produce a usable app — no phase is "just setup"
+- **Phase 2** = visual/spatial (maps, photos) + trip prep (the core loop)
+- **Phase 3** = deeper intelligence and agent features
+- **Phase 4** = offline, deploy, sharing
+- "Done enough" = Will can plan a trip start-to-finish in the app. See `docs/USER-JOURNEY.md`.

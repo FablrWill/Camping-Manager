@@ -1,12 +1,10 @@
 # Project Status — Camp Commander
 
 ## Quick Pickup
-> **Last session:** 2026-03-30 (Session 6)
-> **Current phase:** Planning pause — defining user journey before next build
+> **Last session:** 2026-03-30 (Session 7)
+> **Current phase:** Phase 2 — Trip Prep (the core loop)
 > **Task tracker:** See `TASKS.md` in project root — start there.
-
-## ⚠️ Before Building Anything
-Will completed a voice interview to define the primary user loop (before/during/after a trip). Bring that document back and use it to rewrite `TASKS.md` and `FEATURE-PHASES.md` before resuming. Do not pick up "Up Next" tasks without this context.
+> **User journey:** See `docs/USER-JOURNEY.md` — this defines what to build and why.
 
 ## Session History
 1. **Session 1** (2026-03-29) — Project kickoff, planning, docs
@@ -15,6 +13,7 @@ Will completed a voice interview to define the primary user loop (before/during/
 4. **Session 4** (2026-03-30) — Timeline map: Google Takeout import, GPS paths, animation, day picker, dark mode
 5. **Session 5** (2026-03-30) — Location pin drop CRUD + gear inventory CRUD (parallel session)
 6. **Session 6** (2026-03-30) — Project review + planning pause. No code written. See CHANGELOG.
+7. **Session 7** (2026-03-30) — User journey defined via voice interview. Roadmap rewritten. See USER-JOURNEY.md.
 
 ## Key Files
 - `TASKS.md` — What's done, what's next, where to start
@@ -24,4 +23,4 @@ Will completed a voice interview to define the primary user loop (before/during/
 - `docs/IDEAS.md` — Raw feature ideas and brainstorms
 
 ## Known Blockers
-- None currently — but do not build until user journey doc is reviewed
+- **Claude API key needed** — required to build packing list generator, meal planning, and all Phase 2 trip prep features
