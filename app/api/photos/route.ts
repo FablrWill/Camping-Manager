@@ -11,6 +11,11 @@ export async function GET() {
       altitude: true,
       takenAt: true,
       imagePath: true,
+      locationSource: true,
+      locationDescription: true,
+      locationConfidence: true,
+      visionApproximate: true,
+      googleUrl: true,
     },
     orderBy: { takenAt: "desc" },
   });

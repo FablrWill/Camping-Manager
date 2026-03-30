@@ -87,24 +87,85 @@ model Location {
 }
 
 model Photo {
-  id         String    @id @default(cuid())
-  title      String
-  latitude   Float
-  longitude  Float
-  altitude   Float?
-  takenAt    DateTime?
-  imagePath  String    // /photos/[cuid].jpg (compressed copy)
-  locationId String?
-  tripId     String?
-  notes      String?
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
+  id                  String    @id @default(cuid())
+  title               String
+  latitude            Float?    // nullable for unplaced photos
+  longitude           Float?
+  altitude            Float?
+  takenAt             DateTime?
+  imagePath           String    // /photos/[cuid].jpg (compressed copy)
+  locationId          String?
+  tripId              String?
+  locationSource      String?   // "exif" | "vision" | null
+  locationDescription String?   // AI-inferred place name
+  locationConfidence  String?   // "high" | "medium" | "low"
+  visionApproximate   Boolean   @default(false)
+  googleUrl           String?   // link to Google Photos
+  notes               String?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
 
   location Location? @relation(fields: [locationId], references: [id])
   trip     Trip?     @relation(fields: [tripId], references: [id])
 
   @@index([locationId])
   @@index([tripId])
+  @@index([takenAt])
+}
+
+// --- Timeline Models (from Google Maps Location History) ---
+
+model TimelinePoint {
+  id           String   @id @default(cuid())
+  latitude     Float
+  longitude    Float
+  altitude     Float?
+  timestamp    DateTime
+  timestampMs  BigInt
+  accuracy     Int?
+  activityType String?  // ON_FOOT, IN_VEHICLE, HIKING, etc.
+  createdAt    DateTime @default(now())
+
+  @@index([timestamp])
+  @@index([timestampMs])
+}
+
+model PlaceVisit {
+  id              String   @id @default(cuid())
+  name            String
+  address         String?
+  latitude        Float
+  longitude       Float
+  startTimestamp  DateTime
+  endTimestamp    DateTime
+  startMs         BigInt
+  endMs           BigInt
+  durationMinutes Int
+  confidence      String   @default("UNKNOWN")
+  createdAt       DateTime @default(now())
+
+  @@index([startTimestamp])
+  @@index([startMs])
+}
+
+model ActivitySegment {
+  id              String   @id @default(cuid())
+  activityType    String   // HIKING, IN_VEHICLE, CYCLING, etc.
+  startLat        Float
+  startLon        Float
+  endLat          Float
+  endLon          Float
+  startTimestamp  DateTime
+  endTimestamp    DateTime
+  startMs         BigInt
+  endMs           BigInt
+  durationMinutes Int
+  distanceMeters  Int?
+  waypoints       String?  // JSON array of {lat, lon} pairs
+  createdAt       DateTime @default(now())
+
+  @@index([startTimestamp])
+  @@index([startMs])
 }
 
 model Trip {
