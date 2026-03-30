@@ -26,7 +26,7 @@ These are the highest-priority tasks ready to build now. Pick one and go.
 | Mobile layout shell + nav | ✅ Done | Sticky nav, stone/amber theme |
 | Home page with module cards | ✅ Done | 4 cards: Gear, Vehicle, Spots, Trips |
 | Seed data | ✅ Done | Genesis spot (Linville Gorge) + Santa Fe vehicle |
-| **Gear inventory CRUD** | ✅ Done | List, add, edit, delete gear items. Built in parallel session. |
+| **Gear inventory CRUD** | ✅ Done | List, add, edit, delete, wishlist toggle, category filters, search. |
 | **Vehicle profile page** | ❌ Ready | Display + edit Santa Fe specs and mods. Model + seed data exist. |
 
 ---
@@ -62,7 +62,10 @@ These are the highest-priority tasks ready to build now. Pick one and go.
 
 | Task | Status | Notes |
 |------|--------|-------|
+| **NC camping knowledge base** | ❌ Ready | PDF ingestion, deep research, RAG architecture. Planning session first. |
 | Gear photo identification | ❌ Planned | Snap a photo → Claude identifies brand/type/specs |
+| Link/screenshot → gear import | ❌ Planned | Paste Amazon URL or screenshot → auto-populate gear form |
+| Wishlist deal finder | ❌ Planned | Search eBay API, Google Shopping, FB Marketplace for wishlist items |
 | User guide finder | ❌ Planned | Auto-search web for product manuals, save PDF |
 | **Nearby trails & recreation API** | ❌ Planned | Query OSM Overpass, NPS, Recreation.gov, USDA Forest Service for trails, campsites, and points of interest near a location. Display as map layers. |
 | AI trip planning agent | ❌ Planned | Campsite discovery, research, recommendations |
