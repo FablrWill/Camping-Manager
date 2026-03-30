@@ -217,3 +217,42 @@ A conversational trip planning flow where the agent does the legwork:
 This is the "killer feature" — the thing that makes Outland OS more than an inventory tracker. It's a camping concierge that handles the annoying stuff too.
 
 ---
+
+### Siri/Reminders Inbox — "Capture on the Road"
+**Added:** 2026-03-30
+**Context:** Will uses Siri via CarPlay while driving to dump random thoughts, feature ideas, gear todos, and trip notes into Apple Reminders. It's a fast, zero-friction capture habit — not what Reminders was designed for, but it works. The problem is those items pile up unorganized and nothing gets done with them.
+
+**The idea:** Give the app read access to Apple Reminders. Periodically (or on demand), the app pulls the list, uses Claude to triage and route each item:
+
+- **Feature/app idea** → logs to IDEAS.md or a backlog section in the app
+- **Gear to buy or research** → creates a gear wishlist entry
+- **Camping to-do** → adds to a trip prep checklist or general todo
+- **Spot to check out** → creates a draft saved location
+- **Personal reminder** → flags it as out-of-scope (not everything is camping-related, and that's fine)
+
+**The flow:**
+1. Will is driving, has a thought: "Hey Siri, remind me to research dry bags for the kayak gear" — goes into Reminders, Will forgets about it
+2. Later, Will opens the app, taps "Process Inbox" — or it runs automatically on a schedule
+3. App reads the Reminders list, Claude categorizes each item with brief reasoning
+4. Will sees a triage view: each item with the suggested action, can approve/edit/skip
+5. Confirmed items get routed to the right place in the app; processed items optionally get deleted or archived from Reminders
+
+**Why it works:**
+- Doesn't change Will's capture habit — Siri + CarPlay stays as-is
+- Removes the manual work of remembering to act on those notes
+- Makes Reminders a lightweight input queue rather than a graveyard of forgotten ideas
+- Claude handles the "what is this, and what do I do with it?" step — which is the friction that kills the follow-through
+
+**Technical considerations:**
+- Requires Apple EventKit / Reminders API access — available in native iOS/macOS apps but not web apps
+- The most realistic path: a lightweight iOS shortcut or companion native app that fetches reminders and sends them to the web app's API
+- Alternatively, a macOS app running locally that has Reminders access and feeds the inbox
+- Could also be a Shortcuts automation: "Share from Reminders to Outland OS" that Will triggers manually when he wants to process the queue
+- Privacy: Reminders can have personal/sensitive items (the screenshot showed non-camping things like doctor appointments). The triage UI should make it easy to skip/ignore items that aren't relevant, and nothing should auto-act without Will seeing it first.
+
+**Not in scope:**
+- Writing back to Reminders (read-only is fine)
+- Replacing Reminders for capture — the Siri/CarPlay habit is the whole point, keep it
+- Full automation without human review — this should always be a "Will approves" step before anything gets routed
+
+---
