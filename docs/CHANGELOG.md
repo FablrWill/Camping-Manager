@@ -124,3 +124,28 @@ All notable changes to Camp Commander are tracked here.
 - Python extraction tools ready for Google Takeout data
 - Next: location save/edit, gear inventory CRUD, or start using real Takeout data
 - See `docs/STATUS.md` for pickup instructions
+
+## 2026-03-30 — Session 5: Location Pin Drop + Gear CRUD
+
+### Created
+- `components/LocationForm.tsx` — mobile-friendly slide-up form for creating/editing locations. Fields: name, date/time visited, type, star rating, road condition, clearance, cell/Starlink signal, water access, description, notes.
+- `app/api/locations/route.ts` — GET all locations, POST create new location
+- `app/api/locations/[id]/route.ts` — GET single, PUT update, DELETE location
+- Prisma migration: `add_visited_at_to_location` — adds `visitedAt DateTime?` to Location model
+- Gear inventory CRUD (built in parallel session) — list, add, edit, delete gear items
+
+### Changed
+- `components/SpotMap.tsx` — Added `onLocationEdit` callback prop, Edit button in location popups, expanded `MapLocation` interface with all Location fields
+- `app/spots/spots-client.tsx` — Map click → LocationForm with lat/lng pre-filled, edit existing locations via popup Edit button, location state management with API refresh
+- `app/spots/page.tsx` — Fetches all Location fields (not just map subset), serializes visitedAt/createdAt/updatedAt
+- `TASKS.md` — Marked gear CRUD + location pin drop done, added nearby trails API task, updated Up Next
+
+### Decisions Made
+- **visitedAt field** — like Google Photos info panel, lets you record when you visited, not just when you saved
+- **Slide-up panel** over modal — better mobile UX, doesn't obscure map completely
+- **Nearby trails API** planned for Phase 3 — will use OSM Overpass, NPS, Recreation.gov, USDA Forest Service (no AllTrails/Wikiloc APIs available)
+
+### Status at End of Session
+- Location save/edit fully working on /spots page
+- Gear CRUD built in parallel session
+- Next: vehicle profile page, auto-tag photos, basic trip creation

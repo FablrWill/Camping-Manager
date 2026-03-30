@@ -1,6 +1,6 @@
 # Camp Commander — Task Tracker
 
-> **Last updated:** 2026-03-30 (Session 4)
+> **Last updated:** 2026-03-30 (Session 5)
 > **Start here** if you're picking up after a break.
 
 ---
@@ -9,11 +9,11 @@
 
 These are the highest-priority tasks ready to build now. Pick one and go.
 
-1. **Gear inventory CRUD** — Add, view, edit, delete gear items. This is the core Phase 1 feature that's been waiting. The GearItem model already exists in Prisma with fields for name, brand, category, condition, weight, etc. Needs: list page, add form, edit form, delete confirmation. Mobile-first.
+1. **Vehicle profile page** — Display and edit the Santa Fe specs and mods. Vehicle + VehicleMod models exist, seed data is in the DB. Needs: a read-only profile view, then an edit mode.
 
-2. **Vehicle profile page** — Display and edit the Santa Fe specs and mods. Vehicle + VehicleMod models exist, seed data is in the DB. Needs: a read-only profile view, then an edit mode.
+2. **Auto-tag photos to trips/locations** — Match photos to saved locations via GPS proximity + timestamp overlap.
 
-3. **Location save/edit with map pin drop** — Click the map on /spots to drop a pin and save a new location. The Location model exists. SpotMap already has an `onMapClick` prop wired up. Needs: a save form that appears when you click, writes to the DB.
+3. **Basic trip creation** — Date range, location, vehicle, notes. Trip model exists.
 
 ---
 
@@ -26,7 +26,7 @@ These are the highest-priority tasks ready to build now. Pick one and go.
 | Mobile layout shell + nav | ✅ Done | Sticky nav, stone/amber theme |
 | Home page with module cards | ✅ Done | 4 cards: Gear, Vehicle, Spots, Trips |
 | Seed data | ✅ Done | Genesis spot (Linville Gorge) + Santa Fe vehicle |
-| **Gear inventory CRUD** | ❌ Ready | List, add, edit, delete gear items. Model exists. |
+| **Gear inventory CRUD** | ✅ Done | List, add, edit, delete gear items. Built in parallel session. |
 | **Vehicle profile page** | ❌ Ready | Display + edit Santa Fe specs and mods. Model + seed data exist. |
 
 ---
@@ -48,7 +48,7 @@ These are the highest-priority tasks ready to build now. Pick one and go.
 | Path animation | ✅ Done | Replay trail with speed control (1x–16x) |
 | Color-coded photo markers | ✅ Done | Blue=EXIF, green=vision exact, orange=approximate |
 | Vision AI screenshot enrichment | ✅ Done | Claude Sonnet reads map screenshots for location |
-| **Location save/edit with pin drop** | ❌ Ready | Click map → save form → write to DB. onMapClick already wired. |
+| **Location save/edit with pin drop** | ✅ Done | Click map → slide-up form → CRUD API. Edit via popup button. visitedAt date/time field. |
 | **Auto-tag photos to trips/locations** | ❌ Ready | Match via GPS proximity + timestamp overlap |
 | **Basic trip creation** | ❌ Ready | Date range, location, vehicle, notes. Trip model exists. |
 | Personal signal map | ❌ Planned | Log cell + Starlink quality per spot over time |
