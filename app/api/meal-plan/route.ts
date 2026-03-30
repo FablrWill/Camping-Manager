@@ -79,6 +79,11 @@ export async function POST(request: NextRequest) {
       weather,
     })
 
+    await prisma.trip.update({
+      where: { id: tripId },
+      data: { mealPlanGeneratedAt: new Date() },
+    })
+
     return NextResponse.json(mealPlan)
   } catch (error) {
     console.error('Meal plan generation failed:', error)

@@ -52,8 +52,21 @@ export default function PackingList({ tripId, tripName }: PackingListProps) {
     }
   }
 
-  function toggleItem(key: string) {
-    setChecked((prev) => ({ ...prev, [key]: !prev[key] }))
+  async function togglePacked(key: string, gearId: string | undefined, newChecked: boolean) {
+    setChecked(prev => ({ ...prev, [key]: newChecked }))
+    if (gearId) {
+      try {
+        await fetch('/api/packing-list/items', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tripId, gearId, packed: newChecked }),
+        })
+      } catch (err) {
+        console.error('Failed to save packed state:', err)
+        // Revert optimistic update
+        setChecked(prev => ({ ...prev, [key]: !newChecked }))
+      }
+    }
   }
 
   function addCustomItem(category: string) {
@@ -226,7 +239,7 @@ export default function PackingList({ tripId, tripName }: PackingListProps) {
                     <input
                       type="checkbox"
                       checked={isChecked}
-                      onChange={() => toggleItem(key)}
+                      onChange={() => togglePacked(key, item.gearId, !isChecked)}
                       className="sr-only"
                     />
 
