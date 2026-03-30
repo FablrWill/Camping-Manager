@@ -1,0 +1,336 @@
+'use client'
+
+import { useState } from 'react'
+import { Loader2, RotateCcw, Plus, X, Check } from 'lucide-react'
+import type { PackingListResult } from '@/lib/claude'
+
+interface PackingListProps {
+  tripId: string
+  tripName: string
+}
+
+interface CheckedState {
+  [categoryAndItem: string]: boolean
+}
+
+export default function PackingList({ tripId, tripName }: PackingListProps) {
+  const [packingList, setPackingList] = useState<PackingListResult | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [checked, setChecked] = useState<CheckedState>({})
+  const [addingTo, setAddingTo] = useState<string | null>(null)
+  const [newItemName, setNewItemName] = useState('')
+
+  const totalItems = packingList
+    ? packingList.categories.reduce((sum, cat) => sum + cat.items.length, 0)
+    : 0
+  const packedCount = Object.values(checked).filter(Boolean).length
+
+  async function generate() {
+    setLoading(true)
+    setError(null)
+    setChecked({})
+
+    try {
+      const res = await fetch('/api/packing-list', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tripId }),
+      })
+
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || 'Failed to generate')
+      }
+
+      const data: PackingListResult = await res.json()
+      setPackingList(data)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  function toggleItem(key: string) {
+    setChecked((prev) => ({ ...prev, [key]: !prev[key] }))
+  }
+
+  function addCustomItem(category: string) {
+    if (!newItemName.trim() || !packingList) return
+
+    setPackingList((prev) => {
+      if (!prev) return prev
+      return {
+        ...prev,
+        categories: prev.categories.map((cat) => {
+          if (cat.name !== category) return cat
+          return {
+            ...cat,
+            items: [
+              ...cat.items,
+              {
+                name: newItemName.trim(),
+                category,
+                fromInventory: false,
+              },
+            ],
+          }
+        }),
+      }
+    })
+
+    setNewItemName('')
+    setAddingTo(null)
+  }
+
+  // Not generated yet — show CTA
+  if (!packingList && !loading && !error) {
+    return (
+      <div className="bg-amber-50 dark:bg-amber-950/30 rounded-xl border border-amber-200 dark:border-amber-800 p-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-sm font-semibold text-stone-900 dark:text-stone-100">
+              🎒 Packing List
+            </h3>
+            <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
+              AI-generated from your gear + weather
+            </p>
+          </div>
+          <button
+            onClick={generate}
+            className="bg-amber-600 hover:bg-amber-700 dark:bg-amber-500 dark:hover:bg-amber-400 text-white dark:text-stone-900 px-4 py-2 rounded-lg font-medium text-sm transition-colors"
+          >
+            Generate with Claude
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-700 p-4">
+        <div className="flex items-center gap-2 mb-4">
+          <Loader2 size={16} className="animate-spin text-amber-500" />
+          <span className="text-sm text-stone-500 dark:text-stone-400">
+            Claude is building your packing list...
+          </span>
+        </div>
+        <div className="space-y-3">
+          {[1, 2, 3].map((section) => (
+            <div key={section} className="space-y-2">
+              <div className="animate-pulse bg-stone-200 dark:bg-stone-700 rounded h-4 w-24" />
+              {[1, 2, 3].map((row) => (
+                <div
+                  key={row}
+                  className="animate-pulse bg-stone-100 dark:bg-stone-800 rounded h-8 w-full"
+                />
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="bg-red-50 dark:bg-red-950/30 rounded-xl border border-red-200 dark:border-red-800 p-4">
+        <p className="text-sm text-red-600 dark:text-red-400">
+          {error}
+        </p>
+        <button
+          onClick={generate}
+          className="mt-2 text-sm text-red-600 dark:text-red-400 font-medium flex items-center gap-1.5 hover:text-red-700 dark:hover:text-red-300 transition-colors"
+        >
+          <RotateCcw size={14} />
+          Tap to retry
+        </button>
+      </div>
+    )
+  }
+
+  // Generated list
+  return (
+    <div className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-700 overflow-hidden">
+      {/* Header with progress */}
+      <div className="p-4 border-b border-stone-100 dark:border-stone-800">
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-sm font-semibold text-stone-900 dark:text-stone-100">
+            🎒 Packing List
+          </h3>
+          <button
+            onClick={generate}
+            className="text-xs text-stone-400 dark:text-stone-500 hover:text-amber-600 dark:hover:text-amber-400 flex items-center gap-1 transition-colors"
+            title="Regenerate"
+          >
+            <RotateCcw size={12} />
+            Regenerate
+          </button>
+        </div>
+
+        {/* Progress bar */}
+        <div className="flex items-center gap-2">
+          <div className="flex-1 bg-stone-200 dark:bg-stone-700 rounded-full h-2">
+            <div
+              className="bg-amber-500 dark:bg-amber-400 rounded-full h-2 transition-all duration-300"
+              style={{
+                width: totalItems > 0 ? `${(packedCount / totalItems) * 100}%` : '0%',
+              }}
+            />
+          </div>
+          <span className="text-xs text-stone-500 dark:text-stone-400 tabular-nums shrink-0">
+            {packedCount} / {totalItems} packed
+          </span>
+        </div>
+      </div>
+
+      {/* Categories */}
+      <div className="divide-y divide-stone-100 dark:divide-stone-800">
+        {packingList!.categories.map((cat) => (
+          <div key={cat.name} className="p-4">
+            <h4 className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider mb-2">
+              {cat.emoji} {cat.name}
+            </h4>
+
+            <div className="space-y-1">
+              {cat.items.map((item, i) => {
+                const key = `${cat.name}-${i}`
+                const isChecked = checked[key] ?? false
+
+                return (
+                  <label
+                    key={key}
+                    className="flex items-center gap-3 py-1.5 cursor-pointer group"
+                  >
+                    {/* Custom checkbox */}
+                    <div
+                      className={`w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 transition-colors ${
+                        isChecked
+                          ? 'bg-amber-600 dark:bg-amber-500 border-amber-600 dark:border-amber-500'
+                          : 'border-stone-300 dark:border-stone-600 group-hover:border-amber-400 dark:group-hover:border-amber-500'
+                      }`}
+                    >
+                      {isChecked && (
+                        <Check
+                          size={12}
+                          className="text-white dark:text-stone-900"
+                          strokeWidth={3}
+                        />
+                      )}
+                    </div>
+
+                    <input
+                      type="checkbox"
+                      checked={isChecked}
+                      onChange={() => toggleItem(key)}
+                      className="sr-only"
+                    />
+
+                    <div className="flex-1 min-w-0">
+                      <span
+                        className={`text-sm transition-colors ${
+                          isChecked
+                            ? 'line-through text-stone-400 dark:text-stone-600'
+                            : 'text-stone-900 dark:text-stone-100'
+                        }`}
+                      >
+                        {item.name}
+                      </span>
+
+                      {item.reason && (
+                        <span className="text-xs text-stone-400 dark:text-stone-500 ml-1.5">
+                          — {item.reason}
+                        </span>
+                      )}
+                    </div>
+
+                    {!item.fromInventory && (
+                      <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 font-medium shrink-0">
+                        add
+                      </span>
+                    )}
+                  </label>
+                )
+              })}
+            </div>
+
+            {/* Add custom item */}
+            {addingTo === cat.name ? (
+              <div className="flex items-center gap-2 mt-2">
+                <input
+                  type="text"
+                  value={newItemName}
+                  onChange={(e) => setNewItemName(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') addCustomItem(cat.name)
+                    if (e.key === 'Escape') {
+                      setAddingTo(null)
+                      setNewItemName('')
+                    }
+                  }}
+                  placeholder="Item name..."
+                  autoFocus
+                  className="flex-1 px-2 py-1.5 text-sm rounded-lg border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-400 dark:focus:ring-amber-500"
+                />
+                <button
+                  onClick={() => addCustomItem(cat.name)}
+                  className="text-amber-600 dark:text-amber-400 p-1.5"
+                >
+                  <Check size={16} />
+                </button>
+                <button
+                  onClick={() => {
+                    setAddingTo(null)
+                    setNewItemName('')
+                  }}
+                  className="text-stone-400 dark:text-stone-500 p-1.5"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => setAddingTo(cat.name)}
+                className="text-xs text-stone-400 dark:text-stone-500 hover:text-amber-600 dark:hover:text-amber-400 flex items-center gap-1 mt-2 transition-colors"
+              >
+                <Plus size={12} />
+                Add item
+              </button>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Tips */}
+      {packingList!.tips.length > 0 && (
+        <div className="p-4 border-t border-stone-100 dark:border-stone-800 bg-stone-50 dark:bg-stone-800/50">
+          <h4 className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider mb-2">
+            💡 Trip Tips
+          </h4>
+          <ul className="space-y-1.5">
+            {packingList!.tips.map((tip, i) => (
+              <li
+                key={i}
+                className="text-sm text-stone-600 dark:text-stone-300 flex gap-2"
+              >
+                <span className="text-amber-500 shrink-0">•</span>
+                {tip}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Attribution */}
+      <div className="px-4 py-2 text-center">
+        <p className="text-xs text-stone-400 dark:text-stone-500">
+          ✦ Generated by Claude · Edit freely
+        </p>
+      </div>
+    </div>
+  )
+}

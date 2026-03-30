@@ -49,11 +49,11 @@ A personal car camping assistant and travel guide built as a mobile-friendly web
 
 ## Documentation Standards
 - **TASKS.md** is the single source of truth. Update it every session.
-- **CHANGELOG.md** rules:
-  - Newest session first (reverse chronological)
-  - One entry per session — never duplicate a session
-  - Parallel sessions on the same day get suffixes: "Session 5a", "Session 5b"
-  - Always include a `---` separator between sessions
-  - Mark status changes in FEATURE-PHASES.md and TASKS.md when features are completed
-- **STATUS.md** must match CHANGELOG.md session numbering exactly
+- **Changelog** is split into one file per session in `docs/changelog/`:
+  - File naming: `session-NN.md` (zero-padded for sort). Parallel sessions use suffixes: `session-05a.md`, `session-05b.md`
+  - Each session creates its own file — **never edit another session's file**
+  - `docs/CHANGELOG.md` is just an index table. Add one row when you create a session file.
+  - This structure prevents merge conflicts when parallel worktrees both write changelog entries.
+  - To find the next session number: read the index table in `docs/CHANGELOG.md`, pick the next unused number. If another session is running in parallel on the same day, use a suffix (e.g., 12a, 12b).
+- **STATUS.md** must match the latest session number
 - When a feature listed in TASKS.md or FEATURE-PHASES.md is built, mark it ✅ Done immediately — don't leave stale "Ready" markers
