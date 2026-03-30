@@ -44,13 +44,13 @@ Every feature mapped to a build phase.
 | **Weather integration** | ✅ Done | Open-Meteo (free, no key). Auto-fetches for upcoming trips. Camping alerts (rain, cold, wind, UV). |
 | **Claude API: packing list generator** | ✅ Done | Trip details + gear inventory + weather → categorized packing list with progress tracking |
 | **Claude API: meal planning + shopping list** | ✅ Done | Full meal plan per trip. Home/camp prep tags. Shopping list by store section. Copy-to-clipboard. |
-| **Power budget calculator** | ❌ Ready | EcoFlow + solar + devices. Weather-adjusted solar estimates. |
+| **Power budget calculator** | ✅ Done | Planning mode + live mode. Weather-adjusted solar, charge reminders, day-by-day trajectory. (Session 14) |
 | **Executive trip prep flow** | ❌ Ready | Single view: weather → packing → meals → checklist |
 
 ### Lower Priority (Phase 2 bonus)
 | Feature | Status | Notes |
 |---------|--------|-------|
-| Vehicle profile page | ❌ Low | Data exists. Useful but not blocking anything. |
+| Vehicle profile page | ✅ Done | Hero card, specs, mods CRUD with cost tracking. (Session 6) |
 | Personal signal map | ❌ Planned | Log cell + Starlink quality per spot over time |
 | Seasonal ratings | ❌ Planned | Rate spots differently by time of year |
 | GPX import | ❌ Planned | Import trails from AllTrails/Wikiloc exports |

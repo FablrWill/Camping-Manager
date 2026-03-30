@@ -15,13 +15,24 @@ A personal car camping assistant and travel guide built as a mobile-friendly web
 ## Project Structure
 ```
 /app              — Next.js app router pages
-  /api/photos     — Photo CRUD and upload
+  /api/gear       — Gear CRUD (list, create, update, delete)
+  /api/locations  — Location CRUD + pin drop
+  /api/photos     — Photo CRUD and upload with EXIF extraction
+  /api/trips      — Trip CRUD
+  /api/vehicle    — Vehicle profile + mods CRUD
+  /api/weather    — Open-Meteo weather for trip locations
+  /api/packing-list — Claude AI packing list generator
+  /api/meal-plan  — Claude AI meal planning + shopping list
+  /api/power-budget — Power budget calculator (solar, battery, devices)
   /api/timeline   — Timeline data with date filtering
   /api/import     — Bulk import from Google Takeout
-  /spots          — Interactive map page
-/components       — React components (SpotMap, PhotoUpload)
-/lib              — Utilities, database client, API helpers
-/prisma           — Database schema and migrations (9 models)
+  /spots          — Interactive map page (Leaflet/OSM)
+  /gear           — Gear inventory page
+  /trips          — Trip planning page
+  /vehicle        — Vehicle profile page
+/components       — React components (15 client components + 9 UI primitives)
+/lib              — Utilities: db client, claude.ts, weather.ts, power.ts, exif.ts
+/prisma           — Database schema (10 models), migrations, seed.ts (33 gear items)
 /public           — Static assets + uploaded photos
 /tools/photo-map  — Python scripts for Google Takeout extraction + AI enrichment
 /docs             — Project documentation, planning, specs
