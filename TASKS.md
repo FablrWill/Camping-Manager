@@ -1,6 +1,6 @@
 # Outland OS — Task Tracker
 
-> **Last updated:** 2026-03-30 (Session 7 — User Journey + Roadmap)
+> **Last updated:** 2026-03-30 (Session 9 — Audit + Weather Integration)
 > **Start here** if you're picking up after a break.
 > **North star:** `docs/USER-JOURNEY.md` — read this before building anything new.
 
@@ -10,9 +10,9 @@
 
 These are the highest-priority tasks based on the user journey defined in `docs/USER-JOURNEY.md`. Build in this order.
 
-1. **Weather integration** — Fetch forecast for a trip's location and dates. OpenWeatherMap or NOAA. Feeds into packing list and prep flow. *(Trip creation UI already built — Session 6)*
+1. ~~**Weather integration**~~ ✅ Done (Session 9) — Open-Meteo, no API key. Auto-fetches for upcoming trips. Camping-relevant alerts (rain, cold, wind, UV).
 
-2. **Claude API integration + packing list generator** — First AI feature. Pass trip details + gear inventory to Claude → smart packing list. Needs Claude API key. See Open Questions.
+2. **Claude API integration + packing list generator** — First AI feature. Pass trip details + gear inventory + weather to Claude → smart packing list. Claude API key configured.
 
 3. **Meal planning with shopping list** — Claude generates a full meal plan for the trip duration. Shopping list organized by store section. Home prep vs. camp cooking split.
 

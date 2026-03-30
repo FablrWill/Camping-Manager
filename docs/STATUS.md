@@ -3,7 +3,7 @@
 ## Quick Pickup
 > **Last session:** 2026-03-30 (Session 9)
 > **Current phase:** Phase 2 — Trip Prep (the core loop)
-> **App name:** Outland OS (renamed from Camp Commander, Session 8)
+> **App name:** Outland OS
 > **Task tracker:** See `TASKS.md` in project root — start there.
 > **North star:** See `docs/USER-JOURNEY.md` — defines what to build and why.
 
@@ -23,13 +23,13 @@
 7. **Session 6** (2026-03-30) — Project review + planning pause. KB architecture planning (parallel session).
 8. **Session 7** (2026-03-30) — User journey defined via voice interview. Roadmap rewritten.
 9. **Session 8** (2026-03-30) — All branches merged. Style guide updated. App renamed to Outland OS.
-10. **Session 9** (2026-03-30) — Smart Campsite feature scoped and documented. HA architecture established.
+10. **Session 9** (2026-03-30) — Full project audit, weather integration (Open-Meteo), API error handling fixes, smart campsite feature spec added.
 
 ## Key Files
 - `TASKS.md` — What's done, what's next, where to start
 - `docs/USER-JOURNEY.md` — The north star. Read before building.
 - `docs/FEATURE-PHASES.md` — Full feature roadmap by phase
 - `docs/STYLE-GUIDE.md` — Design system + component specs (includes trip prep UI specs)
+- `docs/AUDIT.md` — Full project audit: code health, integrations, PWA research, creative ideas
 - `docs/CHANGELOG.md` — Detailed session-by-session changes
 - `docs/ARCHITECTURE.md` — Tech stack, schema, project structure
-

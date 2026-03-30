@@ -2,31 +2,37 @@
 
 All notable changes to Outland OS are tracked here.
 
-## 2026-03-30 — Session 9: Smart Campsite Feature Planning
+## 2026-03-30 — Session 9: Audit + Weather Integration + Smart Campsite
 
-### No Code Written — Feature Design & Documentation
+### Created
+- `docs/AUDIT.md` — Top-to-bottom project audit: code quality, docs consistency, open source research (Open-Meteo, RIDB, NPS, GPX tools, Serwist PWA), Google integration analysis, PWA vs native hardware access, 5 creative feature ideas, implementation plan
+- `lib/weather.ts` — Open-Meteo API client. WMO weather code mapping, unit conversion (metric→imperial), smart camping alerts: rain, cold, heat, wind, UV with severity levels
+- `components/WeatherCard.tsx` — Compact forecast display: day grid with emoji/high/low/precip, expandable details (wind, UV, sunrise/sunset), alert strips, loading skeleton, error state
+- `app/api/weather/route.ts` — GET endpoint with input validation, date format checks, 1-hour cache header
 
-### What We Did
-- Scoped the Smart Campsite feature with Will through conversation
-- Established architecture: Home Assistant as control plane, app adds camping context on top
-- Broke feature into subfeatures and assigned to phase/status
-- Added Smart Campsite spec to `docs/FEATURE-PHASES.md` and `TASKS.md`
+### Changed
+- `components/TripsClient.tsx` — Auto-fetches weather for upcoming trips with GPS locations. WeatherCard displayed inline on trip cards. Replaced `alert()` with inline error state.
+- `app/trips/page.tsx` — Now passes location GPS coordinates to client
+- `app/api/trips/route.ts` — Added try-catch + validation, returns location lat/lon
+- `app/api/vehicle/route.ts` — Added try-catch + validation
+- `app/api/vehicle/[id]/route.ts` — Added try-catch to GET and PUT
+- `app/api/vehicle/[id]/mods/route.ts` — Added try-catch + validation
+- `app/api/timeline/route.ts` — Wrapped Promise.all in try-catch
+- `.env.example` — Updated: Claude API key moved up, weather note (Open-Meteo, no key needed)
+- `docs/FEATURE-PHASES.md` — Smart Campsite section added to Phase 3
+- `TASKS.md` — Weather marked done, smart campsite subtasks added, blockers updated
 
 ### Key Decisions
-- Smart devices extend the existing gear inventory model (not a separate feature) — `isSmartDevice` flag + connection metadata fields, all nullable
-- HA bridge (live device status) is blocked until Will retrieves HA hardware from Durham (~mid-April 2026)
-- Device registry + gear UI + campsite setup checklist can be built now
-- Context7 to pull current HA API docs at build time for the bridge feature
-- App never talks to Blink directly — goes through HA integration
-
-### Files Updated
-- `docs/FEATURE-PHASES.md` — Smart Campsite section added to Phase 3
-- `TASKS.md` — Smart Campsite subtasks added to Phase 3
+- **Open-Meteo over OpenWeatherMap** — free, no API key, better camping data (wind, UV, solar radiation, soil temp). Eliminates a blocker.
+- **Smart devices extend gear model** — `isSmartDevice` flag + connection metadata, all nullable. Not a separate feature.
+- **HA as control plane** — app adds camping context on top. App never talks to devices directly.
+- **PWA for now, native later if needed** — camera, GPS, mic, offline all work in PWA. Only Bluetooth (EcoFlow) and background GPS require native.
 
 ### Status at End of Session
-- Branch `claude/hungry-fermi` pushed to GitHub
-- Next: build Phase 2 trip prep features (weather, packing list, meals)
-- Smart Campsite device registry ready to build whenever
+- Weather integration complete and working
+- All API routes now have error handling
+- Claude API key configured, no blockers for Phase 2
+- Next: Claude API packing list generator (task #2 in Up Next)
 
 ---
 
