@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import {
   Plus,
   Calendar,
@@ -75,44 +75,45 @@ export default function TripsClient({ initialTrips, locations, vehicles }: Trips
   const [weatherByTrip, setWeatherByTrip] = useState<Record<string, WeatherData>>({})
   const [weatherLoading, setWeatherLoading] = useState<Record<string, boolean>>({})
   const [weatherErrors, setWeatherErrors] = useState<Record<string, string>>({})
+  const [fetchedTrips] = useState<Set<string>>(new Set())
 
   const now = new Date().toISOString()
 
   // Fetch weather for upcoming trips that have a location with GPS
-  const fetchTripWeather = useCallback(async (trip: TripData) => {
-    if (!trip.location?.latitude || !trip.location?.longitude) return
-    if (weatherByTrip[trip.id] || weatherLoading[trip.id]) return
-
-    // Only fetch for trips within 16 days (Open-Meteo forecast limit)
-    const daysOut = Math.ceil((new Date(trip.startDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
-    if (daysOut > 16 || new Date(trip.endDate) < new Date()) return
-
-    setWeatherLoading(prev => ({ ...prev, [trip.id]: true }))
-
-    try {
-      const start = trip.startDate.split('T')[0]
-      const end = trip.endDate.split('T')[0]
-      const params = new URLSearchParams({
-        lat: trip.location.latitude.toString(),
-        lon: trip.location.longitude.toString(),
-        start,
-        end,
-      })
-      const res = await fetch(`/api/weather?${params}`)
-      if (!res.ok) throw new Error('Failed to fetch')
-      const data = await res.json()
-      setWeatherByTrip(prev => ({ ...prev, [trip.id]: data }))
-    } catch {
-      setWeatherErrors(prev => ({ ...prev, [trip.id]: 'Could not load forecast' }))
-    } finally {
-      setWeatherLoading(prev => ({ ...prev, [trip.id]: false }))
-    }
-  }, [weatherByTrip, weatherLoading])
-
   useEffect(() => {
     const upcoming = trips.filter(t => t.endDate >= now)
-    upcoming.forEach(fetchTripWeather)
-  }, [trips, now, fetchTripWeather])
+
+    upcoming.forEach(async (trip) => {
+      if (!trip.location?.latitude || !trip.location?.longitude) return
+      if (fetchedTrips.has(trip.id)) return
+
+      // Only fetch for trips within 16 days (Open-Meteo forecast limit)
+      const daysOut = Math.ceil((new Date(trip.startDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+      if (daysOut > 16 || new Date(trip.endDate) < new Date()) return
+
+      fetchedTrips.add(trip.id)
+      setWeatherLoading(prev => ({ ...prev, [trip.id]: true }))
+
+      try {
+        const start = trip.startDate.split('T')[0]
+        const end = trip.endDate.split('T')[0]
+        const params = new URLSearchParams({
+          lat: trip.location.latitude.toString(),
+          lon: trip.location.longitude.toString(),
+          start,
+          end,
+        })
+        const res = await fetch(`/api/weather?${params}`)
+        if (!res.ok) throw new Error('Failed to fetch')
+        const data = await res.json()
+        setWeatherByTrip(prev => ({ ...prev, [trip.id]: data }))
+      } catch {
+        setWeatherErrors(prev => ({ ...prev, [trip.id]: 'Could not load forecast' }))
+      } finally {
+        setWeatherLoading(prev => ({ ...prev, [trip.id]: false }))
+      }
+    })
+  }, [trips, now, fetchedTrips])
   const upcoming = trips.filter((t) => t.endDate >= now)
   const past = trips.filter((t) => t.endDate < now)
 

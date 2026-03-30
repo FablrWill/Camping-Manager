@@ -18,12 +18,13 @@
 2. **Session 2** (2026-03-29) — Foundation build: Next.js, Prisma, schema, seed data
 3. **Session 3** (2026-03-30) — Photo map: Leaflet, EXIF upload, photo/location markers
 4. **Session 4** (2026-03-30) — Timeline map: Google Takeout import, GPS paths, animation, day picker, dark mode
-5. **Session 5** (2026-03-30) — Location pin drop CRUD + gear inventory CRUD (parallel session)
-6. **Session 6** (2026-03-30) — Frontend design system, dark mode, vehicle page, trips page, component library (parallel session)
-7. **Session 6** (2026-03-30) — Project review + planning pause. KB architecture planning (parallel session).
-8. **Session 7** (2026-03-30) — User journey defined via voice interview. Roadmap rewritten.
-9. **Session 8** (2026-03-30) — All branches merged. Style guide updated. App renamed to Outland OS.
-10. **Session 9** (2026-03-30) — Full project audit, weather integration (Open-Meteo), API error handling fixes, smart campsite feature spec added.
+5. **Session 5a** (2026-03-30) — Location pin drop CRUD + gear inventory CRUD
+6. **Session 5b** (2026-03-30) — Knowledge base architecture + corpus (parallel session)
+7. **Session 6a** (2026-03-30) — Frontend design system, vehicle page, trips page, component library (parallel session)
+8. **Session 6b** (2026-03-30) — Project review + planning pause (parallel session)
+9. **Session 7** (2026-03-30) — User journey defined via voice interview. Roadmap rewritten.
+10. **Session 8** (2026-03-30) — All branches merged. Style guide updated. App renamed to Outland OS.
+11. **Session 9** (2026-03-30) — Full project audit, weather integration, API hardening, smart campsite spec.
 
 ## Key Files
 - `TASKS.md` — What's done, what's next, where to start

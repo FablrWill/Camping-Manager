@@ -73,6 +73,7 @@ export default function GearClient({ initialItems }: { initialItems: GearItem[] 
   const [showForm, setShowForm] = useState(false)
   const [deletingItem, setDeletingItem] = useState<GearItem | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
 
   // Filter items
   const filtered = useMemo(() => {
@@ -139,6 +140,7 @@ export default function GearClient({ initialItems }: { initialItems: GearItem[] 
   async function handleDelete() {
     if (!deletingItem) return
     setIsDeleting(true)
+    setDeleteError(null)
 
     try {
       const res = await fetch(`/api/gear/${deletingItem.id}`, { method: 'DELETE' })
@@ -147,7 +149,7 @@ export default function GearClient({ initialItems }: { initialItems: GearItem[] 
       setDeletingItem(null)
     } catch (err) {
       console.error(err)
-      alert('Failed to delete item')
+      setDeleteError('Failed to delete item. Please try again.')
     } finally {
       setIsDeleting(false)
     }
@@ -370,13 +372,18 @@ export default function GearClient({ initialItems }: { initialItems: GearItem[] 
             <h3 className="text-lg font-bold text-stone-900 dark:text-stone-50 mb-2">
               Delete {deletingItem.name}?
             </h3>
-            <p className="text-stone-500 dark:text-stone-400 mb-6">
+            <p className="text-stone-500 dark:text-stone-400 mb-4">
               This will permanently remove this item from your{' '}
               {deletingItem.isWishlist ? 'wish list' : 'gear inventory'}.
             </p>
+            {deleteError && (
+              <p className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30 rounded-lg px-3 py-2 mb-4">
+                {deleteError}
+              </p>
+            )}
             <div className="flex gap-3">
               <button
-                onClick={() => setDeletingItem(null)}
+                onClick={() => { setDeletingItem(null); setDeleteError(null) }}
                 className="flex-1 py-2.5 rounded-lg border border-stone-300 dark:border-stone-600 text-stone-700 dark:text-stone-300 font-medium hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors"
               >
                 Cancel

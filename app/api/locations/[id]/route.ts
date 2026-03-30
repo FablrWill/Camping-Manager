@@ -5,92 +5,107 @@ export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = await params;
-  const location = await prisma.location.findUnique({ where: { id } });
+  try {
+    const { id } = await params;
+    const location = await prisma.location.findUnique({ where: { id } });
 
-  if (!location) {
-    return NextResponse.json({ error: "Location not found" }, { status: 404 });
+    if (!location) {
+      return NextResponse.json({ error: "Location not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({
+      ...location,
+      visitedAt: location.visitedAt?.toISOString() ?? null,
+      createdAt: location.createdAt.toISOString(),
+      updatedAt: location.updatedAt.toISOString(),
+    });
+  } catch (error) {
+    console.error('Failed to fetch location:', error)
+    return NextResponse.json({ error: 'Failed to fetch location' }, { status: 500 })
   }
-
-  return NextResponse.json({
-    ...location,
-    visitedAt: location.visitedAt?.toISOString() ?? null,
-    createdAt: location.createdAt.toISOString(),
-    updatedAt: location.updatedAt.toISOString(),
-  });
 }
 
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = await params;
-  const body = await request.json();
+  try {
+    const { id } = await params;
+    const body = await request.json();
 
-  const existing = await prisma.location.findUnique({ where: { id } });
-  if (!existing) {
-    return NextResponse.json({ error: "Location not found" }, { status: 404 });
+    const existing = await prisma.location.findUnique({ where: { id } });
+    if (!existing) {
+      return NextResponse.json({ error: "Location not found" }, { status: 404 });
+    }
+
+    const location = await prisma.location.update({
+      where: { id },
+      data: {
+        name: body.name ?? existing.name,
+        latitude: body.latitude ?? existing.latitude,
+        longitude: body.longitude ?? existing.longitude,
+        type: body.type !== undefined ? body.type : existing.type,
+        description:
+          body.description !== undefined
+            ? body.description
+            : existing.description,
+        rating: body.rating !== undefined ? body.rating : existing.rating,
+        roadCondition:
+          body.roadCondition !== undefined
+            ? body.roadCondition
+            : existing.roadCondition,
+        clearanceNeeded:
+          body.clearanceNeeded !== undefined
+            ? body.clearanceNeeded
+            : existing.clearanceNeeded,
+        cellSignal:
+          body.cellSignal !== undefined ? body.cellSignal : existing.cellSignal,
+        starlinkSignal:
+          body.starlinkSignal !== undefined
+            ? body.starlinkSignal
+            : existing.starlinkSignal,
+        waterAccess:
+          body.waterAccess !== undefined
+            ? body.waterAccess
+            : existing.waterAccess,
+        visitedAt:
+          body.visitedAt !== undefined
+            ? body.visitedAt
+              ? new Date(body.visitedAt)
+              : null
+            : existing.visitedAt,
+        notes: body.notes !== undefined ? body.notes : existing.notes,
+      },
+    });
+
+    return NextResponse.json({
+      ...location,
+      visitedAt: location.visitedAt?.toISOString() ?? null,
+      createdAt: location.createdAt.toISOString(),
+      updatedAt: location.updatedAt.toISOString(),
+    });
+  } catch (error) {
+    console.error('Failed to update location:', error)
+    return NextResponse.json({ error: 'Failed to update location' }, { status: 500 })
   }
-
-  const location = await prisma.location.update({
-    where: { id },
-    data: {
-      name: body.name ?? existing.name,
-      latitude: body.latitude ?? existing.latitude,
-      longitude: body.longitude ?? existing.longitude,
-      type: body.type !== undefined ? body.type : existing.type,
-      description:
-        body.description !== undefined
-          ? body.description
-          : existing.description,
-      rating: body.rating !== undefined ? body.rating : existing.rating,
-      roadCondition:
-        body.roadCondition !== undefined
-          ? body.roadCondition
-          : existing.roadCondition,
-      clearanceNeeded:
-        body.clearanceNeeded !== undefined
-          ? body.clearanceNeeded
-          : existing.clearanceNeeded,
-      cellSignal:
-        body.cellSignal !== undefined ? body.cellSignal : existing.cellSignal,
-      starlinkSignal:
-        body.starlinkSignal !== undefined
-          ? body.starlinkSignal
-          : existing.starlinkSignal,
-      waterAccess:
-        body.waterAccess !== undefined
-          ? body.waterAccess
-          : existing.waterAccess,
-      visitedAt:
-        body.visitedAt !== undefined
-          ? body.visitedAt
-            ? new Date(body.visitedAt)
-            : null
-          : existing.visitedAt,
-      notes: body.notes !== undefined ? body.notes : existing.notes,
-    },
-  });
-
-  return NextResponse.json({
-    ...location,
-    visitedAt: location.visitedAt?.toISOString() ?? null,
-    createdAt: location.createdAt.toISOString(),
-    updatedAt: location.updatedAt.toISOString(),
-  });
 }
 
 export async function DELETE(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = await params;
+  try {
+    const { id } = await params;
 
-  const existing = await prisma.location.findUnique({ where: { id } });
-  if (!existing) {
-    return NextResponse.json({ error: "Location not found" }, { status: 404 });
+    const existing = await prisma.location.findUnique({ where: { id } });
+    if (!existing) {
+      return NextResponse.json({ error: "Location not found" }, { status: 404 });
+    }
+
+    await prisma.location.delete({ where: { id } });
+    return NextResponse.json({ deleted: true });
+  } catch (error) {
+    console.error('Failed to delete location:', error)
+    return NextResponse.json({ error: 'Failed to delete location' }, { status: 500 })
   }
-
-  await prisma.location.delete({ where: { id } });
-  return NextResponse.json({ deleted: true });
 }

@@ -76,6 +76,7 @@ export default function VehicleClient({ vehicle }: { vehicle: Vehicle }) {
   const [showModForm, setShowModForm] = useState(false)
   const [mods, setMods] = useState(vehicle.mods)
   const [saving, setSaving] = useState(false)
+  const [modError, setModError] = useState<string | null>(null)
 
   const totalModCost = mods.reduce((sum, m) => sum + (m.cost ?? 0), 0)
 
@@ -92,6 +93,7 @@ export default function VehicleClient({ vehicle }: { vehicle: Vehicle }) {
       notes: (form.get('notes') as string) || null,
     }
 
+    setModError(null)
     try {
       const res = await fetch(`/api/vehicle/${vehicle.id}/mods`, {
         method: 'POST',
@@ -104,7 +106,7 @@ export default function VehicleClient({ vehicle }: { vehicle: Vehicle }) {
       setShowModForm(false)
       ;(e.target as HTMLFormElement).reset()
     } catch {
-      alert('Failed to save mod')
+      setModError('Failed to save mod. Please try again.')
     } finally {
       setSaving(false)
     }
@@ -284,10 +286,15 @@ export default function VehicleClient({ vehicle }: { vehicle: Vehicle }) {
                 className="w-full px-3 py-2.5 rounded-lg border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-400 dark:focus:ring-amber-500 resize-none"
               />
             </div>
+            {modError && (
+              <p className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30 rounded-lg px-3 py-2">
+                {modError}
+              </p>
+            )}
             <div className="flex gap-3 pt-1">
               <button
                 type="button"
-                onClick={() => setShowModForm(false)}
+                onClick={() => { setShowModForm(false); setModError(null) }}
                 className="flex-1 py-2.5 rounded-lg border border-stone-300 dark:border-stone-600 text-stone-700 dark:text-stone-300 font-medium hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors"
               >
                 Cancel

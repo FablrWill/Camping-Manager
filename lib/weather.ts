@@ -198,6 +198,10 @@ export async function fetchWeather(
   const data = await res.json()
   const daily = data.daily
 
+  if (!daily?.time || !Array.isArray(daily.time) || daily.time.length === 0) {
+    return { latitude: data.latitude, longitude: data.longitude, elevation: data.elevation ?? 0, days: [], alerts: [] }
+  }
+
   const days: DayForecast[] = daily.time.map((date: string, i: number) => {
     const { label, emoji } = decodeWeatherCode(daily.weather_code[i])
     return {

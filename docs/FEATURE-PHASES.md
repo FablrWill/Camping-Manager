@@ -40,8 +40,8 @@ Every feature mapped to a build phase.
 ### Trip Prep (the core — build next)
 | Feature | Status | Notes |
 |---------|--------|-------|
-| **Trip creation UI** | ❌ Ready | Date range, destination, vehicle, type, notes. Model exists. |
-| **Weather integration** | ❌ Ready | Forecast for trip location + dates. OpenWeatherMap or NOAA. |
+| **Trip creation UI** | ✅ Done | Date range, destination, vehicle, notes. Countdown, active ribbon. |
+| **Weather integration** | ✅ Done | Open-Meteo (free, no key). Auto-fetches for upcoming trips. Camping alerts (rain, cold, wind, UV). |
 | **Claude API: packing list generator** | ❌ Ready | Trip details + gear inventory → smart packing list |
 | **Claude API: meal planning + shopping list** | ❌ Ready | Full meal plan per trip. Home prep vs. camp cooking. |
 | **Power budget calculator** | ❌ Ready | EcoFlow + solar + devices. Weather-adjusted solar estimates. |
