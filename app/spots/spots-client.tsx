@@ -208,7 +208,7 @@ export default function SpotsClient({
   return (
     <div className="flex flex-col" style={{ height: "calc(100vh - 64px)" }}>
       {/* Controls bar */}
-      <div className="flex flex-wrap items-center justify-between px-2 py-2 gap-2 bg-white border-b border-stone-200">
+      <div className="flex flex-wrap items-center justify-between px-2 py-2 gap-2 bg-white dark:bg-stone-900 border-b border-stone-200 dark:border-stone-700">
         {/* Left: layer toggles */}
         <div className="flex gap-1 flex-wrap">
           {([
@@ -222,8 +222,8 @@ export default function SpotsClient({
               onClick={() => toggleLayer(key)}
               className={`px-2.5 py-1 text-xs rounded-full font-medium transition-colors ${
                 layers[key]
-                  ? "bg-stone-800 text-white"
-                  : "bg-stone-200 text-stone-500"
+                  ? "bg-stone-800 text-white dark:bg-stone-200 dark:text-stone-900"
+                  : "bg-stone-200 text-stone-500 dark:bg-stone-700 dark:text-stone-400"
               }`}
             >
               {label}
@@ -234,7 +234,7 @@ export default function SpotsClient({
             className={`px-2.5 py-1 text-xs rounded-full font-medium transition-colors ${
               darkMode
                 ? "bg-indigo-600 text-white"
-                : "bg-stone-200 text-stone-500"
+                : "bg-stone-200 text-stone-500 dark:bg-stone-700 dark:text-stone-400"
             }`}
           >
             🌙
@@ -247,12 +247,12 @@ export default function SpotsClient({
             type="date"
             value={selectedDate}
             onChange={(e) => setSelectedDate(e.target.value)}
-            className="px-2 py-1 text-xs border border-stone-300 rounded-lg bg-white"
+            className="px-2 py-1 text-xs border border-stone-300 dark:border-stone-600 rounded-lg bg-white dark:bg-stone-800 dark:text-stone-100"
           />
           {selectedDate && (
             <button
               onClick={() => setSelectedDate("")}
-              className="px-2 py-1 text-xs bg-stone-200 text-stone-600 rounded-full hover:bg-stone-300"
+              className="px-2 py-1 text-xs bg-stone-200 dark:bg-stone-700 text-stone-600 dark:text-stone-400 rounded-full hover:bg-stone-300 dark:hover:bg-stone-600"
             >
               All time
             </button>
@@ -268,7 +268,7 @@ export default function SpotsClient({
 
       {/* Day summary card */}
       {daySummary && (
-        <div className="mx-2 mt-2 px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-xs text-stone-700 flex flex-wrap gap-x-4 gap-y-1">
+        <div className="mx-2 mt-2 px-3 py-2 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg text-xs text-stone-700 dark:text-stone-300 flex flex-wrap gap-x-4 gap-y-1">
           <span>📅 {new Date(selectedDate + "T12:00:00").toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric", year: "numeric" })}</span>
           {daySummary.hikingKm > 0 && <span>🥾 {daySummary.hikingKm.toFixed(1)}km</span>}
           {daySummary.drivingKm > 0 && <span>🚗 {daySummary.drivingKm.toFixed(1)}km</span>}
@@ -316,7 +316,7 @@ export default function SpotsClient({
 
       {/* Animation controls */}
       {hasTimeline && timelinePoints.length > 1 && (
-        <div className="flex items-center gap-3 px-3 py-2 bg-stone-50 border-t border-stone-200">
+        <div className="flex items-center gap-3 px-3 py-2 bg-stone-50 dark:bg-stone-900 border-t border-stone-200 dark:border-stone-700">
           <button
             onClick={handleAnimate}
             className={`px-3 py-1 text-xs font-medium rounded-full transition-colors ${
@@ -327,7 +327,7 @@ export default function SpotsClient({
           >
             {animating ? "⏸ Stop" : "▶ Animate Path"}
           </button>
-          <div className="flex items-center gap-1 text-xs text-stone-500">
+          <div className="flex items-center gap-1 text-xs text-stone-500 dark:text-stone-400">
             <span>🐢</span>
             <input
               type="range"
@@ -339,10 +339,10 @@ export default function SpotsClient({
               className="w-20 h-1 accent-blue-500"
             />
             <span>🐇</span>
-            <span className="ml-1 text-stone-400">{animSpeed}x</span>
+            <span className="ml-1 text-stone-400 dark:text-stone-500">{animSpeed}x</span>
           </div>
           {animTime && (
-            <span className="text-xs text-stone-600 font-mono">
+            <span className="text-xs text-stone-600 dark:text-stone-400 font-mono">
               {new Date(animTime).toLocaleTimeString("en-US", {
                 hour: "numeric",
                 minute: "2-digit",
@@ -353,7 +353,7 @@ export default function SpotsClient({
       )}
 
       {/* Stats footer */}
-      <div className="flex items-center justify-between px-3 py-2 text-xs text-stone-500 border-t border-stone-200">
+      <div className="flex items-center justify-between px-3 py-2 text-xs text-stone-500 dark:text-stone-400 border-t border-stone-200 dark:border-stone-700">
         <div className="flex gap-3">
           <span>📷 {geoPhotos.length} photos</span>
           {totalPathPts > 0 && <span>🗺️ {totalPathPts.toLocaleString()} pts</span>}

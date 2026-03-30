@@ -1,6 +1,6 @@
 # Outland OS — Task Tracker
 
-> **Last updated:** 2026-03-30 (Session 10 — Gear Recovery + Housekeeping)
+> **Last updated:** 2026-03-30 (Session 11 — Seed Data + Spots Dark Mode)
 > **Start here** if you're picking up after a break.
 > **North star:** `docs/USER-JOURNEY.md` — read this before building anything new.
 
@@ -21,8 +21,8 @@ These are the highest-priority tasks based on the user journey defined in `docs/
 5. **Executive trip prep flow** — Single "prepare this trip" view: weather → packing → meals → checklist. The Wednesday-before-Saturday experience.
 
 ### Housekeeping (do alongside or after)
-- **Seed the dev database** — so dashboard, vehicle, and trips pages show real data
-- **Polish spots page dark mode** — control bar and stats footer still need dark mode classes
+- ~~**Seed the dev database**~~ ✅ Done (Session 11) — 3 mods, 9 gear + 2 wishlist, 4 locations, 4 trips
+- ~~**Polish spots page dark mode**~~ ✅ Done (Session 11) — control bar, toggles, date input, animation strip, stats footer
 
 ---
 
@@ -34,7 +34,7 @@ These are the highest-priority tasks based on the user journey defined in `docs/
 | Database schema (9 models) | ✅ Done | GearItem, Vehicle, VehicleMod, Location, Trip, PackingItem, Photo, TimelinePoint, PlaceVisit, ActivitySegment |
 | Mobile layout shell + nav | ✅ Done | **Redesigned Session 6:** Bottom tab bar (Lucide icons), glassmorphic top header, dark mode toggle |
 | Home page dashboard | ✅ Done | **Redesigned Session 6:** Live stats (gear count, weight, spots, photos), recent gear, quick actions, wishlist callout |
-| Seed data | ✅ Done | Genesis spot (Linville Gorge) + Santa Fe vehicle |
+| Seed data | ✅ Done | **Expanded Session 11:** 3 mods, 9 gear + 2 wishlist, 4 locations (Linville, Beech Gap, Rough Ridge, Davidson River), 4 trips |
 | **Gear inventory CRUD** | ✅ Done | List, add, edit, delete, wishlist toggle, category filters, search. **Dark mode added Session 6.** |
 | **Vehicle profile page** | ✅ Done | **Built Session 6:** Hero card with gradient, specs list, expandable cargo dimensions, mods CRUD with cost tracking |
 | **Style guide + design system** | ✅ Done | **Session 6:** docs/STYLE-GUIDE.md, CSS custom properties, component library (Button, Card, Badge, Input, Modal, Chip, EmptyState, PageHeader, StatCard) |
