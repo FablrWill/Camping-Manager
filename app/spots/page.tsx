@@ -8,15 +8,6 @@ export default async function SpotsPage() {
         latitude: { not: null },
         longitude: { not: null },
       },
-      select: {
-        id: true,
-        name: true,
-        latitude: true,
-        longitude: true,
-        type: true,
-        rating: true,
-        description: true,
-      },
     }),
     prisma.photo.findMany({
       select: {
@@ -37,13 +28,16 @@ export default async function SpotsPage() {
     }),
   ]);
 
-  // Filter out null coords and cast
+  // Filter out null coords, cast, and serialize dates
   const validLocations = locations
     .filter((l) => l.latitude != null && l.longitude != null)
     .map((l) => ({
       ...l,
       latitude: l.latitude as number,
       longitude: l.longitude as number,
+      visitedAt: l.visitedAt?.toISOString() ?? null,
+      createdAt: l.createdAt.toISOString(),
+      updatedAt: l.updatedAt.toISOString(),
     }));
 
   const serializedPhotos = photos.map((p) => ({

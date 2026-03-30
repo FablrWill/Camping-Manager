@@ -86,6 +86,13 @@ export interface MapLocation {
   type?: string | null;
   rating?: number | null;
   description?: string | null;
+  roadCondition?: string | null;
+  clearanceNeeded?: string | null;
+  cellSignal?: string | null;
+  starlinkSignal?: string | null;
+  waterAccess?: boolean;
+  visitedAt?: string | null;
+  notes?: string | null;
 }
 
 export interface MapPhoto {
@@ -159,6 +166,7 @@ interface SpotMapProps {
   layers: Layers;
   darkMode: boolean;
   onMapClick?: (lat: number, lng: number) => void;
+  onLocationEdit?: (locationId: string) => void;
   onAnimationTime?: (time: string | null) => void;
 }
 
@@ -172,6 +180,7 @@ const SpotMap = forwardRef<SpotMapHandle, SpotMapProps>(function SpotMap(
     layers,
     darkMode,
     onMapClick,
+    onLocationEdit,
     onAnimationTime,
   },
   ref
@@ -328,18 +337,33 @@ const SpotMap = forwardRef<SpotMapHandle, SpotMapProps>(function SpotMap(
         ? loc.type.replace("_", " ").replace(/\b\w/g, (c) => c.toUpperCase())
         : "";
 
-      marker.bindPopup(`
+      const popup = L.popup().setContent(`
         <div style="min-width:180px;font-family:system-ui;">
           <h3 style="margin:0 0 4px;font-size:15px;font-weight:600;">${loc.name}</h3>
           ${typeLabel ? `<p style="margin:2px 0;color:#666;font-size:12px;">${typeLabel}</p>` : ""}
           ${stars ? `<p style="margin:2px 0;">${stars}</p>` : ""}
           ${loc.description ? `<p style="margin:4px 0;font-size:13px;color:#444;">${loc.description.slice(0, 120)}${loc.description.length > 120 ? "..." : ""}</p>` : ""}
+          ${onLocationEdit ? `<button data-edit-location="${loc.id}" style="margin-top:6px;padding:4px 12px;background:#d97706;color:white;border:none;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;">Edit</button>` : ""}
         </div>
       `);
 
+      marker.bindPopup(popup);
+
+      if (onLocationEdit) {
+        marker.on("popupopen", () => {
+          const btn = document.querySelector(`[data-edit-location="${loc.id}"]`);
+          if (btn) {
+            btn.addEventListener("click", () => {
+              map.closePopup();
+              onLocationEdit(loc.id);
+            });
+          }
+        });
+      }
+
       locationLayersRef.current.addLayer(marker);
     });
-  }, [locations, layers.spots, ready]);
+  }, [locations, layers.spots, ready, onLocationEdit]);
 
   // Update activity segment paths
   useEffect(() => {
