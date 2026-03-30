@@ -64,6 +64,7 @@ These are the highest-priority tasks ready to build now. Pick one and go.
 |------|--------|-------|
 | Gear photo identification | ❌ Planned | Snap a photo → Claude identifies brand/type/specs |
 | User guide finder | ❌ Planned | Auto-search web for product manuals, save PDF |
+| **Nearby trails & recreation API** | ❌ Planned | Query OSM Overpass, NPS, Recreation.gov, USDA Forest Service for trails, campsites, and points of interest near a location. Display as map layers. |
 | AI trip planning agent | ❌ Planned | Campsite discovery, research, recommendations |
 | Smart packing lists | ❌ Planned | Based on trip type, duration, weather, gear |
 | Meal planning | ❌ Planned | Recipes, shopping list, home prep vs camp cooking |

@@ -3,6 +3,8 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
 import PhotoUpload from "@/components/PhotoUpload";
+import LocationForm from "@/components/LocationForm";
+import type { LocationData } from "@/components/LocationForm";
 import type {
   MapLocation,
   MapPhoto,
@@ -32,9 +34,15 @@ export default function SpotsClient({
   photos: initialPhotos,
 }: SpotsClientProps) {
   const mapRef = useRef<SpotMapHandle>(null);
+  const [locations, setLocations] = useState(initialLocations);
   const [showUpload, setShowUpload] = useState(false);
   const [photos, setPhotos] = useState(initialPhotos);
   const [darkMode, setDarkMode] = useState(false);
+
+  // Location form state
+  const [showLocationForm, setShowLocationForm] = useState(false);
+  const [pendingCoords, setPendingCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [editingLocation, setEditingLocation] = useState<LocationData | null>(null);
   const [selectedDate, setSelectedDate] = useState<string>("");
   const [animating, setAnimating] = useState(false);
   const [animSpeed, setAnimSpeed] = useState(1);
@@ -90,6 +98,69 @@ export default function SpotsClient({
       setPhotos(data);
     }
     setShowUpload(false);
+  }, []);
+
+  const refreshLocations = useCallback(async () => {
+    const res = await fetch("/api/locations");
+    if (res.ok) {
+      const data = await res.json();
+      // Filter to only locations with coordinates for the map
+      setLocations(
+        data.filter((l: MapLocation) => l.latitude != null && l.longitude != null)
+      );
+    }
+  }, []);
+
+  const handleMapClick = useCallback((lat: number, lng: number) => {
+    setPendingCoords({ lat, lng });
+    setEditingLocation(null);
+    setShowLocationForm(true);
+  }, []);
+
+  const handleLocationEdit = useCallback(
+    (locationId: string) => {
+      const loc = locations.find((l) => l.id === locationId);
+      if (!loc) return;
+      setPendingCoords({ lat: loc.latitude, lng: loc.longitude });
+      setEditingLocation({
+        id: loc.id,
+        name: loc.name,
+        latitude: loc.latitude,
+        longitude: loc.longitude,
+        type: loc.type ?? "",
+        description: loc.description ?? "",
+        rating: loc.rating ?? null,
+        roadCondition: loc.roadCondition ?? "",
+        clearanceNeeded: loc.clearanceNeeded ?? "",
+        cellSignal: loc.cellSignal ?? "",
+        starlinkSignal: loc.starlinkSignal ?? "",
+        waterAccess: loc.waterAccess ?? false,
+        visitedAt: loc.visitedAt ?? "",
+        notes: loc.notes ?? "",
+      });
+      setShowLocationForm(true);
+    },
+    [locations]
+  );
+
+  const handleLocationSaved = useCallback(async () => {
+    await refreshLocations();
+    setShowLocationForm(false);
+    setPendingCoords(null);
+    setEditingLocation(null);
+  }, [refreshLocations]);
+
+  const handleLocationDeleted = useCallback(async () => {
+    await refreshLocations();
+    setShowLocationForm(false);
+    setPendingCoords(null);
+    setEditingLocation(null);
+  }, [refreshLocations]);
+
+  const handleLocationCancel = useCallback(() => {
+    setShowLocationForm(false);
+    setPendingCoords(null);
+    setEditingLocation(null);
   }, []);
 
   // Filter photos by date
@@ -220,15 +291,27 @@ export default function SpotsClient({
       <div className="flex-1 min-h-0 rounded-lg overflow-hidden mx-1 my-1">
         <SpotMap
           ref={mapRef}
-          locations={initialLocations}
+          locations={locations}
           photos={filteredPhotos}
           timelinePoints={timelinePoints}
           placeVisits={placeVisits}
           activitySegments={activitySegments}
           layers={layers}
           darkMode={darkMode}
+          onMapClick={handleMapClick}
+          onLocationEdit={handleLocationEdit}
           onAnimationTime={setAnimTime}
         />
+        {showLocationForm && pendingCoords && (
+          <LocationForm
+            lat={pendingCoords.lat}
+            lng={pendingCoords.lng}
+            existing={editingLocation}
+            onSave={handleLocationSaved}
+            onCancel={handleLocationCancel}
+            onDelete={editingLocation ? handleLocationDeleted : undefined}
+          />
+        )}
       </div>
 
       {/* Animation controls */}
