@@ -28,12 +28,12 @@ export default function RootLayout({
               <Link href="/" className="hover:text-amber-300 transition-colors">Home</Link>
               <Link href="/gear" className="hover:text-amber-300 transition-colors">Gear</Link>
               <Link href="/vehicle" className="hover:text-amber-300 transition-colors">Vehicle</Link>
-              <Link href="/locations" className="hover:text-amber-300 transition-colors">Spots</Link>
+              <Link href="/spots" className="hover:text-amber-300 transition-colors">Spots</Link>
               <Link href="/trips" className="hover:text-amber-300 transition-colors">Trips</Link>
             </div>
           </nav>
         </header>
-        <main className="max-w-4xl mx-auto px-4 py-6">
+        <main>
           {children}
         </main>
       </body>

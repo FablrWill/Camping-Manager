@@ -82,7 +82,29 @@ model Location {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  trips Trip[]
+  trips  Trip[]
+  photos Photo[]
+}
+
+model Photo {
+  id         String    @id @default(cuid())
+  title      String
+  latitude   Float
+  longitude  Float
+  altitude   Float?
+  takenAt    DateTime?
+  imagePath  String    // /photos/[cuid].jpg (compressed copy)
+  locationId String?
+  tripId     String?
+  notes      String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  location Location? @relation(fields: [locationId], references: [id])
+  trip     Trip?     @relation(fields: [tripId], references: [id])
+
+  @@index([locationId])
+  @@index([tripId])
 }
 
 model Trip {
@@ -97,9 +119,10 @@ model Trip {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  location    Location? @relation(fields: [locationId], references: [id])
-  vehicle     Vehicle?  @relation(fields: [vehicleId], references: [id])
+  location     Location? @relation(fields: [locationId], references: [id])
+  vehicle      Vehicle?  @relation(fields: [vehicleId], references: [id])
   packingItems PackingItem[]
+  photos       Photo[]
 }
 
 model PackingItem {

@@ -4,7 +4,7 @@ Every feature mapped to a build phase. This is the organized version of IDEAS.md
 
 ---
 
-## Phase 1 — Foundation ← CURRENT
+## Phase 1 — Foundation
 *Goal: App skeleton, basic data management, mobile-friendly shell*
 
 | Feature | Status | Notes |
@@ -20,15 +20,18 @@ Every feature mapped to a build phase. This is the organized version of IDEAS.md
 
 ---
 
-## Phase 2 — Locations & Photos
+## Phase 2 — Locations & Photos ← CURRENT
 *Goal: Save spots, upload photos, see everything on a map*
 
 | Feature | Status | Notes |
 |---------|--------|-------|
-| Location save/edit with map pin | ❌ | Needs Google Maps API key |
-| Photo upload with EXIF extraction | ❌ | Auto-extract GPS, date from photos |
+| Map view of all saved locations | ✅ Done | Leaflet/OpenStreetMap, no API key needed |
+| Photo upload with EXIF extraction | ✅ Done | GPS auto-extracted, compressed to ~100KB |
+| Photo map pins with popups | ✅ Done | Click to see photo, date, altitude |
+| Marker clustering | ✅ Done | Handles large photo sets cleanly |
+| Filter bar (photos/spots/all) | ✅ Done | |
+| Location save/edit with map pin | ❌ | Drop a pin to save a new spot |
 | Auto-tag photos to trips/locations | ❌ | Match via EXIF GPS + date |
-| Map view of all saved locations | ❌ | Pins with filters by type, rating, season |
 | Basic trip creation | ❌ | Dates, location, vehicle, notes |
 | Personal signal map | ❌ | Log cell + Starlink quality per spot over time |
 | Seasonal ratings | ❌ | Rate spots differently by time of year |

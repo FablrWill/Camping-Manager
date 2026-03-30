@@ -54,3 +54,37 @@ All notable changes to Camp Commander are tracked here.
 - Phase 1 foundation complete
 - Next: gear inventory CRUD, vehicle profile page
 - See `docs/STATUS.md` for pickup instructions
+
+## 2026-03-30 — Session 3: Photo Map
+
+### Created
+- `Photo` model in Prisma schema (latitude, longitude, altitude, takenAt, imagePath)
+- `/spots` page — full-screen Leaflet/OpenStreetMap map, no Google API key required
+- `components/SpotMap.tsx` — Leaflet map with custom pins, clustering, click popups
+- `components/PhotoUpload.tsx` — drag-drop / camera roll upload with GPS feedback
+- `app/api/photos/upload/route.ts` — EXIF GPS extraction + sharp compression (~100KB)
+- `app/api/photos/route.ts` — list photos for client-side refresh
+- `lib/exif.ts` — EXIF GPS parser utility
+- Leaflet/OpenStreetMap markers: amber camera pins (photos) + green location pins (spots)
+
+### Changed
+- `app/layout.tsx` — Spots nav link updated to `/spots`, removed max-width from main (map needs full width)
+- `app/page.tsx` — Spots card link updated to `/spots`, added container padding directly
+
+### Dependencies Added
+- `leaflet`, `react-leaflet`, `@types/leaflet` — map rendering
+- `react-leaflet-cluster` — marker clustering
+- `exif-parser` — EXIF GPS extraction
+- `sharp` — image compression
+
+### Decisions Made
+- **Leaflet/OpenStreetMap** over Google Maps — free, no API key, no rate limits; sufficient for personal use
+- **Store compressed copy locally** (~100KB JPEG) — avoids Google Photos link complexity, works offline
+- **No Google Takeout pipeline** — direct phone upload is simpler; can add bulk import later if needed
+- **Server component for data, client component for map** — Leaflet needs browser `window`, handled via dynamic import
+
+### Status at End of Session
+- Phase 2 photo map complete
+- Linville Gorge pin visible on load; upload geotagged photos to add pins
+- Next: location save/edit with pin drop, gear inventory CRUD
+- See `docs/STATUS.md` for pickup instructions
