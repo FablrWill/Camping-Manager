@@ -2,6 +2,34 @@
 
 All notable changes to Outland OS are tracked here.
 
+## 2026-03-30 — Session 9: Smart Campsite Feature Planning
+
+### No Code Written — Feature Design & Documentation
+
+### What We Did
+- Scoped the Smart Campsite feature with Will through conversation
+- Established architecture: Home Assistant as control plane, app adds camping context on top
+- Broke feature into subfeatures and assigned to phase/status
+- Added Smart Campsite spec to `docs/FEATURE-PHASES.md` and `TASKS.md`
+
+### Key Decisions
+- Smart devices extend the existing gear inventory model (not a separate feature) — `isSmartDevice` flag + connection metadata fields, all nullable
+- HA bridge (live device status) is blocked until Will retrieves HA hardware from Durham (~mid-April 2026)
+- Device registry + gear UI + campsite setup checklist can be built now
+- Context7 to pull current HA API docs at build time for the bridge feature
+- App never talks to Blink directly — goes through HA integration
+
+### Files Updated
+- `docs/FEATURE-PHASES.md` — Smart Campsite section added to Phase 3
+- `TASKS.md` — Smart Campsite subtasks added to Phase 3
+
+### Status at End of Session
+- Branch `claude/hungry-fermi` pushed to GitHub
+- Next: build Phase 2 trip prep features (weather, packing list, meals)
+- Smart Campsite device registry ready to build whenever
+
+---
+
 ## 2026-03-30 — Session 8: Merge All Branches + App Rename
 
 ### No Code Written — Integration & Housekeeping
