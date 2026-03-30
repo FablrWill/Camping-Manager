@@ -1,6 +1,6 @@
 # Outland OS — Task Tracker
 
-> **Last updated:** 2026-03-30 (Session 12 — Meal Planning Plan)
+> **Last updated:** 2026-03-30 (Session 14 — Power Budget Calculator)
 > **Start here** if you're picking up after a break.
 > **North star:** `docs/USER-JOURNEY.md` — read this before building anything new.
 
@@ -16,7 +16,7 @@ These are the highest-priority tasks based on the user journey defined in `docs/
 
 3. **Meal planning with shopping list** — Implementation plan complete (`docs/plans/meal-planning.md`). Claude generates a full meal plan for the trip duration. Shopping list organized by store section. Home prep vs. camp cooking split. Ready to build.
 
-4. **Power budget calculator** — EcoFlow + solar + devices. Weather-adjusted solar estimates.
+4. ~~**Power budget calculator**~~ ✅ Done (Session 14) — Planning mode + live mode. Weather-adjusted solar, charge reminders, day-by-day battery trajectory, live status with alerts. Photo scanning + HA auto-update planned (Phase 3).
 
 5. **Executive trip prep flow** — Single "prepare this trip" view: weather → packing → meals → checklist. The Wednesday-before-Saturday experience.
 
