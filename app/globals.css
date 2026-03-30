@@ -1,1 +1,167 @@
 @import "tailwindcss";
+
+/*
+ * Camp Commander Design Tokens
+ * Stone/amber palette with full dark mode support.
+ * Uses CSS custom properties so Tailwind utilities + dark: variant both work.
+ */
+
+:root {
+  /* Backgrounds */
+  --color-bg-primary: #fafaf9;      /* stone-50 */
+  --color-bg-surface: #ffffff;       /* white */
+  --color-bg-surface-alt: #f5f5f4;  /* stone-100 */
+  --color-bg-nav: #292524;           /* stone-800 */
+  --color-bg-overlay: rgba(0, 0, 0, 0.5);
+
+  /* Text */
+  --color-text-primary: #1c1917;     /* stone-900 */
+  --color-text-secondary: #78716c;   /* stone-500 */
+  --color-text-tertiary: #a8a29e;    /* stone-400 */
+  --color-text-inverse: #fafaf9;     /* stone-50 */
+
+  /* Accent (amber) */
+  --color-accent: #d97706;           /* amber-600 */
+  --color-accent-hover: #b45309;     /* amber-700 */
+  --color-accent-soft: #fffbeb;      /* amber-50 */
+  --color-accent-text: #ffffff;
+
+  /* Borders */
+  --color-border: #e7e5e4;           /* stone-200 */
+  --color-border-hover: #fbbf24;     /* amber-400 */
+  --color-border-focus: #fbbf24;     /* amber-400 */
+
+  /* Status */
+  --color-danger: #dc2626;           /* red-600 */
+  --color-success: #059669;          /* emerald-600 */
+  --color-warning: #d97706;          /* amber-600 */
+
+  /* Elevation */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-normal: 200ms ease;
+  --transition-slow: 300ms ease;
+
+  /* Radii */
+  --radius-sm: 0.375rem;   /* 6px */
+  --radius-md: 0.5rem;     /* 8px */
+  --radius-lg: 0.75rem;    /* 12px */
+  --radius-xl: 1rem;       /* 16px */
+  --radius-2xl: 1.5rem;    /* 24px */
+  --radius-full: 9999px;
+}
+
+.dark {
+  --color-bg-primary: #0c0a09;      /* stone-950 */
+  --color-bg-surface: #1c1917;       /* stone-900 */
+  --color-bg-surface-alt: #292524;   /* stone-800 */
+  --color-bg-nav: #1c1917;           /* stone-900 */
+  --color-bg-overlay: rgba(0, 0, 0, 0.7);
+
+  --color-text-primary: #fafaf9;     /* stone-50 */
+  --color-text-secondary: #a8a29e;   /* stone-400 */
+  --color-text-tertiary: #78716c;    /* stone-500 */
+  --color-text-inverse: #1c1917;     /* stone-900 */
+
+  --color-accent: #f59e0b;           /* amber-500 */
+  --color-accent-hover: #fbbf24;     /* amber-400 */
+  --color-accent-soft: rgba(245, 158, 11, 0.1);
+  --color-accent-text: #1c1917;      /* stone-900 */
+
+  --color-border: #44403c;           /* stone-700 */
+  --color-border-hover: #f59e0b;     /* amber-500 */
+  --color-border-focus: #f59e0b;     /* amber-500 */
+
+  --color-danger: #ef4444;           /* red-500 */
+  --color-success: #10b981;          /* emerald-500 */
+  --color-warning: #f59e0b;          /* amber-500 */
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+}
+
+/* Base styles */
+body {
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Safe area padding for iPhone notch/home indicator */
+@supports (padding: env(safe-area-inset-bottom)) {
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* Scrollbar styling for dark mode */
+.dark ::-webkit-scrollbar {
+  width: 6px;
+}
+.dark ::-webkit-scrollbar-track {
+  background: #292524;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #57534e;
+  border-radius: 3px;
+}
+
+/* Hide scrollbar on horizontal chip scrollers */
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Skeleton loading pulse */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--color-bg-surface-alt) 25%,
+    var(--color-border) 50%,
+    var(--color-bg-surface-alt) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-pulse {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Bottom sheet slide-up animation */
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out;
+}
+
+/* Fade in for overlays */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.2s ease-out;
+}

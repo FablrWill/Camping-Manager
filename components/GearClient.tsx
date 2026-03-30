@@ -167,25 +167,25 @@ export default function GearClient({ initialItems }: { initialItems: GearItem[] 
     <div className="max-w-4xl mx-auto px-4 py-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-bold">
+        <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-50 tracking-tight">
           {showWishlist ? 'Wish List' : 'My Gear'}
         </h1>
         <button
           onClick={openAdd}
-          className="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+          className="bg-amber-600 hover:bg-amber-700 dark:bg-amber-500 dark:hover:bg-amber-400 text-white dark:text-stone-900 px-4 py-2 rounded-lg font-medium transition-colors"
         >
           + Add {showWishlist ? 'Wish' : 'Gear'}
         </button>
       </div>
 
       {/* Owned / Wishlist toggle */}
-      <div className="flex gap-1 mb-4 bg-stone-200 rounded-lg p-1">
+      <div className="flex gap-1 mb-4 bg-stone-200 dark:bg-stone-800 rounded-lg p-1">
         <button
           onClick={() => setShowWishlist(false)}
           className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
             !showWishlist
-              ? 'bg-white text-stone-900 shadow-sm'
-              : 'text-stone-500 hover:text-stone-700'
+              ? 'bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-50 shadow-sm'
+              : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-300'
           }`}
         >
           Owned ({ownedCount})
@@ -194,8 +194,8 @@ export default function GearClient({ initialItems }: { initialItems: GearItem[] 
           onClick={() => setShowWishlist(true)}
           className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
             showWishlist
-              ? 'bg-white text-stone-900 shadow-sm'
-              : 'text-stone-500 hover:text-stone-700'
+              ? 'bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-50 shadow-sm'
+              : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-300'
           }`}
         >
           Wish List ({wishlistCount})
@@ -208,17 +208,17 @@ export default function GearClient({ initialItems }: { initialItems: GearItem[] 
         placeholder="Search gear..."
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
-        className="w-full px-3 py-2 mb-4 rounded-lg border border-stone-300 bg-white text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-400"
+        className="w-full px-3 py-2 mb-4 rounded-lg border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-400 dark:focus:ring-amber-500"
       />
 
       {/* Category filter chips */}
-      <div className="flex gap-2 mb-6 overflow-x-auto pb-1 -mx-4 px-4">
+      <div className="flex gap-2 mb-6 overflow-x-auto hide-scrollbar pb-1 -mx-4 px-4">
         <button
           onClick={() => setActiveCategory(null)}
           className={`shrink-0 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
             !activeCategory
-              ? 'bg-stone-800 text-white'
-              : 'bg-stone-200 text-stone-600 hover:bg-stone-300'
+              ? 'bg-stone-800 text-white dark:bg-stone-200 dark:text-stone-900'
+              : 'bg-stone-200 text-stone-600 hover:bg-stone-300 dark:bg-stone-700 dark:text-stone-400 dark:hover:bg-stone-600'
           }`}
         >
           All
@@ -236,8 +236,8 @@ export default function GearClient({ initialItems }: { initialItems: GearItem[] 
               }
               className={`shrink-0 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
                 activeCategory === cat.value
-                  ? 'bg-stone-800 text-white'
-                  : 'bg-stone-200 text-stone-600 hover:bg-stone-300'
+                  ? 'bg-stone-800 text-white dark:bg-stone-200 dark:text-stone-900'
+                  : 'bg-stone-200 text-stone-600 hover:bg-stone-300 dark:bg-stone-700 dark:text-stone-400 dark:hover:bg-stone-600'
               }`}
             >
               {cat.emoji} {cat.label} ({count})
@@ -248,9 +248,9 @@ export default function GearClient({ initialItems }: { initialItems: GearItem[] 
 
       {/* Gear list grouped by category */}
       {grouped.length === 0 ? (
-        <div className="text-center py-16 text-stone-400">
+        <div className="text-center py-16">
           <p className="text-4xl mb-3">{showWishlist ? '🎁' : '🎒'}</p>
-          <p className="text-lg font-medium">
+          <p className="text-lg font-medium text-stone-400 dark:text-stone-500">
             {searchQuery
               ? 'No items match your search'
               : showWishlist
@@ -261,7 +261,7 @@ export default function GearClient({ initialItems }: { initialItems: GearItem[] 
             {!searchQuery && (
               <button
                 onClick={openAdd}
-                className="text-amber-600 hover:text-amber-700 font-medium"
+                className="text-amber-600 hover:text-amber-700 dark:text-amber-500 dark:hover:text-amber-400 font-medium"
               >
                 Add your first {showWishlist ? 'wish list item' : 'piece of gear'}
               </button>
@@ -274,7 +274,7 @@ export default function GearClient({ initialItems }: { initialItems: GearItem[] 
             <div key={category}>
               {/* Category header (only if "All" is selected) */}
               {!activeCategory && (
-                <h2 className="text-sm font-semibold text-stone-500 uppercase tracking-wider mb-2">
+                <h2 className="text-sm font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider mb-2">
                   {getCategoryEmoji(category)} {getCategoryLabel(category)} ({categoryItems.length})
                 </h2>
               )}
@@ -283,12 +283,12 @@ export default function GearClient({ initialItems }: { initialItems: GearItem[] 
                   <button
                     key={item.id}
                     onClick={() => openEdit(item)}
-                    className="w-full text-left bg-white rounded-xl border border-stone-200 hover:border-amber-400 p-4 transition-colors"
+                    className="w-full text-left bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-700 hover:border-amber-400 dark:hover:border-amber-500 p-4 transition-colors"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 mb-1">
-                          <span className="font-semibold text-stone-900 truncate">
+                          <span className="font-semibold text-stone-900 dark:text-stone-50 truncate">
                             {item.name}
                           </span>
                           {item.condition && (
@@ -299,20 +299,20 @@ export default function GearClient({ initialItems }: { initialItems: GearItem[] 
                             </span>
                           )}
                         </div>
-                        <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-sm text-stone-500">
+                        <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-sm text-stone-500 dark:text-stone-400">
                           {item.brand && <span>{item.brand}</span>}
                           {item.weight && <span>{item.weight} lb</span>}
                           {item.storageLocation && (
                             <span>📍 {item.storageLocation}</span>
                           )}
                           {item.price && (
-                            <span className={showWishlist ? 'font-medium text-stone-700' : ''}>
+                            <span className={showWishlist ? 'font-medium text-stone-700 dark:text-stone-300' : ''}>
                               ${item.price.toFixed(2)}
                             </span>
                           )}
                         </div>
                         {item.notes && (
-                          <p className="text-sm text-stone-400 mt-1 line-clamp-1">
+                          <p className="text-sm text-stone-400 dark:text-stone-500 mt-1 line-clamp-1">
                             {item.notes}
                           </p>
                         )}
@@ -334,7 +334,7 @@ export default function GearClient({ initialItems }: { initialItems: GearItem[] 
 
       {/* Summary footer */}
       {filtered.length > 0 && (
-        <div className="mt-8 text-center text-sm text-stone-400">
+        <div className="mt-8 text-center text-sm text-stone-400 dark:text-stone-500">
           {filtered.length} item{filtered.length !== 1 ? 's' : ''}
           {items.some((i) => i.weight && !i.isWishlist) && !showWishlist && (
             <>
@@ -365,19 +365,19 @@ export default function GearClient({ initialItems }: { initialItems: GearItem[] 
 
       {/* Delete confirmation */}
       {deletingItem && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-end sm:items-center justify-center p-4">
-          <div className="bg-white rounded-2xl w-full max-w-sm p-6 shadow-xl">
-            <h3 className="text-lg font-bold text-stone-900 mb-2">
+        <div className="fixed inset-0 z-50 bg-black/50 dark:bg-black/70 flex items-end sm:items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white dark:bg-stone-900 rounded-2xl w-full max-w-sm p-6 shadow-xl animate-slide-up">
+            <h3 className="text-lg font-bold text-stone-900 dark:text-stone-50 mb-2">
               Delete {deletingItem.name}?
             </h3>
-            <p className="text-stone-500 mb-6">
+            <p className="text-stone-500 dark:text-stone-400 mb-6">
               This will permanently remove this item from your{' '}
               {deletingItem.isWishlist ? 'wish list' : 'gear inventory'}.
             </p>
             <div className="flex gap-3">
               <button
                 onClick={() => setDeletingItem(null)}
-                className="flex-1 py-2.5 rounded-lg border border-stone-300 text-stone-700 font-medium hover:bg-stone-50 transition-colors"
+                className="flex-1 py-2.5 rounded-lg border border-stone-300 dark:border-stone-600 text-stone-700 dark:text-stone-300 font-medium hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors"
               >
                 Cancel
               </button>

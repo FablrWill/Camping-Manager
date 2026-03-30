@@ -1,16 +1,26 @@
 import type { Metadata, Viewport } from "next";
-import Link from "next/link";
 import "./globals.css";
+import AppShell from "@/components/AppShell";
 
 export const metadata: Metadata = {
   title: "Camp Commander",
   description: "Personal car camping assistant and travel guide",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Camp Commander",
+  },
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#0c0a09" },
+  ],
 };
 
 export default function RootLayout({
@@ -19,23 +29,26 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className="bg-stone-50 text-stone-900 min-h-screen">
-        <header className="sticky top-0 z-50 bg-stone-800 text-stone-50 px-4 py-3 shadow-md">
-          <nav className="max-w-4xl mx-auto flex items-center justify-between">
-            <h1 className="text-lg font-bold tracking-tight">Camp Commander</h1>
-            <div className="flex gap-4 text-sm">
-              <Link href="/" className="hover:text-amber-300 transition-colors">Home</Link>
-              <Link href="/gear" className="hover:text-amber-300 transition-colors">Gear</Link>
-              <Link href="/vehicle" className="hover:text-amber-300 transition-colors">Vehicle</Link>
-              <Link href="/spots" className="hover:text-amber-300 transition-colors">Spots</Link>
-              <Link href="/trips" className="hover:text-amber-300 transition-colors">Trips</Link>
-            </div>
-          </nav>
-        </header>
-        <main>
-          {children}
-        </main>
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        {/* Prevent flash of wrong theme */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var theme = localStorage.getItem('cc-theme');
+                  if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                    document.documentElement.classList.add('dark');
+                  }
+                } catch(e) {}
+              })();
+            `,
+          }}
+        />
+      </head>
+      <body className="bg-stone-50 dark:bg-stone-950 text-stone-900 dark:text-stone-50 min-h-screen antialiased">
+        <AppShell>{children}</AppShell>
       </body>
     </html>
   );
