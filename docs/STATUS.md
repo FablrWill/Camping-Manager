@@ -1,7 +1,7 @@
 # Project Status — Outland OS
 
 ## Quick Pickup
-> **Last session:** 2026-03-30 (Session 9)
+> **Last session:** 2026-03-30 (Session 11)
 > **Current phase:** Phase 2 — Trip Prep (the core loop)
 > **App name:** Outland OS
 > **Task tracker:** See `TASKS.md` in project root — start there.

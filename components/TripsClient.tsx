@@ -11,6 +11,7 @@ import {
   ChevronRight,
 } from 'lucide-react'
 import WeatherCard from '@/components/WeatherCard'
+import PackingList from '@/components/PackingList'
 import type { DayForecast, WeatherAlert } from '@/lib/weather'
 
 interface TripData {
@@ -255,6 +256,13 @@ export default function TripsClient({ initialTrips, locations, vehicles }: Trips
                 loading={weatherLoading[trip.id] ?? false}
                 error={weatherErrors[trip.id] ?? null}
               />
+            </div>
+          )}
+
+          {/* Packing list for upcoming trips */}
+          {!isPast && (
+            <div className="mt-3">
+              <PackingList tripId={trip.id} tripName={trip.name} />
             </div>
           )}
         </div>

@@ -1,6 +1,6 @@
 # Outland OS — Task Tracker
 
-> **Last updated:** 2026-03-30 (Session 10 — Gear Recovery + Housekeeping)
+> **Last updated:** 2026-03-30 (Session 11 — Claude API Packing List Generator)
 > **Start here** if you're picking up after a break.
 > **North star:** `docs/USER-JOURNEY.md` — read this before building anything new.
 
@@ -12,7 +12,7 @@ These are the highest-priority tasks based on the user journey defined in `docs/
 
 1. ~~**Weather integration**~~ ✅ Done (Session 9) — Open-Meteo, no API key. Auto-fetches for upcoming trips. Camping-relevant alerts (rain, cold, wind, UV).
 
-2. **Claude API integration + packing list generator** — First AI feature. Pass trip details + gear inventory + weather to Claude → smart packing list. Claude API key configured.
+2. ~~**Claude API integration + packing list generator**~~ ✅ Done (Session 11) — First AI feature. Anthropic SDK installed. Claude generates categorized packing list from trip details + gear inventory + weather. Editable checklist with progress bar. "Generate with Claude" CTA on upcoming trip cards.
 
 3. **Meal planning with shopping list** — Claude generates a full meal plan for the trip duration. Shopping list organized by store section. Home prep vs. camp cooking split.
 
