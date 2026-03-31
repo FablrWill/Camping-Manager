@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 1: Validation** - Test and harden all existing AI features before building new ones
 - [x] **Phase 2: Executive Trip Prep** - Unify weather, packing, meals, and power into a single "am I ready?" view (completed 2026-03-30)
 - [ ] **Phase 3: Knowledge Base** - Build and validate NC camping RAG corpus with hybrid retrieval
-- [ ] **Phase 4: Chat Agent** - Messenger-style AI assistant with full trip context and tool use
+- [x] **Phase 4: Chat Agent** - Messenger-style AI assistant with full trip context and tool use (completed 2026-03-31)
 - [ ] **Phase 5: Intelligence Features** - AI trip recommendations and voice trip debrief
 
 ## Phase Details
@@ -75,7 +75,7 @@ Plans:
 **Plans**: 4 plans
 Plans:
 - [x] 04-01-PLAN.md — Foundation: bug fixes (packing upsert, trip CRUD), Conversation/Message/AgentMemory schema, agent tool registry, system prompt, Chat nav tab
-- [ ] 04-02-PLAN.md — Chat API: streaming SSE endpoint, tool-calling loop, conversation persistence, context windowing
+- [x] 04-02-PLAN.md — Chat API: streaming SSE endpoint, tool-calling loop, conversation persistence, context windowing
 - [ ] 04-03-PLAN.md — Chat UI: messenger-style page, streaming bubbles, empty state, context-aware shortcut button
 - [ ] 04-04-PLAN.md — Agent memory: preference extraction, memory upsert tool, memory injection into context
 **UI hint**: yes
@@ -103,5 +103,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 1. Validation | 0/TBD | Not started | - |
 | 2. Executive Trip Prep | 2/2 | Complete   | 2026-03-30 |
 | 3. Knowledge Base | 2/4 | In Progress|  |
-| 4. Chat Agent | 1/4 | In Progress | - |
+| 4. Chat Agent | 2/1 | Complete   | 2026-03-31 |
 | 5. Intelligence Features | 0/TBD | Not started | - |
