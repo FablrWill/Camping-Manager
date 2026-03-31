@@ -22,9 +22,9 @@
 - [x] **RAG-04**: Corpus sources are defined and documented (dispersed camping spots, permit databases, seasonal closures, personal trip notes, etc.)
 
 ### Chat Interface
-- [ ] **CHAT-01**: User can interact with a messenger-style chat agent that has access to the knowledge base, gear inventory, trip data, and saved locations
+- [x] **CHAT-01**: User can interact with a messenger-style chat agent that has access to the knowledge base, gear inventory, trip data, and saved locations
 - [ ] **CHAT-02**: Chat agent can answer questions like "what do I need for a cold-weather trip?" using RAG context + user's gear
-- [ ] **CHAT-03**: Chat uses streaming responses (SSE) for responsive feel on mobile
+- [x] **CHAT-03**: Chat uses streaming responses (SSE) for responsive feel on mobile
 - [ ] **CHAT-04**: Chat agent uses tool-use pattern — can query gear, trips, locations, weather, and knowledge base as tools
 
 ### AI Trip Recommendations
