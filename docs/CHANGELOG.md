@@ -8,6 +8,7 @@ All notable changes to Outland OS are tracked here.
 
 | Session | Date | Summary |
 |---------|------|---------|
+| [17](changelog/session-17.md) | 2026-03-31 | Phase 3 Knowledge Base execution — RAG corpus, hybrid search, PDF/web parsers |
 | [16](changelog/session-16.md) | 2026-03-30 | Phase 3 planning complete + README, architecture, start-here docs |
 | [15](changelog/session-15.md) | 2026-03-30 | Branch cleanup, merge all features, gear consolidation, doc audit |
 | [14](changelog/session-14.md) | 2026-03-30 | Power Budget Calculator — planning + live mode |
