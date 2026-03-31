@@ -16,7 +16,7 @@
 - [x] **PREP-04**: User can access the executive prep flow from the trip card on the home page
 
 ### Knowledge Base (RAG)
-- [ ] **RAG-01**: System has a curated NC camping knowledge corpus ingested with vector embeddings and full-text search indexes
+- [x] **RAG-01**: System has a curated NC camping knowledge corpus ingested with vector embeddings and full-text search indexes
 - [ ] **RAG-02**: User can search the knowledge base and get relevant results about NC camping spots, regulations, seasonal info, and local knowledge
 - [ ] **RAG-03**: Knowledge base search uses hybrid retrieval (vector similarity + keyword matching) for best results
 - [ ] **RAG-04**: Corpus sources are defined and documented (dispersed camping spots, permit databases, seasonal closures, personal trip notes, etc.)
