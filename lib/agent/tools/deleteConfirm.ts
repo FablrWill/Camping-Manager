@@ -34,15 +34,19 @@ export async function executeDeleteConfirm(input: {
   itemName: string;
   description: string;
 }): Promise<string> {
-  // This tool NEVER deletes. It returns a structured JSON signal that the
-  // ChatClient detects and renders as an inline confirmation card.
-  // The user's reply ("yes, delete it" / "keep it") triggers actual deletion
-  // in the next conversation turn if confirmed.
-  return JSON.stringify({
-    action: 'confirm_delete',
-    itemType: input.itemType,
-    itemId: input.itemId,
-    itemName: input.itemName,
-    description: input.description,
-  });
+  try {
+    // This tool NEVER deletes. It returns a structured JSON signal that the
+    // ChatClient detects and renders as an inline confirmation card.
+    // The user's reply ("yes, delete it" / "keep it") triggers actual deletion
+    // in the next conversation turn if confirmed.
+    return JSON.stringify({
+      action: 'confirm_delete',
+      itemType: input.itemType,
+      itemId: input.itemId,
+      itemName: input.itemName,
+      description: input.description,
+    });
+  } catch (error) {
+    return `Error: Failed to create delete confirmation — ${(error as Error).message}`;
+  }
 }
