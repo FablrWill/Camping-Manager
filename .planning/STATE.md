@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 03-03-PLAN.md — hybrid search checkpoint pending
-last_updated: "2026-03-31T04:46:50.498Z"
+stopped_at: Completed 03-04-PLAN.md
+last_updated: "2026-03-31T04:24:56.019Z"
 last_activity: 2026-03-31
 progress:
   total_phases: 5
@@ -55,7 +55,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 02-executive-trip-prep P01 | 18 | 2 tasks | 9 files |
 | Phase 02-executive-trip-prep P02 | 3 | 3 tasks | 6 files |
 | Phase 03 P02 | 25 | 2 tasks | 7 files |
-| Phase 03 P03 | 37 | 2 tasks | 4 files |
+| Phase 03 P04 | 15 | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -74,8 +74,8 @@ Recent decisions affecting current work:
 - [Phase 02-executive-trip-prep]: Ready Checklist derives from prepState.sections computed status, not the PREP_SECTIONS registry config
 - [Phase 03]: Move vec0 table creation from migration to runtime init (Prisma SQLite lacks sqlite-vec)
 - [Phase 03]: Use BigInt for vec0 rowid in better-sqlite3, batch size 10 with 21s delay for Voyage free tier
-- [Phase 03]: vec0 queries use AND k = ? constraint instead of LIMIT for knn search
-- [Phase 03]: RRF k=60 for hybrid merge — standard value from original paper, most queries tie on small corpus
+- [Phase 03]: Used NPS Blue Ridge Parkway URL instead of USFS (USFS returns 403 Forbidden)
+- [Phase 03]: Parser module pattern: lib/rag/parsers/{format}.ts exports async chunk function
 
 ### Pending Todos
 
@@ -90,6 +90,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-31T04:46:50.494Z
-Stopped at: Completed 03-03-PLAN.md — hybrid search checkpoint pending
+Last session: 2026-03-31T04:24:56.016Z
+Stopped at: Completed 03-04-PLAN.md
 Resume file: None

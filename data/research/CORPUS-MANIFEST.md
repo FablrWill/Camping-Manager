@@ -1,7 +1,7 @@
 # Knowledge Base Corpus Manifest
 
 Documents the sources ingested into the Outland OS camping knowledge base.
-Updated: 2026-03-30
+Updated: 2026-03-31
 
 ## Sources
 
@@ -23,26 +23,37 @@ with `topic`, `region`, `category`, `confidence` fields.
 
 ### External Sources (D-02)
 
-Priority external sources for ingestion:
-- US Forest Service (USFS) -- Pisgah and Nantahala National Forest campground data
-- Recreation.gov -- Federal campground reservations, permit info, seasonal closures
-- NC State Parks -- State park campground details, regulations
+Ingested external sources from government recreation sites:
 
-These are ingested via PDF parsing and web scraping (see Plan 04 for pipeline support).
+| Source | Type | URL/Path | Status |
+|--------|------|----------|--------|
+| NPS Blue Ridge Parkway Camping | Web (scraped) | https://www.nps.gov/blri/planyourvisit/camping.htm | Ingested |
+
+Additional sources can be added:
+- **PDFs:** Download and place in `data/external/` directory
+- **URLs:** Add to the `EXTERNAL_URLS` array in `tools/ingest/run-ingest.ts`
+- Then run: `npx tsx tools/ingest/run-ingest.ts --clear`
+
+Priority sources for future ingestion:
+- Recreation.gov — Federal campground reservations, permit info, seasonal closures
+- NC State Parks — State park campground details, regulations
+- USFS Pisgah/Nantahala — National forest campground data (note: USFS site blocks automated requests, may need PDF download)
 
 ### Ingestion Workflow (D-04)
 
 Manual re-ingest: Run `npx tsx tools/ingest/run-ingest.ts --clear` when:
 - Research files are updated with new information
 - New source files are added to `data/research/`
-- External sources are downloaded and placed in the corpus directory
+- External PDFs are placed in `data/external/`
+- External URLs are added to `EXTERNAL_URLS` in `run-ingest.ts`
 
 No scheduled background jobs. Single-user tool -- manual is appropriate.
 
 ## Statistics
 
 *Updated after each ingest run:*
-- Total files: 7 (seed corpus)
-- Total chunks: 237 (as of 2026-03-31 initial ingest)
+- Seed corpus: 7 markdown files
+- External sources: 1 web page (NPS Blue Ridge Parkway)
+- Total files: 8 sources
 - Embedding model: voyage-3-lite (512 dimensions)
 - Chunk size target: 256-512 tokens

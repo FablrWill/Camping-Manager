@@ -6,11 +6,13 @@ import { RawChunk, ChunkMetadata } from './types';
 import { prisma } from '@/lib/db';
 import { getVecDb } from './db';
 import { embedTexts } from './embed';
+import { chunkPdf } from './parsers/pdf';
+import { chunkWebPage } from './parsers/web';
 
 /**
  * Estimate token count for a text string using GPT tokenizer.
  */
-function estimateTokens(text: string): number {
+export function estimateTokens(text: string): number {
   return encode(text).length;
 }
 
@@ -145,19 +147,27 @@ export function chunkMarkdown(fileContent: string, filePath: string): RawChunk[]
 
 /**
  * Read a file and chunk it based on file type.
- * Currently only supports .md files. PDF and web page support planned for Plan 04.
+ * Supports: .md (markdown), .pdf (PDF text extraction), http/https URLs (web scraping).
  */
-export function ingestFile(filePath: string): RawChunk[] {
-  const ext = extname(filePath).toLowerCase();
-
-  if (ext !== '.md') {
-    throw new Error(
-      `Unsupported file type: ${ext}. Only .md files are supported in this plan. PDF and web page support added in Plan 04.`
-    );
+export async function ingestFile(filePath: string): Promise<RawChunk[]> {
+  // URL detection — route to web scraper
+  if (filePath.startsWith('http://') || filePath.startsWith('https://')) {
+    return chunkWebPage(filePath);
   }
 
-  const content = readFileSync(filePath, 'utf-8');
-  return chunkMarkdown(content, filePath);
+  const ext = extname(filePath).toLowerCase();
+  switch (ext) {
+    case '.md': {
+      const content = readFileSync(filePath, 'utf-8');
+      return chunkMarkdown(content, filePath);
+    }
+    case '.pdf':
+      return chunkPdf(filePath);
+    default:
+      throw new Error(
+        `Unsupported file type: .${ext}. Supported: .md, .pdf, or http/https URL`
+      );
+  }
 }
 
 /**

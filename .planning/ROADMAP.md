@@ -60,8 +60,8 @@ Plans:
 Plans:
 - [x] 03-01-PLAN.md — Database foundation: KnowledgeChunk Prisma model, FTS5 virtual table with triggers, vec0 table, better-sqlite3 connection module
 - [x] 03-02-PLAN.md — Ingest pipeline: markdown chunking, Voyage-3-lite embeddings, ingest CLI script, corpus manifest
-- [x] 03-03-PLAN.md — Hybrid search (FTS5 + vec0 via RRF), search API route, validation script, retrieval quality review
-- [ ] 03-04-PLAN.md — PDF parsing + web scraping: extend ingest pipeline for external sources (USFS, recreation.gov) per D-02/D-03
+- [ ] 03-03-PLAN.md — Hybrid search (FTS5 + vec0 via RRF), search API route, validation script, retrieval quality review
+- [x] 03-04-PLAN.md — PDF parsing + web scraping: extend ingest pipeline for external sources (USFS, recreation.gov) per D-02/D-03
 
 ### Phase 4: Chat Agent
 **Goal**: Users can have a messenger-style conversation with an AI assistant that has real access to their gear, trips, locations, weather, and camping knowledge
@@ -97,6 +97,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 |-------|----------------|--------|-----------|
 | 1. Validation | 0/TBD | Not started | - |
 | 2. Executive Trip Prep | 2/2 | Complete   | 2026-03-30 |
-| 3. Knowledge Base | 3/4 | In Progress|  |
+| 3. Knowledge Base | 2/4 | In Progress|  |
 | 4. Chat Agent | 0/TBD | Not started | - |
 | 5. Intelligence Features | 0/TBD | Not started | - |
