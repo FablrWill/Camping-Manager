@@ -13,21 +13,14 @@ export async function PATCH(request: NextRequest) {
       )
     }
 
-    const item = await prisma.packingItem.update({
+    const item = await prisma.packingItem.upsert({
       where: { tripId_gearId: { tripId, gearId } },
-      data: { packed },
+      update: { packed },
+      create: { tripId, gearId, packed },
     })
 
     return NextResponse.json(item)
   } catch (error) {
-    // Prisma P2025 = record not found
-    if (
-      error instanceof Error &&
-      'code' in error &&
-      (error as { code: string }).code === 'P2025'
-    ) {
-      return NextResponse.json({ error: 'Packing item not found' }, { status: 404 })
-    }
     console.error('Failed to update packing item:', error)
     return NextResponse.json({ error: 'Failed to update packing item' }, { status: 500 })
   }

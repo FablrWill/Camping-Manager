@@ -2,14 +2,14 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Backpack, Car, MapPin, Tent } from 'lucide-react'
+import { Home, Backpack, Car, MapPin, MessageCircle } from 'lucide-react'
 
 const NAV_ITEMS = [
   { href: '/', label: 'Home', icon: Home },
   { href: '/gear', label: 'Gear', icon: Backpack },
   { href: '/vehicle', label: 'Vehicle', icon: Car },
   { href: '/spots', label: 'Spots', icon: MapPin },
-  { href: '/trips', label: 'Trips', icon: Tent },
+  { href: '/chat', label: 'Chat', icon: MessageCircle },
 ] as const
 
 export default function BottomNav() {

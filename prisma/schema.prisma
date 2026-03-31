@@ -221,3 +221,37 @@ model KnowledgeChunk {
 
   @@index([source])
 }
+
+model Conversation {
+  id        String    @id @default(cuid())
+  title     String?   // auto-set from first user message, editable
+  context   String?   // JSON: page context passed when opening chat from other pages
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  messages  Message[]
+}
+
+model Message {
+  id             String   @id @default(cuid())
+  conversationId String
+  role           String   // "user" | "assistant" | "tool_result"
+  content        String   // text content or JSON for tool calls/results
+  toolCallId     String?  // populated for tool_result role messages
+  toolName       String?  // name of tool called, if role is tool_result
+  createdAt      DateTime @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+  @@index([createdAt])
+}
+
+model AgentMemory {
+  id        String   @id @default(cuid())
+  key       String   @unique  // e.g. "camping_style", "dietary_restrictions", "preferred_regions"
+  value     String   // plain text or JSON value
+  updatedAt DateTime @updatedAt
+
+  @@index([key])
+}
