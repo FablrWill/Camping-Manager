@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 04-chat-agent 04-03-PLAN.md
-last_updated: "2026-03-31T22:20:32.374Z"
+stopped_at: "Paused at 04-04 checkpoint:human-verify (Tasks 1-2 complete)"
+last_updated: "2026-03-31T22:33:51.656Z"
 last_activity: 2026-03-31
 progress:
   total_phases: 5
   completed_phases: 2
   total_plans: 10
-  completed_plans: 8
+  completed_plans: 9
   percent: 25
 ---
 
@@ -83,6 +83,8 @@ Recent decisions affecting current work:
 - [Phase 04]: AgentMemory uses unique key constraint — upsert pattern for preference updates
 - [Phase 04-chat-agent]: Streaming cursor appended at render (streamingText + '|') disappears automatically on message_complete without extra state
 - [Phase 04-chat-agent]: deleteConfirm uses natural-language chat replies rather than special API — simpler and agent handles the action
+- [Phase 04-chat-agent]: Wrapped plain Tool schemas as BetaRunnableTool with run()+parse() in chat route — tools in registry are Tool[], not BetaRunnableTool[]
+- [Phase 04-chat-agent]: BottomNav final config: Home/Gear/Spots/Trips/Chat — Vehicle removed, Trips restored from Plan 01 changes
 
 ### Pending Todos
 
@@ -97,6 +99,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-31T22:20:32.370Z
-Stopped at: Completed 04-chat-agent 04-03-PLAN.md
+Last session: 2026-03-31T22:33:39.844Z
+Stopped at: Paused at 04-04 checkpoint:human-verify (Tasks 1-2 complete)
 Resume file: None
