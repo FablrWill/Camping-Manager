@@ -1,8 +1,8 @@
 # Project Status — Outland OS
 
 ## Quick Pickup
-> **Last session:** 2026-03-30 (Session 14)
-> **Current phase:** Phase 2 — Trip Prep (the core loop)
+> **Last session:** 2026-03-31 (Session 17)
+> **Current phase:** Phase 4 — Chat Agent (Phase 3 Knowledge Base complete)
 > **App name:** Outland OS
 > **Task tracker:** See `TASKS.md` in project root — start there.
 > **North star:** See `docs/USER-JOURNEY.md` — defines what to build and why.
@@ -11,7 +11,8 @@
 - **Claude API key** ✅ — Configured in `.env` (2026-03-30). AI features unblocked.
 - **Weather API key** — NOT NEEDED. Switched to Open-Meteo (free, no key). See `docs/AUDIT.md`.
 - **HA hardware** — In Durham. Will picking up ~mid-April 2026. Blocks HA bridge feature only.
-- No blockers for Phase 2 "Up Next" tasks.
+- **Voyage AI API key** ✅ — Configured in `.env` (2026-03-31). Knowledge base embeddings working.
+- No blockers for Phase 4.
 
 ## Session History
 - **Session 1** (2026-03-29) — Project kickoff, planning, docs
@@ -32,6 +33,8 @@
 - **Session 13** (2026-03-30) — Meal planning full implementation: AI generator, API route, MealPlan UI component.
 - **Session 14** (2026-03-30) — Power budget calculator — planning + live mode.
 - **Session 15** (2026-03-30) — Branch cleanup, merge all features, consolidate gear seed data (33 items).
+- **Session 16** (2026-03-30) — Phase 3 planning complete + README, architecture, start-here docs.
+- **Session 17** (2026-03-31) — Phase 3 Knowledge Base execution: RAG corpus, hybrid search, PDF/web parsers, search API.
 
 ## Key Files
 - `TASKS.md` — What's done, what's next, where to start

@@ -1,6 +1,6 @@
 # Outland OS — Task Tracker
 
-> **Last updated:** 2026-03-30 (Session 14 — Power Budget Calculator)
+> **Last updated:** 2026-03-31 (Session 17 — Phase 3 Knowledge Base Execution)
 > **Start here** if you're picking up after a break.
 > **North star:** `docs/USER-JOURNEY.md` — read this before building anything new.
 
@@ -86,7 +86,7 @@ These are the highest-priority tasks based on the user journey defined in `docs/
 | AI trip recommendations | ❌ Planned | "Find me a spot within 2hrs of Asheville this weekend" |
 | Voice Ghostwriter / trip debrief | ❌ Planned | Voice-first journaling on the drive home |
 | Chat interface | ❌ Planned | Messenger-style interaction with the agent |
-| NC camping knowledge base (RAG) | ❌ Planned | Architecture planned. Corpus ready in data/. Vectra + FTS5 hybrid retrieval. |
+| NC camping knowledge base (RAG) | ✅ Done | Session 17 — 237 chunks from 7 research files + external sources. Hybrid search (FTS5 + vec0/RRF). voyage-3-lite 512-dim embeddings. PDF + web parsers. POST /api/knowledge/search endpoint. |
 | Gear photo identification | ❌ Planned | Snap a photo → Claude identifies brand/type/specs |
 | Safety float plan | ❌ Planned | Send trip summary to emergency contacts |
 | Nearby trails & recreation API | ❌ Planned | OSM, NPS, Recreation.gov near a saved location |
@@ -105,11 +105,23 @@ These are the highest-priority tasks based on the user journey defined in `docs/
 
 ---
 
+## Known Bugs / Gaps (from GPT code review, 2026-03-31)
+
+| Issue | Severity | Notes |
+|-------|----------|-------|
+| Dashboard trips stat hardcoded to 0 | Low | `DashboardClient.tsx:163` — needs `tripCount` from server props |
+| Packing item checkbox uses `update` not `upsert` | Medium | `api/packing-list/items/route.ts:16` — will 404 if PackingItem rows don't exist yet. Should upsert on `(tripId, gearId)` |
+| No per-trip update/delete route | Medium | `app/api/trips/[id]/route.ts` doesn't exist — can't edit or delete a trip |
+| Missing `placeholder.jpg` in public/ | Low | `api/import/photos/route.ts:87` references `/photos/placeholder.jpg` — broken images for imported photos without files |
+| Prep power section uses heuristic, not computed budget | Low | Prep API power status doesn't call `calculatePowerBudget` — can misrepresent readiness |
+
+---
+
 ## Open Questions / Blockers
 
 - **Claude API key** ✅ — Configured in `.env` (2026-03-30). Packing list, meal planning, and enrich_screenshots.py are unblocked.
 - **Weather API key** — NOT NEEDED. Switched to Open-Meteo (free, no key required). See `docs/AUDIT.md`.
-- **OpenAI API key** — Needed for KB embeddings (Phase 3, not urgent)
+- **Voyage AI API key** ✅ — Configured in `.env` (2026-03-31). Used for knowledge base embeddings (voyage-3-lite).
 - **Speech API** — Web Speech API (free) vs Whisper (better) for Voice Ghostwriter (Phase 3)
 
 ---

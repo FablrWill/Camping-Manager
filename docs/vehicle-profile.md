@@ -39,6 +39,17 @@
 - **Starlink Mini** — internet connectivity for remote work from campsite
 - Hybrid 12V system available as backup
 
+## Stealth Camping System (v6)
+
+A modular, sensor-driven environmental control system for overnight car camping. Full spec in `docs/santa-fe-camping-system.md`.
+
+- **Airflow:** Intake via cracked window + screen → cabin → exhaust through moonroof (fan-assisted)
+- **Sensors:** 3-point temp/humidity (outside, lower cabin, upper cabin) feeding automation rules
+- **Fans:** Intake fan + exhaust fan, controlled by fan controller powered from portable power bank
+- **HVAC:** Vehicle AC/heat via hybrid Ready Mode as backup climate control
+- **Moonroof:** Mesh + fan insert for exhaust ventilation
+- **Insulation panels:** Custom-cut with vent zones for windows/cargo area
+
 ## Notes
 - Hybrid system means access to 12V and potentially auxiliary power without running the engine
 - "Ready Mode" can idle the engine to charge battery / run climate — useful for staying warm
