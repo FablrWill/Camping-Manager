@@ -72,7 +72,12 @@ Plans:
   2. Agent can answer "what do I need for a cold-weather trip?" by referencing the user's actual gear inventory and RAG knowledge base
   3. Agent can query gear, trips, saved locations, weather, and the knowledge base as distinct tools within a single response
   4. Agent has a hard cap on tool call iterations (5-10 per message) that prevents runaway API cost
-**Plans**: TBD
+**Plans**: 4 plans
+Plans:
+- [x] 04-01-PLAN.md — Foundation: bug fixes (packing upsert, trip CRUD), Conversation/Message/AgentMemory schema, agent tool registry, system prompt, Chat nav tab
+- [ ] 04-02-PLAN.md — Chat API: streaming SSE endpoint, tool-calling loop, conversation persistence, context windowing
+- [ ] 04-03-PLAN.md — Chat UI: messenger-style page, streaming bubbles, empty state, context-aware shortcut button
+- [ ] 04-04-PLAN.md — Agent memory: preference extraction, memory upsert tool, memory injection into context
 **UI hint**: yes
 
 ### Phase 5: Intelligence Features
@@ -98,5 +103,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 1. Validation | 0/TBD | Not started | - |
 | 2. Executive Trip Prep | 2/2 | Complete   | 2026-03-30 |
 | 3. Knowledge Base | 2/4 | In Progress|  |
-| 4. Chat Agent | 0/TBD | Not started | - |
+| 4. Chat Agent | 1/4 | In Progress | - |
 | 5. Intelligence Features | 0/TBD | Not started | - |
