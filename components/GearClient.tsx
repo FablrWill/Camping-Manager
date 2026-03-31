@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import GearForm from './GearForm'
+import ChatContextButton from '@/components/ChatContextButton'
 
 interface GearItem {
   id: string
@@ -351,6 +352,11 @@ export default function GearClient({ initialItems }: { initialItems: GearItem[] 
             </>
           )}
         </div>
+      )}
+
+      {/* Context-aware FAB — show when editing a gear item */}
+      {editingItem && (
+        <ChatContextButton contextType="gear" contextId={editingItem.id} />
       )}
 
       {/* Add/Edit form modal */}

@@ -11,6 +11,7 @@ import {
   ChevronRight,
 } from 'lucide-react'
 import Link from 'next/link'
+import ChatContextButton from '@/components/ChatContextButton'
 import WeatherCard from '@/components/WeatherCard'
 import PackingList from '@/components/PackingList'
 import MealPlan from '@/components/MealPlan'
@@ -49,6 +50,7 @@ type TripCategory = 'upcoming' | 'past'
 
 export default function TripsClient({ initialTrips, locations, vehicles }: TripsClientProps) {
   const [trips, setTrips] = useState(initialTrips)
+  const [selectedTripId, setSelectedTripId] = useState<string | null>(null)
   const [showForm, setShowForm] = useState(false)
   const [saving, setSaving] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
@@ -143,9 +145,13 @@ export default function TripsClient({ initialTrips, locations, vehicles }: Trips
     const days = daysUntil(trip.startDate)
     const isPast = trip.endDate < now
     const isActive = trip.startDate <= now && trip.endDate >= now
+    const isSelected = selectedTripId === trip.id
 
     return (
-      <div className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-700 overflow-hidden hover:border-amber-400 dark:hover:border-amber-500 transition-colors">
+      <div
+        className={`bg-white dark:bg-stone-900 rounded-xl border overflow-hidden transition-colors cursor-pointer ${isSelected ? 'border-amber-400 dark:border-amber-500' : 'border-stone-200 dark:border-stone-700 hover:border-amber-400 dark:hover:border-amber-500'}`}
+        onClick={() => setSelectedTripId(isSelected ? null : trip.id)}
+      >
         {/* Status ribbon */}
         {isActive && (
           <div className="bg-emerald-600 dark:bg-emerald-500 text-white dark:text-stone-900 text-xs font-medium px-3 py-1 text-center">
@@ -438,6 +444,11 @@ export default function TripsClient({ initialTrips, locations, vehicles }: Trips
             </section>
           )}
         </>
+      )}
+
+      {/* Context-aware FAB — show when a trip is selected */}
+      {selectedTripId && (
+        <ChatContextButton contextType="trip" contextId={selectedTripId} />
       )}
     </div>
   )

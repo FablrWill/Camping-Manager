@@ -10,6 +10,7 @@ const PAGE_TITLES: Record<string, string> = {
   '/vehicle': 'Vehicle',
   '/spots': 'Spots',
   '/trips': 'Trips',
+  '/chat': 'Chat',
 }
 
 export default function TopHeader() {

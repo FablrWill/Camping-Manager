@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
 import PhotoUpload from "@/components/PhotoUpload";
 import LocationForm from "@/components/LocationForm";
+import ChatContextButton from "@/components/ChatContextButton";
 import type { LocationData } from "@/components/LocationForm";
 import type {
   MapLocation,
@@ -366,6 +367,11 @@ export default function SpotsClient({
           </span>
         )}
       </div>
+
+      {/* Context-aware FAB — show when editing an existing spot */}
+      {editingLocation?.id && (
+        <ChatContextButton contextType="spot" contextId={editingLocation.id} />
+      )}
     </div>
   );
 }
