@@ -35,7 +35,7 @@ function ftsSearch(query: string, topK: number): RankedResult[] {
   const rows = db
     .prepare(
       `
-    SELECT kc.id, kc.title, kc.content, kc.metadata
+    SELECT kc.id, kc.title, kc.content, kc.source, kc.metadata
     FROM knowledge_chunks_fts fts
     JOIN KnowledgeChunk kc ON kc.id = fts.id
     WHERE knowledge_chunks_fts MATCH ?
@@ -54,6 +54,7 @@ function ftsSearch(query: string, topK: number): RankedResult[] {
     id: r.id,
     title: r.title,
     content: r.content,
+    source: (r as { source?: string }).source ?? '',
     metadata: r.metadata,
     rank: idx + 1,
   }));
@@ -68,7 +69,7 @@ function vecSearch(queryEmbedding: Float32Array, topK: number): RankedResult[] {
   const rows = db
     .prepare(
       `
-    SELECT kc.id, kc.title, kc.content, kc.metadata, vt.distance
+    SELECT kc.id, kc.title, kc.content, kc.source, kc.metadata, vt.distance
     FROM vec_knowledge_chunks vt
     JOIN KnowledgeChunk kc ON kc.rowid = vt.rowid
     WHERE vt.embedding MATCH ?
@@ -88,6 +89,7 @@ function vecSearch(queryEmbedding: Float32Array, topK: number): RankedResult[] {
     id: r.id,
     title: r.title,
     content: r.content,
+    source: (r as { source?: string }).source ?? '',
     metadata: r.metadata,
     rank: idx + 1,
   }));
@@ -137,7 +139,7 @@ function mergeRRF(
       id,
       title: data.title,
       content: data.content,
-      source: metadata.topic ?? data.title, // Use source from parsed metadata
+      source: data.source,
       metadata,
       score,
     };
@@ -185,7 +187,7 @@ export async function vectorOnlySearch(
       id: r.id,
       title: r.title,
       content: r.content,
-      source: metadata.topic ?? r.title,
+      source: r.source,
       metadata,
       score: 1 / (60 + r.rank),
     };

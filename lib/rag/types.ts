@@ -45,6 +45,7 @@ export interface RankedResult {
   id: string;
   title: string;
   content: string;
+  source: string;
   metadata: string; // JSON string
   rank: number; // 1-based position
 }
