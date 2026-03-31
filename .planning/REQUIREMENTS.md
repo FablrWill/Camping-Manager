@@ -23,9 +23,9 @@
 
 ### Chat Interface
 - [x] **CHAT-01**: User can interact with a messenger-style chat agent that has access to the knowledge base, gear inventory, trip data, and saved locations
-- [ ] **CHAT-02**: Chat agent can answer questions like "what do I need for a cold-weather trip?" using RAG context + user's gear
+- [x] **CHAT-02**: Chat agent can answer questions like "what do I need for a cold-weather trip?" using RAG context + user's gear
 - [x] **CHAT-03**: Chat uses streaming responses (SSE) for responsive feel on mobile
-- [ ] **CHAT-04**: Chat agent uses tool-use pattern — can query gear, trips, locations, weather, and knowledge base as tools
+- [x] **CHAT-04**: Chat agent uses tool-use pattern — can query gear, trips, locations, weather, and knowledge base as tools
 
 ### AI Trip Recommendations
 - [ ] **REC-01**: User can ask "find me a camping spot" with constraints (distance from Asheville, dates, amenities, weather preferences)
