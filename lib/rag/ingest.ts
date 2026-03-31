@@ -168,7 +168,8 @@ export function ingestFile(filePath: string): RawChunk[] {
 export async function ingestChunks(
   chunks: RawChunk[]
 ): Promise<{ inserted: number }> {
-  const BATCH_SIZE = 20;
+  // Use smaller batches to stay under 10K TPM rate limit on free tier
+  const BATCH_SIZE = 10;
   let totalInserted = 0;
 
   for (let i = 0; i < chunks.length; i += BATCH_SIZE) {
@@ -202,18 +203,20 @@ export async function ingestChunks(
         .get(row.id) as { rowid: number };
 
       // Insert embedding into vec0 virtual table
+      // vec0 requires BigInt for rowid with better-sqlite3
       vecDb
         .prepare(
           'INSERT INTO vec_knowledge_chunks(rowid, embedding) VALUES (?, ?)'
         )
-        .run(rowIdResult.rowid, Buffer.from(embedding.buffer));
+        .run(BigInt(rowIdResult.rowid), Buffer.from(embedding.buffer));
 
       totalInserted++;
     }
 
     // Rate limit delay between batches
+    // Voyage free tier: 3 RPM, so wait 21s between requests to stay safe
     if (i + BATCH_SIZE < chunks.length) {
-      await new Promise((r) => setTimeout(r, 100));
+      await new Promise((r) => setTimeout(r, 21000));
     }
   }
 

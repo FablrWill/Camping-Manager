@@ -1,7 +1,25 @@
+import { resolve, dirname, join } from 'path';
 import Database from 'better-sqlite3';
 import * as sqliteVec from 'sqlite-vec';
 
 let vecDb: Database.Database | null = null;
+
+/**
+ * Resolve the DATABASE_URL to an absolute path.
+ * Prisma resolves `file:` paths relative to the schema file location (prisma/),
+ * so we replicate that behavior for better-sqlite3.
+ */
+function resolveDbPath(): string {
+  const dbUrl = process.env.DATABASE_URL ?? 'file:./prisma/dev.db';
+  const relativePath = dbUrl.replace(/^file:/, '');
+
+  // If it's already absolute, use it directly
+  if (relativePath.startsWith('/')) return relativePath;
+
+  // Prisma resolves relative paths from the schema directory (prisma/)
+  const schemaDir = resolve(process.cwd(), 'prisma');
+  return join(schemaDir, relativePath);
+}
 
 /**
  * Get a better-sqlite3 connection with sqlite-vec extension loaded.
@@ -10,8 +28,7 @@ let vecDb: Database.Database | null = null;
  */
 export function getVecDb(): Database.Database {
   if (!vecDb) {
-    const dbUrl = process.env.DATABASE_URL ?? 'file:./prisma/dev.db';
-    const dbPath = dbUrl.replace('file:', '');
+    const dbPath = resolveDbPath();
     vecDb = new Database(dbPath);
     vecDb.pragma('journal_mode = WAL');
     sqliteVec.load(vecDb);
