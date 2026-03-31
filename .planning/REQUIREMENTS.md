@@ -17,8 +17,8 @@
 
 ### Knowledge Base (RAG)
 - [x] **RAG-01**: System has a curated NC camping knowledge corpus ingested with vector embeddings and full-text search indexes
-- [ ] **RAG-02**: User can search the knowledge base and get relevant results about NC camping spots, regulations, seasonal info, and local knowledge
-- [ ] **RAG-03**: Knowledge base search uses hybrid retrieval (vector similarity + keyword matching) for best results
+- [x] **RAG-02**: User can search the knowledge base and get relevant results about NC camping spots, regulations, seasonal info, and local knowledge
+- [x] **RAG-03**: Knowledge base search uses hybrid retrieval (vector similarity + keyword matching) for best results
 - [x] **RAG-04**: Corpus sources are defined and documented (dispersed camping spots, permit databases, seasonal closures, personal trip notes, etc.)
 
 ### Chat Interface
