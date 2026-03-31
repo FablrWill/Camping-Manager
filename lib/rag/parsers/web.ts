@@ -28,11 +28,14 @@ export async function chunkWebPage(url: string): Promise<RawChunk[]> {
   const html = await response.text();
   const $ = cheerio.load(html);
 
-  // Extract page title
-  const pageTitle = $('h1').first().text().trim() || $('title').text().trim() || url;
+  // Extract page title from <title> tag first (before removing elements)
+  const metaTitle = $('title').text().trim();
 
   // Remove non-content elements
   $('script, style, nav, footer, header, .sidebar, #menu, .nav, .footer, .header, iframe, noscript').remove();
+
+  // Extract page title — use <title> or first h1 after cleanup
+  const pageTitle = metaTitle || $('h1').first().text().trim() || url;
 
   // Extract main content — prefer semantic content elements, fallback to body
   let textContent = '';
