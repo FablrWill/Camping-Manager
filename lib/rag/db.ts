@@ -15,6 +15,12 @@ export function getVecDb(): Database.Database {
     vecDb = new Database(dbPath);
     vecDb.pragma('journal_mode = WAL');
     sqliteVec.load(vecDb);
+    // Create vec0 virtual table if it doesn't exist
+    // (can't be in Prisma migrations because Prisma's SQLite engine doesn't have sqlite-vec)
+    vecDb.exec(`
+      CREATE VIRTUAL TABLE IF NOT EXISTS vec_knowledge_chunks
+        USING vec0(embedding float[512]);
+    `);
   }
   return vecDb;
 }
