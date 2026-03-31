@@ -45,3 +45,5 @@ DropBox/*
 
 # Archive (personal reference files, not tracked)
 archive/
+dev.db-shm
+dev.db-wal
