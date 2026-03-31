@@ -81,6 +81,12 @@ Accent reserved for: send button background, active BottomNav chat tab icon, inp
 
 ---
 
+## Focal Point
+
+**Primary visual anchor (`/chat` screen):** The amber send button in the input bar is the only high-chroma element on screen. All other surfaces are stone neutrals. The eye is drawn to the input area — this reinforces that the action is typing and sending. No competing accent elements appear above the input bar.
+
+---
+
 ## Component Inventory
 
 New components to build for this phase:
@@ -90,7 +96,7 @@ New components to build for this phase:
 | `ChatPage` | `app/chat/page.tsx` | Server component, passes history to client |
 | `ChatClient` | `components/ChatClient.tsx` | Main stateful shell |
 | `ChatBubble` | `components/ChatBubble.tsx` | Card, Badge |
-| `ChatInput` | `components/ChatInput.tsx` | Input (Textarea variant), Button |
+| `ChatInput` | `components/ChatInput.tsx` | Input (Textarea variant), Button — send button label: "Send message" (icon-only on mobile, `aria-label="Send message"`) |
 | `ToolActivityIndicator` | `components/ToolActivityIndicator.tsx` | Badge (muted variant) |
 | `SkeletonBubble` | `components/SkeletonBubble.tsx` | `.skeleton` CSS class from globals.css |
 | `ChatContextButton` | `components/ChatContextButton.tsx` | Button (ghost variant), MessageCircle icon |
@@ -168,7 +174,7 @@ Modifications to existing components:
 ### Confirm Before Destructive Agent Actions
 
 - When agent plans to delete: render an inline confirmation card inside the chat, not a modal
-- Card contains: description of what will be deleted + two buttons: `Cancel` (secondary) and `Delete [item]` (danger)
+- Card contains: description of what will be deleted + two buttons: "Keep [item]" (secondary) and "Delete [item]" (danger)
 - Agent waits for user response before executing the delete
 - **Source:** CONTEXT.md D-04
 
@@ -191,7 +197,7 @@ Modifications to existing components:
 
 | Element | Copy |
 |---------|------|
-| Primary CTA (send button) | "Send" (icon-only on mobile with `aria-label="Send message"`) |
+| Primary CTA (send button) | "Send message" (icon-only on mobile with `aria-label="Send message"`) |
 | Page title | "Chat" |
 | Empty state heading | "Your camping assistant" |
 | Empty state body | "Ask anything — gear, spots, trip planning. I know NC camping." |
@@ -205,7 +211,7 @@ Modifications to existing components:
 | Destructive confirm heading | "Delete [item name]?" |
 | Destructive confirm body | "This can't be undone." |
 | Destructive confirm CTA | "Delete [item]" (danger variant) |
-| Destructive cancel | "Cancel" (secondary variant) |
+| Destructive cancel | "Keep [item]" (secondary variant) |
 | Context shortcut (trip) | "Ask about this trip" |
 | Context shortcut (gear) | "Ask about this gear" |
 | Context shortcut (spot) | "Ask about this spot" |
