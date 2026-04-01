@@ -25,8 +25,8 @@ Requirements for v1.1 "Close the Loop." Each maps to roadmap phases.
 
 ### Day-Of Execution
 
-- [ ] **EXEC-01**: User can view a time-ordered departure checklist generated from their trip's packing list, meal plan, and power data
-- [ ] **EXEC-02**: User can send a safety float plan email to an emergency contact with trip summary on departure
+- [x] **EXEC-01**: User can view a time-ordered departure checklist generated from their trip's packing list, meal plan, and power data
+- [x] **EXEC-02**: User can send a safety float plan email to an emergency contact with trip summary on departure
 
 ### Learning Loop
 
@@ -69,8 +69,8 @@ Requirements for v1.1 "Close the Loop." Each maps to roadmap phases.
 | OFF-02 | Phase 8 | Pending |
 | OFF-03 | Phase 8 | Pending |
 | OFF-04 | Phase 8 | Pending |
-| EXEC-01 | Phase 7 | Pending |
-| EXEC-02 | Phase 7 | Pending |
+| EXEC-01 | Phase 7 | Complete |
+| EXEC-02 | Phase 7 | Complete |
 | LEARN-01 | Phase 9 | Pending |
 | LEARN-02 | Phase 9 | Pending |
 | LEARN-03 | Phase 9 | Pending |

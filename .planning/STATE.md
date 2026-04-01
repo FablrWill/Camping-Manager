@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Close the Loop
 status: executing
-stopped_at: Phase 7 UI-SPEC approved
-last_updated: "2026-04-01T21:19:28.697Z"
+stopped_at: Completed 07-01-PLAN.md
+last_updated: "2026-04-01T22:29:15.360Z"
 last_activity: 2026-04-01
 progress:
   total_phases: 9
   completed_phases: 5
-  total_plans: 19
-  completed_plans: 19
+  total_plans: 22
+  completed_plans: 20
   percent: 40
 ---
 
@@ -21,12 +21,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-01)
 
 **Core value:** Personal camping second brain — a closed-loop system that plans, executes, and learns from every trip
-**Current focus:** Phase 06 — stabilization
+**Current focus:** Phase 07 — day-of-execution
 
 ## Current Position
 
-Phase: 7
-Plan: Not started
+Phase: 07 (day-of-execution) — EXECUTING
+Plan: 2 of 3
 Status: Ready to execute
 Last activity: 2026-04-01
 
@@ -59,6 +59,7 @@ Progress: [████░░░░░░] 40%
 | Phase 06-stabilization P03 | 7 | 2 tasks | 5 files |
 | Phase 06-stabilization P04 | 3 | 2 tasks | 2 files |
 | Phase 06-stabilization P05 | 8 | 2 tasks | 6 files |
+| Phase 07-day-of-execution P01 | 13 | 2 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -81,6 +82,9 @@ Recent decisions affecting current work:
 - [Phase 06-stabilization]: TripCard extracted to standalone file — PackingList/MealPlan child state no longer destroyed on parent re-render
 - [Phase 06-stabilization]: SpotMap photo delete uses onPhotoDeleted callback instead of window.location.reload() — map zoom/center preserved
 - [Phase 06-stabilization]: Both PackingList and MealPlan guard regenerate with ConfirmDialog — first-time generation skips confirm
+- [Phase 07-day-of-execution]: Settings singleton uses hardcoded id='user_settings' — enforces one row, upsert always targets same record
+- [Phase 07-day-of-execution]: sendFloatPlan uses text field not html — plain text ensures newlines render correctly in all email clients
+- [Phase 07-day-of-execution]: FTS virtual tables not managed by Prisma — migration SQL manually corrected to remove DROP TABLE for non-existent tables
 
 ### Pending Todos
 
@@ -94,6 +98,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-01T21:19:28.694Z
-Stopped at: Phase 7 UI-SPEC approved
-Resume file: .planning/phases/07-day-of-execution/07-UI-SPEC.md
+Last session: 2026-04-01T22:29:15.357Z
+Stopped at: Completed 07-01-PLAN.md
+Resume file: None

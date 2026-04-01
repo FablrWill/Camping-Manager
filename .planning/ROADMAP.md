@@ -125,7 +125,7 @@ Plans:
   3. The safety email includes trip name, destination, dates, packed gear summary, and emergency contact info — enough for someone to act on it
 **Plans**: 3 plans
 Plans:
-- [ ] 07-01-PLAN.md — Foundation: schema migration (DepartureChecklist, FloatPlanLog, Settings), Zod schemas, nodemailer install, email utility, settings page, TopHeader gear icon
+- [x] 07-01-PLAN.md — Foundation: schema migration (DepartureChecklist, FloatPlanLog, Settings), Zod schemas, nodemailer install, email utility, settings page, TopHeader gear icon
 - [ ] 07-02-PLAN.md — Departure checklist: Claude generation API, check-off persistence, departure page UI, prep page integration
 - [ ] 07-03-PLAN.md — Float plan: Claude email composition, Nodemailer send, FloatPlanLog, send flow in departure page
 **UI hint**: yes
