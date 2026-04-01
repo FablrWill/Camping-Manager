@@ -109,8 +109,8 @@ Plans:
 **Plans**: 3 plans
 Plans:
 - [x] 06-01-PLAN.md — Schema migration (MealPlan, TripFeedback, PackingItem usage, cachedAt) + Zod install + parseClaudeJSON utility
-- [ ] 06-02-PLAN.md — Missing CRUD APIs (photo delete, mod delete) + trip/vehicle CRUD UI + design system migration
-- [ ] 06-03-PLAN.md — AI output persistence (packing list + meal plan) with load-on-mount, regenerate, error/retry UI
+- [x] 06-02-PLAN.md — Missing CRUD APIs (photo delete, mod delete) + trip/vehicle CRUD UI + design system migration
+- [x] 06-03-PLAN.md — AI output persistence (packing list + meal plan) with load-on-mount, regenerate, error/retry UI
 **UI hint**: yes
 
 ### Phase 7: Day-Of Execution
@@ -160,7 +160,7 @@ Phases execute in numeric order: 6 → 7 → 8 → 9
 | 3. Knowledge Base | v1.0 | 4/4 | Complete | 2026-03-31 |
 | 4. Chat Agent | v1.0 | 4/4 | Complete | 2026-03-31 |
 | 5. Intelligence Features | v1.0 | 4/4 | Complete | 2026-04-01 |
-| 6. Stabilization | v1.1 | 2/3 | In Progress |  |
+| 6. Stabilization | v1.1 | 3/3 | Complete   | 2026-04-01 |
 | 7. Day-Of Execution | v1.1 | 0/TBD | Not started | - |
 | 8. PWA and Offline | v1.1 | 0/TBD | Not started | - |
 | 9. Learning Loop | v1.1 | 0/TBD | Not started | - |
