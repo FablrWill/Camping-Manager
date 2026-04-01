@@ -1,18 +1,32 @@
 # Project Status — Outland OS
 
 ## Quick Pickup
-> **Last session:** 2026-03-31 (Session 17)
-> **Current phase:** Phase 4 — Chat Agent (Phase 3 Knowledge Base complete)
+> **Last session:** 2026-04-01 (Session 19)
+> **Milestone v1.0:** Complete — all 5 phases shipped
+> **Next step:** `/gsd:new-milestone` to plan v1.1
 > **App name:** Outland OS
 > **Task tracker:** See `TASKS.md` in project root — start there.
 > **North star:** See `docs/USER-JOURNEY.md` — defines what to build and why.
+
+## What's Built (v1.0)
+- **Trip prep** — Weather, packing lists, meal plans, power budget, executive prep view
+- **Knowledge base** — NC camping RAG corpus with hybrid search (FTS5 + vector)
+- **Chat agent** — Streaming SSE, 11 tools, conversation persistence
+- **Spot recommendations** — Saved locations + knowledge base + weather forecasts, inline cards
+- **Voice debrief** — Record → Whisper transcribe → Claude extract insights → apply to gear/locations/trips
 
 ## Known Blockers
 - **Claude API key** ✅ — Configured in `.env` (2026-03-30). AI features unblocked.
 - **Weather API key** — NOT NEEDED. Switched to Open-Meteo (free, no key). See `docs/AUDIT.md`.
 - **HA hardware** — In Durham. Will picking up ~mid-April 2026. Blocks HA bridge feature only.
 - **Voyage AI API key** ✅ — Configured in `.env` (2026-03-31). Knowledge base embeddings working.
-- No blockers for Phase 4.
+- **OpenAI API key** — Needed for voice debrief (Whisper). Add `OPENAI_API_KEY` to `.env` when ready.
+
+## Outstanding UAT (human testing needed)
+- Voice debrief end-to-end flow (needs device + mic + running server)
+- Recommendation cards in chat (needs running server + Claude API)
+- Chat streaming on mobile (needs device)
+- RAG search source path bug (code fix — Phase 3 gap)
 
 ## Session History
 - **Session 1** (2026-03-29) — Project kickoff, planning, docs
@@ -35,6 +49,8 @@
 - **Session 15** (2026-03-30) — Branch cleanup, merge all features, consolidate gear seed data (33 items).
 - **Session 16** (2026-03-30) — Phase 3 planning complete + README, architecture, start-here docs.
 - **Session 17** (2026-03-31) — Phase 3 Knowledge Base execution: RAG corpus, hybrid search, PDF/web parsers, search API.
+- **Session 18** (2026-03-31) — Phase 4 Chat Agent: streaming SSE, 11 tools, conversation persistence.
+- **Session 19** (2026-04-01) — Phase 5 gap closure + verification. Milestone v1.0 complete. Doc cleanup + forward plan.
 
 ## Key Files
 - `TASKS.md` — What's done, what's next, where to start
@@ -44,3 +60,4 @@
 - `docs/AUDIT.md` — Full project audit: code health, integrations, PWA research, creative ideas
 - `docs/CHANGELOG.md` — Detailed session-by-session changes
 - `docs/ARCHITECTURE.md` — Tech stack, schema, project structure
+- `.planning/ROADMAP.md` — GSD milestone roadmap with phase tracking

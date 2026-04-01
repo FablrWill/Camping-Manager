@@ -14,7 +14,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [ ] **Phase 1: Validation** - Test and harden all existing AI features before building new ones
 - [x] **Phase 2: Executive Trip Prep** - Unify weather, packing, meals, and power into a single "am I ready?" view (completed 2026-03-30)
-- [ ] **Phase 3: Knowledge Base** - Build and validate NC camping RAG corpus with hybrid retrieval
+- [x] **Phase 3: Knowledge Base** - Build and validate NC camping RAG corpus with hybrid retrieval (completed 2026-03-31)
 - [x] **Phase 4: Chat Agent** - Messenger-style AI assistant with full trip context and tool use (completed 2026-03-31)
 - [x] **Phase 5: Intelligence Features** - AI trip recommendations and voice trip debrief (completed 2026-04-01)
 
@@ -60,7 +60,7 @@ Plans:
 Plans:
 - [x] 03-01-PLAN.md — Database foundation: KnowledgeChunk Prisma model, FTS5 virtual table with triggers, vec0 table, better-sqlite3 connection module
 - [x] 03-02-PLAN.md — Ingest pipeline: markdown chunking, Voyage-3-lite embeddings, ingest CLI script, corpus manifest
-- [ ] 03-03-PLAN.md — Hybrid search (FTS5 + vec0 via RRF), search API route, validation script, retrieval quality review
+- [x] 03-03-PLAN.md — Hybrid search (FTS5 + vec0 via RRF), search API route, validation script, retrieval quality review
 - [x] 03-04-PLAN.md — PDF parsing + web scraping: extend ingest pipeline for external sources (USFS, recreation.gov) per D-02/D-03
 
 ### Phase 4: Chat Agent
@@ -90,11 +90,12 @@ Plans:
   3. User can record a voice memo from the app and have it automatically transcribed
   4. Transcription is processed by Claude to extract structured insights (what worked, what didn't, gear feedback, spot ratings)
   5. Extracted insights can update gear notes, location ratings, or trip notes from a review screen
-**Plans**: 3 plans
+**Plans**: 4 plans
 Plans:
 - [x] 05-01-PLAN.md — Recommendation tool: chat-native agent tool, dual-source ranking (saved + KB), rich card rendering in chat, save-to-locations flow
 - [x] 05-02-PLAN.md — Voice backend: OpenAI SDK install, Whisper transcription, Claude insight extraction, apply API routes
 - [x] 05-03-PLAN.md — Voice UI: VoiceRecordModal with MediaRecorder, InsightsReviewSheet, mic button on trip cards
+- [x] 05-04-PLAN.md — Gap closure: wire weather forecasts into recommend_spots (REC-02)
 **UI hint**: yes
 
 ## Progress
@@ -106,6 +107,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 |-------|----------------|--------|-----------|
 | 1. Validation | 0/TBD | Not started | - |
 | 2. Executive Trip Prep | 2/2 | Complete   | 2026-03-30 |
-| 3. Knowledge Base | 2/4 | In Progress|  |
+| 3. Knowledge Base | 4/4 | Complete   | 2026-03-31 |
 | 4. Chat Agent | 4/4 | Complete   | 2026-03-31 |
-| 5. Intelligence Features | 3/3 | Complete   | 2026-04-01 |
+| 5. Intelligence Features | 4/4 | Complete   | 2026-04-01 |

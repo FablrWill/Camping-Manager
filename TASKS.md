@@ -1,28 +1,30 @@
 # Outland OS — Task Tracker
 
-> **Last updated:** 2026-03-31 (Session 18 — Phase 4 Chat Agent Complete)
+> **Last updated:** 2026-04-01 (Session 19 — Phase 5 Intelligence Features Complete, Milestone v1.0 Done)
 > **Start here** if you're picking up after a break.
 > **North star:** `docs/USER-JOURNEY.md` — read this before building anything new.
 
 ---
 
-## Up Next
+## 🏁 Milestone v1.0 Complete
 
-These are the highest-priority tasks based on the user journey defined in `docs/USER-JOURNEY.md`. Build in this order.
+All 5 phases of v1.0 shipped. The app has: executive trip prep, NC camping knowledge base, streaming chat agent with 11 tools, AI spot recommendations with weather, and voice trip debriefs.
 
-1. ~~**Weather integration**~~ ✅ Done (Session 9) — Open-Meteo, no API key. Auto-fetches for upcoming trips. Camping-relevant alerts (rain, cold, wind, UV).
+## Up Next — Milestone v1.1
 
-2. ~~**Claude API integration + packing list generator**~~ ✅ Done (Session 11) — First AI feature. Anthropic SDK installed. Claude generates categorized packing list from trip details + gear inventory + weather. Editable checklist with progress bar. "Generate with Claude" CTA on upcoming trip cards.
+Run `/gsd:new-milestone` to kick off planning. Candidates for v1.1:
 
-3. ~~**Meal planning with shopping list**~~ ✅ Done (Session 13) — Claude generates full meal plan with day-by-day meals, prep tags (At Home/At Camp), shopping list by store section, prep timeline, copy-to-clipboard.
+1. **Phase 1 Validation** — Never ran. Harden existing AI features (packing, meals, power) before adding more.
+2. **Deploy to Vercel** — SQLite → Postgres, get it live and usable from anywhere.
+3. **Smart Campsite / Home Assistant** — HA hardware arriving ~mid-April. Device registry, bridge, automation templates.
+4. **Bug fixes** — See Known Bugs section below. Several medium-severity issues.
+5. **Executive trip prep flow** — The "am I ready?" single view. Partially built in Phase 2 but not the full vision.
 
-4. ~~**Power budget calculator**~~ ✅ Done (Session 14) — Planning mode + live mode. Weather-adjusted solar, charge reminders, day-by-day battery trajectory, live status with alerts. Photo scanning + HA auto-update planned (Phase 3).
-
-5. **Executive trip prep flow** — Single "prepare this trip" view: weather → packing → meals → checklist. The Wednesday-before-Saturday experience.
-
-### Housekeeping (do alongside or after)
-- ~~**Seed the dev database**~~ ✅ Done (Session 11) — 3 mods, 9 gear + 2 wishlist, 4 locations, 4 trips
-- ~~**Polish spots page dark mode**~~ ✅ Done (Session 11) — control bar, toggles, date input, animation strip, stats footer
+### Quick wins worth doing first
+- Fix dashboard trips stat (hardcoded 0)
+- Fix packing item upsert bug
+- Add trip update/delete route
+- Resolve RAG search source path bug (Phase 3 verification gap)
 
 ---
 
@@ -83,8 +85,8 @@ These are the highest-priority tasks based on the user journey defined in `docs/
 ### Other Phase 3
 | Task | Status | Notes |
 |------|--------|-------|
-| AI trip recommendations | ❌ Planned | "Find me a spot within 2hrs of Asheville this weekend" |
-| Voice Ghostwriter / trip debrief | ❌ Planned | Voice-first journaling on the drive home |
+| AI trip recommendations | ✅ Done | Session 19 — `recommend_spots` agent tool. Saved locations + RAG + weather forecasts. Rich cards in chat with Save button. |
+| Voice Ghostwriter / trip debrief | ✅ Done | Session 19 — Whisper transcription → Claude insight extraction → review sheet → apply to gear/locations/trips. Mic button on trip cards. |
 | Chat interface | ✅ Done | Session 18 — Streaming SSE agent with BetaToolRunner, 11 tools (gear/trips/locations/weather/knowledge/write ops), conversation persistence, context-aware FAB, bottom nav Chat tab |
 | NC camping knowledge base (RAG) | ✅ Done | Session 17 — 237 chunks from 7 research files + external sources. Hybrid search (FTS5 + vec0/RRF). voyage-3-lite 512-dim embeddings. PDF + web parsers. POST /api/knowledge/search endpoint. |
 | Gear photo identification | ❌ Planned | Snap a photo → Claude identifies brand/type/specs |
@@ -122,7 +124,8 @@ These are the highest-priority tasks based on the user journey defined in `docs/
 - **Claude API key** ✅ — Configured in `.env` (2026-03-30). Packing list, meal planning, and enrich_screenshots.py are unblocked.
 - **Weather API key** — NOT NEEDED. Switched to Open-Meteo (free, no key required). See `docs/AUDIT.md`.
 - **Voyage AI API key** ✅ — Configured in `.env` (2026-03-31). Used for knowledge base embeddings (voyage-3-lite).
-- **Speech API** — Web Speech API (free) vs Whisper (better) for Voice Ghostwriter (Phase 3)
+- **OpenAI API key** — Needed for voice debrief (Whisper transcription). Add `OPENAI_API_KEY` to `.env` when ready to test.
+- **Speech API** ✅ — Decided on OpenAI Whisper (Session 19). Better accuracy than Web Speech API, handles background noise.
 
 ---
 
