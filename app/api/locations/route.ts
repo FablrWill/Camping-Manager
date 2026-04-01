@@ -25,9 +25,9 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    if (!body.name || body.latitude == null || body.longitude == null) {
+    if (!body.name) {
       return NextResponse.json(
-        { error: "name, latitude, and longitude are required" },
+        { error: "name is required" },
         { status: 400 }
       );
     }

@@ -9,6 +9,8 @@ import { weatherTool, executeWeatherTool } from './weather';
 
 // Plan 02 tools (expanded read + write registry)
 import { searchKnowledgeTool, executeSearchKnowledge } from './searchKnowledge';
+// Plan 05-01 tools (recommendations)
+import { recommendSpotsTool, executeRecommendSpots } from './recommend';
 import { listGearTool, executeListGear } from './listGear';
 import { updateGearTool, executeUpdateGear } from './updateGear';
 import { listTripsTool, executeListTrips } from './listTrips';
@@ -42,6 +44,7 @@ export const AGENT_TOOLS: Tool[] = [
   getWeatherTool,
   togglePackingItemTool,
   deleteConfirmTool,
+  recommendSpotsTool, // Phase 05 Plan 01
 ];
 
 type ToolInput = Record<string, unknown>;
@@ -89,6 +92,8 @@ export async function executeAgentTool(name: string, input: ToolInput): Promise<
       return executeTogglePackingItem(input as Parameters<typeof executeTogglePackingItem>[0]);
     case 'request_delete_confirmation':
       return executeDeleteConfirm(input as Parameters<typeof executeDeleteConfirm>[0]);
+    case 'recommend_spots':
+      return executeRecommendSpots(input as Parameters<typeof executeRecommendSpots>[0]);
     default:
       return `Error: Unknown tool: ${name}`;
   }

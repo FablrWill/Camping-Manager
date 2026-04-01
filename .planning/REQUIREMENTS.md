@@ -28,9 +28,9 @@
 - [x] **CHAT-04**: Chat agent uses tool-use pattern — can query gear, trips, locations, weather, and knowledge base as tools
 
 ### AI Trip Recommendations
-- [ ] **REC-01**: User can ask "find me a camping spot" with constraints (distance from Asheville, dates, amenities, weather preferences)
-- [ ] **REC-02**: Recommendations draw from saved locations + knowledge base + weather forecasts
-- [ ] **REC-03**: User can save a recommended spot to their locations from the recommendation result
+- [x] **REC-01**: User can ask "find me a camping spot" with constraints (distance from Asheville, dates, amenities, weather preferences)
+- [x] **REC-02**: Recommendations draw from saved locations + knowledge base + weather forecasts
+- [x] **REC-03**: User can save a recommended spot to their locations from the recommendation result
 
 ### Voice Ghostwriter
 - [x] **VOICE-01**: User can record a voice memo (trip debrief / journal entry) from the app

@@ -1,5 +1,7 @@
 'use client'
 
+import RecommendationCard, { Recommendation } from './RecommendationCard'
+
 interface DeleteConfirmPayload {
   action: 'confirm_delete'
   itemType: string
@@ -34,14 +36,35 @@ function extractDeleteConfirm(content: string): DeleteConfirmPayload | null {
   return null
 }
 
+function extractRecommendations(content: string): Recommendation[] | null {
+  const jsonMatch = content.match(/```json\s*([\s\S]*?)\s*```|({[\s\S]*?"action"\s*:\s*"recommendations"[\s\S]*?})/m)
+  if (!jsonMatch) return null
+
+  const jsonStr = jsonMatch[1] || jsonMatch[2]
+  if (!jsonStr) return null
+
+  try {
+    const parsed = JSON.parse(jsonStr) as { action: string; recommendations: Recommendation[] }
+    if (parsed.action === 'recommendations' && Array.isArray(parsed.recommendations)) {
+      return parsed.recommendations
+    }
+  } catch {
+    // Malformed JSON — skip
+  }
+  return null
+}
+
 export default function ChatBubble({ role, content, toolCalls, onConfirmDelete, onCancelDelete }: ChatBubbleProps) {
   const isUser = role === 'user'
 
   const deleteConfirm = !isUser ? extractDeleteConfirm(content) : null
+  const recommendations = !isUser ? extractRecommendations(content) : null
 
-  // Strip JSON block from displayed text if we have a confirm_delete card
+  // Strip JSON block from displayed text if we have a confirm_delete or recommendations card
   const displayContent = deleteConfirm
     ? content.replace(/```json\s*[\s\S]*?\s*```/m, '').replace(/{[\s\S]*?"action"\s*:\s*"confirm_delete"[\s\S]*?}/m, '').trim()
+    : recommendations
+    ? content.replace(/```json\s*[\s\S]*?\s*```/m, '').replace(/{[\s\S]*?"action"\s*:\s*"recommendations"[\s\S]*?}/m, '').trim()
     : content
 
   return (
@@ -83,6 +106,14 @@ export default function ChatBubble({ role, content, toolCalls, onConfirmDelete, 
                 Delete {deleteConfirm.itemName}
               </button>
             </div>
+          </div>
+        )}
+
+        {recommendations && recommendations.length > 0 && (
+          <div className="mt-3 space-y-2">
+            {recommendations.map((rec, i) => (
+              <RecommendationCard key={rec.id ?? `rec-${i}`} rec={rec} />
+            ))}
           </div>
         )}
       </div>
