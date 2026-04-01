@@ -92,6 +92,7 @@ A personal second brain for car camping — an AI-powered knowledge system that 
 - [ ] Dog planning (pet-friendly sites, packing, trail rules)
 - [ ] Knowledge base expansion (2500+ chunks)
 - [ ] Deploy to Vercel (database migration when ready)
+- [ ] Live location sharing — shareable public map link (read-only) showing Will's real-time or last-reported GPS position; friends/emergency contacts click link to see location on a map without needing an account
 
 ### Out of Scope
 
@@ -140,4 +141,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-01 — Milestone v1.1 started (Close the Loop)*
+*Last updated: 2026-04-01 — Phase 07 complete (Day of Execution: departure checklist + float plan email)*
