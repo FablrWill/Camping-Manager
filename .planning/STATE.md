@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Close the Loop
 status: planning
-stopped_at: Phase 6 UI-SPEC approved
-last_updated: "2026-04-01T18:12:37.151Z"
+stopped_at: Completed 06-02-PLAN.md
+last_updated: "2026-04-01T19:44:10.554Z"
 last_activity: 2026-04-01 — Roadmap created for v1.1 Close the Loop
 progress:
   total_phases: 9
   completed_phases: 4
-  total_plans: 14
+  total_plans: 17
   completed_plans: 14
   percent: 40
 ---
@@ -55,6 +55,7 @@ Progress: [████░░░░░░] 40%
 - Trend: Stable
 
 *Updated after each plan completion*
+| Phase 06 P02 | 657 | 4 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -69,6 +70,8 @@ Recent decisions affecting current work:
 - [v1.1 Research]: Manual public/sw.js preferred over Serwist — avoids Webpack/Turbopack conflict
 - [v1.1 Research]: Schema migration (PackingItem usage fields + TripFeedback) belongs in Phase 6 to unblock Phase 9
 - [Phase 05]: VoiceRecordModal manages full state machine — voice debrief infrastructure already exists for Phase 9 to wire up
+- [Phase 06]: DOM event delegation on Leaflet map container for photo delete — Leaflet popups are raw HTML, not React, so React state must be triggered via data-photo-delete attribute + click delegation
+- [Phase 06]: window.location.reload() after photo delete in SpotMap — simplest correct approach given props-based data flow, avoids threading callbacks through 3 component layers
 
 ### Pending Todos
 
@@ -82,6 +85,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-01T18:12:37.147Z
-Stopped at: Phase 6 UI-SPEC approved
-Resume file: .planning/phases/06-stabilization/06-UI-SPEC.md
+Last session: 2026-04-01T19:44:10.551Z
+Stopped at: Completed 06-02-PLAN.md
+Resume file: None
