@@ -1,7 +1,8 @@
 'use client'
 
+import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Moon, Sun } from 'lucide-react'
+import { Moon, Settings as SettingsIcon, Sun } from 'lucide-react'
 import { useTheme } from './ThemeProvider'
 
 const PAGE_TITLES: Record<string, string> = {
@@ -11,6 +12,7 @@ const PAGE_TITLES: Record<string, string> = {
   '/spots': 'Spots',
   '/trips': 'Trips',
   '/chat': 'Chat',
+  '/settings': 'Settings',
 }
 
 export default function TopHeader() {
@@ -25,6 +27,13 @@ export default function TopHeader() {
         <h1 className="text-lg font-bold tracking-tight text-stone-900 dark:text-stone-50">
           {title}
         </h1>
+        <Link
+          href="/settings"
+          className="p-2 rounded-lg text-stone-400 hover:text-stone-600 hover:bg-stone-100 dark:hover:text-stone-200 dark:hover:bg-stone-800 transition-colors"
+          aria-label="Settings"
+        >
+          <SettingsIcon size={20} />
+        </Link>
         <button
           onClick={toggleTheme}
           className="p-2 rounded-lg text-stone-400 hover:text-stone-600 hover:bg-stone-100 dark:hover:text-stone-200 dark:hover:bg-stone-800 transition-colors"
