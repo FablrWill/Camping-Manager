@@ -16,6 +16,8 @@ import WeatherCard from '@/components/WeatherCard'
 import PackingList from '@/components/PackingList'
 import MealPlan from '@/components/MealPlan'
 import PowerBudget from '@/components/PowerBudget'
+import VoiceDebriefButton from './VoiceDebriefButton'
+import VoiceRecordModal from './VoiceRecordModal'
 import type { DayForecast, WeatherAlert } from '@/lib/weather'
 import { formatDateRange, daysUntil, tripNights } from '@/lib/trip-utils'
 
@@ -54,6 +56,7 @@ export default function TripsClient({ initialTrips, locations, vehicles }: Trips
   const [showForm, setShowForm] = useState(false)
   const [saving, setSaving] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
+  const [debriefTrip, setDebriefTrip] = useState<{ id: string; name: string; locationId: string | null } | null>(null)
   const [weatherByTrip, setWeatherByTrip] = useState<Record<string, WeatherData>>({})
   const [weatherLoading, setWeatherLoading] = useState<Record<string, boolean>>({})
   const [weatherErrors, setWeatherErrors] = useState<Record<string, string>>({})
@@ -224,6 +227,16 @@ export default function TripsClient({ initialTrips, locations, vehicles }: Trips
                   </Link>
                 </div>
               )}
+
+              {/* Voice debrief button */}
+              <div className="mt-2 flex items-center">
+                <VoiceDebriefButton
+                  tripId={trip.id}
+                  tripName={trip.name}
+                  locationId={trip.location?.id ?? null}
+                  onOpen={() => setDebriefTrip({ id: trip.id, name: trip.name, locationId: trip.location?.id ?? null })}
+                />
+              </div>
             </div>
 
             {/* Days countdown for upcoming */}
@@ -449,6 +462,16 @@ export default function TripsClient({ initialTrips, locations, vehicles }: Trips
       {/* Context-aware FAB — show when a trip is selected */}
       {selectedTripId && (
         <ChatContextButton contextType="trip" contextId={selectedTripId} />
+      )}
+
+      {/* Voice debrief modal */}
+      {debriefTrip && (
+        <VoiceRecordModal
+          tripId={debriefTrip.id}
+          tripName={debriefTrip.name}
+          locationId={debriefTrip.locationId}
+          onClose={() => setDebriefTrip(null)}
+        />
       )}
     </div>
   )
