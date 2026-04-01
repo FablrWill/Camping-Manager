@@ -1,103 +1,85 @@
-# Requirements — Outland OS Milestone 1
+# Requirements: Outland OS — Milestone v1.1
 
-## v1 Requirements
+**Defined:** 2026-04-01
+**Core Value:** Personal camping second brain — a closed-loop system that plans, executes, and learns from every trip
 
-### Validation & Polish
-- [ ] **VAL-01**: User can generate a packing list from trip details and verify it includes weather-appropriate items from their gear inventory
-- [ ] **VAL-02**: User can generate a meal plan for a trip and verify it correctly splits home prep vs camp cooking with a shopping list organized by store section
-- [ ] **VAL-03**: User can calculate power budget for a trip and verify solar estimates adjust based on weather forecast for trip dates
-- [ ] **VAL-04**: User can identify and report bugs in existing AI features (packing, meals, power) and have them fixed before new features are built
-- [ ] **VAL-05**: All existing AI features handle edge cases gracefully — empty gear inventory, no weather data, zero-day trips, long trips (7+ days)
+## v1.1 Requirements
 
-### Executive Trip Prep
-- [x] **PREP-01**: User can view a single "am I ready?" screen for an upcoming trip that shows weather, packing status, meal plan status, and power budget status
-- [x] **PREP-02**: User can navigate from the executive prep view to each sub-feature (weather details, packing list, meal plan, power budget) and back
-- [x] **PREP-03**: Executive prep view shows clear ready/not-ready indicators for each category
-- [x] **PREP-04**: User can access the executive prep flow from the trip card on the home page
+Requirements for v1.1 "Close the Loop." Each maps to roadmap phases.
 
-### Knowledge Base (RAG)
-- [x] **RAG-01**: System has a curated NC camping knowledge corpus ingested with vector embeddings and full-text search indexes
-- [x] **RAG-02**: User can search the knowledge base and get relevant results about NC camping spots, regulations, seasonal info, and local knowledge
-- [x] **RAG-03**: Knowledge base search uses hybrid retrieval (vector similarity + keyword matching) for best results
-- [x] **RAG-04**: Corpus sources are defined and documented (dispersed camping spots, permit databases, seasonal closures, personal trip notes, etc.)
+### Stabilization
 
-### Chat Interface
-- [x] **CHAT-01**: User can interact with a messenger-style chat agent that has access to the knowledge base, gear inventory, trip data, and saved locations
-- [x] **CHAT-02**: Chat agent can answer questions like "what do I need for a cold-weather trip?" using RAG context + user's gear
-- [x] **CHAT-03**: Chat uses streaming responses (SSE) for responsive feel on mobile
-- [x] **CHAT-04**: Chat agent uses tool-use pattern — can query gear, trips, locations, weather, and knowledge base as tools
+- [ ] **STAB-01**: User can generate AI outputs (packing list, meal plan) without crashes from malformed Claude responses (Zod parseClaudeJSON utility)
+- [ ] **STAB-02**: User can view previously generated packing lists and meal plans after navigating away (persisted to database)
+- [ ] **STAB-03**: User can edit and delete trips from the trips page
+- [ ] **STAB-04**: User can edit vehicle profile and edit/delete vehicle mods
+- [ ] **STAB-05**: User can delete photos from the photo gallery
+- [ ] **STAB-06**: All existing forms use the design system UI primitives (Button, Input, Card, Modal) for visual consistency
 
-### AI Trip Recommendations
-- [x] **REC-01**: User can ask "find me a camping spot" with constraints (distance from Asheville, dates, amenities, weather preferences)
-- [x] **REC-02**: Recommendations draw from saved locations + knowledge base + weather forecasts
-- [x] **REC-03**: User can save a recommended spot to their locations from the recommendation result
+### PWA / Offline Mode
 
-### Voice Ghostwriter
-- [x] **VOICE-01**: User can record a voice memo (trip debrief / journal entry) from the app
-- [x] **VOICE-02**: Voice recording is transcribed to text automatically
-- [x] **VOICE-03**: Transcription is processed by Claude to extract structured insights (what worked, what didn't, gear feedback, spot ratings)
-- [x] **VOICE-04**: Extracted insights can update gear notes, location ratings, or trip notes automatically
-- [x] **VOICE-05**: Voice input implementation reuses patterns/code from Fablr.ai where applicable
+- [ ] **OFF-01**: User can install the app to their phone's home screen as a PWA
+- [ ] **OFF-02**: User can open the app offline and see the app shell (navigation, cached pages)
+- [ ] **OFF-03**: User can tap "Leaving Now" on a trip and have all trip data cached for offline use (weather snapshot, packing list, meal plan, spot coordinates, emergency info)
+- [ ] **OFF-04**: User can view cached map tiles for trip area while offline (tiles visible at time of "Leaving Now")
+
+### Day-Of Execution
+
+- [ ] **EXEC-01**: User can view a time-ordered departure checklist generated from their trip's packing list, meal plan, and power data
+- [ ] **EXEC-02**: User can send a safety float plan email to an emergency contact with trip summary on departure
+
+### Learning Loop
+
+- [ ] **LEARN-01**: User can mark packed items as "used" or "didn't need" after a trip
+- [ ] **LEARN-02**: User can view a Claude-generated post-trip summary (what to drop, what was missing, location rating) after completing gear usage tracking
+- [ ] **LEARN-03**: User can record a voice debrief that automatically updates gear notes and location ratings
 
 ## v2 Requirements (Deferred)
 
-- Executive trip prep: "Download for Offline" pre-trip button
-- Smart campsite device registry + Home Assistant bridge (blocked on hardware, ~mid-April)
-- Auto-tag photos to trips/locations
-- Safety float plan (send trip summary to emergency contacts)
-- Gear photo identification (snap photo → Claude identifies)
-- Link/screenshot → gear import
-- Nearby trails & recreation API
-- Fuel & last stop planner
-- Permit & registration handling
-- Vehicle pre-trip checklist
-- Post-trip auto-review (what you forgot, what you didn't use)
-- Wear planning (weather-based clothing recommendations)
-- Wishlist deal finder
-- User guide finder (auto-search product manuals)
-- Agent orchestration layer (route tasks to Haiku/Sonnet/Opus by complexity)
+- Feedback-driven packing improvement (needs 3+ trips of history data to be meaningful)
+- Dead man's switch safety check-in (needs persistent server infrastructure)
+- Full offline map tile pre-download (deep-link to Gaia GPS instead)
+- Dog-aware trip planning (waiting for dog arrival + needs assessment)
+- Knowledge base expansion (2500+ chunks)
+- Deploy to Vercel (database migration when ready)
+- Smart campsite / Home Assistant bridge (blocked on hardware)
 
 ## Out of Scope
 
-- Offline/PWA — defer until features stabilize (research says add service worker last)
-- Deploy to Vercel — defer until ready for production (SQLite → Postgres is a hard migration)
-- Multi-user auth — single user tool
-- Dog planning — Will doesn't have the dog yet
-- Cost tracking / Gear ROI — nice to have, not core
-- Signal map / Seasonal ratings / GPX import / Google Maps import — Phase 2 bonus, not blocking the core loop
-- Buddy trip mode / Gear lending — requires multi-user, out of scope
-- Shareable trip reports — requires deploy first
-- Dark sky / sun / moon — nice to have, not blocking
+| Feature | Reason |
+|---------|--------|
+| Full region map tile download | 100MB-2GB per region; cache in-viewport tiles only, deep-link Gaia GPS for full offline maps |
+| Background check-in timer / dead man's switch | Requires persistent server process; local dev architecture doesn't support it |
+| Two-way offline sync / conflict resolution | Single user, local SQLite — no sync conflicts possible |
+| Reservation / permit API integration | Recreation.gov API is brittle and high maintenance; paste confirmation URL instead |
+| Rich text debrief editor | Adds friction; voice is the input modality, not keyboard |
+| Real-time offline sync | Single-user local-first app; offline snapshot is read-only in v1.1 |
 
 ## Traceability
 
-| REQ-ID | Phase | Plan | Status |
-|--------|-------|------|--------|
-| VAL-01 | Phase 1 | TBD | Pending |
-| VAL-02 | Phase 1 | TBD | Pending |
-| VAL-03 | Phase 1 | TBD | Pending |
-| VAL-04 | Phase 1 | TBD | Pending |
-| VAL-05 | Phase 1 | TBD | Pending |
-| PREP-01 | Phase 2 | TBD | Pending |
-| PREP-02 | Phase 2 | TBD | Pending |
-| PREP-03 | Phase 2 | TBD | Pending |
-| PREP-04 | Phase 2 | TBD | Pending |
-| RAG-01 | Phase 3 | TBD | Pending |
-| RAG-02 | Phase 3 | TBD | Pending |
-| RAG-03 | Phase 3 | TBD | Pending |
-| RAG-04 | Phase 3 | TBD | Pending |
-| CHAT-01 | Phase 4 | TBD | Pending |
-| CHAT-02 | Phase 4 | TBD | Pending |
-| CHAT-03 | Phase 4 | TBD | Pending |
-| CHAT-04 | Phase 4 | TBD | Pending |
-| REC-01 | Phase 5 | TBD | Pending |
-| REC-02 | Phase 5 | TBD | Pending |
-| REC-03 | Phase 5 | TBD | Pending |
-| VOICE-01 | Phase 5 | TBD | Pending |
-| VOICE-02 | Phase 5 | TBD | Pending |
-| VOICE-03 | Phase 5 | TBD | Pending |
-| VOICE-04 | Phase 5 | TBD | Pending |
-| VOICE-05 | Phase 5 | TBD | Pending |
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| STAB-01 | TBD | Pending |
+| STAB-02 | TBD | Pending |
+| STAB-03 | TBD | Pending |
+| STAB-04 | TBD | Pending |
+| STAB-05 | TBD | Pending |
+| STAB-06 | TBD | Pending |
+| OFF-01 | TBD | Pending |
+| OFF-02 | TBD | Pending |
+| OFF-03 | TBD | Pending |
+| OFF-04 | TBD | Pending |
+| EXEC-01 | TBD | Pending |
+| EXEC-02 | TBD | Pending |
+| LEARN-01 | TBD | Pending |
+| LEARN-02 | TBD | Pending |
+| LEARN-03 | TBD | Pending |
+
+**Coverage:**
+- v1.1 requirements: 15 total
+- Mapped to phases: 0 (pending roadmap)
+- Unmapped: 15
 
 ---
-*Last updated: 2026-03-30 after roadmap creation*
+*Requirements defined: 2026-04-01*
+*Last updated: 2026-04-01 after milestone v1.1 definition*
