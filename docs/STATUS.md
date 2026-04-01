@@ -1,9 +1,10 @@
 # Project Status — Outland OS
 
 ## Quick Pickup
-> **Last session:** 2026-04-01 (Session 20)
+> **Last session:** 2026-04-01 (Session 23)
 > **Milestone v1.0:** Complete — all 5 phases shipped
-> **Next step:** Will doing vision brain dump → resume `/gsd:new-milestone` with expert reviews + vision doc
+> **Milestone v1.1:** In progress — Phase 6 complete, Phase 7 UI-SPEC approved
+> **Next step:** `/gsd:plan-phase 7` — create execution plans for departure checklist + float plan
 > **App name:** Outland OS
 > **Task tracker:** See `TASKS.md` in project root — start there.
 > **North star:** See `docs/USER-JOURNEY.md` — defines what to build and why.
@@ -15,18 +16,27 @@
 - **Spot recommendations** — Saved locations + knowledge base + weather forecasts, inline cards
 - **Voice debrief** — Record → Whisper transcribe → Claude extract insights → apply to gear/locations/trips
 
+## What's Built (v1.1 — in progress)
+- **Stabilization (Phase 6)** — AI output persistence, missing CRUD, design system migration, packing list fixes, TripCard extraction, ConfirmDialogs
+
+## Current Phase: 7 — Day-Of Execution
+- **Status:** UI-SPEC approved, ready for planning
+- **Goal:** Departure checklist + safety float plan email
+- **New pages:** `/trips/[id]/depart`, `/settings`
+- **Requirements:** EXEC-01, EXEC-02
+
 ## Known Blockers
 - **Claude API key** ✅ — Configured in `.env` (2026-03-30). AI features unblocked.
 - **Weather API key** — NOT NEEDED. Switched to Open-Meteo (free, no key). See `docs/AUDIT.md`.
 - **HA hardware** — In Durham. Will picking up ~mid-April 2026. Blocks HA bridge feature only.
 - **Voyage AI API key** ✅ — Configured in `.env` (2026-03-31). Knowledge base embeddings working.
 - **OpenAI API key** — Needed for voice debrief (Whisper). Add `OPENAI_API_KEY` to `.env` when ready.
+- **Gmail App Password** — Needed for Phase 7 float plan email. Add `GMAIL_USER` + `GMAIL_APP_PASSWORD` to `.env`.
 
 ## Outstanding UAT (human testing needed)
 - Voice debrief end-to-end flow (needs device + mic + running server)
 - Recommendation cards in chat (needs running server + Claude API)
 - Chat streaming on mobile (needs device)
-- RAG search source path bug (code fix — Phase 3 gap)
 
 ## Session History
 - **Session 1** (2026-03-29) — Project kickoff, planning, docs
@@ -51,7 +61,10 @@
 - **Session 17** (2026-03-31) — Phase 3 Knowledge Base execution: RAG corpus, hybrid search, PDF/web parsers, search API.
 - **Session 18** (2026-03-31) — Phase 4 Chat Agent: streaming SSE, 11 tools, conversation persistence.
 - **Session 19** (2026-04-01) — Phase 5 gap closure + verification. Milestone v1.0 complete. Doc cleanup + forward plan.
-- **Session 20** (2026-04-01) — Project review + milestone v1.1 kickoff. 4 expert agent audits launched. Will doing vision brain dump separately.
+- **Session 20** (2026-04-01) — Project review + milestone v1.1 kickoff. 4 expert agent audits launched.
+- **Session 21** (2026-04-01) — Phase 6 full planning pipeline — discuss, research, UI-SPEC, plans, cross-AI review.
+- **Session 22** (2026-04-01) — Phase 6 gap closure execution — packing-list persistence, TripCard extraction, ConfirmDialogs.
+- **Session 23** (2026-04-01) — Phase 7 UI design contract — departure checklist, float plan, settings page.
 
 ## Key Files
 - `TASKS.md` — What's done, what's next, where to start

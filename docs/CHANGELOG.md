@@ -8,7 +8,9 @@ All notable changes to Outland OS are tracked here.
 
 | Session | Date | Summary |
 |---------|------|---------|
+| [23](changelog/session-23.md) | 2026-04-01 | Phase 07 UI design contract — departure checklist, float plan, settings page |
 | [22](changelog/session-22.md) | 2026-04-01 | Phase 06 gap closure execution — packing-list persistence, TripCard extraction, ConfirmDialogs |
+| [21](changelog/session-21.md) | 2026-04-01 | Phase 06 full planning pipeline — discuss, research, UI-SPEC, plans, cross-AI review |
 | [20](changelog/session-20.md) | 2026-04-01 | Project review + milestone v1.1 kickoff, 4 expert agent audits launched |
 | [19](changelog/session-19.md) | 2026-04-01 | Phase 5 gap closure + verification, Milestone v1.0 complete, doc cleanup |
 | [18](changelog/session-18.md) | 2026-03-31 | Phase 4: Chat Agent — streaming SSE, 11 tools, conversation persistence |

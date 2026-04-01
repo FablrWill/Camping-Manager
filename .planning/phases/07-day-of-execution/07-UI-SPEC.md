@@ -79,7 +79,7 @@ Source: Extrapolated from existing component patterns in `components/ui/` — `P
 | Secondary (30%) | `--color-bg-surface` (#ffffff / #1c1917 dark) + `--color-bg-surface-alt` (#f5f5f4 / #292524 dark) | Cards, checklist item rows, settings form areas, nav |
 | Accent (10%) | `--color-accent` (#d97706 amber-600 / #f59e0b amber-500 dark) | Primary buttons, progress bar fill, completion percentage, "Send Float Plan" button |
 | Warning | `--color-warning` (#d97706 / #f59e0b dark) | Unpacked item highlight rows (amber-50 bg, amber-700 text) |
-| Destructive | `--color-danger` (#dc2626 / #ef4444 dark) | Regenerate checklist confirmation button only |
+| Destructive | `--color-danger` (#dc2626 / #ef4444 dark) | Reserved for future destructive actions (delete operations). Not used in Phase 7 — regenerate uses primary variant since no data is permanently deleted. |
 | Success | `--color-success` (#059669 / #10b981 dark) | Checked-off checklist items, "Float plan sent" confirmation badge |
 
 Accent reserved for:
@@ -87,7 +87,7 @@ Accent reserved for:
 2. Checklist progress bar fill
 3. Completion percentage text
 4. Checked checkbox fill (`bg-amber-600`)
-5. Settings save button
+5. "Save Contact" settings button
 6. Inline link to settings from "no emergency contact" inline prompt
 
 Warning color reserved for:
@@ -138,7 +138,7 @@ Slot in as a new `TripPrepSection` entry at the bottom of the existing prep page
 
 Layout: Single scrollable column. `PageHeader` title "Settings". Sections grouped in `Card` containers:
 
-1. **Emergency Contact** — two `Input` fields: Name, Email. Save button (primary, amber).
+1. **Emergency Contact** — two `Input` fields: Name, Email. "Save Contact" button (primary, amber).
 2. **Gmail Configuration** — informational card explaining that `GMAIL_USER` and `GMAIL_APP_PASSWORD` are set in `.env`. Read-only display of configured email (masked). No editable fields in UI — server-side config only.
 3. **Future sections placeholder** — single muted card "More settings coming in future phases."
 
@@ -168,7 +168,7 @@ Settings page accessible via gear icon in `TopHeader` component (`aria-label="Se
 - Source: CONTEXT.md D-04, Phase 6 pattern for regenerate with confirmation.
 
 ### Settings Save
-- Emergency contact form: Save button at bottom of Emergency Contact card. Validation: name and email both required; email must contain "@". Inline error below field on invalid input.
+- Emergency contact form: "Save Contact" button at bottom of Emergency Contact card. Validation: name and email both required; email must contain "@". Inline error below field on invalid input.
 - On save: button loading state "Saving..." → success: button returns to normal, green checkmark badge "Saved" fades out after 2 seconds.
 
 ### No Emergency Contact — Inline Prompt
@@ -201,6 +201,7 @@ Settings page accessible via gear icon in `TopHeader` component (`aria-label="Se
 | Settings page title | "Settings" |
 | Emergency contact section title | "Emergency Contact" |
 | Gmail section title | "Email Configuration" |
+| Settings save CTA | "Save Contact" |
 | Settings saved confirmation | "Saved" |
 | Destructive — checklist regenerate | See regenerate confirmation above |
 
@@ -251,4 +252,4 @@ No third-party registries. All components are built from the project's custom `c
 - [ ] Dimension 5 Spacing: PASS
 - [ ] Dimension 6 Registry Safety: PASS
 
-**Approval:** pending
+**Approval:** approved (2026-04-01)

@@ -1,6 +1,6 @@
 # Outland OS — Task Tracker
 
-> **Last updated:** 2026-04-01 (Session 20 — Project review + milestone v1.1 kickoff)
+> **Last updated:** 2026-04-01 (Session 23 — Phase 7 UI design contract)
 > **Start here** if you're picking up after a break.
 > **North star:** `docs/USER-JOURNEY.md` — read this before building anything new.
 
@@ -10,27 +10,24 @@
 
 All 5 phases of v1.0 shipped. The app has: executive trip prep, NC camping knowledge base, streaming chat agent with 11 tools, AI spot recommendations with weather, and voice trip debriefs.
 
-## Up Next — Milestone v1.1
+## Milestone v1.1 — Close the Loop
 
-**Status:** In planning. Session 20 ran comprehensive project assessment + 4 expert agent audits.
+**Status:** Phase 6 complete. Phase 7 UI-SPEC approved, ready for planning.
 
-**Waiting on:**
-- Will's vision brain dump doc (separate LLM conversation → `.planning/MILESTONE-CONTEXT.md`)
-- Expert review reports in `.planning/review/` (4 agents: code quality, UX, architecture, feature gaps)
+| Phase | Status | Summary |
+|-------|--------|---------|
+| 6. Stabilization | ✅ Complete | AI output persistence, CRUD gaps fixed, design system migration, packing list fixes |
+| 7. Day-Of Execution | 🎨 UI-SPEC approved | Departure checklist + float plan email. Next: `/gsd:plan-phase 7` |
+| 8. PWA and Offline | ○ Not started | Home screen install, "Leaving Now" offline snapshot |
+| 9. Learning Loop | ○ Not started | Post-trip gear usage tracking, Claude debrief, voice writeback |
 
-**Next:** Resume `/gsd:new-milestone` with vision doc + expert reviews to define scope.
+**Next:** `/gsd:plan-phase 7` — create execution plans for departure checklist and float plan
 
-**Key findings from Session 20 assessment:**
-- 3 critical code bugs (JSON.parse, EXIF timestamps, timezone handling)
-- CRUD gaps (trips, vehicle, photos missing edit/delete)
-- AI-generated state not persisted (packing/meal plans lost on refresh)
-- Phase 1 Validation never executed — AI features untested for edge cases
-
-### Quick wins worth doing first
-- Fix dashboard trips stat (hardcoded 0)
-- Fix packing item upsert bug
-- Add trip update/delete route
-- Resolve RAG search source path bug (Phase 3 verification gap)
+**Phase 7 scope (EXEC-01, EXEC-02):**
+- Time-ordered departure checklist generated from packing list, meal plan, power data
+- Safety float plan email to emergency contact via Gmail
+- New pages: `/trips/[id]/depart`, `/settings`
+- Gmail integration via Nodemailer (App Password in `.env`)
 
 ---
 
@@ -96,7 +93,7 @@ All 5 phases of v1.0 shipped. The app has: executive trip prep, NC camping knowl
 | Chat interface | ✅ Done | Session 18 — Streaming SSE agent with BetaToolRunner, 11 tools (gear/trips/locations/weather/knowledge/write ops), conversation persistence, context-aware FAB, bottom nav Chat tab |
 | NC camping knowledge base (RAG) | ✅ Done | Session 17 — 237 chunks from 7 research files + external sources. Hybrid search (FTS5 + vec0/RRF). voyage-3-lite 512-dim embeddings. PDF + web parsers. POST /api/knowledge/search endpoint. |
 | Gear photo identification | ❌ Planned | Snap a photo → Claude identifies brand/type/specs |
-| Safety float plan | ❌ Planned | Send trip summary to emergency contacts |
+| Safety float plan | ❌ Ready | Phase 7 — UI-SPEC approved, planning next |
 | Nearby trails & recreation API | ❌ Planned | OSM, NPS, Recreation.gov near a saved location |
 | Fuel & last stop planner | ❌ Planned | Route-aware: last gas, grocery, ice before backcountry |
 | *...and more in FEATURE-PHASES.md* | | |
