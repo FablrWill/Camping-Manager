@@ -42,9 +42,9 @@ Declared values (must be multiples of 4):
 | 3xl | 64px | Page-level spacing (`py-16`) |
 
 Exceptions:
-- Touch targets (buttons, icon-only controls): minimum 44px height on mobile. Use `py-2.5` (10px top + 10px bottom + font height) which meets this for md/lg size buttons.
-- Modal footer button rows: `gap-3` (12px) — matches existing ConfirmDialog pattern.
-- Form input internal padding: `px-3 py-2.5` — matches existing Input component.
+- Touch targets (buttons, icon-only controls): minimum 44px height on mobile. Use `py-3` (12px top + 12px bottom + font height) which meets this for md/lg size buttons.
+- Modal footer button rows: `gap-2` (8px) — consistent with standard sm spacing token.
+- Form input internal padding: `px-4 py-2` — 16px horizontal, 8px vertical.
 
 ---
 
@@ -53,11 +53,11 @@ Exceptions:
 | Role | Size | Weight | Line Height |
 |------|------|--------|-------------|
 | Body | 16px (text-base) | 400 (normal) | 1.5 |
-| Label | 14px (text-sm) | 500 (medium) | 1.4 |
+| Label | 14px (text-sm) | 400 (normal) | 1.4 |
 | Heading | 18px (text-lg) | 700 (bold) | 1.2 |
 | Display | 20px (text-xl) | 700 (bold) | 1.2 |
 
-Source: Extracted from existing components. Modal titles use `text-lg font-bold`. CardTitle uses `font-semibold` (600). Labels in Input/Select use `text-sm font-medium`. Body copy uses default (16px, 400). Kept to 4 sizes with 2 effective weights (medium for labels, bold for headings — semibold maps to bold for consistency in this phase).
+Source: Extracted from existing components. Modal titles use `text-lg font-bold`. Labels in Input/Select use `text-sm`. Body copy uses default (16px, 400). Two weights only: 400 (normal) for body and labels, 700 (bold) for headings and display.
 
 ---
 
@@ -226,3 +226,5 @@ No third-party component registries. All components are hand-built in `component
 | Migration targets (VehicleClient, TripsClient) | Codebase grep — raw HTML form elements found |
 | Touch target 44px minimum | Default — mobile-first per CLAUDE.md |
 | Spacing scale 4/8/16/24/32/48/64 | Tailwind defaults, confirmed against existing components |
+| Typography: 2 weights only (400, 700) | Checker revision — dropped 500/medium |
+| Spacing exceptions: py-3, gap-2, px-4 py-2 | Checker revision — replaced non-compliant values |
