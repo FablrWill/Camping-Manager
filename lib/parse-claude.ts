@@ -88,3 +88,34 @@ export const MealPlanResultSchema = z.object({
 });
 
 export type MealPlanResult = z.infer<typeof MealPlanResultSchema>;
+
+// --- Departure Checklist Schemas ---
+
+const DepartureChecklistItemSchema = z.object({
+  id: z.string(),
+  text: z.string(),
+  checked: z.boolean().default(false),
+  isUnpackedWarning: z.boolean().default(false),
+});
+
+const DepartureChecklistSlotSchema = z.object({
+  label: z.string(),
+  items: z.array(DepartureChecklistItemSchema),
+});
+
+export const DepartureChecklistResultSchema = z.object({
+  slots: z.array(DepartureChecklistSlotSchema),
+});
+
+export type DepartureChecklistResult = z.infer<typeof DepartureChecklistResultSchema>;
+export type DepartureChecklistItem = z.infer<typeof DepartureChecklistItemSchema>;
+export type DepartureChecklistSlot = z.infer<typeof DepartureChecklistSlotSchema>;
+
+// --- Float Plan Email Schema ---
+
+export const FloatPlanEmailSchema = z.object({
+  subject: z.string(),
+  body: z.string(),
+});
+
+export type FloatPlanEmail = z.infer<typeof FloatPlanEmailSchema>;
