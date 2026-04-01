@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, CheckCircle } from 'lucide-react'
 import { Button, ConfirmDialog, EmptyState, PageHeader } from '@/components/ui'
 import DepartureChecklistItem from '@/components/DepartureChecklistItem'
 import type { DepartureChecklistResult } from '@/lib/parse-claude'
@@ -13,6 +13,14 @@ interface DepartureChecklistClientProps {
   tripName: string
   startDate: string
   endDate: string
+  emergencyContactName: string | null
+  emergencyContactEmail: string | null
+}
+
+interface FloatPlanSentState {
+  sentTo: string
+  sentToName: string
+  sentAt: string
 }
 
 export default function DepartureChecklistClient({
@@ -20,12 +28,26 @@ export default function DepartureChecklistClient({
   tripName,
   startDate,
   endDate,
+  emergencyContactName: tripEmergencyContactName,
+  emergencyContactEmail: tripEmergencyContactEmail,
 }: DepartureChecklistClientProps) {
   const [checklist, setChecklist] = useState<DepartureChecklistResult | null>(null)
   const [checklistId, setChecklistId] = useState<string | null>(null)
   const [generating, setGenerating] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [showRegenConfirm, setShowRegenConfirm] = useState(false)
+
+  // Float plan state
+  const [resolvedContactName, setResolvedContactName] = useState<string | null>(
+    tripEmergencyContactName
+  )
+  const [resolvedContactEmail, setResolvedContactEmail] = useState<string | null>(
+    tripEmergencyContactEmail
+  )
+  const [sendingFloatPlan, setSendingFloatPlan] = useState(false)
+  const [floatPlanSent, setFloatPlanSent] = useState<FloatPlanSentState | null>(null)
+  const [floatPlanError, setFloatPlanError] = useState<string | null>(null)
+  const [showFloatPlanConfirm, setShowFloatPlanConfirm] = useState(false)
 
   // Load saved checklist on mount
   useEffect(() => {
@@ -45,6 +67,29 @@ export default function DepartureChecklistClient({
     }
     loadSaved()
   }, [tripId])
+
+  // Load emergency contact from settings (fallback if not set at trip level)
+  useEffect(() => {
+    if (tripEmergencyContactEmail) {
+      // Trip-level override already set — no need to fetch settings
+      return
+    }
+    async function loadSettings() {
+      try {
+        const res = await fetch('/api/settings')
+        if (res.ok) {
+          const data = await res.json()
+          if (data.emergencyContactEmail) {
+            setResolvedContactEmail(data.emergencyContactEmail)
+            setResolvedContactName(data.emergencyContactName ?? null)
+          }
+        }
+      } catch {
+        // Silent fail — user will see no-contact prompt
+      }
+    }
+    loadSettings()
+  }, [tripEmergencyContactEmail])
 
   const handleGenerate = useCallback(async () => {
     setGenerating(true)
@@ -102,6 +147,41 @@ export default function DepartureChecklistClient({
     [checklistId]
   )
 
+  const handleSendFloatPlan = useCallback(() => {
+    if (!resolvedContactEmail) {
+      // No emergency contact — don't open confirm, just show amber prompt
+      return
+    }
+    setShowFloatPlanConfirm(true)
+  }, [resolvedContactEmail])
+
+  const onConfirmSend = useCallback(async () => {
+    setShowFloatPlanConfirm(false)
+    setSendingFloatPlan(true)
+    setFloatPlanError(null)
+    try {
+      const res = await fetch('/api/float-plan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tripId }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setFloatPlanError(data.error || 'Could not send float plan — try again.')
+        return
+      }
+      setFloatPlanSent({
+        sentTo: data.sentTo,
+        sentToName: data.sentToName,
+        sentAt: data.sentAt,
+      })
+    } catch {
+      setFloatPlanError('Could not send float plan — check your connection and try again.')
+    } finally {
+      setSendingFloatPlan(false)
+    }
+  }, [tripId])
+
   // Progress calculation
   const totalItems = checklist
     ? checklist.slots.reduce((sum, slot) => sum + slot.items.length, 0)
@@ -115,6 +195,14 @@ export default function DepartureChecklistClient({
   const progressPct = totalItems > 0 ? Math.round((checkedItems / totalItems) * 100) : 0
 
   const dateRange = formatDateRange(startDate, endDate)
+
+  // Format sent time for display
+  const formattedSentAt = floatPlanSent
+    ? new Date(floatPlanSent.sentAt).toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+    : null
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6 space-y-4">
@@ -225,8 +313,42 @@ export default function DepartureChecklistClient({
         </div>
       )}
 
-      {/* Float plan send button — added in Plan 03 */}
-      <div id="float-plan-area" />
+      {/* Float plan section */}
+      <div className="border-t border-stone-200 dark:border-stone-800 my-6 pt-6">
+        {floatPlanSent ? (
+          <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
+            <CheckCircle size={18} />
+            <span className="text-sm font-bold">
+              Float plan sent to {floatPlanSent.sentToName} at {formattedSentAt}
+            </span>
+          </div>
+        ) : (
+          <>
+            <Button
+              variant="primary"
+              onClick={handleSendFloatPlan}
+              disabled={!resolvedContactEmail || sendingFloatPlan}
+              className="w-full"
+            >
+              {sendingFloatPlan ? 'Sending...' : 'Send Float Plan'}
+            </Button>
+
+            {!resolvedContactEmail && (
+              <div className="mt-3 p-3 bg-amber-50 dark:bg-amber-950/20 rounded-lg text-sm text-amber-700 dark:text-amber-400">
+                No emergency contact set.{' '}
+                <Link href="/settings" className="underline font-bold">
+                  Add one in Settings
+                </Link>{' '}
+                before sending.
+              </div>
+            )}
+
+            {floatPlanError && (
+              <p className="mt-2 text-sm text-red-600 dark:text-red-400">{floatPlanError}</p>
+            )}
+          </>
+        )}
+      </div>
 
       {/* Regenerate confirmation */}
       <ConfirmDialog
@@ -239,6 +361,17 @@ export default function DepartureChecklistClient({
         title="Regenerate Checklist?"
         message="This will replace your current checklist. Your check-off progress will be lost."
         confirmLabel="Regenerate Checklist"
+        confirmVariant="primary"
+      />
+
+      {/* Float plan send confirmation */}
+      <ConfirmDialog
+        open={showFloatPlanConfirm}
+        onClose={() => setShowFloatPlanConfirm(false)}
+        onConfirm={onConfirmSend}
+        title="Send Float Plan?"
+        message={`This will email your trip summary to ${resolvedContactName ?? 'your emergency contact'} (${resolvedContactEmail ?? ''}).`}
+        confirmLabel="Send Plan"
         confirmVariant="primary"
       />
     </div>

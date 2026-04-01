@@ -7,7 +7,14 @@ export default async function DepartPage({ params }: { params: Promise<{ id: str
 
   const trip = await prisma.trip.findUnique({
     where: { id },
-    select: { id: true, name: true, startDate: true, endDate: true },
+    select: {
+      id: true,
+      name: true,
+      startDate: true,
+      endDate: true,
+      emergencyContactName: true,
+      emergencyContactEmail: true,
+    },
   })
 
   if (!trip) notFound()
@@ -18,6 +25,8 @@ export default async function DepartPage({ params }: { params: Promise<{ id: str
       tripName={trip.name}
       startDate={trip.startDate.toISOString()}
       endDate={trip.endDate.toISOString()}
+      emergencyContactName={trip.emergencyContactName ?? null}
+      emergencyContactEmail={trip.emergencyContactEmail ?? null}
     />
   )
 }
