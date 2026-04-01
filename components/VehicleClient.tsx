@@ -14,7 +14,10 @@ import {
   ChevronUp,
   DollarSign,
   Calendar,
+  Pencil,
+  Trash2,
 } from 'lucide-react'
+import { Button, Input, Textarea, Modal, ConfirmDialog } from '@/components/ui'
 
 interface VehicleMod {
   id: string
@@ -71,12 +74,103 @@ function SpecRow({ icon, label, value, unit }: SpecRowProps) {
   )
 }
 
-export default function VehicleClient({ vehicle }: { vehicle: Vehicle }) {
+export default function VehicleClient({ vehicle: initialVehicle }: { vehicle: Vehicle }) {
+  const [vehicle, setVehicle] = useState(initialVehicle)
   const [showAllSpecs, setShowAllSpecs] = useState(false)
   const [showModForm, setShowModForm] = useState(false)
   const [mods, setMods] = useState(vehicle.mods)
   const [saving, setSaving] = useState(false)
   const [modError, setModError] = useState<string | null>(null)
+
+  // Vehicle edit state
+  const [editingVehicle, setEditingVehicle] = useState(false)
+  const [isSavingVehicle, setIsSavingVehicle] = useState(false)
+  const [vehicleError, setVehicleError] = useState<string | null>(null)
+
+  // Mod delete state
+  const [confirmDeleteMod, setConfirmDeleteMod] = useState<{ id: string; name: string } | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
+
+  // Vehicle edit form state
+  const [editName, setEditName] = useState(vehicle.name)
+  const [editYear, setEditYear] = useState(vehicle.year?.toString() ?? '')
+  const [editMake, setEditMake] = useState(vehicle.make ?? '')
+  const [editModel, setEditModel] = useState(vehicle.model ?? '')
+  const [editDrivetrain, setEditDrivetrain] = useState(vehicle.drivetrain ?? '')
+  const [editFuelEconomy, setEditFuelEconomy] = useState(vehicle.fuelEconomy ?? '')
+  const [editGroundClearance, setEditGroundClearance] = useState(vehicle.groundClearance?.toString() ?? '')
+  const [editTowingCapacity, setEditTowingCapacity] = useState(vehicle.towingCapacity?.toString() ?? '')
+  const [editCargoVolume, setEditCargoVolume] = useState(vehicle.cargoVolume?.toString() ?? '')
+  const [editCargoLength, setEditCargoLength] = useState(vehicle.cargoLength?.toString() ?? '')
+  const [editCargoWidth, setEditCargoWidth] = useState(vehicle.cargoWidth?.toString() ?? '')
+  const [editNotes, setEditNotes] = useState(vehicle.notes ?? '')
+
+  function openVehicleEdit() {
+    setEditName(vehicle.name)
+    setEditYear(vehicle.year?.toString() ?? '')
+    setEditMake(vehicle.make ?? '')
+    setEditModel(vehicle.model ?? '')
+    setEditDrivetrain(vehicle.drivetrain ?? '')
+    setEditFuelEconomy(vehicle.fuelEconomy ?? '')
+    setEditGroundClearance(vehicle.groundClearance?.toString() ?? '')
+    setEditTowingCapacity(vehicle.towingCapacity?.toString() ?? '')
+    setEditCargoVolume(vehicle.cargoVolume?.toString() ?? '')
+    setEditCargoLength(vehicle.cargoLength?.toString() ?? '')
+    setEditCargoWidth(vehicle.cargoWidth?.toString() ?? '')
+    setEditNotes(vehicle.notes ?? '')
+    setVehicleError(null)
+    setEditingVehicle(true)
+  }
+
+  async function handleVehicleSave(e: React.FormEvent) {
+    e.preventDefault()
+    setIsSavingVehicle(true)
+    setVehicleError(null)
+    try {
+      const res = await fetch(`/api/vehicle/${vehicle.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: editName,
+          year: editYear ? parseInt(editYear) : null,
+          make: editMake || null,
+          model: editModel || null,
+          drivetrain: editDrivetrain || null,
+          fuelEconomy: editFuelEconomy || null,
+          groundClearance: editGroundClearance ? parseFloat(editGroundClearance) : null,
+          towingCapacity: editTowingCapacity ? parseInt(editTowingCapacity) : null,
+          cargoVolume: editCargoVolume ? parseFloat(editCargoVolume) : null,
+          cargoLength: editCargoLength ? parseFloat(editCargoLength) : null,
+          cargoWidth: editCargoWidth ? parseFloat(editCargoWidth) : null,
+          notes: editNotes || null,
+        }),
+      })
+      if (!res.ok) throw new Error('Failed to save')
+      const updated = await res.json()
+      setVehicle(updated)
+      setEditingVehicle(false)
+    } catch {
+      setVehicleError("Couldn't save — check your connection and try again.")
+    } finally {
+      setIsSavingVehicle(false)
+    }
+  }
+
+  async function handleDeleteMod(modId: string) {
+    setIsDeleting(true)
+    setDeleteError(null)
+    try {
+      const res = await fetch(`/api/vehicle/${vehicle.id}/mods/${modId}`, { method: 'DELETE' })
+      if (!res.ok) throw new Error('Failed to delete')
+      setMods((prev) => prev.filter((m) => m.id !== modId))
+      setConfirmDeleteMod(null)
+    } catch {
+      setDeleteError("Couldn't delete — try again or reload the page.")
+    } finally {
+      setIsDeleting(false)
+    }
+  }
 
   const totalModCost = mods.reduce((sum, m) => sum + (m.cost ?? 0), 0)
 
@@ -118,16 +212,27 @@ export default function VehicleClient({ vehicle }: { vehicle: Vehicle }) {
       <div className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-700 overflow-hidden">
         {/* Hero banner */}
         <div className="bg-gradient-to-br from-stone-800 to-stone-700 dark:from-stone-800 dark:to-stone-900 p-6 text-white">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center">
-              <Car size={28} />
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center">
+                <Car size={28} />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold">{vehicle.name}</h2>
+                {vehicle.drivetrain && (
+                  <p className="text-stone-300 text-sm">{vehicle.drivetrain}</p>
+                )}
+              </div>
             </div>
-            <div>
-              <h2 className="text-xl font-bold">{vehicle.name}</h2>
-              {vehicle.drivetrain && (
-                <p className="text-stone-300 text-sm">{vehicle.drivetrain}</p>
-              )}
-            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={openVehicleEdit}
+              aria-label="Edit vehicle"
+              className="text-white/70 hover:text-white hover:bg-white/10"
+            >
+              <Pencil size={16} />
+            </Button>
           </div>
         </div>
 
@@ -154,13 +259,15 @@ export default function VehicleClient({ vehicle }: { vehicle: Vehicle }) {
           {/* Expandable cargo section */}
           {(vehicle.cargoVolume || vehicle.cargoLength || vehicle.cargoWidth) && (
             <>
-              <button
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={() => setShowAllSpecs(!showAllSpecs)}
                 className="flex items-center gap-2 w-full py-3 text-sm text-amber-600 dark:text-amber-500 font-medium"
               >
                 {showAllSpecs ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                 {showAllSpecs ? 'Hide' : 'Show'} cargo dimensions
-              </button>
+              </Button>
 
               {showAllSpecs && (
                 <div className="pb-2">
@@ -214,100 +321,21 @@ export default function VehicleClient({ vehicle }: { vehicle: Vehicle }) {
               </p>
             )}
           </div>
-          <button
-            onClick={() => setShowModForm(!showModForm)}
-            className="bg-amber-600 hover:bg-amber-700 dark:bg-amber-500 dark:hover:bg-amber-400 text-white dark:text-stone-900 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5"
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={() => setShowModForm(true)}
+            icon={<Plus size={14} />}
           >
-            <Plus size={14} />
             Add Mod
-          </button>
+          </Button>
         </div>
 
-        {/* Add mod form */}
-        {showModForm && (
-          <form
-            onSubmit={handleAddMod}
-            className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-700 p-4 mb-4 space-y-3"
-          >
-            <div>
-              <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
-                Mod Name *
-              </label>
-              <input
-                name="name"
-                required
-                placeholder="e.g. Roof rack crossbars"
-                className="w-full px-3 py-2.5 rounded-lg border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-400 dark:focus:ring-amber-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
-                Description
-              </label>
-              <input
-                name="description"
-                placeholder="What it does, brand, part number..."
-                className="w-full px-3 py-2.5 rounded-lg border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-400 dark:focus:ring-amber-500"
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
-                  Cost ($)
-                </label>
-                <input
-                  name="cost"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  placeholder="0.00"
-                  className="w-full px-3 py-2.5 rounded-lg border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-400 dark:focus:ring-amber-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
-                  Installed
-                </label>
-                <input
-                  name="installedAt"
-                  type="date"
-                  className="w-full px-3 py-2.5 rounded-lg border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-amber-400 dark:focus:ring-amber-500"
-                />
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
-                Notes
-              </label>
-              <textarea
-                name="notes"
-                rows={2}
-                placeholder="Any additional notes..."
-                className="w-full px-3 py-2.5 rounded-lg border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-400 dark:focus:ring-amber-500 resize-none"
-              />
-            </div>
-            {modError && (
-              <p className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30 rounded-lg px-3 py-2">
-                {modError}
-              </p>
-            )}
-            <div className="flex gap-3 pt-1">
-              <button
-                type="button"
-                onClick={() => { setShowModForm(false); setModError(null) }}
-                className="flex-1 py-2.5 rounded-lg border border-stone-300 dark:border-stone-600 text-stone-700 dark:text-stone-300 font-medium hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={saving}
-                className="flex-1 py-2.5 rounded-lg bg-amber-600 hover:bg-amber-700 dark:bg-amber-500 dark:hover:bg-amber-400 text-white dark:text-stone-900 font-medium disabled:opacity-50 transition-colors"
-              >
-                {saving ? 'Saving...' : 'Add Mod'}
-              </button>
-            </div>
-          </form>
+        {/* Inline errors */}
+        {deleteError && (
+          <div className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30 rounded-lg px-4 py-2 mb-3">
+            {deleteError}
+          </div>
         )}
 
         {/* Mods list */}
@@ -364,12 +392,226 @@ export default function VehicleClient({ vehicle }: { vehicle: Vehicle }) {
                       </p>
                     )}
                   </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setConfirmDeleteMod({ id: mod.id, name: mod.name })}
+                    aria-label="Delete mod"
+                    className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 shrink-0"
+                  >
+                    <Trash2 size={14} />
+                  </Button>
                 </div>
               </div>
             ))}
           </div>
         )}
       </section>
+
+      {/* Add mod modal */}
+      <Modal
+        open={showModForm}
+        onClose={() => { setShowModForm(false); setModError(null) }}
+        title="Add Mod"
+      >
+        <form onSubmit={handleAddMod} className="p-4 space-y-3">
+          <Input
+            label="Mod Name *"
+            name="name"
+            required
+            placeholder="e.g. Roof rack crossbars"
+          />
+          <Input
+            label="Description"
+            name="description"
+            placeholder="What it does, brand, part number..."
+          />
+          <div className="grid grid-cols-2 gap-3">
+            <Input
+              label="Cost ($)"
+              name="cost"
+              type="number"
+              step="0.01"
+              min="0"
+              placeholder="0.00"
+            />
+            <Input
+              label="Installed"
+              name="installedAt"
+              type="date"
+            />
+          </div>
+          <Textarea
+            label="Notes"
+            name="notes"
+            rows={2}
+            placeholder="Any additional notes..."
+          />
+          {modError && (
+            <p className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30 rounded-lg px-3 py-2">
+              {modError}
+            </p>
+          )}
+          <div className="flex gap-3 pt-1 pb-2">
+            <Button
+              type="button"
+              variant="secondary"
+              className="flex-1"
+              onClick={() => { setShowModForm(false); setModError(null) }}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              variant="primary"
+              className="flex-1"
+              loading={saving}
+            >
+              Add Mod
+            </Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Edit vehicle modal */}
+      <Modal
+        open={editingVehicle}
+        onClose={() => setEditingVehicle(false)}
+        title="Edit Vehicle"
+        size="lg"
+      >
+        <form onSubmit={handleVehicleSave} className="p-4 space-y-3">
+          <Input
+            label="Name *"
+            required
+            value={editName}
+            onChange={(e) => setEditName(e.target.value)}
+            placeholder="e.g. Santa Fe Hybrid"
+          />
+          <div className="grid grid-cols-3 gap-3">
+            <Input
+              label="Year"
+              type="number"
+              min="1900"
+              max="2100"
+              value={editYear}
+              onChange={(e) => setEditYear(e.target.value)}
+              placeholder="2025"
+            />
+            <Input
+              label="Make"
+              value={editMake}
+              onChange={(e) => setEditMake(e.target.value)}
+              placeholder="Hyundai"
+            />
+            <Input
+              label="Model"
+              value={editModel}
+              onChange={(e) => setEditModel(e.target.value)}
+              placeholder="Santa Fe"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <Input
+              label="Drivetrain"
+              value={editDrivetrain}
+              onChange={(e) => setEditDrivetrain(e.target.value)}
+              placeholder="AWD Hybrid"
+            />
+            <Input
+              label="Fuel Economy"
+              value={editFuelEconomy}
+              onChange={(e) => setEditFuelEconomy(e.target.value)}
+              placeholder="36 mpg city / 31 hwy"
+            />
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            <Input
+              label="Ground Clearance (in)"
+              type="number"
+              step="0.1"
+              value={editGroundClearance}
+              onChange={(e) => setEditGroundClearance(e.target.value)}
+              placeholder="8.3"
+            />
+            <Input
+              label="Towing Capacity (lb)"
+              type="number"
+              value={editTowingCapacity}
+              onChange={(e) => setEditTowingCapacity(e.target.value)}
+              placeholder="3500"
+            />
+            <Input
+              label="Cargo Volume (cu ft)"
+              type="number"
+              step="0.1"
+              value={editCargoVolume}
+              onChange={(e) => setEditCargoVolume(e.target.value)}
+              placeholder="72.1"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <Input
+              label="Cargo Length (in)"
+              type="number"
+              step="0.1"
+              value={editCargoLength}
+              onChange={(e) => setEditCargoLength(e.target.value)}
+              placeholder="74.8"
+            />
+            <Input
+              label="Cargo Width (in)"
+              type="number"
+              step="0.1"
+              value={editCargoWidth}
+              onChange={(e) => setEditCargoWidth(e.target.value)}
+              placeholder="43.5"
+            />
+          </div>
+          <Textarea
+            label="Notes"
+            rows={3}
+            value={editNotes}
+            onChange={(e) => setEditNotes(e.target.value)}
+            placeholder="Any notes about the vehicle..."
+          />
+          {vehicleError && (
+            <p className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30 rounded-lg px-3 py-2">
+              {vehicleError}
+            </p>
+          )}
+          <div className="flex gap-3 pt-1 pb-2">
+            <Button
+              type="button"
+              variant="secondary"
+              className="flex-1"
+              onClick={() => setEditingVehicle(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              variant="primary"
+              className="flex-1"
+              loading={isSavingVehicle}
+            >
+              Save Changes
+            </Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Delete mod confirm dialog */}
+      <ConfirmDialog
+        open={!!confirmDeleteMod}
+        onClose={() => setConfirmDeleteMod(null)}
+        onConfirm={() => confirmDeleteMod && handleDeleteMod(confirmDeleteMod.id)}
+        title="Delete mod?"
+        message="This mod record will be permanently removed."
+        confirmLabel="Delete"
+        confirmVariant="danger"
+        loading={isDeleting}
+      />
     </div>
   )
 }
