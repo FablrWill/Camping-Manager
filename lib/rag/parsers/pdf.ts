@@ -1,4 +1,5 @@
-import pdfParse from 'pdf-parse';
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const pdfParse = require('pdf-parse') as (buffer: Buffer) => Promise<{ text: string; info?: Record<string, string> }>;
 import { readFileSync } from 'fs';
 import { basename } from 'path';
 import { encode } from 'gpt-tokenizer';

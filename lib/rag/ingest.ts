@@ -199,7 +199,7 @@ export async function ingestChunks(
           source: chunk.source,
           title: chunk.title,
           content: chunk.content,
-          embedding: Buffer.from(embedding.buffer),
+          embedding: Buffer.from(embedding.buffer as ArrayBuffer),
           metadata: JSON.stringify(chunk.metadata),
           chunkIdx: chunk.chunkIdx,
           tokenCount: chunk.tokenCount,
