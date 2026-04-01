@@ -1,288 +1,290 @@
-# Technology Stack — New Feature Additions
+# Stack Research — v1.1 Close the Loop (Additions Only)
 
 **Project:** Outland OS (camping second brain)
-**Researched:** 2026-03-30
-**Scope:** Libraries and tools needed for Phase 2–4 features. Does NOT re-document existing stack (Next.js 16, Prisma, Leaflet, Claude API, Tailwind — all validated).
+**Researched:** 2026-04-01
+**Scope:** NEW libraries needed for v1.1 features only. Does NOT re-document the existing stack (Next.js 16, Prisma, SQLite, Leaflet, Claude API, Tailwind, Vercel AI SDK, sqlite-vec, react-speech-recognition, serwist, leaflet.offline — all documented in the previous milestone research).
 
 ---
 
-## PWA / Offline
+## What This Milestone Adds
 
-### Service Worker
+The four v1.1 feature areas and their library needs:
+
+| Feature Area | New Library Needed? | Verdict |
+|---|---|---|
+| Zod validation (Claude API response parsing) | Yes — Zod 4 | Add now |
+| PWA / offline — "Leaving Now" cache | Already researched (serwist, leaflet.offline) | No new library; clarify config pattern below |
+| Safety email on departure | Yes — nodemailer | Add now |
+| Trip Day Sequencer / learning loop | No new library | Pure logic on existing stack |
+| Offline data reads (trip data in field) | Partially covered — clarify IndexedDB pattern | idb for structured read cache |
+
+---
+
+## New Libraries for v1.1
+
+### 1. Zod — Runtime Validation for Claude API Responses
 
 | Technology | Version | Purpose | Why |
 |------------|---------|---------|-----|
-| `@serwist/next` | 9.5.7 | Service worker + offline caching for Next.js | Actively maintained (published 15 days ago). Official Next.js docs name it as the only recommended offline option. Successor to `next-pwa` (abandoned 2 years ago). Wraps Workbox with Next.js-specific config. |
+| `zod` | 4.3.6 | Parse and validate all Claude API JSON responses | Claude returns untyped JSON. TypeScript only catches type errors at compile time — Zod catches schema errors at runtime. The `parseClaudeJSON<T>` utility (already in TASKS.md) wraps every Claude response in a Zod schema before it reaches the UI. Prevents the "JSON parsing" bugs listed in the v1.1 stabilize list. |
 
 **Install:**
 ```bash
-npm install @serwist/next serwist
+npm install zod
 ```
 
-**Critical caveat:** Serwist currently requires Webpack, not Turbopack. Next.js 16 defaults to Turbopack in dev. Build script must be run with `--no-turbo` (or disable Turbopack in `next.config.ts`). Confirmed by official Next.js docs and Serwist docs.
-
-**What it handles:**
-- App shell caching (JS/CSS/HTML → works offline)
-- API response caching (configurable per route)
-- Background sync for deferred writes
-- Web push (optional — low priority for this project)
-
-**What it does NOT handle:** Map tile caching (separate concern — see below).
-
-**Confidence:** HIGH — verified via official Next.js docs + npm publish recency.
-
----
-
-### Offline Map Tiles
-
-| Technology | Version | Purpose | Why |
-|------------|---------|---------|-----|
-| `leaflet.offline` | latest | Cache OSM tiles to IndexedDB | Most actively maintained Leaflet offline library. Integrates directly with Leaflet's tile layer system. Stores tiles in browser IndexedDB so pre-trip downloads work. |
-
-**Install:**
-```bash
-npm install leaflet.offline
-```
-
-**Alternative considered:** `Leaflet.TileLayer.PouchDBCached` — uses PouchDB as the backend, adds a large dependency. leaflet.offline uses IndexedDB directly; simpler for this use case.
-
-**UX pattern:** Add a "Download area for offline" button on the Spots map page before a trip. Seed the bounding box of the destination area at zoom levels 10–15.
-
-**Confidence:** MEDIUM — library is maintained but last major activity was 2023. IndexedDB tile caching is a solved pattern; the library works even if infrequently updated.
-
----
-
-### Offline Data Storage (app data, not tiles)
-
-No new library needed. Use the existing Prisma/SQLite database — it runs fully local. API routes already read from it. Serwist can cache API responses. For full offline write support (deferred mutations), use the Browser's built-in IndexedDB via a simple wrapper if needed in a later phase — avoid adding a full offline-first library (TanStack Query, WatermelonDB) until the need is proven.
-
----
-
-## RAG / Vector Search (NC Camping Knowledge Base)
-
-### Embedding + Vector Storage
-
-| Technology | Version | Purpose | Why |
-|------------|---------|---------|-----|
-| `sqlite-vec` | 0.1.8 | Vector similarity search inside existing SQLite | Keeps the entire stack in one SQLite file. No external service. Node.js bindings work with `better-sqlite3`. Author (Alex Garcia) actively maintains. Avoids adding Chroma, Pinecone, or Qdrant — all require external processes. |
-| `@anthropic-ai/sdk` (existing) | 0.80.0 | Generate embeddings via Claude or call text embedding model | Already in the project. Use `claude-3-haiku-20240307` for embedding generation to keep cost low. |
-
-**Install:**
-```bash
-npm install sqlite-vec better-sqlite3
-npm install -D @types/better-sqlite3
-```
-
-**Why not Vectra (named in milestone context)?** Vectra is a local file-based vector store for Node.js. sqlite-vec is a stronger choice because it lives inside the existing SQLite DB rather than a parallel folder of JSON files, making backup, migration, and querying unified. Vectra has low npm activity as of 2025.
-
-**Why not LangChain?** LangChain JS is a heavy abstraction with frequent breaking changes. For a single-user personal tool with one knowledge base (NC camping info), a thin direct implementation is simpler and more maintainable.
-
-**Architecture for the knowledge base:**
-1. Source documents: markdown files in `/data/knowledge/` (NC camping areas, permit info, trail notes)
-2. Ingest script: chunk docs → generate embeddings via Anthropic API → store in `sqlite-vec` table
-3. At query time: embed the user question → cosine search in sqlite-vec → inject top-5 chunks into Claude prompt as context
-
-**FTS5 (Full-Text Search):** SQLite already supports FTS5 natively. Use it for keyword fallback when vector search returns low-confidence results. No library needed — raw SQL via Prisma's `$queryRaw`.
-
-**Confidence:** MEDIUM — sqlite-vec v0.1.8 is alpha-versioned but functional. The vector search pattern is well documented. Risk: potential breaking changes before 1.0. Mitigate by pinning the version.
-
----
-
-## Home Assistant Integration
-
-No npm library needed. Use the HA REST API directly.
-
-**Approach:**
-
+**Import pattern (v4):**
 ```typescript
-// lib/homeAssistant.ts — thin wrapper, no external dep
-const HA_URL = process.env.HA_URL      // e.g. http://homeassistant.local:8123
-const HA_TOKEN = process.env.HA_TOKEN  // Long-lived access token from HA profile
+import { z } from 'zod'
 ```
 
-**Why no library:** The `node-home-assistant` npm package (last updated 2017) and similar wrappers are poorly maintained. The HA REST API is simple JSON over HTTP — a `fetch` wrapper in ~50 lines is more reliable than a stale dependency.
+The package root exports Zod 4 as of August 2025. Do not use `zod/v4` subpath — that was a transitional pattern that is now deprecated.
 
-**Available HA REST endpoints used in this project:**
-- `GET /api/states/<entity_id>` — read device state
-- `POST /api/services/<domain>/<service>` — trigger automations
-- `GET /api/states` — list all entity states for dashboard
+**Usage pattern for `parseClaudeJSON<T>`:**
+```typescript
+// lib/parseClaudeJSON.ts
+import { z, ZodSchema } from 'zod'
+
+export function parseClaudeJSON<T>(raw: string, schema: ZodSchema<T>): T {
+  const json = JSON.parse(raw)
+  return schema.parse(json)
+}
+
+// Example schema for packing list
+const PackingListSchema = z.object({
+  items: z.array(z.object({
+    name: z.string(),
+    category: z.string(),
+    priority: z.enum(['essential', 'recommended', 'optional']),
+    reason: z.string().optional(),
+  })),
+  weather_note: z.string().optional(),
+})
+```
+
+Apply to: packing list route, meal plan route, voice debrief extraction route, trip recommendation route.
+
+**Version status:** Zod 4.3.6, published ~March 2026. Zod 4 is stable (shipped August 2025). Not breaking from Zod 3 for standard validation patterns.
+
+**Confidence:** HIGH — official npm, 40M+ weekly downloads, Zod 4 stable confirmed via official release notes and InfoQ announcement.
+
+---
+
+### 2. Nodemailer — Safety Email on Departure
+
+| Technology | Version | Purpose | Why |
+|------------|---------|---------|-----|
+| `nodemailer` | 8.0.4 | Send the "trip float plan" safety email to an emergency contact when the user taps "Leaving Now" | Standard Node.js email library. Used in Next.js API routes. Handles SMTP transports — Gmail with an App Password is the zero-cost path for a personal tool. No external email service account needed for personal use. The safety email is a one-shot send (not a marketing campaign), so deliverability complexity doesn't apply here. |
+
+**Install:**
+```bash
+npm install nodemailer
+npm install -D @types/nodemailer
+```
+
+**nodemailer has bundled TypeScript types in v8** — the `@types/nodemailer` package (v7.0.11) is still needed for older versions but should be checked at install time. As of v8, built-in types may replace the DefinitelyTyped package. Install both, let TypeScript resolve.
+
+**Transport config (Gmail App Password — personal use):**
+```typescript
+// lib/email.ts
+import nodemailer from 'nodemailer'
+
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_FROM,
+    pass: process.env.EMAIL_APP_PASSWORD, // Gmail App Password, not account password
+  },
+})
+```
 
 **Required env vars:**
 ```
-HA_URL=http://homeassistant.local:8123
-HA_TOKEN=your_long_lived_access_token
+EMAIL_FROM=your.email@gmail.com
+EMAIL_APP_PASSWORD=xxxx xxxx xxxx xxxx   # Google account → Security → App Passwords
+EMAIL_EMERGENCY_CONTACT=emergency@example.com
 ```
 
-**Timing:** HA hardware not yet available (mid-April 2026). Build the data model and UI shell now; wire to real HA later. Use mock API responses in dev.
+**What the safety email contains:** Trip name, destination, expected return date, saved location GPS coords, vehicle description, emergency note. All data from existing Prisma models — no new DB schema needed.
 
-**Confidence:** HIGH — official HA REST API is stable, well-documented, and version 2026.3.4 active.
+**Alternative considered:** Resend, SendGrid, Postmark — all require account setup, API keys, domain verification. Overkill for one email sent per trip to a single contact. Gmail SMTP is sufficient and free.
+
+**Confidence:** HIGH — nodemailer 8.0.4 confirmed active (published April 2026). Gmail App Password SMTP pattern is the documented personal-use approach in the official nodemailer docs.
 
 ---
 
-## Voice Input (Journaling / Debrief)
+### 3. idb — IndexedDB Wrapper for Offline Trip Data Cache
 
 | Technology | Version | Purpose | Why |
 |------------|---------|---------|-----|
-| `react-speech-recognition` | 4.0.1 | Browser-native speech-to-text via Web Speech API | Uses the browser's built-in SpeechRecognition — no server costs, no API key for basic transcription. Published 6 months ago, still maintained. Returns transcript as React state. |
+| `idb` | 8.0.3 | Store trip data snapshot in browser IndexedDB for field access when offline | The "Leaving Now" flow needs to write trip data (packing list, meal plan, map pins, weather) into browser storage so the app works offline in the field without network access. The Prisma/SQLite database runs server-side — it's not accessible offline. `idb` wraps the IndexedDB API with promises/async-await, reducing ~80% of boilerplate. Used alongside serwist (which caches the app shell) to give the full offline experience. |
 
 **Install:**
 ```bash
-npm install react-speech-recognition
-npm install -D @types/react-speech-recognition
+npm install idb
 ```
 
-**Browser support reality:** Chrome/Edge have native Web Speech API — it works well. Safari iOS 14.5+ supports it. Firefox does not support it without a polyfill. Given Will primarily uses Chrome on phone and laptop, this is sufficient.
+**Usage pattern:**
+```typescript
+// lib/offlineCache.ts — write on "Leaving Now"
+import { openDB } from 'idb'
 
-**Important caveat:** The Web Speech API sends audio to Google's servers for processing (Chrome's implementation). This is fine for casual trip journaling. It does NOT work offline. For offline voice transcription, the alternative is Whisper (OpenAI) via API — but that adds cost and complexity. Defer offline voice to Phase 4 if it becomes a requirement.
+const DB_NAME = 'outland-offline'
+const DB_VERSION = 1
 
-**Alternative considered:** Vercel AI SDK's `useAudioRecorder` / Anthropic's audio input. As of early 2026, Claude's API supports audio input in some models. This is higher quality but costs API credits per transcription. The Web Speech API is free and good enough for debrief notes.
+export async function cacheTrip(tripId: string, data: OfflineTripData) {
+  const db = await openDB(DB_NAME, DB_VERSION, {
+    upgrade(db) {
+      db.createObjectStore('trips', { keyPath: 'id' })
+    },
+  })
+  await db.put('trips', { id: tripId, ...data, cachedAt: Date.now() })
+}
 
-**Confidence:** MEDIUM — react-speech-recognition is the standard library; the Web Speech API limitation (Chrome only, online-only) is a known constraint, acceptable for this use case.
-
----
-
-## AI Chat / Streaming (Agent Interface)
-
-### Switch to Vercel AI SDK for Chat Features
-
-| Technology | Version | Purpose | Why |
-|------------|---------|---------|-----|
-| `ai` (Vercel AI SDK) | 6.0.141 | Streaming chat UI + React hooks | Reduces ~60% of boilerplate for streaming. `useChat` hook handles message history, streaming rendering, error states. Supports Anthropic as a provider — keeps Claude as the model. The existing `@anthropic-ai/sdk` integration for packing lists and meal plans does NOT need to change — keep it for those one-shot generation routes. |
-| `@ai-sdk/anthropic` | latest | Anthropic provider adapter for Vercel AI SDK | Needed to wire Vercel AI SDK to Claude models. |
-
-**Install (for new chat/agent routes only):**
-```bash
-npm install ai @ai-sdk/anthropic
+export async function getCachedTrip(tripId: string): Promise<OfflineTripData | undefined> {
+  const db = await openDB(DB_NAME, DB_VERSION)
+  return db.get('trips', tripId)
+}
 ```
 
-**Strategy:** Do not rip out the existing `@anthropic-ai/sdk` usage. Use it for:
-- Packing list generation (`/api/packing`)
-- Meal plan generation (`/api/meals`)
-- Any one-shot generation
+**What gets cached in IndexedDB on "Leaving Now":**
+- Trip details (name, dates, destination)
+- Packed items list (from PackingItem table)
+- Meal plan (from DB or last AI generation)
+- Saved location data for destination (coords, notes, road info)
+- Weather snapshot for trip dates
+- Emergency contact info
 
-Use Vercel AI SDK (`ai` package) for:
-- Chat interface (messenger-style agent)
-- Voice journaling transcription → response
-- Trip recommendation dialog
+**Why not raw IndexedDB:** The native API is callback-based and verbose. `idb` is the canonical lightweight wrapper (1.19kB brotli'd), authored by Jake Archibald (ex-Google, web standards contributor). No abstraction overhead — mirrors the native API with promises added.
 
-Both packages can coexist. The `@ai-sdk/anthropic` adapter wraps the same underlying API.
+**Why not Dexie.js:** Dexie adds cloud sync, realtime, and React hooks — all unnecessary for a single-user local cache. idb is the minimal correct tool here.
 
-**Confidence:** HIGH — Vercel AI SDK v6 is current, well-documented, and the canonical choice for Next.js streaming chat.
+**Confidence:** HIGH — idb 8.0.3 is the widely-used standard wrapper, authored by the person who co-created the IDB spec. Active GitHub, MDN-referenced.
 
 ---
 
-## Postgres Migration (Deploy Phase)
+## What NOT to Add for v1.1
 
-### Database
+| Avoid | Why | Use Instead |
+|-------|-----|-------------|
+| Resend / Postmark / SendGrid | Requires account + domain verification + API key for a single-trip safety email | nodemailer + Gmail App Password |
+| Dexie.js | Cloud sync and React hooks are unnecessary for a read-only offline trip snapshot | idb (1.19kB) |
+| WatermelonDB / RxDB | Full offline-first database sync — massive overkill for "cache one trip snapshot" | idb for write-on-departure, Serwist for app shell |
+| react-hook-form | Will has no complex multi-step form validation needs in v1.1; Zod is the validation layer, not RHF | Plain `useState` + Zod `safeParse` on submit |
+| email-templates / mjml | HTML email templating is unnecessary for a plain-text float plan email | Plain text nodemailer email — readable on any device |
+| Zod 3 (via `zod@3.x`) | Zod 4 is stable and the package root default as of August 2025. No reason to pin v3. | `import { z } from 'zod'` |
 
-| Technology | Version | Purpose | Why |
-|------------|---------|---------|-----|
-| Neon | managed | Serverless Postgres for Vercel deployment | Scale-to-zero billing (free at personal-project traffic). Native serverless driver designed for Vercel Functions. Instant branching for PR preview environments. Prisma has first-class Neon support. Better Vercel integration than Supabase for a Prisma-first project. |
-| `@neondatabase/serverless` | latest | Neon's serverless HTTP/WebSocket driver | Required for Vercel serverless functions — standard `pg` uses persistent connections that don't work in serverless. |
-| `@prisma/adapter-neon` | latest | Prisma adapter for Neon's serverless driver | Official Prisma adapter — lets Prisma use WebSocket connections required by Neon serverless. |
+---
 
-**Install (at deploy time, not now):**
-```bash
-npm install @neondatabase/serverless @prisma/adapter-neon ws
+## Pattern: PWA Config Clarification (No New Library, Just Config)
+
+Serwist was already selected in the previous milestone research. The v1.1 "Leaving Now" feature requires clarifying the service worker caching strategy, not adding new libraries.
+
+**Two-layer offline strategy:**
+
+| Layer | Tool | What It Caches |
+|-------|------|----------------|
+| App shell | `@serwist/next` (Serwist) | JS/CSS/HTML bundles — app loads without network |
+| Trip data | `idb` (IndexedDB) | Dynamic trip content written on "Leaving Now" tap |
+| Map tiles | `leaflet.offline` (existing) | OSM tiles for destination area |
+
+**Key config detail:** Next.js 16 defaults to Turbopack in `next dev`. Serwist requires Webpack. Change `package.json`:
+```json
+"dev": "next dev"
 ```
-
-**Migration path (when ready):**
-1. Keep SQLite for all local dev — no change to current workflow
-2. At deploy: update `prisma/schema.prisma` provider from `sqlite` to `postgresql`
-3. Run `npx prisma migrate deploy` against Neon connection string
-4. Update `next.config.ts` to wire the Neon adapter
-5. Photos: move from `public/photos/` to Vercel Blob Storage (separate step)
-
-**Alternative considered:** Supabase — it's a full backend platform (auth, storage, realtime). Those features don't align with this project's "no auth, Claude handles AI" architecture. Neon is pure Postgres, which is what's needed.
-
-**Confidence:** HIGH — Prisma + Neon + Vercel is the documented recommended stack in Prisma's own deployment guide.
+(Remove `--turbopack` flag if present.) Build remains webpack-based by default.
 
 ---
 
-## Photo Storage (Deploy Phase)
+## Learning Loop — No New Libraries
 
-| Technology | Purpose | Why |
-|------------|---------|-----|
-| Vercel Blob | Host uploaded photos in production | Current `public/photos/` won't persist on Vercel's ephemeral filesystem. Vercel Blob is the path-of-least-resistance for a Vercel-deployed Next.js app. SDK is `@vercel/blob`. Free tier: 1GB storage. |
+The post-trip learning loop (gear usage tracking, post-trip debrief, feedback-driven packing improvements) is pure application logic on the existing stack:
 
-**Install (at deploy time):**
-```bash
-npm install @vercel/blob
-```
+- **Gear usage tracking** — new Prisma fields on `PackingItem` (used: Boolean, usageNote: String)
+- **Post-trip review** — Claude API call (existing `@anthropic-ai/sdk`) with packed items + usage data as context
+- **Voice debrief** — already built in v1.0 (react-speech-recognition + Claude extraction)
+- **Feedback-driven packing** — pass trip history as context to the packing list generator (existing Claude route)
 
-**Confidence:** MEDIUM — Vercel Blob is the obvious choice for Vercel-hosted apps, but alternatives (Cloudflare R2, S3) are viable if cost becomes an issue. Will's photo volume is moderate so free tier should hold.
+No new library needed. All learning loop features are data model changes + Claude prompt engineering.
 
 ---
 
-## Alternatives Considered and Rejected
+## Trip Day Sequencer — No New Libraries
 
-| Category | Recommended | Rejected | Why Rejected |
-|----------|-------------|----------|--------------|
-| PWA | `@serwist/next` | `next-pwa` | Abandoned 2+ years ago |
-| PWA | `@serwist/next` | Custom service worker | Serwist handles Workbox complexity; not worth reinventing |
-| Vector DB | `sqlite-vec` | Vectra | Low npm activity; JSON file storage doesn't fit SQLite-first arch |
-| Vector DB | `sqlite-vec` | Chroma / Qdrant | Require external server process; overkill for personal tool |
-| Vector DB | `sqlite-vec` | LangChain JS | Heavy abstraction, frequent breaking changes, unnecessary for single KB |
-| HA bridge | Raw fetch | `node-home-assistant` | Package last updated 2017; HA REST API is simple enough to wrap in-house |
-| Postgres | Neon | Supabase | Supabase adds auth/realtime features not needed; Neon is pure Postgres |
-| Postgres | Neon | PlanetScale | MySQL, not Postgres; Prisma schema would require more changes |
-| AI chat | Vercel AI SDK | Raw `@anthropic-ai/sdk` streaming | SDK already used for simple routes; AI SDK cuts boilerplate for streaming UI |
-| Voice | `react-speech-recognition` | Whisper API | Adds per-transcription cost; Web Speech API is free and sufficient |
-| Voice | `react-speech-recognition` | Deepgram | Requires API key + cost; over-engineered for trip journaling |
+The Trip Day Sequencer (time-sequenced departure checklist from packing + meals + power) is a derived view over existing data. Implementation is:
+
+1. A new API route that reads PackingItem, MealPlan, and PowerBudget for a given trip
+2. Sorts and sequences items by time-of-day logic (morning camp breakdown, drive, arrival setup)
+3. Renders as a checklist component with completion state in `useState`
+
+No new library. Optional: `date-fns` for time arithmetic — but it's already likely in the project or can be avoided with plain JS Date methods for this use case.
 
 ---
 
-## Full Installation Reference
+## Full Installation for v1.1 New Libraries
 
 ```bash
-# PWA / Offline
-npm install @serwist/next serwist
-npm install leaflet.offline
+# Validation
+npm install zod
 
-# RAG / Knowledge Base
-npm install sqlite-vec better-sqlite3
-npm install -D @types/better-sqlite3
+# Safety email
+npm install nodemailer
+npm install -D @types/nodemailer
 
-# AI Chat Streaming
-npm install ai @ai-sdk/anthropic
-
-# Voice Input
-npm install react-speech-recognition
-npm install -D @types/react-speech-recognition
-
-# --- Deploy phase only (do not install now) ---
-# Postgres
-npm install @neondatabase/serverless @prisma/adapter-neon ws
-# Photo storage
-npm install @vercel/blob
+# Offline trip data cache
+npm install idb
 ```
 
 ---
 
-## Environment Variables to Add
+## New Environment Variables for v1.1
 
 ```bash
-# Home Assistant (Phase 3 — add when HA hardware arrives)
-HA_URL=http://homeassistant.local:8123
-HA_TOKEN=your_long_lived_access_token
-
-# Deploy phase
-DATABASE_URL=postgresql://...  # Neon connection string
-BLOB_READ_WRITE_TOKEN=...       # Vercel Blob token
+# Safety email (nodemailer + Gmail)
+EMAIL_FROM=your.email@gmail.com
+EMAIL_APP_PASSWORD=xxxx xxxx xxxx xxxx
+EMAIL_EMERGENCY_CONTACT=emergency@example.com
 ```
+
+---
+
+## Version Compatibility
+
+| Package | Version | Compatible With | Notes |
+|---------|---------|-----------------|-------|
+| `zod` | 4.3.6 | TypeScript 5, Next.js 16, Node.js 20 | Import from `"zod"` (not `"zod/v4"`) |
+| `nodemailer` | 8.0.4 | Node.js 18+, Next.js API routes | Use in API routes only — not client components |
+| `idb` | 8.0.3 | All modern browsers, Next.js client components | Browser-only; guard with `typeof window !== 'undefined'` |
+
+---
+
+## Unchanged from Previous Milestone Research
+
+These libraries were already researched and selected — no re-evaluation needed:
+
+- `@serwist/next` + `serwist` — PWA service worker
+- `leaflet.offline` — offline map tile caching
+- `react-speech-recognition` — voice debrief recording (already built)
+- `ai` + `@ai-sdk/anthropic` — streaming chat (already built)
+- `sqlite-vec` + `better-sqlite3` — RAG vector search (already built)
+- `@anthropic-ai/sdk` — Claude API for all AI generation
 
 ---
 
 ## Sources
 
-- [Official Next.js PWA Guide](https://nextjs.org/docs/app/guides/progressive-web-apps) — confirmed Serwist, confirmed Webpack requirement (2026-03-25 update)
-- [@serwist/next on npm](https://www.npmjs.com/package/@serwist/next) — v9.5.7, published 15 days ago
-- [sqlite-vec JS docs](https://alexgarcia.xyz/sqlite-vec/js.html) — v0.1.8, Node.js usage patterns
-- [sqlite-vec GitHub](https://github.com/asg017/sqlite-vec) — active maintenance confirmed
-- [Vercel AI SDK](https://ai-sdk.dev/docs/introduction) — v6.0.141 current
-- [AI SDK Anthropic provider](https://ai-sdk.dev/providers/ai-sdk-providers/anthropic) — confirmed Claude support
-- [Home Assistant REST API](https://developers.home-assistant.io/docs/api/rest/) — v2026.3.4
-- [Prisma + Neon + Vercel guide](https://www.prisma.io/docs/guides/frameworks/nextjs) — official Prisma docs
-- [Neon vs Supabase 2026](https://www.devpick.io/compare/neon-vs-supabase) — comparison with Vercel integration context
-- [react-speech-recognition npm](https://www.npmjs.com/package/react-speech-recognition) — v4.0.1, published 6 months ago
-- [leaflet.offline GitHub](https://github.com/allartk/leaflet.offline) — IndexedDB tile caching for Leaflet
+- [Next.js official PWA guide](https://nextjs.org/docs/app/guides/progressive-web-apps) — confirms Serwist, confirms webpack requirement, confirms manifest.ts pattern (updated 2026-03-31)
+- [Serwist @serwist/next on npm](https://www.npmjs.com/package/@serwist/next) — v9.5.7, published ~March 2026
+- [Zod v4 versioning](https://zod.dev/v4/versioning) — confirms `"zod"` root now exports v4, `"zod/v4"` subpath deprecated
+- [Zod 4.3.6 on npm](https://www.npmjs.com/package/zod) — latest stable, published ~March 2026
+- [InfoQ: Zod v4 stable release](https://www.infoq.com/news/2025/08/zod-v4-available/) — August 2025 stable release confirmation
+- [nodemailer 8.0.4 on npm](https://www.npmjs.com/package/nodemailer) — latest stable, published April 2026
+- [@types/nodemailer 7.0.11](https://www.npmjs.com/package/@types/nodemailer) — TS types, published February 2026
+- [idb 8.0.3 — Jake Archibald, GitHub](https://github.com/jakearchibald/idb) — IndexedDB wrapper, MDN-referenced
+- [Building offline-first PWA with Next.js + IndexedDB (2026)](https://oluwadaprof.medium.com/building-an-offline-first-pwa-notes-app-with-next-js-indexeddb-and-supabase-f861aa3a06f9) — idb usage pattern confirmation
+- [Mailtrap Next.js email guide 2026](https://mailtrap.io/blog/nextjs-send-email/) — nodemailer + Gmail App Password pattern for personal-use apps
+
+---
+
+*Stack research for: Outland OS v1.1 Close the Loop (new additions only)*
+*Researched: 2026-04-01*

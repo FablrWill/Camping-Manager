@@ -1,358 +1,447 @@
-# Architecture Patterns
+# Architecture Research
 
-**Domain:** Personal camping assistant / second brain (Next.js 16 App Router)
-**Researched:** 2026-03-30
-**Confidence:** HIGH for PWA/HA patterns; MEDIUM for RAG/agent layer
-
----
-
-## Current Architecture (Baseline)
-
-The app already has a clean, working layered pattern:
-
-```
-Browser
-  └── Server Components (data fetch, ISR)
-        └── Client Components (state, interactions)
-              └── API Routes (REST, try/catch, JSON)
-                    └── Prisma ORM
-                          └── SQLite file
-                    └── External Services (Claude API, Open-Meteo)
-```
-
-All new features extend this baseline without disrupting it. New layers sit alongside or wrap existing layers — not inside them.
+**Domain:** Personal camping assistant — v1.1 Close the Loop (PWA/offline, learning loop, trip execution)
+**Researched:** 2026-04-01
+**Confidence:** HIGH for PWA/offline patterns; HIGH for learning loop (existing voice debrief infrastructure); HIGH for trip sequencer (existing prep infrastructure)
 
 ---
 
-## New Component Map
+## Existing Architecture Baseline
 
-### 1. PWA / Offline Layer
-
-```
-public/sw.js (Service Worker)
-  ├── Cache Strategy: app shell (stale-while-revalidate)
-  ├── Cache Strategy: API responses (network-first, cache-fallback)
-  ├── Cache Strategy: map tiles (cache-first, 50MB quota)
-  └── Background Sync: deferred writes queue
-
-app/manifest.ts (Web App Manifest)
-  └── Next.js built-in, no library needed
-
-lib/offline/
-  ├── useOnlineStatus.ts   — network detection hook
-  ├── syncQueue.ts         — IndexedDB queue for offline mutations
-  └── tileCache.ts         — Leaflet tile layer with CacheStorage backend
-```
-
-**How it integrates:** The service worker intercepts fetch requests. App shell routes (HTML, JS, CSS) use stale-while-revalidate. REST API calls use network-first with a fallback to the last cached response. Map tiles use cache-first with a bounded 50MB quota. Offline mutations (new gear, packing check-offs) go into an IndexedDB sync queue and replay via Background Sync when connectivity returns.
-
-**Key constraint:** Serwist (the recommended offline library) requires Webpack, not Turbopack. The `next.config.js` `dev` script must use `next dev --no-turbo` when Serwist is active. Alternatively, write a minimal manual service worker in `public/sw.js` — this avoids the build tool dependency entirely and is simpler for a single-user app.
-
-**Recommendation:** Manual service worker in `public/sw.js`. About 80 lines. Skip Serwist/next-pwa. Register it with `navigator.serviceWorker.register('/sw.js')` in a client component that loads on every page.
-
----
-
-### 2. RAG Knowledge Base
-
-```
-lib/rag/
-  ├── ingest.ts           — chunk + embed documents, write to knowledge_chunks table
-  ├── search.ts           — hybrid search: FTS5 + vector similarity, RRF merge
-  └── context.ts          — assemble retrieved chunks into Claude prompt context
-
-prisma/schema.prisma additions:
-  KnowledgeChunk
-    id, source, title, content (text), embedding (blob), metadata (json)
-    FTS5 virtual table: knowledge_chunks_fts (managed outside Prisma)
-
-tools/ingest/
-  └── nc-camping-corpus.ts — Node script to ingest markdown files, URLs, PDFs
-```
-
-**How it integrates:** The RAG layer is a pure server-side concern. Client components call `/api/agent` (the chat endpoint) which calls `lib/rag/search.ts` to retrieve relevant chunks, then passes them as context to the Claude API call.
-
-**Vector search approach:** Use `sqlite-vec` (Node.js loadable extension, maintained by Alex Garcia). Embedding model: `text-embedding-3-small` via OpenAI API, or `voyage-3-lite` via Anthropic's recommended provider. Store embeddings as BLOB in SQLite, query with `vec_distance_cosine()`.
-
-**FTS5 note:** Prisma does not manage FTS5 virtual tables. Create them in a raw SQL migration file (`prisma/migrations/xxx_fts5/migration.sql`) using `CREATE VIRTUAL TABLE IF NOT EXISTS knowledge_chunks_fts USING fts5(...)` with a trigger to keep it in sync. This is a one-time setup.
-
-**Hybrid search pattern (Reciprocal Rank Fusion):**
-```
-results = merge(fts5_results, vector_results, k=60)
-score = Σ 1/(k + rank_i) for each result list
-```
-This outperforms either search type alone for camping knowledge queries (location names, gear names, technique descriptions).
-
-**Data flow:**
-```
-User query
-  → /api/agent POST
-    → lib/rag/search.ts (FTS5 + vec_distance_cosine)
-      → top-k chunks retrieved
-    → lib/claude.ts (system prompt + chunks + query)
-      → Claude API streaming response
-    → SSE stream → client ChatClient component
-```
-
----
-
-### 3. AI Agent Layer
-
-```
-lib/agent/
-  ├── tools.ts            — Claude tool definitions (search_spots, get_gear, get_weather)
-  ├── orchestrator.ts     — multi-turn conversation with tool use loop
-  └── prompts.ts          — system prompts per agent persona
-
-app/api/agent/route.ts    — streaming SSE endpoint
-  └── POST: { message, conversationId, context }
-
-components/ChatClient.tsx — messenger-style UI, SSE reader, tool call visibility
-app/chat/page.tsx         — chat page entry point
-```
-
-**How it integrates:** The agent layer wraps the existing Claude integration in `lib/claude.ts`. The orchestrator runs the tool-use loop server-side: Claude calls a tool → server executes it against Prisma/RAG → result fed back to Claude → repeat until final text response. Streaming uses Server-Sent Events via `ReadableStream` in the Next.js API route.
-
-**Tool definitions (Phase 3 scope):**
-- `search_knowledge_base` — queries RAG system
-- `get_weather` — calls existing `lib/weather.ts`
-- `find_nearby_spots` — queries Location table by radius
-- `get_gear_inventory` — queries GearItem table
-- `get_trip_context` — returns active trip data
-
-**Cost control:** Use `claude-haiku-3-5` for tool calls and context retrieval; escalate to `claude-sonnet-4-5` only for final answer synthesis. Cache conversation context in session (or a `Conversation` DB model) to avoid resending full history each turn.
-
-**Streaming pattern:**
-```typescript
-// app/api/agent/route.ts
-export async function POST(req: Request) {
-  const stream = new ReadableStream({
-    async start(controller) {
-      for await (const chunk of claudeStream) {
-        controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify(chunk)}\n\n`))
-      }
-      controller.close()
-    }
-  })
-  return new Response(stream, { headers: { 'Content-Type': 'text/event-stream' } })
-}
-```
-
----
-
-### 4. Home Assistant Bridge
-
-```
-lib/ha/
-  ├── client.ts           — REST client (fetch wrapper with Bearer token)
-  ├── ws.ts               — WebSocket client (home-assistant-js-websocket)
-  └── types.ts            — HA entity state types
-
-app/api/ha/
-  ├── state/[entityId]/route.ts  — GET: fetch entity state, POST: call service
-  └── devices/route.ts           — GET: list all HA entities
-
-components/SmartCampClient.tsx   — device status dashboard
-app/camp/page.tsx                — "smart campsite" page
-```
-
-**How it integrates:** The HA connection lives entirely on the server side. `lib/ha/client.ts` stores `HA_URL` and `HA_TOKEN` in environment variables. Client components call the Next.js proxy routes (`/api/ha/...`) — the browser never touches the HA instance directly. This is the correct pattern for a local-network HA instance: the Next.js server acts as the bridge.
-
-**REST vs WebSocket decision:**
-- REST (`/api/ha/state/...`): Use for on-demand state reads (dashboard load, manual refresh). Simple, stateless, easy to cache.
-- WebSocket (`home-assistant-js-websocket`): Use only if real-time state streaming is needed (live sensor updates). For a camping dashboard that refreshes on tap, REST is sufficient and simpler.
-
-**Recommendation:** Start with REST only. Add WebSocket later if live updates become a real need.
-
-**Auth pattern:**
-```typescript
-// lib/ha/client.ts
-const HA_HEADERS = {
-  Authorization: `Bearer ${process.env.HA_TOKEN}`,
-  'Content-Type': 'application/json',
-}
-
-export async function getEntityState(entityId: string) {
-  const res = await fetch(`${process.env.HA_URL}/api/states/${entityId}`, {
-    headers: HA_HEADERS,
-    next: { revalidate: 30 }, // ISR cache for 30s
-  })
-  return res.json()
-}
-```
-
-**HA hardware constraint:** HA instance not available until mid-April 2026. Build the schema (SmartDevice fields on GearItem) and proxy routes now. Wire up real HA calls when the hardware arrives.
-
----
-
-### 5. Voice Input
-
-```
-lib/voice/
-  └── useSpeechInput.ts   — Web Speech API hook with fallback state
-
-components/VoiceDebrief.tsx — voice recording UI, transcript display
-app/api/debrief/route.ts   — POST transcript → Claude → structured debrief
-```
-
-**Browser support reality:** Web Speech API works on Chrome/Chromium and iOS Safari 14.5+. Firefox: no. Android Chrome: yes. Given this is a personal tool Will uses on his phone (presumably iOS Safari), Web Speech API is viable but needs a graceful text fallback for the few cases it fails.
-
-**Alternative:** If Web Speech API proves too unreliable on iOS, use `MediaRecorder` to capture audio and POST the blob to `app/api/transcribe/route.ts` which calls Whisper via OpenAI API (not Claude). Whisper is more reliable but adds API cost and latency. Start with Web Speech API; add Whisper fallback if needed.
-
-**Data flow:**
-```
-User taps "Start Debrief"
-  → useSpeechInput hook activates SpeechRecognition
-  → Interim transcript shown live in VoiceDebrief component
-  → User taps "Done"
-  → Full transcript POST → /api/debrief
-    → Claude: extract trip highlights, gear notes, rating, location notes
-    → Structured JSON response
-  → UI offers: "Save to Trip", "Add to Gear Notes"
-```
-
----
-
-### 6. Database Migration Path (SQLite → Postgres)
-
-This is a deploy-time concern, not a feature. The existing Prisma schema is fully portable.
-
-**Migration steps:**
-1. Change `datasource db { provider = "sqlite" }` → `provider = "postgresql"`
-2. Add `DATABASE_URL` to Vercel env vars (Vercel Postgres or Neon)
-3. Run `npx prisma migrate deploy` in Vercel build command
-4. For SQLite-specific things (FTS5 virtual tables, sqlite-vec extension): these do NOT migrate. The RAG system needs a Postgres alternative at deploy time — `pgvector` for vectors, native Postgres FTS for text.
-
-**Recommendation:** Keep SQLite locally (it works great). At Vercel deploy time, swap to Postgres + pgvector. This is a one-time migration effort, not something to solve now.
-
----
-
-## Complete Component Boundary Map
+Before examining new integration points, the existing system is:
 
 ```
 Browser (Client)
-├── App Shell (cached by SW)
-│   ├── ChatClient           → /api/agent (SSE stream)
-│   ├── SmartCampClient      → /api/ha/state
-│   ├── VoiceDebrief         → Web Speech API → /api/debrief
-│   ├── SpotMap (Leaflet)    → tile cache (SW CacheStorage)
-│   └── Offline indicator    → useOnlineStatus hook
+  └── Server Components (data fetch via Promise.all)
+        └── Client Components (useState, useCallback, useEffect)
+              └── REST API Routes (try/catch, NextResponse.json)
+                    └── Prisma ORM → SQLite file
+                    └── External Services (Claude API, Open-Meteo, OpenAI Whisper)
+
+lib/
+  ├── claude.ts        — packing list, meal plan generation
+  ├── weather.ts       — Open-Meteo wrapper
+  ├── rag/             — FTS5 + sqlite-vec hybrid search
+  ├── agent/           — Claude tool-use orchestrator + SSE streaming
+  └── voice/           — Whisper transcription + insight extraction
+```
+
+All four v1.1 feature areas integrate with this baseline without disrupting it. Each adds a layer alongside existing layers.
+
+---
+
+## System Overview
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        Browser (Client)                          │
+│  ┌──────────┐  ┌──────────┐  ┌──────────────┐  ┌────────────┐  │
+│  │TripsClient│  │TripPrep  │  │VoiceDebrief  │  │OfflineBar  │  │
+│  │(enhanced)│  │(+Sequencer│  │(+Learning    │  │(new)       │  │
+│  │          │  │+Safety   │  │ Loop)        │  │            │  │
+│  └────┬─────┘  └────┬─────┘  └──────┬───────┘  └──────┬─────┘  │
+│       │              │               │                  │        │
+├───────┴──────────────┴───────────────┴──────────────────┴────────┤
+│                    Service Worker (public/sw.js)                  │
+│  App Shell → stale-while-revalidate                              │
+│  Trip API  → network-first, offline fallback                     │
+│  Map tiles → cache-first, 50MB quota                             │
+├─────────────────────────────────────────────────────────────────┤
+│                      Next.js API Routes                          │
+│  /api/trips/[id]/cache       (new — "Leaving Now" snapshot)      │
+│  /api/trips/[id]/sequencer   (new — day-of checklist)            │
+│  /api/trips/[id]/safety-email (new — departure float plan)       │
+│  /api/voice/apply (existing) + /api/voice/extract (existing)     │
+│  /api/gear/usage             (new — mark used/unused post-trip)  │
+└─────────────────────────────────────────────────────────────────┘
 │
-Service Worker (public/sw.js)
-├── App shell: stale-while-revalidate
-├── API responses: network-first, cache-fallback
-├── Tiles: cache-first, 50MB bounded
-└── Background Sync: mutation replay queue
-│
-Next.js Server
-├── /api/agent              → lib/agent/orchestrator.ts → Claude API
-├── /api/ha/state           → lib/ha/client.ts → HA REST API
-├── /api/debrief            → lib/claude.ts → Claude API
-├── /api/knowledge/search   → lib/rag/search.ts → SQLite (FTS5 + vec)
-└── All existing routes     → Prisma → SQLite
-│
-External Services
-├── Claude API (Anthropic)   — agent, RAG synthesis, debrief
-├── Home Assistant REST      — device states, service calls
-├── Open-Meteo               — weather (existing)
-└── Embedding API            — text-embedding-3-small for RAG ingest
+┌─────────────────────────────────────────────────────────────────┐
+│                    Prisma ORM + SQLite                           │
+│  Trip (enhanced: cachedAt, cacheData fields)                     │
+│  PackingItem (enhanced: usedOnTrip, notUsed, forgotNeeded)       │
+│  GearItem (existing: notes field — debrief appends here)         │
+│  Location (existing: rating — debrief can update)                │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Data Flow: Offline Write Cycle
+## Component Responsibilities
 
-The most important new flow — getting data into the DB when offline:
-
-```
-User action (e.g., check packing item while camping, no signal)
-  → Optimistic UI update (local state)
-  → syncQueue.ts: write to IndexedDB queue (mutation type + payload)
-  → If online: immediate flush → /api/[route] → Prisma → SQLite
-  → If offline: queue persists
-  → On reconnect: Background Sync fires → service worker flushes queue
-  → API routes process queued mutations in order
-  → UI reconciles (no duplicate writes — idempotent mutation design)
-```
-
-**Key requirement:** All mutation API routes must be idempotent (safe to call twice). Use `upsert` over `create` where possible, or include a client-generated `idempotencyKey` field on mutable models.
-
----
-
-## Build Order (Dependency Graph)
-
-Features must be built in this order to avoid rework:
-
-```
-Phase 2 (current):
-  1. Meal planning + power budget (Claude API — no new arch needed)
-  2. Trip prep executive view (UI composition — no new arch needed)
-
-Phase 3a — Foundation for intelligence:
-  3. SmartDevice fields on GearItem (schema) → enables HA bridge UI later
-  4. RAG ingest pipeline (lib/rag/) → knowledge base populated before agent needs it
-  5. Agent chat interface + /api/agent route (lib/agent/) → depends on RAG
-  6. HA proxy routes (lib/ha/) → schema exists from step 3; wire up when HW arrives
-
-Phase 3b — Voice (parallel, no deps on 3a):
-  7. Voice debrief (lib/voice/) → independent, can be built any time
-
-Phase 4 — PWA + Deploy:
-  8. Service worker + manifest → add after core features stable (SW adds complexity)
-  9. Offline sync queue → depends on SW; add alongside or after SW
- 10. Offline map tile caching → depends on SW
- 11. SQLite → Postgres migration → only at Vercel deployment time
-```
-
-**Do not build the service worker early.** SW caching makes local dev confusing (stale responses, need to manually clear cache). Build it last, after all features work online.
+| Component | Responsibility | Status |
+|-----------|---------------|--------|
+| `public/sw.js` | Intercept fetches, cache app shell + API + tiles | New |
+| `app/manifest.ts` | PWA install metadata | New |
+| `lib/offline/useOnlineStatus.ts` | Hook: window online/offline events | New |
+| `lib/offline/tripCache.ts` | Snapshot trip data to IndexedDB on "Leaving Now" | New |
+| `components/OfflineBar.tsx` | Banner shown when `useOnlineStatus` returns false | New |
+| `app/api/trips/[id]/cache/route.ts` | Server: assemble + return full trip snapshot JSON | New |
+| `components/TripSequencer.tsx` | Day-of departure checklist ordered by time | New |
+| `app/api/trips/[id]/sequencer/route.ts` | Server: build ordered checklist from packing + meals + power | New |
+| `app/api/trips/[id]/safety-email/route.ts` | Server: format + send trip summary email via Nodemailer | New |
+| `components/InsightsReviewSheet.tsx` | Existing — review voice debrief before applying | Exists |
+| `components/VoiceDebriefButton.tsx` | Existing — trigger debrief modal | Exists |
+| `app/api/voice/apply/route.ts` | Existing — write gear notes, location rating, trip notes | Exists |
+| `components/GearUsageTracker.tsx` | Post-trip: mark each packing item used/unused/forgot | New |
+| `app/api/gear/usage/route.ts` | Server: batch update PackingItem usedOnTrip/notUsed flags | New |
 
 ---
 
-## Anti-Patterns to Avoid
+## Recommended Project Structure (New Files Only)
 
-### Putting HA credentials in client-side code
-**What goes wrong:** `HA_TOKEN` leaks to the browser via env vars prefixed `NEXT_PUBLIC_`.
-**Instead:** All HA calls go through Next.js API routes. Token stays server-side only.
+```
+public/
+├── sw.js                        # Manual service worker (no Serwist needed)
+├── icon-192x192.png             # PWA icons
+└── icon-512x512.png
 
-### Service worker in development
-**What goes wrong:** SW caches responses, dev changes don't appear, hours of debugging.
-**Instead:** Register SW only when `process.env.NODE_ENV === 'production'` or use a dev-bypass flag.
+app/
+├── manifest.ts                  # Next.js built-in PWA manifest
+├── api/trips/[id]/
+│   ├── cache/route.ts           # "Leaving Now" data snapshot
+│   ├── sequencer/route.ts       # Day-of departure checklist
+│   └── safety-email/route.ts    # Departure float plan email
+├── api/gear/
+│   └── usage/route.ts           # Batch gear usage flags
 
-### Running FTS5 and vector search on every keystroke
-**What goes wrong:** SQLite under load with a 50k-chunk knowledge base is slow in the hot path.
-**Instead:** Debounce search input (300ms). For the chat agent, search happens once per user message, not incrementally.
+lib/
+└── offline/
+    ├── useOnlineStatus.ts       # Hook: navigator.onLine + events
+    └── tripCache.ts             # IndexedDB get/set for trip snapshot
 
-### Building RAG before having corpus
-**What goes wrong:** RAG system built, tested with placeholder data, then real corpus reveals chunking strategy is wrong.
-**Instead:** Gather 20-30 real NC camping documents first. Test chunking and search quality before wiring to Claude.
+components/
+├── OfflineBar.tsx               # "You're offline — trip data cached" banner
+├── TripSequencer.tsx            # Departure checklist component
+└── GearUsageTracker.tsx         # Post-trip used/unused tracker
+```
 
-### Migrating to Postgres prematurely
-**What goes wrong:** Postgres requires a running server (even locally via Docker), adding friction to daily dev.
-**Instead:** SQLite locally through all development. Migrate only when deploying to Vercel.
+### Structure Rationale
+
+- **`public/sw.js`:** Service workers must be at the root origin to intercept all requests. A manual file avoids Serwist's Webpack requirement and is sufficient for a single-user app.
+- **`lib/offline/`:** Keeps IndexedDB logic separate from components. `tripCache.ts` is the only place that reads/writes the offline snapshot — prevents scattered IndexedDB calls.
+- **`app/api/trips/[id]/`:** Groups all trip-specific operations together. The cache route is a read-only data aggregator; the sequencer and safety-email routes compute from existing data.
+
+---
+
+## Architectural Patterns
+
+### Pattern 1: "Leaving Now" Snapshot
+
+**What:** When Will taps "Leaving Now", the client calls `/api/trips/[id]/cache` which assembles all trip data into one JSON payload: packing list, meal plan, weather forecast, location details, map center point. The client writes this to IndexedDB. The service worker serves this data when offline.
+
+**When to use:** At the departure trigger point. Not a background sync — it is an explicit user action.
+
+**Trade-offs:** Simple to implement, no continuous sync complexity. Snapshot is stale-as-of-departure (no live updates). Acceptable for trip use: weather was checked at departure, packing list finalized.
+
+**Example:**
+```typescript
+// lib/offline/tripCache.ts
+const DB_NAME = 'outland-offline'
+const STORE = 'trip-snapshots'
+
+export async function saveTripSnapshot(tripId: string, data: TripSnapshot) {
+  const db = await openDB(DB_NAME, 1, {
+    upgrade(db) { db.createObjectStore(STORE) }
+  })
+  await db.put(STORE, data, tripId)
+}
+
+export async function getTripSnapshot(tripId: string): Promise<TripSnapshot | undefined> {
+  const db = await openDB(DB_NAME, 1)
+  return db.get(STORE, tripId)
+}
+```
+
+### Pattern 2: Network-First API Caching
+
+**What:** The service worker intercepts `fetch` calls to `/api/*` routes. It tries the network first; on failure (offline), it returns the last cached response for that URL. Non-API fetches (app shell, static assets) use stale-while-revalidate.
+
+**When to use:** All REST API calls during trips. This handles incidental offline reads (checking packing list, viewing weather last-fetched, reading meal plan).
+
+**Trade-offs:** Dead-simple. No sync queue needed for read-heavy use (which trip execution is). Write operations (checking off packing items) still require connectivity OR a separate offline queue. For v1.1, packing item checks can fail gracefully with a "saved when back online" toast — full offline writes are a v2 concern.
+
+**Example:**
+```javascript
+// public/sw.js (simplified)
+self.addEventListener('fetch', (event) => {
+  const url = new URL(event.request.url)
+
+  if (url.pathname.startsWith('/api/')) {
+    event.respondWith(
+      fetch(event.request)
+        .then(res => {
+          const clone = res.clone()
+          caches.open('api-v1').then(cache => cache.put(event.request, clone))
+          return res
+        })
+        .catch(() => caches.match(event.request))
+    )
+    return
+  }
+
+  // App shell: stale-while-revalidate
+  event.respondWith(
+    caches.match(event.request).then(cached => cached || fetch(event.request))
+  )
+})
+```
+
+### Pattern 3: Post-Trip Learning Loop
+
+**What:** After a trip completes, the system offers two parallel flows: (1) Gear Usage Tracker — Will marks each packing item as used/not used/forgot; (2) Voice Debrief — existing `InsightsReviewSheet` already handles gear notes, location ratings, trip notes. The learning loop is not a new architectural layer — it is a post-trip state transition that writes back to existing models.
+
+**When to use:** Trip status transitions from "in progress" to "completed" (based on `endDate` passing). Surface both flows on the trip detail page when `now > endDate`.
+
+**Trade-offs:** Reuses existing `InsightsReviewSheet` and `voice/apply` route, which already handle gear/location/trip note updates. The only new piece is the gear usage flag batch update and the "packed but didn't use" intelligence query at packing list generation time.
+
+**Data model additions needed:**
+```prisma
+// PackingItem additions (new migration)
+model PackingItem {
+  // ... existing fields
+  usedOnTrip   Boolean?   // null=not tracked, true=used, false=not used
+  forgotNeeded Boolean?   // true=forgot this + needed it
+  reviewedAt   DateTime?  // when Will reviewed this trip's gear
+}
+```
+
+**Closed-loop packing improvement:**
+
+The existing `generatePackingList` in `lib/claude.ts` already takes gear inventory as context. After the learning loop adds usage data, the next packing list generation can include a history section in the prompt:
+
+```
+GEAR HISTORY (from past trips):
+- Headlamp: used 4/4 trips — always pack
+- Camp chair (heavier): used 1/4 trips — pack only for 2+ nights
+- Rain jacket: not packed but needed 1 trip (rainy weekend trip)
+```
+
+This requires a `getGearUsageHistory()` query that aggregates PackingItem usage flags across trips, grouped by gearId.
+
+---
+
+## Data Flow
+
+### Request Flow: "Leaving Now"
+
+```
+Will taps "Leaving Now" button
+    ↓
+TripPrepClient → POST /api/trips/[id]/cache
+    ↓
+Server: assembles TripSnapshot {
+  trip, location, weather, packingItems, mealPlan, photos with GPS
+}
+    ↓
+Client: saveTripSnapshot(id, data) → IndexedDB
+    ↓
+SW: caches all trip API routes for offline
+    ↓
+Confirmation: "Trip data saved. You're ready to go."
+```
+
+### Request Flow: Post-Trip Learning Loop
+
+```
+Trip endDate passes (or Will taps "Trip Complete")
+    ↓
+TripsClient shows "Review this trip" prompt
+    ↓
+Path A: GearUsageTracker
+  Will checks off used/unused/forgot items
+  → POST /api/gear/usage { tripId, items: [{gearId, usedOnTrip, forgotNeeded}] }
+  → Server: batch update PackingItem rows
+  → Next packing list for similar trip includes usage history
+
+Path B: VoiceDebrief (existing)
+  Will records voice notes
+  → Whisper transcription → Claude insight extraction
+  → InsightsReviewSheet UI
+  → POST /api/voice/apply → gear notes, location rating, trip notes updated
+```
+
+### Request Flow: Day-Of Sequencer
+
+```
+Will opens trip on departure day
+    ↓
+TripPrepClient shows "Day Of" tab (visible when now >= startDate - 1 day)
+    ↓
+GET /api/trips/[id]/sequencer
+    ↓
+Server builds time-ordered checklist:
+  1. Charge gear with batteries (hasBattery=true from GearItem)
+  2. Load packing items by category (shelter/sleep/cook → load in reverse)
+  3. Pre-trip meal prep tasks (from mealPlan.prepTimeline)
+  4. Safety email trigger
+  5. "Leaving Now" button (triggers cache snapshot)
+    ↓
+TripSequencer component: displays ordered cards, checkable steps
+```
+
+### State Management
+
+```
+Online state:         useOnlineStatus hook (window events) → OfflineBar
+Trip snapshot state:  IndexedDB via tripCache.ts (persists across sessions)
+Sequencer state:      useState in TripSequencer (ephemeral — resets per departure)
+Gear usage state:     useState in GearUsageTracker → batched POST on "Save"
+```
+
+---
+
+## Integration Points
+
+### Existing System → New Features
+
+| Existing Component | How v1.1 Integrates |
+|-------------------|---------------------|
+| `TripPrepClient.tsx` | Add "Day Of" tab that renders `TripSequencer`; add "Leaving Now" button that calls cache route |
+| `TripsClient.tsx` | Add "Review trip" state when `now > endDate`; renders `GearUsageTracker` + debrief prompt |
+| `lib/claude.ts generatePackingList()` | Add `gearUsageHistory` param; inject packed-but-unused history into prompt |
+| `app/api/trips/[id]/prep/route.ts` | Already returns packing + weather — this feeds the cache snapshot route |
+| `PackingItem` model | Add `usedOnTrip`, `forgotNeeded`, `reviewedAt` fields (new migration) |
+| `InsightsReviewSheet.tsx` | No changes needed — existing component handles voice debrief review |
+| `app/api/voice/apply/route.ts` | No changes needed — already writes back to gear, location, trip |
+
+### New External Dependencies
+
+| Service | Integration Pattern | Notes |
+|---------|---------------------|-------|
+| Nodemailer (npm) | Server-side: `lib/email.ts` wraps nodemailer; safety-email route calls it | Needs `EMAIL_FROM`, `EMAIL_TO`, `SMTP_*` env vars |
+| IndexedDB (native) | Client-side: `lib/offline/tripCache.ts` uses `idb` npm wrapper | `idb` is 1KB; simpler than raw IndexedDB API |
+| Service Worker API (native) | `public/sw.js` registered in `AppShell.tsx` useEffect | Register only in production; skip in dev |
+| Web App Manifest | `app/manifest.ts` (Next.js built-in) | Zero dependencies |
+
+### Internal Boundaries
+
+| Boundary | Communication | Notes |
+|----------|---------------|-------|
+| `TripPrepClient` ↔ cache route | HTTP POST → JSON snapshot | Snapshot is read-only; no writes from offline client |
+| `TripSequencer` ↔ sequencer route | HTTP GET → ordered checklist | Stateless — regenerates each visit |
+| `GearUsageTracker` ↔ gear usage route | HTTP POST → batch update | Idempotent: uses upsert on (tripId, gearId) |
+| `AppShell` ↔ service worker | `navigator.serviceWorker.register` | SW registered once on app load; `skipWaiting` + `clients.claim` for immediate activation |
+
+---
+
+## Anti-Patterns
+
+### Anti-Pattern 1: Serwist/next-pwa for a simple offline requirement
+
+**What people do:** Install `@serwist/next` or `next-pwa`, add webpack plugin config, write complex SW rules.
+
+**Why it's wrong:** Serwist requires Webpack (not Turbopack). Next.js 16 defaults to Turbopack for dev. Adds build complexity and a large dependency for what is ultimately ~80 lines of custom service worker code.
+
+**Do this instead:** Write a manual `public/sw.js`. Register it in `AppShell.tsx`. Cache the routes you actually need (trip API, app shell). Takes 2 hours to build, zero build tool friction.
+
+### Anti-Pattern 2: Full offline-write sync queue for v1.1
+
+**What people do:** Build IndexedDB mutation queue + Background Sync API + server-side replay logic for all write operations.
+
+**Why it's wrong:** Background Sync API has limited iOS Safari support. A sync queue requires idempotency keys on every mutation model, conflict resolution logic, and debugging complexity that is completely disproportionate for a single-user app where "offline writes" means checking off packing items at a campsite.
+
+**Do this instead:** For v1.1, offline writes fail gracefully with a "Syncing when back online" toast. The "Leaving Now" snapshot covers all reads. True offline writes are a v2 concern if they prove to be a real gap during actual trip use.
+
+### Anti-Pattern 3: Re-generating the packing list as the learning loop output
+
+**What people do:** Run Claude on trip completion to "improve" the packing list and overwrite it.
+
+**Why it's wrong:** Overwrites Will's manual packing decisions. If he deliberately excluded an item, the AI shouldn't add it back.
+
+**Do this instead:** Keep usage history as input to the next *new* packing list generation. The existing packing list stays untouched. When generating a new list for a similar trip, inject the history as a context section (packed/used, packed/unused, forgot/needed). Claude uses it as signal, not gospel.
+
+### Anti-Pattern 4: Service worker in development
+
+**What people do:** Register the SW unconditionally in `AppShell.tsx`.
+
+**Why it's wrong:** SW caches API responses. Dev changes to data or routes don't appear. Hours of debugging "why isn't my change working" that turns out to be a stale cached response.
+
+**Do this instead:**
+```typescript
+// AppShell.tsx
+useEffect(() => {
+  if (process.env.NODE_ENV === 'production' && 'serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js', { scope: '/' })
+  }
+}, [])
+```
+
+### Anti-Pattern 5: Safety email via a third-party email SaaS
+
+**What people do:** Sign up for SendGrid or Resend, add API keys, handle webhooks.
+
+**Why it's wrong:** Overkill for one email per trip to one recipient. Will doesn't need delivery tracking, templates, or a dashboard.
+
+**Do this instead:** Nodemailer with Will's Gmail via App Password (SMTP). One npm package, one `.env` entry, done. If Gmail SMTP proves unreliable, swap to Resend's free tier (100/day) later — same interface, same code.
+
+---
+
+## Build Order (v1.1 Dependency Graph)
+
+Build in this sequence to avoid rework:
+
+```
+Block 1 — Stabilization (no new architecture, just fixes):
+  1. Fix critical bugs (JSON.parse, upsert, CRUD gaps)
+  2. Add Zod validation (parseClaudeJSON utility)
+  3. Persist packing list + meal plan results to DB
+
+Block 2 — Schema additions (run migration once, unblocks everything):
+  4. Add PackingItem: usedOnTrip, forgotNeeded, reviewedAt
+  (No Trip schema changes needed — TripSnapshot stored in IndexedDB, not SQLite)
+
+Block 3 — Day-Of features (no offline dependency):
+  5. Trip Sequencer route + TripSequencer component
+     - GET /api/trips/[id]/sequencer
+     - Reads existing packing + meals + gear.hasBattery
+     - Adds "Day Of" tab to TripPrepClient
+  6. Safety email route + UI trigger
+     - POST /api/trips/[id]/safety-email
+     - Nodemailer + lib/email.ts
+     - "Send Float Plan" button in sequencer
+
+Block 4 — PWA / Offline (can be parallel with Block 3):
+  7. app/manifest.ts + PWA icons
+  8. public/sw.js (app shell + network-first API caching)
+  9. AppShell.tsx SW registration (production only)
+  10. lib/offline/useOnlineStatus.ts + OfflineBar component
+  11. lib/offline/tripCache.ts (IndexedDB snapshot)
+  12. /api/trips/[id]/cache route + "Leaving Now" button in TripPrepClient
+
+Block 5 — Learning Loop (depends on Block 2 schema):
+  13. GearUsageTracker component
+  14. /api/gear/usage route (batch upsert)
+  15. Post-trip "Review" state in TripsClient
+  16. Inject usage history into generatePackingList() in lib/claude.ts
+```
+
+**Key dependency rule:** Block 5 requires Block 2's schema migration. Everything else is independent — Blocks 3 and 4 can be built in any order after Block 1.
 
 ---
 
 ## Scalability Notes
 
-This is a single-user app. Scalability here means "works well for one user with years of data."
+This is a single-user app. Scalability means "works well across years of data."
 
-| Concern | Current approach | At scale (5+ years of data) |
-|---------|-----------------|------------------------------|
-| SQLite query speed | Fine for hundreds of records | Add indexes on timestamp, coordinates, tripId |
-| Knowledge base size | N/A yet | 10k-50k chunks is comfortable for sqlite-vec |
-| Claude API cost | Per-request, no concern | Add caching for identical prompts; Haiku for tool calls |
-| Tile cache size | N/A yet | Cap at 50MB; prune LRU tiles |
-| IndexedDB offline queue | N/A yet | Never grows large (flushes on reconnect) |
+| Concern | v1.1 approach | If it grows |
+|---------|--------------|-------------|
+| IndexedDB snapshot size | One snapshot per active trip, ~50KB JSON | Prune snapshots older than 30 days |
+| Gear usage history query | Simple JOIN on PackingItem + GearItem | Stays fast; add index on (gearId, reviewedAt) if > 500 trips |
+| Service worker cache | App shell + last 50 API responses | Set `maxEntries: 50` in SW fetch handler |
+| Safety email | Nodemailer SMTP, one email per trip | No scaling concern for personal use |
+| Packing list with history context | ~500 extra tokens in Claude prompt | No cost concern for personal use |
 
 ---
 
 ## Sources
 
-- [Next.js PWA Official Guide](https://nextjs.org/docs/app/guides/progressive-web-apps) — HIGH confidence, official docs, updated 2026-03-25
-- [Serwist + Next.js offline](https://github.com/serwist/serwist) — MEDIUM confidence (requires webpack, adds build complexity)
-- [sqlite-vec hybrid search](https://alexgarcia.xyz/blog/2024/sqlite-vec-hybrid-search/index.html) — HIGH confidence, authored by sqlite-vec maintainer
-- [home-assistant-js-websocket](https://github.com/home-assistant/home-assistant-js-websocket) — HIGH confidence, official HA library
-- [HA REST API docs](https://developers.home-assistant.io/docs/api/rest) — HIGH confidence, official HA developer docs
-- [Prisma + Vercel Postgres](https://vercel.com/kb/guide/nextjs-prisma-postgres) — HIGH confidence, official Vercel guide
-- [Web Speech API browser support](https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API) — HIGH confidence, MDN
-- [Dexie.js for IndexedDB](https://dexie.org/) — MEDIUM confidence (widely used, good for offline queues)
-- [LogRocket offline-first 2025](https://blog.logrocket.com/offline-first-frontend-apps-2025-indexeddb-sqlite/) — MEDIUM confidence (editorial, well-sourced)
+- [Next.js PWA Official Guide](https://nextjs.org/docs/app/guides/progressive-web-apps) — HIGH confidence, official docs, updated 2026-03-31
+- [LogRocket: Next.js 16 PWA with offline support](https://blog.logrocket.com/nextjs-16-pwa-offline-support/) — MEDIUM confidence (editorial, covers Serwist + idb approach)
+- [Next.js: Offline-First with App Router discussion](https://github.com/vercel/next.js/discussions/82498) — MEDIUM confidence (community thread, confirms patterns)
+- [idb library](https://dexie.org/) — HIGH confidence (widely used, minimal API surface)
+- [Workbox caching strategies (web.dev)](https://web.dev/learn/pwa/workbox) — HIGH confidence, Google reference
+
+---
+
+*Architecture research for: Outland OS v1.1 Close the Loop*
+*Researched: 2026-04-01*

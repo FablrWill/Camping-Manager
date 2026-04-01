@@ -1,234 +1,193 @@
 # Project Research Summary
 
-**Project:** Outland OS — personal camping second brain / AI-powered trip assistant
-**Domain:** Personal productivity tool (camping vertical) — offline-capable PWA with AI agent layer
-**Researched:** 2026-03-30
+**Project:** Outland OS — v1.1 Close the Loop
+**Domain:** Personal camping second brain — PWA/offline, post-trip learning loop, trip execution
+**Researched:** 2026-04-01
 **Confidence:** HIGH
 
 ## Executive Summary
 
-Outland OS is a personal camping second brain built on an already-solid Next.js 16 / Prisma / SQLite / Leaflet stack. The research confirms the existing stack is correct and extends naturally into 4 new capability layers: PWA/offline, a RAG knowledge base, an AI agent with tool use, and a Home Assistant bridge for smart campsite monitoring. The core product loop — gear inventory, trip planning, interactive spot map, weather, AI packing lists — is partially complete. The next highest-value work is finishing the meal planning and power budget features, then unifying them into a single executive trip prep view. No new libraries are needed for Phase 2; the stack additions are minimal and scoped to Phase 3 and Phase 4.
+Outland OS v1.1 is an incremental milestone on a well-established foundation. The existing stack (Next.js 16, Prisma/SQLite, Claude API, Leaflet, Tailwind) needs only three new libraries: `zod` for runtime validation of Claude API responses, `nodemailer` for the safety float plan email, and `idb` for offline trip data snapshots. All four feature areas — PWA/offline, day-of execution, learning loop, and stabilization — integrate with the existing architecture without disrupting it. The recommended build order is: stabilize first (fix bugs + add Zod validation + persist AI outputs), then ship offline and day-of features in parallel, then close the loop with gear usage tracking and post-trip review.
 
-The recommended build sequence is strict: complete the Phase 2 core loop before layering any intelligence features. The AI chat agent is only as good as the knowledge base backing it, so the RAG corpus must be built and retrieval quality tested before the chat interface is written. PWA/offline is best added last — service workers make local development significantly more painful and are easiest to retrofit on a stable codebase. The deploy-to-Vercel milestone requires a one-time SQLite→Postgres migration and a photo storage abstraction, both well-understood but requiring dedicated attention.
+The most important architectural decision in this milestone is how the "Leaving Now" offline snapshot works. The correct approach is IndexedDB (via `idb`) for trip data — not service worker response caching. Service worker caching is appropriate for the app shell and static assets; it is explicitly wrong for dynamic API data because stale responses silently replace fresh ones. The offline strategy is two-layer: service worker for the app shell, IndexedDB snapshot for trip content written at departure time. This is non-negotiable — the wrong approach requires a full rewrite to fix.
 
-The main risks are: (1) premature PWA work that complicates development before features are stable, (2) AI agent cost runaway without hard iteration limits, (3) SQLite data loss on Vercel if the migration is skipped, and (4) RAG retrieval quality failures if the corpus is chunked naively. All four are avoidable with the patterns documented in research — none require exotic solutions, but all require intentional design decisions baked in from day one of each phase.
-
----
+The biggest risk in this milestone is the learning loop data model. Post-trip feedback must be appended as events to a `TripFeedback` table, not written back to the source `GearItem` or `Location` records. Mutating source records destroys trip history, makes the feedback loop impossible to build, and has no undo path. The schema must be right before the debrief UI is built. A secondary risk is Serwist's hard dependency on Webpack — Next.js 16 defaults to Turbopack, so build scripts must be explicitly configured or the service worker silently doesn't generate. iOS storage clearing (7-day limit) is a real-world constraint that must be surfaced in the UI.
 
 ## Key Findings
 
 ### Recommended Stack
 
-The existing stack (Next.js 16, Prisma, SQLite, Leaflet, Claude API, Tailwind) needs no changes for Phase 2. Phase 3 adds three libraries and one direct API integration. Phase 4 (PWA) adds a service worker and a tile-caching Leaflet plugin. The deploy phase adds Neon Postgres and Vercel Blob — both are install-at-deploy-time, not install-now.
+Three new libraries are all that's needed for v1.1. Everything else builds on the existing stack. The new libraries are minimal, well-established, and chosen to solve specific problems with the least surface area.
 
-**Core new technologies:**
-- `@serwist/next` (9.5.7): PWA / service worker — the only actively maintained Next.js offline library; `next-pwa` was abandoned 2+ years ago. Requires Webpack; architecture research recommends a manual 80-line `public/sw.js` as a simpler alternative that avoids the Webpack/Turbopack conflict entirely.
-- `sqlite-vec` (0.1.8): vector similarity search inside existing SQLite — avoids external vector DB process; alpha-versioned but functional; pin the version and plan a migration to stable if 1.0 ships during development.
-- `leaflet.offline`: IndexedDB tile caching — used to build the explicit "Download for offline" pre-trip tile fetch flow; OSM tiles are NOT cached by generic service worker strategies.
-- `ai` + `@ai-sdk/anthropic` (Vercel AI SDK v6): streaming chat UI — `useChat` hook eliminates ~60% of streaming boilerplate; coexists cleanly with existing `@anthropic-ai/sdk` (keep both; use AI SDK for streaming chat, keep existing SDK for one-shot generation routes).
-- `react-speech-recognition` (4.0.1): voice debrief — browser-native Web Speech API; treat as progressive enhancement on iOS (Safari PWA mode is unreliable; Chrome on iOS uses WebKit and does not support the API at all).
-- Home Assistant REST API: thin `fetch` wrapper only, no npm library — all HA npm packages are unmaintained; the REST API is simple enough to wrap in ~50 lines.
-- Neon + `@prisma/adapter-neon`: serverless Postgres for Vercel — install at deploy time only; keeps SQLite for all local dev.
+**New libraries for v1.1:**
+- `zod` (4.3.6): Runtime validation for all Claude API responses — prevents crashes when Claude returns malformed JSON. Import from `"zod"` (not `"zod/v4"` — deprecated). Use `.safeParse()`, never `.parse()`, to preserve existing error handling.
+- `nodemailer` (8.0.4): Safety float plan email via Gmail SMTP with App Password. Server-side API route only — credentials must never touch client code. Three new env vars: `EMAIL_FROM`, `EMAIL_APP_PASSWORD`, `EMAIL_EMERGENCY_CONTACT`.
+- `idb` (8.0.3): IndexedDB wrapper for the "Leaving Now" offline snapshot. 1.19kB, authored by the IDB spec co-author, no abstraction overhead. Browser-only — guard with `typeof window !== 'undefined'`.
 
-**Rejected alternatives:**
-- LangChain JS: heavy abstraction, frequent breaking changes, unnecessary for one knowledge base
-- Vectra: low npm activity, parallel JSON file storage clashes with SQLite-first architecture
-- `node-home-assistant`: last updated 2017; raw fetch is more reliable
-- `next-pwa`: abandoned; Serwist is the maintained successor
+**Key config detail:**
+Serwist requires Webpack. The `package.json` dev script must be `next dev` (without `--turbopack`) and the service worker must be disabled in dev mode. Alternative: skip Serwist entirely and write a manual `public/sw.js` (~80 lines) — avoids the Webpack/Turbopack dependency entirely and is sufficient for a single-user app.
+
+**Unchanged from prior milestone research (no re-evaluation needed):**
+`@serwist/next`, `leaflet.offline`, `react-speech-recognition`, `ai` + `@ai-sdk/anthropic`, `sqlite-vec`, `@anthropic-ai/sdk`
 
 ### Expected Features
 
-**Must have (table stakes — most already built):**
-- Gear inventory with categories — already built
-- Trip creation with dates + destination — already built
-- Interactive map of saved spots — already built
-- Weather at destination — already built
-- AI packing list — already built
-- Meal plan per trip with shopping list — in progress (Phase 2)
-- Power budget / runtime estimate — in progress (Phase 2)
-- Photo log attached to trips/spots — in progress
-- Offline access to trip data — Phase 4
+**Must have (table stakes — v1.1 cannot ship without these):**
+- Offline access to trip data (packing list, meal plan, saved spots) — app is useless at a campsite without signal
+- PWA installable to home screen — manifest.json + icons + HTTPS
+- API response validation (Zod on all Claude outputs) — production app cannot crash on malformed AI responses
+- CRUD completeness — trip edit/delete, vehicle edit, mod edit/delete, photo delete — gaps break trust in the tool
+- Persist packing list + meal plan to DB — prerequisite for both "Leaving Now" and gear usage tracking
 
-**Should have (differentiators that define the "second brain"):**
-- Executive trip prep flow — single unified pre-trip screen; no existing camping app has this; highest near-term value per effort
-- Home prep vs. camp cooking distinction — vacuum sealer + sous vide workflow is primary, not an edge case; must be explicit in meal plan UX
-- AI chat agent with full trip context — "am I ready for Saturday?" answered using real cross-referenced gear, weather, power, and meal data
-- NC camping knowledge base (RAG) — local expert knowledge (dispersed spots, permit rules, seasonal access) not available in any single app; most unique long-term differentiator
-- Voice trip debrief — speak 2 minutes after a trip, get a structured log; zero-friction memory capture
-- Dog-aware trip planning — personal context feature; add when dog arrives (weeks away)
-- Power budget with weather-adjusted solar — Open-Meteo cloud cover forecast for trip dates; no existing calculator offers this
+**Should have (differentiators that make v1.1 worth building):**
+- "Leaving Now" one-tap cache trigger — no camping app does this; coordinates weather snapshot, packing list, meal plan, spots, and emergency contact into one offline-ready bundle
+- Trip Day Sequencer — dynamic departure checklist derived from actual trip data (not a static template); ADHD-friendly progressive disclosure (current step + next 2)
+- Safety float plan email — sends trip summary to emergency contact at departure; fills a real gap in camping tools
+- Gear usage tracking — mark items used/not-used post-trip; foundation for all future packing intelligence
+- Post-trip auto-review summary — Claude generates 3-bullet debrief from usage data; zero typing required
 
-**Defer (explicitly not building):**
-- Social feeds, multi-user auth, booking integration, calorie/macro tracking, full recipe database, turn-by-turn navigation, native iOS/Android app
+**Defer (v2+):**
+- Feedback-driven packing improvement — requires 3+ completed trips with usage data to be meaningful
+- Dead man's switch check-in timer — requires persistent background job; local dev architecture doesn't support it reliably
+- Full offline map tile pre-download — 100MB–2GB per region; Gaia GPS fills this adequately
+- Dog-aware trip planning — waiting for dog to arrive and needs assessment
 
 ### Architecture Approach
 
-The existing layered architecture (Server Components → Client Components → API Routes → Prisma → SQLite → External Services) is clean and should not be disrupted. All new capability layers are additive — they sit alongside existing code, not inside it. The critical architectural principle is that all HA calls, all RAG queries, and all embedding operations remain server-side; client components call Next.js API routes only, never external services directly.
+All v1.1 features integrate as parallel additions to the existing Server Components → Client Components → REST API Routes → Prisma/SQLite architecture. No existing layers are replaced. The PWA offline layer (service worker + IndexedDB) sits between the browser and the network, transparent to everything below it. The learning loop is a post-trip state transition that writes to a new `TripFeedback` model (append-only) rather than mutating existing gear or location records.
 
-**Major components (new):**
-1. `lib/rag/` (ingest, search, context) — hybrid FTS5 + vector similarity using Reciprocal Rank Fusion; semantic chunking 256–512 tokens; metadata pre-filter for location names reduces retrieval noise
-2. `lib/agent/` (tools, orchestrator, prompts) — server-side tool-use loop; hard cap 5–10 tool calls per message; Haiku for tool calls, Sonnet for final synthesis; `ChatClient.tsx` as SSE streaming UI
-3. `lib/ha/` (client, types) — REST-only proxy via Next.js API routes; server-to-server fetch avoids CORS entirely; token stays server-side; add WebSocket only if live sensor updates become a real need
-4. `lib/voice/` (`useSpeechInput.ts`) — Web Speech API hook with graceful fallback; text input always present; server-side Whisper as escalation path if iOS Safari proves unreliable
-5. `lib/offline/` (useOnlineStatus, syncQueue, tileCache) — service worker + IndexedDB mutation queue; all mutation routes must be idempotent; explicit "Download for Offline" UI, not automatic tile caching
-6. `lib/storage.ts` — environment-aware storage abstraction: local filesystem in dev, Vercel Blob in production; must be built before adding more photo features
+**New components and their responsibilities:**
+1. `public/sw.js` — Service worker; app shell with stale-while-revalidate; NetworkOnly for all `/api/*` routes; registered production-only
+2. `app/manifest.ts` — Next.js built-in PWA manifest; zero dependencies
+3. `lib/offline/useOnlineStatus.ts` — Hook exposing `navigator.onLine` with window event listeners
+4. `lib/offline/tripCache.ts` — The only place that reads/writes IndexedDB trip snapshots; prevents scattered IDB calls
+5. `components/OfflineBar.tsx` — Always-visible offline indicator when service worker is in offline mode
+6. `app/api/trips/[id]/cache/route.ts` — Server-side data aggregator; assembles full trip snapshot JSON on "Leaving Now"
+7. `app/api/trips/[id]/sequencer/route.ts` — Builds time-ordered departure checklist from packing + meals + gear battery status
+8. `app/api/trips/[id]/safety-email/route.ts` — Formats and sends float plan via Nodemailer; credentials server-side only
+9. `components/TripSequencer.tsx` — Departure checklist with progressive disclosure
+10. `components/GearUsageTracker.tsx` — Post-trip used/unused/forgot checkboxes; batches to `/api/gear/usage`
+11. `lib/parseClaudeJSON.ts` — Shared utility: JSON.parse + Zod safeParse in one call; all AI routes use this
+
+**Schema additions (one Prisma migration, run early in Phase 2):**
+- `PackingItem`: add `usedOnTrip Boolean?`, `forgotNeeded Boolean?`, `reviewedAt DateTime?`
+- New `TripFeedback` model: append-only feedback events linked to trip, gear item, and location
+
+**Build order (dependency graph):**
+Block 1 (Stabilization) → Block 2 (Schema migration) → Block 3 (Day-Of) and Block 4 (PWA, parallel) → Block 5 (Learning Loop)
 
 ### Critical Pitfalls
 
-1. **SQLite silently fails on Vercel** — writes are lost between function invocations; data disappears on every cold start. Hard blocker. Migrate Prisma datasource to Postgres (Neon) before any Vercel deployment. Keep SQLite for all local dev via `.env.local` override.
+1. **Serwist requires Webpack; Next.js 16 defaults to Turbopack** — Set `"dev": "next dev"` (remove `--turbopack`); set `disable: process.env.NODE_ENV === 'development'` in Serwist config. Service worker silently doesn't generate if this is wrong. Verify with DevTools > Application > Service Workers before assuming offline works.
 
-2. **AI agent cost runaway** — unconstrained tool-use loops can generate $50–200 in API charges from a single broken session. Set max 5–10 iterations per user message, expose token counts in the dev UI, set Anthropic workspace spend limits before the agent goes live, and use prompt caching (`cache_control: ephemeral`) on system prompts and large RAG injections.
+2. **"Leaving Now" snapshot must use IndexedDB, not service worker response caching** — Service worker HTTP caching is volatile, subject to cache pressure, and iOS clears it after 7 days of inactivity. IndexedDB is the explicit user-triggered local store. Wrong approach = full rewrite to fix.
 
-3. **Service worker serves stale app on mobile** — deployed updates don't appear on the mobile PWA because the old worker stays alive until all tabs are closed. Configure `skipWaiting: true` + `clientsClaim: true` from day one. Register the service worker only in `NODE_ENV === 'production'` — never in dev.
+3. **Learning loop must append to `TripFeedback`, not mutate `GearItem`** — Mutating source records destroys trip history, makes the learning loop impossible to reconstruct, and has no undo path. Schema must be finalized before any debrief UI is written.
 
-4. **Map tiles are not cached automatically** — a standard PWA service worker does NOT cache OSM tiles; the map shows a blank grid offline. This is explicit feature work: build a "Download for Offline" button that pre-fetches a bounding box at zoom levels 10–15 via `leaflet.offline`.
+4. **Use `safeParse()`, not `parse()` for Zod validation** — `.parse()` throws a ZodError that the existing try-catch catches as a generic 500. Build the shared `parseClaudeJSON<T>` utility first; all AI routes use it. Return 422 for schema mismatches, not 500.
 
-5. **RAG quality degrades with naive chunking** — fixed-size character chunking destroys camping knowledge facts ("dogs allowed, site 14" loses meaning if split). Use semantic/heading-based chunking, 256–512 token target, 20–30% overlap. Test retrieval quality on 10 representative queries before building the chat interface on top.
-
-6. **Home Assistant CORS in production** — direct browser→HA fetch is blocked by Chrome's Private Network Access spec. Always proxy through Next.js API routes. Document Tailscale or a reverse proxy as a setup prerequisite for production remote access.
-
-7. **Prisma migration history incompatible between providers** — SQLite migration SQL is not valid Postgres SQL. At deploy time, regenerate migration history against a Postgres instance from scratch; do not run existing SQLite migrations against Postgres. Plan a full day for this migration.
-
----
+5. **Safety email credentials must live in server-side env vars only** — No `NEXT_PUBLIC_` prefix, no client component email logic. All email sending goes through the API route at `/api/trips/[id]/safety-email`.
 
 ## Implications for Roadmap
 
-### Phase 2: Complete the Core Planning Loop (current)
+Research confirms a 5-block build order with clear dependency boundaries. Blocks 3 and 4 are independent of each other and can be built in parallel or either order after Block 1 completes.
 
-**Rationale:** The fundamental pre-trip planning primitives are nearly done. Finishing them has zero new architectural dependencies — no new libraries, no new patterns, just existing Claude API + Prisma. A complete planning loop is more valuable than a partially complete loop plus an AI agent. Also, meal plan and power budget data feed the agent's trip context in Phase 3 — the data model must exist first.
+### Phase 1: Stabilization
 
-**Delivers:** A complete, trustworthy pre-trip planning workflow: meals planned with shopping list, power budget checked with weather-adjusted solar, and a single executive prep view that unifies weather, packing, meals, and power status.
+**Rationale:** Bugs and gaps in the existing system block every downstream feature. Packing list + meal plan persistence is required by "Leaving Now" AND gear usage tracking. Zod must precede any feature that caches Claude responses offline — malformed data cached offline is a broken app with no retry path. CRUD gaps destroy trust. Fix the floor before building upward.
+**Delivers:** Reliable existing features; Zod validation on all Claude routes via shared `parseClaudeJSON<T>` utility; packing list + meal plan persisted to DB; complete CRUD coverage for trips, vehicle, mods, photos; design system consistency across forms.
+**Addresses:** API validation (table stakes), CRUD completeness (table stakes), AI response reliability.
+**Avoids:** Pitfall 5 (Zod `.parse()` breaking error handling), Pitfall 6 (null/undefined schema mismatch breaking existing clients).
 
-**Addresses:** Meal plan + shopping list, power budget / runtime estimate, executive trip prep flow, home prep vs. camp cooking distinction
+### Phase 2: Schema Migration
 
-**Avoids:** Fix the existing `lib/claude.ts` JSON parsing fragility (known issue, flagged in CONCERNS.md) at the start of Phase 2 — build a shared `parseClaudeJSON<T>` utility with Zod validation before adding more AI features. Every new AI route inherits this fragility if it isn't fixed first.
+**Rationale:** A single Prisma migration that adds `PackingItem` usage fields and the `TripFeedback` model unblocks both Phase 4 learning loop and future packing intelligence. Run it once, early, before any debrief code is written. SQLite ALTER TABLE limitations make migration order matter — nullable columns only on existing tables.
+**Delivers:** `PackingItem.usedOnTrip`, `PackingItem.forgotNeeded`, `PackingItem.reviewedAt`; new `TripFeedback` append-only model.
+**Avoids:** Pitfall 4 (mutating source records), Pitfall 11 (SQLite ALTER TABLE failures — all new columns nullable or with defaults).
 
-**Research flag:** No deeper research needed. Meal planning and power calculator UX patterns are well-documented in FEATURES.md. Stack unchanged.
+### Phase 3: Day-Of Execution
 
----
+**Rationale:** No offline dependency — these features work fully online and can be built and tested without a service worker. Trip Sequencer and safety email are independent routes that read from existing data. Ship these while PWA work runs in parallel.
+**Delivers:** Trip Day Sequencer (time-ordered departure checklist); safety float plan email; "Send Float Plan" button integrated into the departure flow.
+**Uses:** `nodemailer`, existing Claude API, existing Prisma models.
+**Implements:** `/api/trips/[id]/sequencer`, `/api/trips/[id]/safety-email`, `TripSequencer` component.
+**Avoids:** Pitfall 9 (email credentials in client code), Pitfall 8 (timezone handling — UTC storage + Intl.DateTimeFormat display from the start).
 
-### Phase 3: Intelligence Layer
+### Phase 4: PWA and Offline Mode
 
-**Rationale:** Intelligence features depend on each other in strict order: RAG corpus must exist before the agent is worth building; agent route must exist before the chat UI; HA schema additions belong now so the smart campsite UI isn't blocked when hardware arrives in mid-April. Voice is independent and can ship at any point within Phase 3.
+**Rationale:** The service worker and IndexedDB infrastructure is independent of the learning loop. Can be built in parallel with Phase 3 after Phase 1 completes. "Leaving Now" depends on packing list + meal plan persistence (Phase 1) but not on gear usage tracking (Phase 5).
+**Delivers:** PWA installability (manifest + icons); app shell offline via service worker; "Leaving Now" cache trigger with IndexedDB snapshot; offline indicator bar; iOS 7-day limitation surfaced clearly in the UI.
+**Uses:** `idb`, manual `public/sw.js` (recommended) or Serwist with explicit Webpack flag, `app/manifest.ts`.
+**Implements:** `lib/offline/tripCache.ts`, `lib/offline/useOnlineStatus.ts`, `OfflineBar`, `/api/trips/[id]/cache`, "Leaving Now" button in `TripPrepClient`.
+**Avoids:** Pitfall 1 (Serwist/Turbopack conflict), Pitfall 2 (API routes cached as stale), Pitfall 3 (SW cache instead of IndexedDB for snapshot), Pitfall 7 (iOS 7-day storage clearing — show snapshot age in UI).
 
-**Delivers:** An AI assistant that actually knows this specific app's data and NC camping context — transforms the app from a tracker into an advisor.
+### Phase 5: Learning Loop
 
-**Addresses:** AI chat agent with full trip context, NC camping knowledge base, voice trip debrief, gear identification from photo, safety float plan, Home Assistant smart campsite dashboard
-
-**Implements:** `lib/rag/`, `lib/agent/`, `lib/ha/`, `lib/voice/`, `ChatClient.tsx`
-
-**Uses:** `sqlite-vec`, Vercel AI SDK (`ai` + `@ai-sdk/anthropic`), `react-speech-recognition`, raw HA fetch wrapper
-
-**Sub-order within Phase 3:**
-1. Shared `parseClaudeJSON<T>` + Zod validation utility (prerequisite for all AI features — do this at start of Phase 2 or Phase 3)
-2. `SmartDevice` fields on `GearItem` schema — enables HA bridge now, wires to hardware when it arrives
-3. RAG ingest pipeline (`lib/rag/`) — gather 20–30 real NC camping documents first; test retrieval quality on representative queries before touching the agent
-4. AI agent orchestrator + `/api/agent` SSE route — server-side only; hard cap iterations; token cost visible in dev
-5. `ChatClient.tsx` + `/app/chat/` — streaming UI built on top of a working, tested agent
-6. HA proxy routes (`lib/ha/`) — shell built now; real calls wired when hardware arrives mid-April
-7. Voice debrief (`lib/voice/`) — parallel track, no dependencies on items 2–6
-
-**Avoids:**
-- Build HA integration as Next.js proxy routes only — direct browser→HA fetch fails in production due to CORS + Private Network Access
-- Gather real NC camping documents before writing the ingest script — chunking strategy decisions depend on actual document structure
-- Voice input is text-first; voice as progressive enhancement — iOS Chrome does not support the Web Speech API
-
-**Research flags:**
-- RAG ingest: needs a phase-level research pass on NC camping corpus sources and document formats before implementation begins
-- Agent tool definitions: the exact tool input/output schemas should be designed against the actual Prisma schema before coding — easy to get wrong
-- HA integration: standard REST proxy pattern once the architecture decision is made; no further research needed
-
----
-
-### Phase 4: PWA + Production Deploy
-
-**Rationale:** Offline and deployment are both last-phase work for the same reason: they add complexity to every subsequent change. Service worker cache invalidation is an extra debugging dimension on every feature iteration. The Postgres migration is a one-time, careful operation that has no benefit until actual deployment. Both are well-understood; the sequencing is the discipline.
-
-**Delivers:** A fieldworthy app — works without cell signal, installable on home screen as a PWA, photo uploads persistent in production, data surviving Vercel redeployments.
-
-**Addresses:** Offline access to trip data, offline map tiles (explicit download flow), installable PWA, production hosting
-
-**Implements:** `lib/offline/` (service worker, sync queue, tile cache), `lib/storage.ts` (photo storage abstraction), Postgres migration, Vercel Blob setup
-
-**Uses:** `@serwist/next` or manual `public/sw.js`, `leaflet.offline`, `@neondatabase/serverless`, `@prisma/adapter-neon`, `@vercel/blob`
-
-**Pre-work note:** Build `lib/storage.ts` (environment-aware photo storage abstraction) before Phase 4 begins — ideally as the last task of Phase 3. Every photo feature added after this point benefits from the abstraction and avoids rework at deployment.
-
-**Avoids:**
-- SQLite on Vercel is a hard blocker: migrate Prisma datasource to Postgres and regenerate migration history from scratch (do not run SQLite migration files against Postgres)
-- Photo storage abstraction must exist before deployment; store blob URLs in DB, never local paths
-- `skipWaiting: true` + `clientsClaim: true` from day one to prevent stale cache on mobile
-- Map tile caching is explicit feature work, not automatic
-
-**Research flags:**
-- pgvector + Neon setup: FTS5 virtual tables and `sqlite-vec` do NOT migrate to Postgres. Equivalent at deploy time is `pgvector` + Postgres native FTS. A validation pass on the Prisma + Neon + pgvector setup before implementation is warranted.
-- Service worker Webpack constraint: verify the Webpack/Turbopack situation in the actual `next.config.ts` at the time of implementation; the manual `public/sw.js` approach may be simpler.
-
----
+**Rationale:** Depends on Phase 2 schema. Cannot be built without `TripFeedback` model and `PackingItem` usage fields in place. Voice debrief already exists — this phase wires it to write back to the new feedback model and surfaces the gear usage tracker as a post-trip review flow in `TripsClient`.
+**Delivers:** Gear usage tracker (used/unused/forgot checkboxes); post-trip auto-review Claude summary (3 bullets); voice debrief writes back to gear notes and location ratings; packing list generator reads gear usage history as prompt context.
+**Uses:** Existing Claude API, existing voice debrief infrastructure (`InsightsReviewSheet`, `voice/apply` route).
+**Implements:** `GearUsageTracker`, `/api/gear/usage`, post-trip review state in `TripsClient`, `getGearUsageHistory()` query in `lib/claude.ts`.
+**Avoids:** Pitfall 4 (learning loop mutating source records), Pitfall 10 (voice debrief iOS fallback — text input always present; voice as progressive enhancement only).
 
 ### Phase Ordering Rationale
 
-- **Phase 2 before Phase 3:** Intelligence features are shallow without a complete data model. Power budget and meal plan outputs feed into agent trip context. Build the data first, then the intelligence layer on top of it.
-- **RAG before agent within Phase 3:** The agent without a knowledge base is a general-purpose Claude wrapper — not the "local NC camping expert" that makes this app worth building. 20–30 real documents must be ingested and retrieval validated before the chat UI is written.
-- **HA schema before HA hardware:** Hardware arrives mid-April. Schema and proxy routes can be built now. Avoid blocking Phase 3 critical path on hardware availability.
-- **Voice after text-first:** iOS Web Speech API unreliability in PWA mode means building voice-primary risks breaking the primary mobile use case. Text input must always work; voice enhances it.
-- **PWA after features stable:** Service workers add a cache invalidation dimension to every debugging session. Adding offline to a stable app is straightforward; adding new features to an app with an active service worker is painful.
-- **Postgres migration at deploy time only:** SQLite works perfectly for local development. Running Postgres locally (Docker) just for dev adds operational friction. Switch provider only when deploying to Vercel.
+- Phase 1 before everything: packing list persistence is a hard blocker for Phases 4 and 5; Zod utility is a hard blocker for offline caching of AI responses.
+- Phase 2 immediately after Phase 1: schema migration is cheap and must precede all learning loop code. Running it early avoids conflicts with later data writes.
+- Phases 3 and 4 are independent: neither depends on the other; both depend only on Phase 1 completion. Build in parallel or sequentially based on capacity.
+- Phase 5 last: requires Phase 2 schema; benefits from Phase 4's "Leaving Now" trigger surfacing the post-trip review context; voice writeback is highest complexity and benefits from the stable foundation underneath it.
 
----
+### Research Flags
+
+Phases with well-documented patterns (skip `/gsd:research-phase`):
+- **Phase 1 (Stabilization):** Pure bug fixes + Zod integration. safeParse pattern fully documented. No external integrations.
+- **Phase 2 (Schema Migration):** Prisma migration mechanics well-understood. Nullable column rule for SQLite is known.
+- **Phase 3 (Day-Of Execution):** Nodemailer Gmail SMTP is canonical and well-documented. Sequencer is pure data sorting logic over existing models.
+
+Phases that benefit from a quick spike before implementation:
+- **Phase 4 (PWA/Offline):** Validate the manual `public/sw.js` approach against Next.js App Router URL patterns before writing production SW code. 2-hour spike to confirm the manual SW correctly intercepts App Router routes before committing to the approach.
+- **Phase 5 (Learning Loop — voice writeback):** The extraction schema (what fields Claude should identify and return from a voice debrief) needs a prompt engineering spike with a real audio sample before the UI is built.
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | All recommendations verified against official docs and recent npm activity. Serwist, Vercel AI SDK v6, sqlite-vec, Neon confirmed current as of 2026-03-30. |
-| Features | MEDIUM-HIGH | Camping app feature patterns verified against real apps. Power budget and meal plan UX patterns well-documented. NC knowledge base corpus definition speculative until real documents are gathered. |
-| Architecture | HIGH (PWA/HA), MEDIUM (RAG/agent) | PWA and HA proxy patterns from official sources. RAG hybrid search documented by sqlite-vec maintainer. Agent tool design is project-specific and inherently uncertain. |
-| Pitfalls | HIGH | SQLite/Vercel, photo storage, CORS, and service worker stale cache all verified with multiple official sources. iOS Web Speech API issues confirmed via Apple Developer Forums + Can I Use data. |
+| Stack | HIGH | All three new libraries verified via official npm, official docs, and multiple independent sources. Versions confirmed as of 2026-04-01. No experimental dependencies. |
+| Features | HIGH | Feature list tightly scoped to the milestone. Dependency graph is explicit and cross-verified across all four research files. Table stakes / differentiators / v2+ deferral is well-reasoned. |
+| Architecture | HIGH | Existing architecture is documented in CLAUDE.md. New additions are purely additive. PWA patterns verified against official Next.js docs (updated 2026-03-31). IndexedDB approach confirmed via multiple offline-first sources and the idb library author's own documentation. |
+| Pitfalls | HIGH | All critical pitfalls verified against official docs, GitHub issues, and community reports. Serwist/Turbopack conflict, iOS 7-day storage, Zod parse vs safeParse, and SQLite ALTER TABLE limitations are confirmed real-world failure modes with documented examples and recovery paths. |
 
-**Overall confidence:** HIGH for Phases 2 and 4. MEDIUM for Phase 3 (RAG corpus quality and agent tool design are inherently project-specific decisions).
+**Overall confidence:** HIGH
 
 ### Gaps to Address
 
-- **NC camping knowledge base corpus:** What documents to include (trail guides, permit PDFs, personal notes, gear manuals) and how to source them is undefined. This needs explicit planning before RAG ingest work begins. Recommended: define corpus document list as the first task in Phase 3.
-
-- **sqlite-vec alpha version:** v0.1.8 is pre-1.0. Pin the version. If 1.0 ships before Phase 3 work completes, plan a migration sprint. If breaking changes appear before then, the fallback is `pgvector` in a local Postgres container — the architecture is identical, different engine.
-
-- **Voice on iOS:** Web Speech API behavior in Safari PWA (home screen) mode is documented as unreliable. This needs hands-on testing with an actual iPhone before the voice debrief feature UX is designed. Do not build the voice UI around audio input until tested on device.
-
-- **HA hardware:** HA proxy routes and schema can be built now, but end-to-end testing of the smart campsite dashboard is blocked until hardware arrives mid-April. Phase 3 critical path must not gate on HA functionality.
-
-- **EcoFlow API:** The power budget calculator may want to pull live device state. EcoFlow has not published a formal public API. Research this before Phase 2 power budget work to determine whether live device data is feasible or whether manual input is the right model.
-
----
+- **Manual service worker vs. Serwist decision:** Research documents both paths and leans toward the manual approach as simpler for this app's needs. Validate with a 2-hour spike before Phase 4 to confirm the manual SW handles Next.js App Router URL patterns correctly. If it doesn't, fall back to Serwist with `--webpack` flag — well-documented fallback.
+- **Voice debrief extraction schema:** The fields Claude should extract from a voice debrief (gear notes, location rating, trip notes) need to be defined and tested with a real audio sample before the `GearUsageTracker` and feedback write paths are built. Prompt engineering task, not architecture.
+- **Feedback-driven packing improvement timing:** Deferred to v2+ but foundation is being built now. Reassess after Phase 5 ships and Will has 2-3 trips with usage tracking data. The feature may be ready earlier than expected.
 
 ## Sources
 
 ### Primary (HIGH confidence)
-- [Next.js Official PWA Guide](https://nextjs.org/docs/app/guides/progressive-web-apps) — Serwist recommendation, Webpack requirement (updated 2026-03-25)
-- [Vercel AI SDK](https://ai-sdk.dev/docs/introduction) — v6.0.141, streaming chat, Anthropic provider confirmed
-- [HA REST API docs](https://developers.home-assistant.io/docs/api/rest) — entity states, service calls (v2026.3.4)
-- [Prisma + Neon + Vercel guide](https://www.prisma.io/docs/guides/frameworks/nextjs) — official deployment path
-- [Is SQLite Supported in Vercel?](https://vercel.com/kb/guide/is-sqlite-supported-in-vercel) — hard blocker confirmed in official KB
-- [Prisma Migrate Limitations](https://www.prisma.io/docs/orm/prisma-migrate/understanding-prisma-migrate/limitations-and-known-issues) — SQLite/Postgres incompatibility confirmed
-- [sqlite-vec hybrid search](https://alexgarcia.xyz/blog/2024/sqlite-vec-hybrid-search/index.html) — authored by sqlite-vec maintainer, RRF pattern
-- [Web Speech API — MDN](https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API) — browser support matrix
+- [Next.js PWA Official Guide](https://nextjs.org/docs/app/guides/progressive-web-apps) — PWA manifest, service worker, Serwist patterns (updated 2026-03-31)
+- [Zod v4 versioning docs](https://zod.dev/v4/versioning) — import path confirmation; `"zod"` root exports v4; `"zod/v4"` subpath deprecated
+- [Zod 4.3.6 on npm](https://www.npmjs.com/package/zod) — version confirmed
+- [nodemailer 8.0.4 on npm](https://www.npmjs.com/package/nodemailer) — version confirmed; v8 has bundled TypeScript types
+- [idb 8.0.3 — Jake Archibald, GitHub](https://github.com/jakearchibald/idb) — MDN-referenced, IDB spec co-author
+- [Serwist @serwist/next on npm](https://www.npmjs.com/package/@serwist/next) — Turbopack support issue confirmed
+- [Workbox caching strategies (web.dev)](https://web.dev/learn/pwa/workbox) — NetworkOnly for API routes confirmed
+- [Prisma Migrate limitations](https://www.prisma.io/docs/orm/prisma-migrate/understanding-prisma-migrate/limitations-and-known-issues) — SQLite ALTER TABLE constraints confirmed
+- [InfoQ: Zod v4 stable release](https://www.infoq.com/news/2025/08/zod-v4-available/) — August 2025 stable release confirmed
 
 ### Secondary (MEDIUM confidence)
-- [@serwist/next npm](https://www.npmjs.com/package/@serwist/next) — v9.5.7, published 15 days before research date
-- [sqlite-vec GitHub](https://github.com/asg017/sqlite-vec) — active maintenance confirmed
-- [react-speech-recognition npm](https://www.npmjs.com/package/react-speech-recognition) — v4.0.1, published 6 months ago
-- [leaflet.offline GitHub](https://github.com/allartk/leaflet.offline) — IndexedDB tile caching; last major activity 2023
-- [Best RAG Chunking Strategies 2025 — Firecrawl](https://www.firecrawl.dev/blog/best-chunking-strategies-rag)
-- [Preventing AI Agent Runaway Costs — Cloudatler](https://cloudatler.com/blog/the-50-000-loop-how-to-stop-runaway-ai-agent-costs)
-- [HA CORS issue — Community Forum](https://community.home-assistant.io/t/solved-cross-origin-request-blocked-http-configuration/179510)
+- [LogRocket: Next.js 16 PWA offline support](https://blog.logrocket.com/nextjs-16-pwa-offline-support/) — Serwist + idb approach confirmation
+- [Next.js Offline-First discussion #82498](https://github.com/vercel/next.js/discussions/82498) — community patterns for App Router
+- [Mailtrap Next.js email guide 2026](https://mailtrap.io/blog/nextjs-send-email/) — Gmail App Password SMTP pattern for personal-use apps
+- [PWA iOS limitations 2026 — MagicBell](https://www.magicbell.com/blog/pwa-ios-limitations-safari-support-complete-guide) — 7-day storage clearing confirmed
+- [Zod safeParse vs parse — Codú](https://www.codu.co/niall/zod-parse-versus-safeparse-what-s-the-difference-7t_tjfne) — error handling behavior confirmed
+- [Offline-First Frontend Apps 2025 — LogRocket](https://blog.logrocket.com/offline-first-frontend-apps-2025-indexeddb-sqlite/) — IndexedDB vs Cache API decision patterns
 
 ### Tertiary (informational)
-- [AI camping apps overview — Rebecca Campbell](https://rebeccascampbell.com/ai-camping-apps) — competitive feature landscape
-- [Voice journaling AI — Deepgram](https://deepgram.com/ai-apps/audio-diary) — voice debrief UX patterns
-- [Web Speech API Issues on Safari — Apple Developer Forums](https://developer.apple.com/forums/thread/694847) — iOS PWA issues (user reports, not official docs)
-- [EcoFlow App features](https://www.ecoflow.com/us/app) — confirms no trip-planning mode; API availability unconfirmed
+- Competitor feature analysis (Homebound, HikerAlert, Gaia GPS, RV Checklist app) — general patterns; no API access to verify specific behavior
 
 ---
-*Research completed: 2026-03-30*
+*Research completed: 2026-04-01*
 *Ready for roadmap: yes*

@@ -1,8 +1,8 @@
-# Domain Pitfalls
+# Pitfalls Research
 
-**Domain:** Personal camping assistant — adding offline/PWA, RAG, AI agent, Home Assistant integration, and Vercel deployment to an existing Next.js 16 app
-**Researched:** 2026-03-30
-**Covers:** PWA/offline, Claude API cost management, RAG quality, SQLite→Postgres migration, Home Assistant integration, voice input
+**Domain:** Adding PWA/offline mode, post-trip learning loop, trip day execution, and Zod stabilization to existing Next.js 16 + Prisma + SQLite camping app
+**Researched:** 2026-04-01
+**Confidence:** HIGH — all critical pitfalls verified against official docs and community reports
 
 ---
 
@@ -12,120 +12,187 @@ Mistakes that cause rewrites, runaway costs, or deployment blockers.
 
 ---
 
-### Pitfall 1: SQLite Is Silently Read-Only on Vercel
+### Pitfall 1: Serwist Requires Webpack; Next.js 16 Defaults to Turbopack
 
-**What goes wrong:** Vercel's serverless functions have an ephemeral filesystem. SQLite writes to `/tmp` only, and that directory is wiped between invocations. The database appears to work locally, but all writes silently fail (or the database file disappears entirely) after deployment. Data including gear, trips, and spots is lost on every cold start.
+**What goes wrong:**
+Next.js 16 ships with Turbopack as the default bundler (enabled in `next dev` and `next build`). Serwist (`@serwist/next`) — the only maintained App Router PWA library — requires Webpack for service worker compilation. If you add Serwist without adjusting your build scripts, the service worker file never gets generated, the PWA manifest is never injected, and offline mode silently doesn't work. Turbopack support exists in `@serwist/turbopack` (v9+) but is newer and less battle-tested.
 
-**Why it happens:** SQLite is a file-based database. Vercel's serverless runtime does not provide a persistent disk — there is no shared volume across function instances.
+**Why it happens:**
+The Turbopack migration in Next.js 16 is transparent for most features. Developers add Serwist, see no compile errors, and assume it's working — until they go offline and the app fails.
 
-**Consequences:** Total data loss at production deploy. Any feature built after this point that relies on writes (photo tagging, trip creation, gear edits) breaks immediately on Vercel. This is not a warning — it is a hard blocker.
+**Consequences:**
+Service worker is never registered. Offline mode doesn't exist despite appearing to. "Leaving Now" cache trigger does nothing.
 
 **Warning signs:**
-- Working perfectly in local dev but data mysteriously disappears after deployment
-- Vercel logs showing database path errors or `SQLITE_CANTOPEN`
-- New records created in the app not appearing after page reload
+- `navigator.serviceWorker.register()` returns a 404 for `/sw.js`
+- No service worker listed in Chrome DevTools > Application > Service Workers
+- PWA install prompt never appears
 
-**Prevention:**
-1. Migrate the Prisma datasource from `sqlite` to `postgresql` before deploying to Vercel
-2. Keep SQLite for local dev via `.env.local` override; use a real Postgres connection string in `.env.production`
-3. Use Vercel Postgres (serverless-native, built-in connection pooling) or Supabase as the production database
-4. Regenerate migration history after the provider switch — SQLite migrations are not compatible with Postgres SQL syntax and must be recreated with `prisma migrate dev`
+**How to avoid:**
+Use `@serwist/next` v9+ with explicit build configuration. Either:
+1. Pin `next dev --webpack` and `next build` to stay on Webpack (simpler, stable)
+2. Or use `@serwist/turbopack` if Turbopack dev speed matters
 
-**Phase:** Address at the start of the Deploy phase (Phase 4). Do not deploy to Vercel until this is done.
+Add to `package.json`:
+```json
+"dev": "next dev --webpack",
+"build": "next build"
+```
+And set `disable: process.env.NODE_ENV === 'development'` in `withSerwistInit` config to prevent service worker from interfering with dev.
+
+**Phase to address:** PWA Offline phase — before writing any service worker logic.
 
 ---
 
-### Pitfall 2: Photo Storage on Ephemeral Filesystem
+### Pitfall 2: Service Worker Caches Next.js API Routes as Stale Responses
 
-**What goes wrong:** Photos are currently saved to `public/photos/` via filesystem writes. On Vercel, any files written during a function invocation are lost when the container is recycled. Photos upload successfully (you see a 200 response), but they are gone on the next request.
+**What goes wrong:**
+If the service worker uses a `stale-while-revalidate` or `cache-first` strategy across all routes, it will cache `/api/gear`, `/api/trips`, and other API routes. After the initial cache, subsequent fetches return stale responses even when the user is online. The user edits a gear item, navigates away, comes back, and sees the old value — because the service worker served the cached API response.
 
-**Why it happens:** Same root cause as SQLite — Vercel's serverless containers have no persistent disk. The `public/` directory that works in local dev is a write target, but on Vercel it is either read-only (for bundled assets) or ephemeral.
+**Why it happens:**
+Generic Workbox/Serwist configurations treat all same-origin requests identically. The default `defaultCache` in Serwist includes API routes unless explicitly excluded. Developers copy default configs without reading which URL patterns are covered.
 
-**Consequences:** All photo uploads silently disappear in production. Trip photos, gear photos, and map pins with images are all broken. The impact is significant since photos are a core feature.
+**Consequences:**
+Mutations appear to succeed (the database write happens) but the UI shows stale data until cache expires or user force-refreshes. This is subtle and hard to reproduce.
 
 **Warning signs:**
-- Photo upload succeeds but image is missing after refresh
-- Broken image placeholders on the map after a Vercel redeploy
-- No errors in the UI (the write to `/tmp` or ephemeral path succeeds; it just doesn't persist)
+- Edit a record, navigate away, come back — old data shows
+- DevTools Network tab shows API responses served "from ServiceWorker"
+- Only reproduced in PWA mode (installed on home screen), not browser tab
 
-**Prevention:**
-1. Build a storage abstraction (`lib/storage.ts`) with two backends: local filesystem for dev, cloud object storage for production
-2. Use Vercel Blob (native integration, simplest path) or Cloudflare R2 (S3-compatible, cheaper at scale) for production
-3. Store the returned public URL in the database, not the local path
-4. Do this work before adding any more photo features — the abstraction layer is the right foundation
+**How to avoid:**
+Explicitly exclude all `/api/` routes from service worker caching. Use `NetworkOnly` for any URL matching `/api/*`. Only cache static assets (`/_next/static/`, images) and the app shell (HTML pages). The offline strategy for data is IndexedDB snapshots, not service worker response caching.
 
-**Phase:** Phase 4 (Deploy). The CONCERNS.md already flags this. Do not defer past this milestone.
+```typescript
+// In sw.ts — explicit exclusion
+registerRoute(
+  ({ url }) => url.pathname.startsWith('/api/'),
+  new NetworkOnly()
+);
+```
+
+**Phase to address:** PWA Offline phase — configure routing rules before any offline data work.
 
 ---
 
-### Pitfall 3: Service Worker Stale Cache Serves Old App After Updates
+### Pitfall 3: "Leaving Now" Snapshot Must Copy Data to IndexedDB, Not Rely on Service Worker Cache
 
-**What goes wrong:** After deploying a new version of the app, users (including you on mobile) continue seeing the old version because the service worker is caching aggressively. The old worker keeps serving cached HTML/JS even after the new deployment. This is the most reported Next.js PWA issue and it affects real users in subtle ways — you might see stale UI, old bugs you thought you fixed, or broken API contract mismatches.
+**What goes wrong:**
+The intuitive approach to "Leaving Now" caching is to pre-fetch all trip-related API routes so the service worker caches the responses. This works for one session but breaks when the data changes. If the user updates their packing list after clicking "Leaving Now," the service worker has the old response cached and serves it offline. Worse, if the service worker cache is invalidated (browser update, cache clearing), all offline data disappears.
 
-**Why it happens:** Service workers are long-lived by design. A newly installed worker waits until all tabs are closed before taking over. Without `skipWaiting: true`, the old worker holds on indefinitely.
+**Why it happens:**
+Service worker response caching feels like "offline storage" but it's really "HTTP response caching." It's not designed for explicit user-triggered snapshots with guaranteed retention.
 
-**Consequences:** You deploy a bug fix and the mobile app keeps showing the broken version. Or you change an API response shape and the cached old JS throws errors against the new API.
+**Consequences:**
+Offline trip data is stale, incomplete, or silently missing. The feature appears to work until the user actually needs it in the field.
 
 **Warning signs:**
-- Deployed a change but mobile doesn't show it until you manually close all tabs and reopen
-- Errors in production that you can't reproduce in dev
-- "Works on desktop but not mobile" reports (because mobile PWA has the app pinned open)
+- Data appears offline but doesn't match what was shown before departure
+- Offline data disappears after browser update or cache pressure
+- iOS PWA storage cleared after 7 days of inactivity (iOS clears PWA storage aggressively)
 
-**Prevention:**
-1. Configure `skipWaiting: true` and `clientsClaim: true` in the Workbox/Serwist config — this forces the new worker to activate immediately
-2. Add a visible update prompt: "New version available — tap to reload." Do not silently update; that causes mid-session disruptions
-3. Disable the service worker in development (`disable: process.env.NODE_ENV === 'development'`) to prevent dev caching from masking bugs
-4. Use content-hashed filenames for JS chunks (Next.js does this by default) so the cache knows when assets are stale
+**How to avoid:**
+Use IndexedDB for the "Leaving Now" snapshot, not service worker cache:
+1. On "Leaving Now" trigger: fetch all trip data from the API and write it to IndexedDB (using `idb` library)
+2. Service worker intercepts `/api/*` requests while offline and reads from IndexedDB — it does not cache the API responses itself
+3. This is an explicit copy-to-local-storage pattern, not automatic HTTP caching
 
-**Phase:** PWA phase. Set up correctly from the start; retrofitting update behavior is painful.
+iOS caveat: IndexedDB on iOS is also subject to 7-day storage clearing if the PWA is not used. This is a hard platform limitation — document it, and add a "Refresh offline data" button.
+
+**Phase to address:** PWA Offline phase — core architecture decision; wrong approach requires full rewrite.
 
 ---
 
-### Pitfall 4: Offline Maps Require Explicit Tile Pre-Caching — Tiles Are Not Cached by Default
+### Pitfall 4: Learning Loop Overwrites Original Data Instead of Recording Feedback Separately
 
-**What goes wrong:** The standard service worker setup (even with next-pwa or Serwist) caches app assets — HTML, JS, CSS — but does NOT cache map tiles. If you go offline, the map shows a blank grey grid. This surprises most developers who assume "offline PWA" means "offline map."
+**What goes wrong:**
+Post-trip debrief writes changes directly to gear records, packing lists, and location ratings — mutating the source of truth. The `GearItem.notes` field gets overwritten with post-trip observations, replacing the pre-trip notes. A packing list gets regenerated with post-trip feedback baked in, so there's no record of what the original recommendation was. After 3 trips, the history is gone and the system can't explain why it's making certain recommendations.
 
-**Why it happens:** OpenStreetMap tile URLs are dynamic (lat/lon/zoom encoded in the path). Generic cache strategies don't cover them. Additionally, OSM's tile servers set `Cache-Control: no-cache` on many responses, which the browser honours.
+**Why it happens:**
+Mutations are simpler to model than append-only feedback. "Update gear notes with trip observations" is one line of code. Building a separate feedback table feels like over-engineering for a personal app.
 
-**Consequences:** The app technically works offline (the UI loads), but the primary navigation feature — the spots map — is useless without connectivity. Pre-trip offline preparation becomes impossible.
+**Consequences:**
+- No trip history to learn from — each trip overwrites the previous feedback
+- Cannot distinguish "always bring this" from "needed it once in unusual conditions"
+- Bugs in the debrief flow silently corrupt gear records
 
-**Warning signs:**
-- PWA works offline but map tiles are blank
-- Network tab shows 0 tile requests being served from cache while offline
-- The service worker shows in DevTools but map images are not in the cache storage
+**How to avoid:**
+Model feedback as events, not mutations:
 
-**Prevention:**
-1. Use a dedicated tile caching layer: `leaflet-cachestorage` or `Leaflet.TileLayer.PouchDBCached` to intercept tile requests and store them in the Cache Storage API
-2. Implement an explicit "Download for offline" flow that pre-fetches tiles for a bounding box around a planned campsite at zoom levels 10–16
-3. Cap tile storage at a sensible limit (100–200MB) and show the user how much space has been used
-4. Use `leaflet-cachestorage` over PouchDB for simpler integration with Next.js; PouchDB adds significant bundle weight
+Add a `TripFeedback` table:
+```prisma
+model TripFeedback {
+  id          Int      @id @default(autoincrement())
+  tripId      Int
+  gearItemId  Int?
+  locationId  Int?
+  type        String   // "used", "unused", "forgot_needed", "gear_note", "location_rating"
+  value       String?
+  createdAt   DateTime @default(now())
+}
+```
 
-**Phase:** PWA phase. This is feature work — build it as "Download for Offline" rather than assuming it's automatic.
+The packing list generator reads historical feedback as context (not as mutations to the gear records). Location ratings are averaged from feedback events, not overwritten. Gear notes accumulate in `TripFeedback`, and the AI synthesizes them on demand.
+
+**Phase to address:** Learning Loop phase — data model must be right before building the debrief UI.
 
 ---
 
-### Pitfall 5: AI Agent Cost Runaway from Unconstrained Loops
+### Pitfall 5: Zod Added to Claude API Responses Using `.parse()` Throws and Breaks Existing Error Handling
 
-**What goes wrong:** Conversational agent features (chat interface, trip recommendation, orchestration layer) can generate runaway API costs if not constrained. The classic failure: an agent hits an error, retries, the retry hits the same error, and it loops 400+ times over a weekend, burning through API credits. At claude-sonnet-4-6 rates, 100K tokens per minute across a few concurrent threads is $3+/minute.
+**What goes wrong:**
+The existing API routes in this codebase use try-catch with `NextResponse.json({ error: '...' }, { status: 500 })` for error handling. If Zod validation is added using `.parse()` (which throws a `ZodError` on failure), the ZodError is caught by the outer try-catch but the error message is a Zod internal object, not a user-friendly string. Worse, the 500 response is returned instead of a 400 (validation failure vs. server error), confusing error monitoring.
 
-**Why it happens:** Agentic patterns — tool use, multi-step reasoning, memory — involve multiple API calls per user interaction. Without iteration caps, spend limits, or error circuit breakers, a single broken tool call or misunderstood instruction can spiral.
+**Why it happens:**
+`.parse()` is the default Zod example in docs. Developers add it inside existing try-catch blocks without realizing `.parse()` throws a different error type than they're handling.
 
-**Consequences:** A surprise $50–200+ API bill from a single debugging session or background agent loop. For a personal project on a budget, this is a real risk.
+**Consequences:**
+Validation errors look like server crashes. The API returns 500 for bad Claude output instead of surfacing the real issue. Debugging is harder because the ZodError is swallowed.
 
-**Warning signs:**
-- Agent "thinking" without visible progress for more than 10–15 seconds
-- API call count in the Anthropic console spiking unexpectedly
-- Tool call results growing larger in context on each step (context accumulation spiral)
+**How to avoid:**
+Use `.safeParse()` universally for Claude API response validation:
 
-**Prevention:**
-1. Set hard per-request iteration limits on all agent loops (max 5–10 tool calls per user message)
-2. Track `input_tokens + output_tokens` per response and expose it in the UI during development
-3. Use `claude-haiku-3-5` for lightweight tasks (intent classification, short summaries); use `claude-sonnet-4-6` only for complex reasoning
-4. Set Anthropic API spend limits on the project/workspace level as a circuit breaker
-5. Use prompt caching (`cache_control: ephemeral`) on system prompts and large knowledge base injections — these repeat on every turn and are the biggest cost driver
-6. Never pass the full conversation history unbounded; summarize or truncate after N turns
+```typescript
+const result = PackingListSchema.safeParse(parsed);
+if (!result.success) {
+  console.error('Claude response schema mismatch:', result.error.issues);
+  return NextResponse.json(
+    { error: 'AI response format unexpected', raw: text },
+    { status: 422 }
+  );
+}
+return NextResponse.json(result.data);
+```
 
-**Phase:** AI Agent phase (Phase 3). Design limits in from day one — retrofitting spend controls into an existing agent is hard.
+Build a shared `parseClaudeJSON<T>(text: string, schema: ZodSchema<T>)` utility in `lib/claude.ts` that handles JSON.parse + Zod safeParse in one call. All Claude API routes use this instead of naked `JSON.parse()`.
+
+**Phase to address:** Stabilization phase — fix before adding new AI features.
+
+---
+
+### Pitfall 6: Zod Schema Added to Existing API Inputs Breaks Clients That Send Optional Fields as Null vs. Undefined
+
+**What goes wrong:**
+Existing API routes accept loose JSON bodies. Adding Zod input validation with `.parse()` will reject previously-valid requests if the schema is stricter than what clients actually send. A gear item form might send `{ brand: null }` but the Zod schema uses `z.string().optional()` which expects `undefined`, not `null`. All existing clients break with 400 errors after validation is added.
+
+**Why it happens:**
+TypeScript types and Zod schemas use `undefined` for optional fields, but JSON serialization turns `undefined` into omission and `null` stays `null`. The mismatch is invisible until runtime.
+
+**Consequences:**
+Adding Zod to an existing API route immediately breaks the UI if the schema doesn't match what the existing client sends. This is a silent regression — forms stop working after "adding validation."
+
+**How to avoid:**
+Use `.nullable()` generously when adding Zod to existing endpoints:
+```typescript
+z.object({
+  brand: z.string().nullable().optional(), // accepts null, undefined, or string
+})
+```
+Or use `.preprocess()` to coerce null to undefined for optional string fields. Audit the actual request bodies being sent (check browser DevTools network tab) before writing the schema.
+
+Also: add Zod as `safeParse` with logging only first (no rejection), verify it passes on real traffic, then switch to enforcement.
+
+**Phase to address:** Stabilization phase — test schemas against real client payloads before enforcing.
 
 ---
 
@@ -133,185 +200,244 @@ Mistakes that cause rewrites, runaway costs, or deployment blockers.
 
 ---
 
-### Pitfall 6: RAG Quality Degrades with Poor Chunking of Camping Knowledge
+### Pitfall 7: iOS PWA Storage Cleared Aggressively — Offline Data Disappears
 
-**What goes wrong:** The NC camping knowledge base is seeded with unstructured content (trail guides, campsite descriptions, local area notes). If documents are chunked at fixed character boundaries without regard for semantic structure, retrieved chunks are either too broad (pull in irrelevant context) or too narrow (split a sentence about a campsite across two chunks). The agent confidently answers using wrong or incomplete context.
+**What goes wrong:**
+iOS has a 7-day cap on script-writable storage (IndexedDB, Cache Storage) for PWAs. If the app isn't actively used for 7 days, iOS clears all stored data — including the "Leaving Now" offline snapshot. A user who prepares their offline data on Thursday and leaves for a camping trip the following Friday arrives with an empty offline cache.
 
-**Why it happens:** Fixed-size chunking is the default in most RAG tutorials, and it works poorly for structured knowledge like "Site 14 at Linville Gorge, no dogs, 2 miles from parking, water at spring." That sentence loses all meaning if split.
+**Why it happens:**
+Apple's Intelligent Tracking Prevention and storage management policies treat PWA data as non-essential. This behavior is consistent since iOS 13.4 and has not changed.
 
-**Consequences:** Agent gives inaccurate campsite recommendations ("Yes, dogs allowed" when they aren't). Trust in the system erodes fast for a personal tool where accuracy matters for safety planning.
+**Consequences:**
+The "Leaving Now" feature is unreliable as a pre-trip preparation tool if the user prepares more than a week ahead.
 
-**Warning signs:**
-- Agent answers are directionally right but missing key details (capacity, dog rules, fee)
-- Retrieval returns chunks that are half a sentence or half a table
-- Same query returns wildly different answers on repeated runs
+**How to avoid:**
+1. Document this limitation clearly in the UI: "Offline data expires after 7 days of inactivity. Refresh before departing."
+2. Show the "Last snapshot taken: [date]" in the Leaving Now UI so the user knows if it's stale
+3. Trigger the snapshot as late as possible (day of departure, not days ahead)
+4. Consider a "Refresh offline data" button on the trip day view
 
-**Prevention:**
-1. Use semantic chunking or logical section boundaries (heading-based split) rather than fixed-size character splits
-2. Target 256–512 token chunks with 20–30% overlap between adjacent chunks
-3. Prefer `voyage-3` or `text-embedding-3-small` (OpenAI) over generic embeddings; a domain-tuned model improves retrieval 20–40% for structured location data
-4. Test retrieval quality before building the agent layer: run 10 representative queries and inspect what chunks come back
-5. Use structured metadata (location name, region, tags) as pre-filter before vector search — reduces retrieval noise significantly for a camping knowledge base
-
-**Phase:** Intelligence/Agent phase (Phase 3). Build RAG ingestion pipeline carefully before layering the chat interface on top.
+**Phase to address:** PWA Offline phase — surface the limitation in the UI.
 
 ---
 
-### Pitfall 7: Home Assistant Integration Blocked by CORS and Local Network Assumptions
+### Pitfall 8: Trip Day Sequencer Time Logic Breaks Without Explicit Timezone Handling
 
-**What goes wrong:** The web app runs at `https://your-app.vercel.app` (or even `http://localhost:3000` in dev). Home Assistant runs at `http://192.168.x.x:8123` on the local network. When the browser tries to make a fetch() call from the web origin to the HA origin, the request is blocked by CORS before it leaves the browser. Setting `cors_allowed_origins` in HA's `configuration.yaml` is required but not sufficient — Private Network Access (Chrome's spec for calling `http://` from `https://`) adds a second layer of restriction that most tutorials don't cover.
+**What goes wrong:**
+The sequencer generates a departure checklist with time-based steps ("check weather at 7am," "pack cooler 30 min before departure"). The logic uses `new Date()` and relative time arithmetic. When the device timezone doesn't match the trip destination timezone, all times are off. A 7am reminder fires at 4am local time.
 
-**Why it happens:** Browsers enforce the Same-Origin Policy, which requires the server to explicitly permit cross-origin requests. HA supports CORS configuration, but private network access (LAN addresses accessed from a secure origin) requires an additional `Access-Control-Allow-Private-Network: true` header that HA does not send by default in all configurations.
+**Why it happens:**
+JavaScript `Date` objects are timezone-aware but most date arithmetic ignores this. `new Date()` returns local time, but comparisons and displays are inconsistent without explicit timezone normalization.
 
-**Consequences:** HA integration appears to work in development (both running locally), fails completely in production. Alternatively, it works in Chrome but not Safari or Firefox due to differing private network access implementations.
+**Consequences:**
+Sequencer shows wrong times. Time-sensitive steps (weather check, safety email) trigger at wrong moments.
 
-**Warning signs:**
-- Fetch to HA works from `localhost` but fails from Vercel deployment
-- Browser console shows `CORS error` or `Access to fetch blocked by CORS policy`
-- Request works in curl/Postman but not from the browser
-- Preflight OPTIONS request fails for `/api/history` or other HA endpoints
+**How to avoid:**
+Store all times as UTC in the database. Display times using the Intl.DateTimeFormat API with an explicit timezone:
+```typescript
+new Intl.DateTimeFormat('en-US', {
+  timeZone: trip.locationTimezone || 'America/New_York',
+  hour: '2-digit',
+  minute: '2-digit'
+}).format(new Date(step.scheduledAt))
+```
+For v1.1, the simpler fix is: use device local time only, make no assumptions about destination timezone, and document this constraint. The camping destinations are in the same region as the device (NC/SE US).
 
-**Prevention:**
-1. Build the HA bridge as a Next.js API route proxy (`/api/ha/[...path]`) — the server-to-server call from Vercel to HA bypasses CORS entirely since CORS is a browser security policy
-2. The proxy approach also keeps the HA long-lived access token server-side (not exposed in browser JS)
-3. For local network access from production, the user's router or Tailscale/Cloudflare Tunnel is required — document this as a setup prerequisite
-4. Test on mobile Safari specifically, as it implements Private Network Access restrictions more aggressively than Chrome
-
-**Phase:** Smart Campsite phase (Phase 3). Plan the proxy architecture from the start; retrofitting it after building a direct browser-to-HA fetch pattern means rewriting all the integration code.
-
----
-
-### Pitfall 8: Prisma Migration History Becomes Incompatible When Switching Providers
-
-**What goes wrong:** SQLite migration files (generated by `prisma migrate dev`) contain SQLite-specific SQL. When you switch `provider` to `postgresql` in `schema.prisma`, running `prisma migrate deploy` against Postgres will fail or produce incorrect schema because the migration SQL is SQLite syntax, not PostgreSQL syntax.
-
-**Why it happens:** Prisma generates provider-specific SQL in each migration file. The files are not cross-compatible. This is documented by Prisma but frequently overlooked because the schema itself is provider-agnostic (Prisma SDL looks the same either way).
-
-**Consequences:** You can't use your existing migration history in production. You need to regenerate migrations from scratch, which is safe but requires care not to lose the dev migration history.
-
-**Warning signs:**
-- `prisma migrate deploy` fails with SQL syntax errors in production
-- Migration file contains `INTEGER PRIMARY KEY AUTOINCREMENT` (SQLite) instead of `SERIAL` (Postgres)
-- Schema looks correct in `schema.prisma` but Postgres tables have wrong column types
-
-**Prevention:**
-1. When migrating, do NOT run `prisma migrate deploy` with the old migrations — reset the migration history
-2. Strategy: change provider in schema, run `prisma migrate dev --name init` against a fresh Postgres instance to generate new migration files, then deploy those
-3. Keep the SQLite migration directory backed up before wiping it
-4. Use `prisma db push` for the initial production setup if you want to skip migration history entirely (acceptable for a personal app)
-5. Test the full migration locally against a Postgres container (Docker) before deploying to Vercel
-
-**Phase:** Phase 4 (Deploy). Documented in CONCERNS.md as a known future blocker. Plan a full day for this migration — it's mechanical but requires care.
+**Phase to address:** Trip Execution phase — use UTC + display formatting from the start.
 
 ---
 
-### Pitfall 9: Voice Input (Web Speech API) Unreliable on iOS
+### Pitfall 9: Safety Email Requires a Server-Side Route — Cannot Send from the Browser
 
-**What goes wrong:** The Web Speech API (`SpeechRecognition`) works well in Chrome on desktop but is significantly degraded on iOS. The trip debrief / voice ghostwriter feature — likely used on mobile after a camping trip — hits these limitations on the primary device (iPhone). Chrome on iOS uses WebKit (Apple's engine), not Blink, so it does not support the Speech Recognition API at all. Safari on iOS supports it natively but with significant bugs: `isFinal` is sometimes always `false`, interim results duplicate over time, and the API fails silently in PWA (home screen) mode.
+**What goes wrong:**
+Sending email from a browser requires either a public SMTP relay or a service with a publicly-exposed API key. If the Nodemailer or SendGrid API key is put in client-side code (even in `NEXT_PUBLIC_` env vars), it will be visible in browser DevTools and could be abused to send spam. SMTP credentials in client-side code are a hard security failure.
 
-**Why it happens:** On iOS, all browsers must use WebKit as the rendering engine (App Store rules). Chrome on iOS is WebKit with Chrome chrome — it does not have Chrome's SpeechRecognition implementation. Safari has its own implementation that is incomplete.
+**Why it happens:**
+The app has no traditional backend — it's a Next.js app with API routes. It's easy to accidentally write email-sending logic in a client component.
 
-**Consequences:** Voice debrief feature works in desktop testing, breaks for the primary mobile use case. Safari PWA (home screen app) mode makes it worse — the microphone permission prompt may not appear, and the API errors immediately.
+**Consequences:**
+Either the email feature is built in a way that exposes credentials (security failure), or it's blocked by browser security policies (CORS, no direct SMTP from browser).
 
-**Warning signs:**
-- Works in desktop Chrome, fails on iPhone
-- `webkitSpeechRecognition` is undefined in Chrome on iOS
-- Recording appears to start but `onresult` never fires
-- "This feature requires microphone access" appears but mic is already granted
+**How to avoid:**
+Build the safety email as a Next.js API route (`POST /api/trips/[id]/safety-email`). The route runs server-side and can safely use Nodemailer with environment variable credentials. The client sends a single POST request to trigger it.
 
-**Prevention:**
-1. Treat voice input as a progressive enhancement, not a required feature path — always provide a text input fallback
-2. Feature-detect at runtime: `if (!('SpeechRecognition' in window || 'webkitSpeechRecognition' in window))` — hide the voice button rather than showing a broken experience
-3. For the trip debrief feature specifically, consider using the Claude API with a voice-to-text service (Whisper API) as an alternative: record audio via `MediaRecorder`, upload the blob, transcribe server-side
-4. Test on actual iOS Safari before building the UI around voice input; do not rely on Chrome DevTools mobile simulation
+For simplicity with a single-user app: use Nodemailer with a Gmail App Password (not a Google OAuth flow). The credential lives in `.env` as `EMAIL_SMTP_PASSWORD`. This is the fastest path to working email with no external service dependency.
 
-**Phase:** Phase 3 (Intelligence/Agent). Do not build voice as primary — build text-first, voice as enhancement.
+**Phase to address:** Trip Execution phase — route architecture decision, not just implementation detail.
 
 ---
 
-## Minor Pitfalls
+### Pitfall 10: Post-Trip Voice Debrief via Web Speech API Fails on iOS Safari PWA
+
+**What goes wrong:**
+The Web Speech API (`SpeechRecognition`) works well in desktop Chrome. On iOS, all browsers use WebKit — Chrome on iOS is WebKit with Chrome UI, not Blink. The Web Speech API is partially supported in Safari on iOS but has documented bugs: `isFinal` is sometimes always `false`, the API fails silently in PWA/home screen mode, and microphone permission prompts don't appear consistently.
+
+**Why it happens:**
+App Store rules require all iOS browsers to use WebKit. Desktop Chrome behavior does not translate to iOS Chrome.
+
+**Consequences:**
+Voice debrief built for desktop Chrome doesn't work on iPhone — the primary device for post-trip use.
+
+**How to avoid:**
+Build the debrief input as text-first with voice as progressive enhancement:
+1. Default: textarea for typed debrief notes
+2. Enhancement: voice button using Web Speech API with runtime feature detection
+3. If voice is important: use the Anthropic API with Whisper or a similar service — record audio via `MediaRecorder` API, POST the audio blob to a Next.js API route, transcribe server-side
+
+Test on actual iOS Safari before building the UI around voice.
+
+**Phase to address:** Learning Loop phase — build text input first, voice second.
 
 ---
 
-### Pitfall 10: next-pwa Library Is Unmaintained — Use Serwist Instead
+### Pitfall 11: Prisma Schema Additions for Learning Loop Can Break in Dev Due to SQLite ALTER TABLE Limitations
 
-**What goes wrong:** The most commonly referenced PWA library for Next.js (`next-pwa` by shadowwalker) has not been updated in 3+ years and does not work properly with the Next.js App Router. Tutorials referencing it are common but outdated.
+**What goes wrong:**
+SQLite has extremely limited `ALTER TABLE` support — it cannot add `NOT NULL` columns without a default value to an existing table that has rows. If the `TripFeedback` table or new columns are added via `prisma migrate dev` on a database that already has seed data, the migration may fail with a generic SQLite error or silently produce wrong schema.
 
-**Why it happens:** The library predates App Router and uses the older Pages Router patterns. App Router's file-based routing changes how assets are served and cached.
+**Why it happens:**
+Prisma generates standard SQL that works in Postgres but hits SQLite's `ALTER TABLE` limitations. The error messages from SQLite are often unhelpful ("near 'NOT NULL': syntax error").
 
-**Prevention:**
-1. Use Serwist (`@serwist/next`) — the actively maintained fork of next-pwa with App Router support
-2. Alternatively, use Next.js's own PWA guide (published 2025, covers App Router natively)
-3. If you encounter tutorials using `next-pwa`, verify the publication date — if it's before 2024, the App Router config will be wrong
+**Consequences:**
+Migration fails in dev. Developer resets the database to recover. Seed data is lost and must be re-run.
 
-**Phase:** PWA phase.
+**How to avoid:**
+1. All new columns on existing tables should have a default value or be nullable in the Prisma schema
+2. When adding a table with required fields, run `prisma migrate dev` before seeding the database
+3. Keep `npm run db:reset` handy — for a personal dev app, resetting + reseeding is an acceptable recovery
+4. Before running any migration that touches existing tables with data, backup the dev database: `cp prisma/dev.db prisma/dev.db.bak`
 
----
-
-### Pitfall 11: IndexedDB Is Required for Meaningful Offline Data — localStorage Is Not Enough
-
-**What goes wrong:** localStorage is synchronous, limited to ~5MB, and cannot store binary data (photos, tiles). If offline data storage is built on localStorage, it hits the limit quickly with tile caches or photo data and throws quota errors with no clean fallback.
-
-**Why it happens:** localStorage is simpler to use than IndexedDB, so developers reach for it first. Service workers cannot access localStorage at all (it's not available in the service worker context).
-
-**Consequences:** Offline gear list or trip data works until it doesn't, with cryptic quota errors and no clear user message.
-
-**Prevention:**
-1. Use IndexedDB (via the `idb` wrapper library for ergonomics) for all offline data storage
-2. Use the Cache Storage API (available in both service worker and page contexts) for network responses and tile caches
-3. Do not use localStorage for anything that needs to survive offline or be accessed from the service worker
-
-**Phase:** PWA phase.
+**Phase to address:** Stabilization phase and Learning Loop phase — both add schema changes.
 
 ---
 
-### Pitfall 12: Claude API JSON Parsing Is Already Fragile — Do Not Replicate the Pattern
+## Technical Debt Patterns
 
-**What goes wrong:** CONCERNS.md (Issue #2) documents that the existing packing list generator parses Claude's JSON response with no error handling. Every new AI feature built on the same pattern inherits this fragility. As more features are added (meal planning, trip recommendations, gear identification), each unprotected `JSON.parse()` becomes a new failure point.
+Shortcuts that seem reasonable but create long-term problems.
 
-**Why it happens:** The prompt instructs Claude to return JSON, and it usually does. The happy path works, so error handling gets skipped.
-
-**Prevention:**
-1. Fix the existing `lib/claude.ts` JSON parsing before building additional AI features (already flagged as High priority in CONCERNS.md)
-2. Create a shared `parseClaudeJSON<T>(text: string): T` utility that wraps parse+validate in one place
-3. Use Zod schemas to validate the structure of every Claude response before consuming it — catches model drift when Claude changes its output format
-4. Return structured `{ success: boolean, data?: T, rawResponse?: string }` from all Claude API routes so callers can handle errors gracefully
-
-**Phase:** Fix immediately (pre-existing concern). The shared utility should be built before Phase 3 AI features.
+| Shortcut | Immediate Benefit | Long-term Cost | When Acceptable |
+|----------|-------------------|----------------|-----------------|
+| Using `localStorage` for "Leaving Now" offline data | 5 min to implement | 5MB limit hit immediately with packing list + photos; breaks service worker integration | Never — use IndexedDB |
+| Mutating gear records directly in post-trip debrief | Simpler data model | No trip history, no undo, learning loop corrupts source of truth | Never — always append feedback |
+| Caching `/api/*` responses in service worker | "Free" offline API | Stale mutations, data mismatches, confusing debugging | Never — use NetworkOnly for API routes |
+| Using `.parse()` instead of `.safeParse()` in existing routes | Shorter code | ZodError swallowed by outer catch, 500 instead of 400, hard to debug | Only in new isolated routes with dedicated error middleware |
+| Skipping timezone handling in sequencer | Simpler date logic | Wrong times displayed for users in different zones | Acceptable if scoped to local device timezone only (document the constraint) |
+| Sending safety email from client using EmailJS | No server code needed | API key exposed in browser JS | Never — use server-side API route |
+| Disabling service worker entirely in production for simplicity | No caching bugs | No offline capability — the whole PWA feature doesn't work | Only as a temporary debug step, never ship disabled |
 
 ---
 
-## Phase-Specific Warnings
+## Integration Gotchas
 
-| Phase Topic | Likely Pitfall | Mitigation |
-|-------------|---------------|------------|
-| PWA/Offline | Service worker stale cache on mobile | Configure skipWaiting + visible update prompt from day one |
-| PWA/Offline | Map tiles blank offline | Implement explicit tile pre-fetch flow — not automatic |
-| PWA/Offline | Using next-pwa (unmaintained) | Use Serwist or Next.js official PWA guide |
-| AI Agent | Runaway API cost loops | Hard iteration caps + spend limit on Anthropic console |
-| AI Agent | Claude JSON parsing failures | Fix lib/claude.ts first; build shared parse+validate utility |
-| RAG | Poor retrieval quality | Semantic chunking, 256–512 tokens, test retrieval before building chat |
-| HA Integration | CORS in production | Proxy via Next.js API route, never direct browser→HA fetch |
-| HA Integration | Private Network Access in Chrome/Safari | Document Tailscale or reverse proxy as prerequisite |
-| Voice Input | iOS Safari / Chrome on iOS failures | Text-first, voice as enhancement; server-side Whisper as fallback |
-| Deploy | SQLite silently fails on Vercel | Migrate to Postgres before deploying — hard blocker |
-| Deploy | Photos lost on Vercel redeploy | Storage abstraction layer + Vercel Blob or R2 before deployment |
-| Deploy | Prisma migration incompatibility | Regenerate migration history against Postgres; test with Docker |
+Common mistakes when connecting to external services.
+
+| Integration | Common Mistake | Correct Approach |
+|-------------|----------------|------------------|
+| Serwist + Next.js 16 | Assuming Turbopack works out of the box | Use `--webpack` flag for builds; or use `@serwist/turbopack` v9+ explicitly |
+| Serwist dev mode | Testing offline behavior in development | `disable: process.env.NODE_ENV === 'development'` — dev mode disables the SW; test offline in production build only |
+| Nodemailer + Gmail | Using regular Gmail password | Use Gmail App Password via Google Account security settings; regular password fails with modern Google auth |
+| IndexedDB on iOS | Assuming 5GB quota like desktop | iOS PWA has ~50MB Cache API quota and clears after 7 days inactivity |
+| Zod + Prisma types | Assuming Prisma types = Zod schema | They're separate — a `GearItem` from Prisma has `Date` objects; Zod may receive ISO strings from JSON; use `z.coerce.date()` for date fields |
+| Claude API responses | Trusting JSON.parse without schema | Claude sometimes returns JSON with extra text, markdown fences, or truncated output; always extract + validate |
+
+---
+
+## Performance Traps
+
+Patterns that work at small scale but fail as usage grows.
+
+| Trap | Symptoms | Prevention | When It Breaks |
+|------|----------|------------|----------------|
+| Caching entire trip dataset in IndexedDB on every "Leaving Now" | Slow snapshot trigger, high memory | Only cache the active trip's data: packing list, weather, key locations | Over 5 trips with photos each |
+| Service worker intercepts and reads IndexedDB on every API request | 100–300ms added latency for all requests | Only intercept when offline (`navigator.onLine === false`) | Every page load |
+| Packing list learning query scans all TripFeedback rows | Slow list generation as trips accumulate | Add index on `TripFeedback.gearItemId`; limit feedback query to last 10 trips | After 20+ trips |
+| Running Claude API call to generate learning summary on every debrief save | Slow save, high API cost | Batch debrief feedback writes; generate AI summary async or on-demand | Every save event |
+
+---
+
+## UX Pitfalls
+
+Common user experience mistakes in this domain.
+
+| Pitfall | User Impact | Better Approach |
+|---------|-------------|-----------------|
+| Silent service worker update (skipWaiting without notification) | User mid-session sees page reload; state lost | Show "Update available — tap to refresh" banner; let user control timing |
+| "Leaving Now" button with no feedback or confirmation | User doesn't know if snapshot worked; leaves without offline data | Show spinner during snapshot, then "Ready for offline — X items cached" confirmation |
+| Debrief form too long (rate every item, rate every day) | ADHD-hostile; user skips it entirely | One screen: "Anything you'd do differently?" + checkboxes for unused gear. Short wins. |
+| Sequencer shows all steps at once | Overwhelming pre-departure checklist | Progressive disclosure: show current step + next 2. Mark done as you go. |
+| Offline mode with no indicator | User confused why saves aren't working | Always-visible offline indicator when service worker is in offline mode |
+| Safety email as a buried settings feature | User never finds it; doesn't set up emergency contact | Surface it in trip creation flow: "Add emergency contact email (optional)" |
+
+---
+
+## "Looks Done But Isn't" Checklist
+
+Things that appear complete but are missing critical pieces.
+
+- [ ] **PWA/Offline:** Service worker registered and showing in DevTools — verify it actually serves cached content by throttling to Offline in DevTools. Registration success does not mean offline works.
+- [ ] **Leaving Now:** Button click triggers API calls — verify data is actually in IndexedDB (DevTools > Application > IndexedDB) after the snapshot completes.
+- [ ] **Safety Email:** API route returns 200 — verify the email actually arrives in the inbox. SMTP config issues surface only at send time.
+- [ ] **Zod Validation:** Schema added to Claude API route — verify schema matches the actual Claude output by logging a real response and running it through the schema in a test.
+- [ ] **Learning Loop:** Post-trip feedback saved — verify feedback rows appear in `TripFeedback` table (Prisma Studio), not just that the save call returned 200.
+- [ ] **Sequencer:** Steps generated and displayed — verify the time calculations are correct by setting device clock forward and checking step order.
+- [ ] **Offline Maps:** App works offline — verify specifically that the Spots map shows tiles, not just that the app shell loads. Tiles and app shell are separate caches.
+
+---
+
+## Recovery Strategies
+
+When pitfalls occur despite prevention, how to recover.
+
+| Pitfall | Recovery Cost | Recovery Steps |
+|---------|---------------|----------------|
+| Service worker caching API routes, stale data | MEDIUM | Clear service worker in DevTools > Application > Service Workers > Unregister; add NetworkOnly rule; redeploy |
+| Zod .parse() throwing ZodError caught as 500 | LOW | Switch to .safeParse(); add `instanceof ZodError` check in catch blocks to return 400 |
+| Learning loop mutated gear records with bad debrief data | HIGH | No automatic undo if mutation-based; add TripFeedback table and migrate to event model before this is possible |
+| iOS cleared IndexedDB offline snapshot | LOW | User re-triggers "Leaving Now" and takes a new snapshot; add refresh reminder to UI |
+| Prisma migration failed, dev.db corrupted | LOW | `npm run db:reset` resets + reseeds; add `cp prisma/dev.db prisma/dev.db.bak` to pre-migration habit |
+| Safety email SMTP credentials wrong in production | LOW | Rotate Gmail App Password; update `.env`; retry |
+| Serwist/Turbopack build conflict | MEDIUM | Add `--webpack` flag to build script; clear `.next` cache; rebuild |
+
+---
+
+## Pitfall-to-Phase Mapping
+
+How roadmap phases should address these pitfalls.
+
+| Pitfall | Prevention Phase | Verification |
+|---------|------------------|--------------|
+| Serwist requires Webpack build flag | PWA Offline — first task | `next build` produces `/sw.js`; DevTools shows service worker registered |
+| API routes cached as stale responses | PWA Offline — routing config | Network tab while online shows API calls hit server, not service worker |
+| Leaving Now uses IndexedDB, not SW cache | PWA Offline — architecture | DevTools IndexedDB shows trip data after snapshot; data survives browser restart |
+| iOS 7-day storage clearing | PWA Offline — UI copy | Snapshot age shown in UI; refresh reminder present |
+| Learning loop appends feedback, doesn't mutate | Learning Loop — schema first | `TripFeedback` table exists; gear records unchanged after debrief |
+| Zod uses safeParse, not parse | Stabilization — shared utility | `parseClaudeJSON` utility in `lib/claude.ts`; all AI routes use it |
+| Null vs undefined breaks existing clients | Stabilization — schema audit | Test each updated endpoint with actual browser request from existing UI |
+| Safety email server-side only | Trip Execution — route design | No NEXT_PUBLIC_ env vars used for email credentials |
+| Voice debrief iOS fallback | Learning Loop — text-first UI | Text input works without microphone; voice button hidden on unsupported browsers |
+| Timezone in sequencer | Trip Execution — UTC storage | All scheduled times stored as UTC; displayed with Intl.DateTimeFormat |
+| Prisma ALTER TABLE SQLite limits | Stabilization + Learning Loop | `prisma migrate dev` succeeds; `prisma db:reset` tested after each schema addition |
 
 ---
 
 ## Sources
 
-- [Next.js PWA Guide (Official, 2025)](https://nextjs.org/docs/app/guides/progressive-web-apps)
-- [Next.js 16 PWA Offline Support — LogRocket Blog](https://blog.logrocket.com/nextjs-16-pwa-offline-support/)
-- [Offline-First Next.js 15 App Router Discussion — GitHub](https://github.com/vercel/next.js/discussions/82498)
-- [Is SQLite Supported in Vercel? — Vercel Knowledge Base](https://vercel.com/kb/guide/is-sqlite-supported-in-vercel)
-- [Prisma SQLite/Postgres Switching Discussion — GitHub](https://github.com/prisma/prisma/discussions/3642)
+- [Build a Next.js 16 PWA with true offline support — LogRocket Blog](https://blog.logrocket.com/nextjs-16-pwa-offline-support/)
+- [Serwist Getting Started — @serwist/next](https://serwist.pages.dev/docs/next/getting-started)
+- [Serwist Turbopack support issue #54](https://github.com/serwist/serwist/issues/54)
+- [Building Offline-First Next.js 15 App Router — vercel/next.js Discussion #82498](https://github.com/vercel/next.js/discussions/82498)
+- [Next.js PWA Guide (Official)](https://nextjs.org/docs/app/guides/progressive-web-apps)
+- [PWA iOS Limitations and Safari Support 2026 — MagicBell](https://www.magicbell.com/blog/pwa-ios-limitations-safari-support-complete-guide)
+- [Offline-First Frontend Apps 2025 — LogRocket Blog](https://blog.logrocket.com/offline-first-frontend-apps-2025-indexeddb-sqlite/)
+- [PWA Offline Storage Strategies — DEV Community](https://dev.to/tianyaschool/pwa-offline-storage-strategies-indexeddb-and-cache-api-3570)
+- [Zod safeParse vs parse — Codú](https://www.codu.co/niall/zod-parse-versus-safeparse-what-s-the-difference-7t_tjfne)
+- [Using Zod to validate Next.js API routes — Dub](https://dub.co/blog/zod-api-validation)
+- [Common Data Loss Scenarios in Prisma Schema Changes — DEV Community](https://dev.to/vatul16/common-data-loss-scenarios-solutions-in-prisma-schema-changes-52id)
 - [Prisma Migrate Limitations and Known Issues — Prisma Docs](https://www.prisma.io/docs/orm/prisma-migrate/understanding-prisma-migrate/limitations-and-known-issues)
-- [CORS Issue with Home Assistant — Community Forum](https://community.home-assistant.io/t/solved-cross-origin-request-blocked-http-configuration/179510)
-- [Preventing AI Agent Runaway Costs — Cloudatler](https://cloudatler.com/blog/the-50-000-loop-how-to-stop-runaway-ai-agent-costs)
-- [Best Chunking Strategies for RAG 2025 — Firecrawl](https://www.firecrawl.dev/blog/best-chunking-strategies-rag)
-- [Speech Recognition API Browser Compatibility — Can I Use](https://caniuse.com/speech-recognition)
-- [Web Speech API Issues on Safari — Apple Developer Forums](https://developer.apple.com/forums/thread/694847)
-- [Leaflet TileLayer PouchDBCached — GitHub](https://github.com/MazeMap/Leaflet.TileLayer.PouchDBCached)
-- [Six Lessons Learned Building RAG Systems in Production — Towards Data Science](https://towardsdatascience.com/six-lessons-learned-building-rag-systems-in-production/)
+- [Nodemailer vs EmailJS comparison — Mailtrap](https://mailtrap.io/blog/nodemailer-vs-emailjs/)
+- [Overcoming challenges in AI feedback loop integration — Glean](https://www.glean.com/perspectives/overcoming-challenges-in-ai-feedback-loop-integration)
+- [Stale data and caching debugging in React apps — freeCodeCamp](https://www.freecodecamp.org/news/why-your-ui-wont-update-debugging-stale-data-and-caching-in-react-apps/)
+
+---
+*Pitfalls research for: Outland OS v1.1 — Close the Loop (PWA, learning loop, trip execution, stabilization)*
+*Researched: 2026-04-01*
