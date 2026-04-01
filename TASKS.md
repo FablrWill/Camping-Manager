@@ -1,6 +1,6 @@
 # Outland OS — Task Tracker
 
-> **Last updated:** 2026-03-31 (Session 17 — Phase 3 Knowledge Base Execution)
+> **Last updated:** 2026-03-31 (Session 18 — Phase 4 Chat Agent Complete)
 > **Start here** if you're picking up after a break.
 > **North star:** `docs/USER-JOURNEY.md` — read this before building anything new.
 
@@ -85,7 +85,7 @@ These are the highest-priority tasks based on the user journey defined in `docs/
 |------|--------|-------|
 | AI trip recommendations | ❌ Planned | "Find me a spot within 2hrs of Asheville this weekend" |
 | Voice Ghostwriter / trip debrief | ❌ Planned | Voice-first journaling on the drive home |
-| Chat interface | ❌ Planned | Messenger-style interaction with the agent |
+| Chat interface | ✅ Done | Session 18 — Streaming SSE agent with BetaToolRunner, 11 tools (gear/trips/locations/weather/knowledge/write ops), conversation persistence, context-aware FAB, bottom nav Chat tab |
 | NC camping knowledge base (RAG) | ✅ Done | Session 17 — 237 chunks from 7 research files + external sources. Hybrid search (FTS5 + vec0/RRF). voyage-3-lite 512-dim embeddings. PDF + web parsers. POST /api/knowledge/search endpoint. |
 | Gear photo identification | ❌ Planned | Snap a photo → Claude identifies brand/type/specs |
 | Safety float plan | ❌ Planned | Send trip summary to emergency contacts |
