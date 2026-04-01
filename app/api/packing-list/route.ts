@@ -11,14 +11,23 @@ export async function GET(request: NextRequest) {
     }
     const trip = await prisma.trip.findUnique({
       where: { id: tripId },
-      select: { packingListResult: true, packingListGeneratedAt: true },
+      select: {
+        packingListResult: true,
+        packingListGeneratedAt: true,
+        packingItems: { select: { gearId: true, packed: true } },
+      },
     })
     if (!trip) {
       return NextResponse.json({ error: 'Trip not found' }, { status: 404 })
     }
+    const packedState: Record<string, boolean> = {}
+    for (const item of trip.packingItems) {
+      packedState[item.gearId] = item.packed
+    }
     return NextResponse.json({
       result: trip.packingListResult ? JSON.parse(trip.packingListResult) : null,
       generatedAt: trip.packingListGeneratedAt?.toISOString() ?? null,
+      packedState,
     })
   } catch (error) {
     console.error('Failed to fetch packing list:', error)
@@ -131,27 +140,30 @@ export async function POST(request: NextRequest) {
       .flatMap((cat) => cat.items)
       .filter((item) => item.fromInventory && item.gearId)
 
-    for (const item of gearItems) {
-      await prisma.packingItem.upsert({
-        where: { tripId_gearId: { tripId, gearId: item.gearId! } },
-        create: { tripId, gearId: item.gearId!, packed: false },
-        update: {},
+    await prisma.$transaction(async (tx) => {
+      // Upsert PackingItems for gear-linked items
+      for (const item of gearItems) {
+        await tx.packingItem.upsert({
+          where: { tripId_gearId: { tripId, gearId: item.gearId! } },
+          create: { tripId, gearId: item.gearId!, packed: false },
+          update: {},
+        })
+      }
+
+      // D-04: Regeneration resets packed state — new list = clean slate
+      await tx.packingItem.updateMany({
+        where: { tripId },
+        data: { packed: false },
       })
-    }
 
-    // D-04: Regeneration resets packed state — new list = clean slate
-    await prisma.packingItem.updateMany({
-      where: { tripId },
-      data: { packed: false },
-    })
-
-    // Persist packing list result to Trip
-    await prisma.trip.update({
-      where: { id: tripId },
-      data: {
-        packingListResult: JSON.stringify(packingList),
-        packingListGeneratedAt: new Date(),
-      },
+      // Persist packing list result to Trip
+      await tx.trip.update({
+        where: { id: tripId },
+        data: {
+          packingListResult: JSON.stringify(packingList),
+          packingListGeneratedAt: new Date(),
+        },
+      })
     })
 
     return NextResponse.json(packingList)
@@ -160,5 +172,24 @@ export async function POST(request: NextRequest) {
     const message =
       error instanceof Error ? error.message : 'Failed to generate packing list'
     return NextResponse.json({ error: message }, { status: 500 })
+  }
+}
+
+export async function PUT(request: NextRequest) {
+  try {
+    const { tripId, result } = await request.json()
+    if (!tripId || !result) {
+      return NextResponse.json({ error: 'tripId and result are required' }, { status: 400 })
+    }
+
+    await prisma.trip.update({
+      where: { id: tripId },
+      data: { packingListResult: JSON.stringify(result) },
+    })
+
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error('Failed to save packing list:', error)
+    return NextResponse.json({ error: 'Failed to save packing list' }, { status: 500 })
   }
 }
