@@ -46,6 +46,18 @@ export default function PackingList({ tripId, tripName }: PackingListProps) {
           if (data.result) {
             setPackingList(data.result)
             setGeneratedAt(data.generatedAt)
+            // Initialize checked state from server packedState (gearId -> packed)
+            if (data.packedState && data.result) {
+              const initialChecked: CheckedState = {}
+              data.result.categories.forEach((cat: { name: string; items: Array<{ gearId?: string }> }) => {
+                cat.items.forEach((item: { gearId?: string }, i: number) => {
+                  if (item.gearId && data.packedState[item.gearId]) {
+                    initialChecked[`${cat.name}-${i}`] = true
+                  }
+                })
+              })
+              setChecked(initialChecked)
+            }
           }
         }
       } catch {
@@ -110,29 +122,36 @@ export default function PackingList({ tripId, tripName }: PackingListProps) {
   function addCustomItem(category: string) {
     if (!newItemName.trim() || !packingList) return
 
-    setPackingList((prev) => {
-      if (!prev) return prev
-      return {
-        ...prev,
-        categories: prev.categories.map((cat) => {
-          if (cat.name !== category) return cat
-          return {
-            ...cat,
-            items: [
-              ...cat.items,
-              {
-                name: newItemName.trim(),
-                category,
-                fromInventory: false,
-              },
-            ],
-          }
-        }),
-      }
-    })
+    const updatedResult = {
+      ...packingList,
+      categories: packingList.categories.map((cat) => {
+        if (cat.name !== category) return cat
+        return {
+          ...cat,
+          items: [
+            ...cat.items,
+            {
+              name: newItemName.trim(),
+              category,
+              fromInventory: false,
+            },
+          ],
+        }
+      }),
+    }
 
+    setPackingList(updatedResult)
     setNewItemName('')
     setAddingTo(null)
+
+    // Persist updated result to server
+    fetch('/api/packing-list', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tripId, result: updatedResult }),
+    }).catch((err) => {
+      console.error('Failed to save custom item:', err)
+    })
   }
 
   // Mount loading state
