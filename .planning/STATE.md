@@ -1,18 +1,3 @@
----
-gsd_state_version: 1.0
-milestone: v1.1
-milestone_name: close-the-loop
-status: defining_requirements
-last_updated: "2026-04-01T12:00:00.000Z"
-last_activity: 2026-04-01
-progress:
-  total_phases: 0
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
-  percent: 0
----
-
 # Project State
 
 ## Project Reference
@@ -20,53 +5,38 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-01)
 
 **Core value:** Personal camping second brain — a closed-loop system that plans, executes, and learns from every trip
-**Current focus:** Milestone v1.1 — defining requirements
+**Current focus:** Phase 6 — Stabilization (v1.1 start)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-04-01 — Milestone v1.1 started
+Phase: 6 of 9 (Stabilization)
+Plan: 0 of TBD in current phase
+Status: Ready to plan
+Last activity: 2026-04-01 — Roadmap created for v1.1 Close the Loop
 
-Progress: [██░░░░░░░░] 25%
+Progress: [████░░░░░░] 40%
 
 ## Performance Metrics
 
 **Velocity:**
-
-- Total plans completed: 0
-- Average duration: -
-- Total execution time: 0 hours
+- Total plans completed: 14 (v1.0 phases 2-5)
+- Average duration: ~10 min/plan
+- Total execution time: ~2.5 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| - | - | - | - |
+| 02 Executive Trip Prep | 2 | ~21 min | ~10 min |
+| 03 Knowledge Base | 4 | ~65 min | ~16 min |
+| 04 Chat Agent | 4 | ~27 min | ~7 min |
+| 05 Intelligence Features | 4 | ~12 min | ~3 min |
 
 **Recent Trend:**
-
-- Last 5 plans: n/a
-- Trend: n/a
+- Last 5 plans: 4, 4, 15, 4, 3 (Phase 05)
+- Trend: Stable
 
 *Updated after each plan completion*
-| Phase 02-executive-trip-prep P01 | 18 | 2 tasks | 9 files |
-| Phase 02-executive-trip-prep P02 | 3 | 3 tasks | 6 files |
-| Phase 03 P02 | 25 | 2 tasks | 7 files |
-| Phase 03 P04 | 15 | 2 tasks | 7 files |
-| Phase 04 P01 | 8 | 6 tasks | 12 files |
-| Phase 04-chat-agent P03 | 4 | 2 tasks | 6 files |
-| Phase 04 P04 | 15 | 3 tasks | 7 files |
-stopped_at: Completed 05-01-PLAN.md and 05-02-PLAN.md
-last_updated: "2026-04-01T03:23:14.933Z"
-last_activity: 2026-04-01
-progress:
-  total_phases: 5
-  completed_phases: 3
-  total_plans: 13
-| Phase 05 P03 | 4 | 2 tasks | 4 files |
-| Phase 05 P03 | 4 | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -75,39 +45,12 @@ progress:
 Decisions are logged in PROJECT.md Key Decisions table.
 Recent decisions affecting current work:
 
-- [Roadmap]: Phase 1 is validation-first — test existing AI features before building new ones
-- [Roadmap]: RAG (Phase 3) must be built and retrieval validated before Chat (Phase 4) is written
-- [Roadmap]: parseClaudeJSON<T> + Zod utility is Phase 1 prerequisite for all AI routes
-- [Phase 02-executive-trip-prep]: PrepStatus uses extensible string key (not union) so adding sections doesn't require type changes
-- [Phase 02-executive-trip-prep]: Section registry pattern: PREP_SECTIONS config drives both API and UI — adding a section requires no JSX changes
-- [Phase 02-executive-trip-prep]: CSS collapse (not conditional render) keeps sub-components mounted — avoids re-fetching on section collapse/expand
-- [Phase 02-executive-trip-prep]: CSS collapse (not conditional render) keeps sub-components mounted — avoids re-fetching on section collapse/expand
-- [Phase 02-executive-trip-prep]: Ready Checklist derives from prepState.sections computed status, not the PREP_SECTIONS registry config
-- [Phase 03]: Move vec0 table creation from migration to runtime init (Prisma SQLite lacks sqlite-vec)
-- [Phase 03]: Use BigInt for vec0 rowid in better-sqlite3, batch size 10 with 21s delay for Voyage free tier
-- [Phase 03]: Used NPS Blue Ridge Parkway URL instead of USFS (USFS returns 403 Forbidden)
-- [Phase 03]: Parser module pattern: lib/rag/parsers/{format}.ts exports async chunk function
-- [Phase 04]: Trips tab replaced by Chat tab in BottomNav — Trips accessible from Dashboard
-- [Phase 04]: Migration applied via sqlite3 CLI in worktree (non-interactive env prevents prisma migrate dev)
-- [Phase 04]: AgentMemory uses unique key constraint — upsert pattern for preference updates
-- [Phase 04-chat-agent]: Streaming cursor appended at render (streamingText + '|') disappears automatically on message_complete without extra state
-- [Phase 04-chat-agent]: deleteConfirm uses natural-language chat replies rather than special API — simpler and agent handles the action
-- [Phase 04-chat-agent]: Wrapped plain Tool schemas as BetaRunnableTool with run()+parse() in chat route — tools in registry are Tool[], not BetaRunnableTool[]
-- [Phase 04-chat-agent]: BottomNav final config: Home/Gear/Spots/Trips/Chat — Vehicle removed, Trips restored from Plan 01 changes
-- [Phase 04]: Wrapped plain Tool schemas as BetaRunnableTool with run()+parse() in route — tools in registry are Tool[], not BetaRunnableTool[]
-- [Phase 04]: BottomNav final config: Home/Gear/Spots/Trips/Chat — Vehicle removed, Trips restored
-
-stopped_at: Completed 05-01-PLAN.md and 05-02-PLAN.md
-last_updated: "2026-04-01T03:23:14.933Z"
-last_activity: 2026-04-01
-progress:
-  total_phases: 5
-  completed_phases: 3
-  total_plans: 13
-
-- [Phase 05]: VoiceRecordModal manages full state machine (idle/recording/processing/review/extract-error) to avoid prop drilling
-- [Phase 05]: VoiceRecordModal manages full state machine (idle/recording/processing/review/extract-error) — avoids prop drilling
-- [Phase 05]: Gear matching uses case-insensitive substring match — best-effort, unlinked items still shown with badge
+- [v1.1 Research]: "Leaving Now" snapshot must use IndexedDB — not service worker response caching
+- [v1.1 Research]: Learning loop must append to TripFeedback model — never mutate GearItem source records
+- [v1.1 Research]: Use Zod .safeParse() not .parse() — return 422 for schema mismatches, not 500
+- [v1.1 Research]: Manual public/sw.js preferred over Serwist — avoids Webpack/Turbopack conflict
+- [v1.1 Research]: Schema migration (PackingItem usage fields + TripFeedback) belongs in Phase 6 to unblock Phase 9
+- [Phase 05]: VoiceRecordModal manages full state machine — voice debrief infrastructure already exists for Phase 9 to wire up
 
 ### Pending Todos
 
@@ -115,18 +58,12 @@ None yet.
 
 ### Blockers/Concerns
 
-- HA hardware not available until mid-April 2026 — Smart campsite deferred to v2 (not blocking milestone 1)
-- sqlite-vec is pre-1.0 (v0.1.8) — pin version, plan migration sprint if 1.0 ships during Phase 3
-- Voice on iOS: Web Speech API reliability in Safari PWA mode unconfirmed — test on device before building voice UI
-- EcoFlow API: no confirmed public API — power budget will use manual input model unless API found in Phase 1 research
+- Serwist/Turbopack: if manual sw.js fails App Router URL pattern validation in spike, fall back to Serwist with --webpack flag
+- Voice debrief extraction schema needs a prompt engineering spike before Phase 9 UI is built
+- iOS 7-day storage clearing: surface snapshot age clearly in the UI (Phase 8)
 
 ## Session Continuity
 
-stopped_at: Completed 05-01-PLAN.md and 05-02-PLAN.md
-last_updated: "2026-04-01T03:23:14.933Z"
-last_activity: 2026-04-01
-progress:
-  total_phases: 5
-  completed_phases: 3
-  total_plans: 13
+Last session: 2026-04-01
+Stopped at: Roadmap created — v1.1 phases 6-9 defined, ready to plan Phase 6
 Resume file: None

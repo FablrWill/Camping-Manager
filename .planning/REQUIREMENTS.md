@@ -59,27 +59,27 @@ Requirements for v1.1 "Close the Loop." Each maps to roadmap phases.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| STAB-01 | TBD | Pending |
-| STAB-02 | TBD | Pending |
-| STAB-03 | TBD | Pending |
-| STAB-04 | TBD | Pending |
-| STAB-05 | TBD | Pending |
-| STAB-06 | TBD | Pending |
-| OFF-01 | TBD | Pending |
-| OFF-02 | TBD | Pending |
-| OFF-03 | TBD | Pending |
-| OFF-04 | TBD | Pending |
-| EXEC-01 | TBD | Pending |
-| EXEC-02 | TBD | Pending |
-| LEARN-01 | TBD | Pending |
-| LEARN-02 | TBD | Pending |
-| LEARN-03 | TBD | Pending |
+| STAB-01 | Phase 6 | Pending |
+| STAB-02 | Phase 6 | Pending |
+| STAB-03 | Phase 6 | Pending |
+| STAB-04 | Phase 6 | Pending |
+| STAB-05 | Phase 6 | Pending |
+| STAB-06 | Phase 6 | Pending |
+| OFF-01 | Phase 8 | Pending |
+| OFF-02 | Phase 8 | Pending |
+| OFF-03 | Phase 8 | Pending |
+| OFF-04 | Phase 8 | Pending |
+| EXEC-01 | Phase 7 | Pending |
+| EXEC-02 | Phase 7 | Pending |
+| LEARN-01 | Phase 9 | Pending |
+| LEARN-02 | Phase 9 | Pending |
+| LEARN-03 | Phase 9 | Pending |
 
 **Coverage:**
 - v1.1 requirements: 15 total
-- Mapped to phases: 0 (pending roadmap)
-- Unmapped: 15
+- Mapped to phases: 15
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-01*
-*Last updated: 2026-04-01 after milestone v1.1 definition*
+*Last updated: 2026-04-01 — traceability filled after roadmap creation*

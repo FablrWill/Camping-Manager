@@ -1,24 +1,14 @@
-# Roadmap: Outland OS — Milestone 1
+# Roadmap: Outland OS — Milestone v1.1 Close the Loop
 
-## Overview
+## Milestones
 
-Outland OS has 14 sessions of working features behind it. This milestone transforms that foundation into a trustworthy, intelligent camping second brain: first validating what exists, then completing the core trip prep loop, then layering in the knowledge base, chat agent, and voice features that make it actually useful in the field. Every phase delivers something verifiable before the next phase begins.
+- ✅ **v1.0 Foundation** - Phases 1-5 (shipped 2026-04-01)
+- 🚧 **v1.1 Close the Loop** - Phases 6-9 (in progress)
 
 ## Phases
 
-**Phase Numbering:**
-- Integer phases (1, 2, 3): Planned milestone work
-- Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
-
-Decimal phases appear between their surrounding integers in numeric order.
-
-- [ ] **Phase 1: Validation** - Test and harden all existing AI features before building new ones
-- [x] **Phase 2: Executive Trip Prep** - Unify weather, packing, meals, and power into a single "am I ready?" view (completed 2026-03-30)
-- [x] **Phase 3: Knowledge Base** - Build and validate NC camping RAG corpus with hybrid retrieval (completed 2026-03-31)
-- [x] **Phase 4: Chat Agent** - Messenger-style AI assistant with full trip context and tool use (completed 2026-03-31)
-- [x] **Phase 5: Intelligence Features** - AI trip recommendations and voice trip debrief (completed 2026-04-01)
-
-## Phase Details
+<details>
+<summary>✅ v1.0 Foundation (Phases 1-5) - SHIPPED 2026-04-01</summary>
 
 ### Phase 1: Validation
 **Goal**: All existing AI features work correctly and handle edge cases — nothing embarrassing breaks before new features are built on top
@@ -98,15 +88,75 @@ Plans:
 - [x] 05-04-PLAN.md — Gap closure: wire weather forecasts into recommend_spots (REC-02)
 **UI hint**: yes
 
+</details>
+
+### 🚧 v1.1 Close the Loop (In Progress)
+
+**Milestone Goal:** Stabilize the foundation, add offline capability, and build the learning loop — so the app survives a real camping trip and gets smarter from it.
+
+## Phase Details
+
+### Phase 6: Stabilization
+**Goal**: Every existing feature works reliably and the data persists — bugs are fixed, AI outputs survive navigation, CRUD is complete, and all forms use the design system
+**Depends on**: Phase 5
+**Requirements**: STAB-01, STAB-02, STAB-03, STAB-04, STAB-05, STAB-06
+**Success Criteria** (what must be TRUE):
+  1. User can generate a packing list or meal plan and return to it after navigating away — the results are still there
+  2. User can edit or delete any trip, vehicle profile, vehicle mod, or photo without hitting a missing UI or broken action
+  3. A malformed Claude response never crashes the app — it shows an error message and lets the user retry
+  4. Every form in the app (gear, trips, vehicle, mods, locations) uses Button, Input, Card, and Modal from the design system — visual consistency across all pages
+  5. The schema includes PackingItem usage fields and an append-only TripFeedback model — ready for the learning loop
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 7: Day-Of Execution
+**Goal**: Users have the tools to safely depart for a trip — a time-ordered departure checklist and a safety float plan email to an emergency contact
+**Depends on**: Phase 6
+**Requirements**: EXEC-01, EXEC-02
+**Success Criteria** (what must be TRUE):
+  1. User can open an active trip and see a time-ordered departure checklist derived from their actual packing list, meal plan, and power data — not a static template
+  2. User can tap "Send Float Plan" and have a trip summary email delivered to their emergency contact before leaving
+  3. The safety email includes trip name, destination, dates, packed gear summary, and emergency contact info — enough for someone to act on it
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 8: PWA and Offline
+**Goal**: Users can install the app on their phone's home screen and access all trip data without a cell signal — using a single "Leaving Now" tap to cache everything before departure
+**Depends on**: Phase 6
+**Requirements**: OFF-01, OFF-02, OFF-03, OFF-04
+**Success Criteria** (what must be TRUE):
+  1. User can install the app to their phone home screen from Safari or Chrome and launch it as a standalone PWA
+  2. User can open the app with no cell signal and see the app shell, navigation, and previously cached pages
+  3. User can tap "Leaving Now" on a trip and have weather snapshot, packing list, meal plan, saved spots, and emergency info all available offline — written to IndexedDB, not service worker cache
+  4. User can see cached map tiles for the trip area while offline (tiles visible at the time of "Leaving Now")
+  5. User sees a clear indicator when the app is offline and knows how old the cached snapshot is
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 9: Learning Loop
+**Goal**: Every trip makes the app smarter — gear usage is tracked post-trip, Claude generates a debrief summary, and voice notes write back to gear and location records
+**Depends on**: Phase 6
+**Requirements**: LEARN-01, LEARN-02, LEARN-03
+**Success Criteria** (what must be TRUE):
+  1. User can open a completed trip and mark each packed item as "used," "didn't need," or "forgot but needed"
+  2. User can request a post-trip summary and receive a Claude-generated 3-bullet debrief: what to drop, what was missing, and an updated location rating — generated from their actual usage data
+  3. User can record a voice debrief and have it automatically update gear notes and location ratings — with a review screen to confirm before applying changes
+**Plans**: TBD
+**UI hint**: yes
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
+Phases execute in numeric order: 6 → 7 → 8 → 9
 
-| Phase | Plans Complete | Status | Completed |
-|-------|----------------|--------|-----------|
-| 1. Validation | 0/TBD | Not started | - |
-| 2. Executive Trip Prep | 2/2 | Complete   | 2026-03-30 |
-| 3. Knowledge Base | 4/4 | Complete   | 2026-03-31 |
-| 4. Chat Agent | 4/4 | Complete   | 2026-03-31 |
-| 5. Intelligence Features | 4/4 | Complete   | 2026-04-01 |
+| Phase | Milestone | Plans Complete | Status | Completed |
+|-------|-----------|----------------|--------|-----------|
+| 1. Validation | v1.0 | 0/TBD | Not started | - |
+| 2. Executive Trip Prep | v1.0 | 2/2 | Complete | 2026-03-30 |
+| 3. Knowledge Base | v1.0 | 4/4 | Complete | 2026-03-31 |
+| 4. Chat Agent | v1.0 | 4/4 | Complete | 2026-03-31 |
+| 5. Intelligence Features | v1.0 | 4/4 | Complete | 2026-04-01 |
+| 6. Stabilization | v1.1 | 0/TBD | Not started | - |
+| 7. Day-Of Execution | v1.1 | 0/TBD | Not started | - |
+| 8. PWA and Offline | v1.1 | 0/TBD | Not started | - |
+| 9. Learning Loop | v1.1 | 0/TBD | Not started | - |
