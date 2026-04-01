@@ -112,7 +112,7 @@ Plans:
 - [x] 06-02-PLAN.md — Missing CRUD APIs (photo delete, mod delete) + trip/vehicle CRUD UI + design system migration
 - [x] 06-03-PLAN.md — AI output persistence (packing list + meal plan) with load-on-mount, regenerate, error/retry UI
 - [x] 06-04-PLAN.md — Gap closure: packing list persistence fixes ($transaction, packed state in GET, custom item persistence via PUT)
-- [ ] 06-05-PLAN.md — Gap closure: TripCard extraction, SpotMap photo delete without reload, ConfirmDialog on regenerate
+- [x] 06-05-PLAN.md — Gap closure: TripCard extraction, SpotMap photo delete without reload, ConfirmDialog on regenerate
 **UI hint**: yes
 
 ### Phase 7: Day-Of Execution
