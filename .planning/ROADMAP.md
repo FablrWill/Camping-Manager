@@ -106,11 +106,13 @@ Plans:
   3. A malformed Claude response never crashes the app — it shows an error message and lets the user retry
   4. Every form in the app (gear, trips, vehicle, mods, locations) uses Button, Input, Card, and Modal from the design system — visual consistency across all pages
   5. The schema includes PackingItem usage fields and an append-only TripFeedback model — ready for the learning loop
-**Plans**: 3 plans
+**Plans**: 5 plans
 Plans:
 - [x] 06-01-PLAN.md — Schema migration (MealPlan, TripFeedback, PackingItem usage, cachedAt) + Zod install + parseClaudeJSON utility
 - [x] 06-02-PLAN.md — Missing CRUD APIs (photo delete, mod delete) + trip/vehicle CRUD UI + design system migration
 - [x] 06-03-PLAN.md — AI output persistence (packing list + meal plan) with load-on-mount, regenerate, error/retry UI
+- [ ] 06-04-PLAN.md — Gap closure: packing list persistence fixes ($transaction, packed state in GET, custom item persistence via PUT)
+- [ ] 06-05-PLAN.md — Gap closure: TripCard extraction, SpotMap photo delete without reload, ConfirmDialog on regenerate
 **UI hint**: yes
 
 ### Phase 7: Day-Of Execution
@@ -160,7 +162,7 @@ Phases execute in numeric order: 6 → 7 → 8 → 9
 | 3. Knowledge Base | v1.0 | 4/4 | Complete | 2026-03-31 |
 | 4. Chat Agent | v1.0 | 4/4 | Complete | 2026-03-31 |
 | 5. Intelligence Features | v1.0 | 4/4 | Complete | 2026-04-01 |
-| 6. Stabilization | v1.1 | 3/3 | Complete   | 2026-04-01 |
+| 6. Stabilization | v1.1 | 3/5 | In Progress | - |
 | 7. Day-Of Execution | v1.1 | 0/TBD | Not started | - |
 | 8. PWA and Offline | v1.1 | 0/TBD | Not started | - |
 | 9. Learning Loop | v1.1 | 0/TBD | Not started | - |
