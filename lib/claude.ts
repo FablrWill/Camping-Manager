@@ -1,5 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk'
-import { parseClaudeJSON, PackingListResultSchema, MealPlanResultSchema, DepartureChecklistResultSchema, DepartureChecklistResult } from '@/lib/parse-claude'
+import { parseClaudeJSON, PackingListResultSchema, MealPlanResultSchema, DepartureChecklistResultSchema, DepartureChecklistResult, FloatPlanEmailSchema, FloatPlanEmail } from '@/lib/parse-claude'
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -469,6 +469,95 @@ Rules:
     message.content[0].type === 'text' ? message.content[0].text : ''
 
   const parseResult = parseClaudeJSON(text, DepartureChecklistResultSchema)
+  if (!parseResult.success) {
+    throw new Error(parseResult.error)
+  }
+
+  return parseResult.data
+}
+
+export async function composeFloatPlanEmail(params: {
+  tripName: string
+  startDate: string
+  endDate: string
+  destinationName: string | null
+  destinationLat: number | null
+  destinationLon: number | null
+  packedGearSummary: string
+  vehicleName: string | null
+  weatherNotes: string | null
+  tripNotes: string | null
+  emergencyContactName: string
+  checklistStatus: string
+}): Promise<FloatPlanEmail> {
+  const {
+    tripName,
+    startDate,
+    endDate,
+    destinationName,
+    destinationLat,
+    destinationLon,
+    packedGearSummary,
+    vehicleName,
+    weatherNotes,
+    tripNotes,
+    emergencyContactName,
+    checklistStatus,
+  } = params
+
+  const mapsLinkNote =
+    destinationLat !== null && destinationLon !== null
+      ? `A Google Maps link for the destination will be appended by the sender after this email is composed.`
+      : ''
+
+  const userMessage = `Write a safety float plan email for this car camping trip.
+
+TRIP DETAILS:
+- Trip Name: ${tripName}
+- Start Date: ${startDate}
+- End Date: ${endDate}
+${destinationName ? `- Destination: ${destinationName}` : '- Destination: Not specified'}
+${vehicleName ? `- Vehicle: ${vehicleName}` : ''}
+${weatherNotes ? `- Weather Notes: ${weatherNotes}` : ''}
+${tripNotes ? `- Trip Notes: ${tripNotes}` : ''}
+
+PACKED GEAR SUMMARY:
+${packedGearSummary || 'No packed gear recorded.'}
+
+DEPARTURE CHECKLIST STATUS:
+${checklistStatus}
+
+EMERGENCY CONTACT (recipient):
+${emergencyContactName}
+
+${mapsLinkNote}
+
+INSTRUCTIONS:
+- Write the email body as a message to the emergency contact (address them by name: ${emergencyContactName})
+- Include: trip name, dates, destination, a brief summary of packed gear, the departure checklist status (${checklistStatus}), and when to expect my return
+- End with: "Reply to this email if you need to reach me."
+- Keep it friendly and readable for a non-camper
+- Use blank lines for paragraph breaks
+- PLAIN TEXT ONLY — no markdown, no bullet characters like -, *, #, no HTML
+
+Return valid JSON in this exact format:
+{
+  "subject": "Float Plan: ${tripName} — ${startDate} to ${endDate}",
+  "body": "The full plain text email body here"
+}`
+
+  const message = await anthropic.messages.create({
+    model: 'claude-sonnet-4-20250514',
+    max_tokens: 1500,
+    system:
+      'You are writing a safety float plan email for a car camping trip. Write in natural, readable prose that a non-camper emergency contact can understand. Be concise but include all essential safety information. Adapt tone to trip context (solo vs. group, weather concerns, remote vs. developed campground). Write PLAIN TEXT only -- no markdown, no HTML tags. Use blank lines for paragraph breaks. The email will be sent as plain text.',
+    messages: [{ role: 'user', content: userMessage }],
+  })
+
+  const text =
+    message.content[0].type === 'text' ? message.content[0].text : ''
+
+  const parseResult = parseClaudeJSON(text, FloatPlanEmailSchema)
   if (!parseResult.success) {
     throw new Error(parseResult.error)
   }
