@@ -33,11 +33,11 @@
 - [ ] **REC-03**: User can save a recommended spot to their locations from the recommendation result
 
 ### Voice Ghostwriter
-- [ ] **VOICE-01**: User can record a voice memo (trip debrief / journal entry) from the app
-- [ ] **VOICE-02**: Voice recording is transcribed to text automatically
-- [ ] **VOICE-03**: Transcription is processed by Claude to extract structured insights (what worked, what didn't, gear feedback, spot ratings)
-- [ ] **VOICE-04**: Extracted insights can update gear notes, location ratings, or trip notes automatically
-- [ ] **VOICE-05**: Voice input implementation reuses patterns/code from Fablr.ai where applicable
+- [x] **VOICE-01**: User can record a voice memo (trip debrief / journal entry) from the app
+- [x] **VOICE-02**: Voice recording is transcribed to text automatically
+- [x] **VOICE-03**: Transcription is processed by Claude to extract structured insights (what worked, what didn't, gear feedback, spot ratings)
+- [x] **VOICE-04**: Extracted insights can update gear notes, location ratings, or trip notes automatically
+- [x] **VOICE-05**: Voice input implementation reuses patterns/code from Fablr.ai where applicable
 
 ## v2 Requirements (Deferred)
 

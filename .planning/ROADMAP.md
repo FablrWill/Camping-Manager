@@ -93,7 +93,7 @@ Plans:
 **Plans**: 3 plans
 Plans:
 - [ ] 05-01-PLAN.md — Recommendation tool: chat-native agent tool, dual-source ranking (saved + KB), rich card rendering in chat, save-to-locations flow
-- [ ] 05-02-PLAN.md — Voice backend: OpenAI SDK install, Whisper transcription, Claude insight extraction, apply API routes
+- [x] 05-02-PLAN.md — Voice backend: OpenAI SDK install, Whisper transcription, Claude insight extraction, apply API routes
 - [ ] 05-03-PLAN.md — Voice UI: VoiceRecordModal with MediaRecorder, InsightsReviewSheet, mic button on trip cards
 **UI hint**: yes
 
@@ -108,4 +108,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 2. Executive Trip Prep | 2/2 | Complete   | 2026-03-30 |
 | 3. Knowledge Base | 2/4 | In Progress|  |
 | 4. Chat Agent | 4/4 | Complete   | 2026-03-31 |
-| 5. Intelligence Features | 0/3 | Not started | - |
+| 5. Intelligence Features | 1/3 | In Progress|  |

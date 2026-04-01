@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 04-04-PLAN.md
-last_updated: "2026-04-01T02:10:06.667Z"
+stopped_at: Completed 05-02-PLAN.md
+last_updated: "2026-04-01T03:21:37.614Z"
 last_activity: 2026-04-01
 progress:
   total_phases: 5
   completed_phases: 3
-  total_plans: 10
-  completed_plans: 10
+  total_plans: 13
+  completed_plans: 11
   percent: 25
 ---
 
@@ -21,12 +21,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-30)
 
 **Core value:** Personal camping second brain — AI-powered system that knows more about camping logistics, gear, and local NC area than Will does
-**Current focus:** Phase 04 — chat-agent
+**Current focus:** Phase 05 — intelligence-features
 
 ## Current Position
 
-Phase: 5
-Plan: Not started
+Phase: 05 (intelligence-features) — EXECUTING
+Plan: 2 of 3
 Status: Ready to execute
 Last activity: 2026-04-01
 
@@ -59,6 +59,7 @@ Progress: [██░░░░░░░░] 25%
 | Phase 04 P01 | 8 | 6 tasks | 12 files |
 | Phase 04-chat-agent P03 | 4 | 2 tasks | 6 files |
 | Phase 04 P04 | 15 | 3 tasks | 7 files |
+| Phase 05 P02 | 15 | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -88,6 +89,9 @@ Recent decisions affecting current work:
 - [Phase 04-chat-agent]: BottomNav final config: Home/Gear/Spots/Trips/Chat — Vehicle removed, Trips restored from Plan 01 changes
 - [Phase 04]: Wrapped plain Tool schemas as BetaRunnableTool with run()+parse() in route — tools in registry are Tool[], not BetaRunnableTool[]
 - [Phase 04]: BottomNav final config: Home/Gear/Spots/Trips/Chat — Vehicle removed, Trips restored
+- [Phase 05]: Whisper API (server-side) over Web Speech API: iOS Safari Web Speech unreliable; MediaRecorder+Whisper works across platforms
+- [Phase 05]: Claude Haiku for insight extraction: structured JSON extraction is simple — Haiku is faster and cheaper than Sonnet
+- [Phase 05]: Gear notes use append-not-overwrite pattern with date-stamped prefix — debrief insights are additive context, never replace user notes
 
 ### Pending Todos
 
@@ -102,6 +106,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-01T02:10:06.662Z
-Stopped at: Completed 04-04-PLAN.md
+Last session: 2026-04-01T03:21:37.610Z
+Stopped at: Completed 05-02-PLAN.md
 Resume file: None
