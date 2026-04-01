@@ -184,21 +184,28 @@ model Trip {
   currentBatteryPct  Float?    // last known EcoFlow battery %, entered during live mode
   batteryUpdatedAt   DateTime? // when currentBatteryPct was last set
   mealPlanGeneratedAt DateTime? // set when Claude generates a meal plan for this trip
+  packingListResult      String?   // JSON blob of PackingListResult (D-01)
+  packingListGeneratedAt DateTime? // when packing list was last generated (D-01)
+  cachedAt               DateTime? // Phase 8 offline snapshot (D-11)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  location     Location? @relation(fields: [locationId], references: [id])
-  vehicle      Vehicle?  @relation(fields: [vehicleId], references: [id])
-  packingItems PackingItem[]
-  photos       Photo[]
+  location      Location?      @relation(fields: [locationId], references: [id])
+  vehicle       Vehicle?       @relation(fields: [vehicleId], references: [id])
+  packingItems  PackingItem[]
+  photos        Photo[]
+  mealPlan      MealPlan?
+  tripFeedbacks TripFeedback[]
 }
 
 model PackingItem {
-  id       String  @id @default(cuid())
-  tripId   String
-  gearId   String
-  packed   Boolean @default(false)
-  notes    String?
+  id          String    @id @default(cuid())
+  tripId      String
+  gearId      String
+  packed      Boolean   @default(false)
+  notes       String?
+  usageStatus String?   // "used" | "didn't need" | "forgot but needed" | null
+  cachedAt    DateTime? // Phase 8 offline snapshot (D-11)
 
   trip Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
   gear GearItem @relation(fields: [gearId], references: [id], onDelete: Cascade)
@@ -254,4 +261,29 @@ model AgentMemory {
   updatedAt DateTime @updatedAt
 
   @@index([key])
+}
+
+model MealPlan {
+  id          String    @id @default(cuid())
+  tripId      String    @unique  // one meal plan per trip (D-05)
+  result      String    // JSON blob of MealPlanResult
+  generatedAt DateTime  @default(now())
+  cachedAt    DateTime? // Phase 8 offline snapshot (D-11)
+  createdAt   DateTime  @default(now())
+
+  trip Trip @relation(fields: [tripId], references: [id], onDelete: Cascade)
+}
+
+model TripFeedback {
+  id              String    @id @default(cuid())
+  tripId          String    // NOT unique — append-only, multiple records per trip (D-09)
+  summary         String?   // free text summary
+  voiceTranscript String?   // raw voice transcript
+  insights        String?   // JSON: structured extracted insights
+  status          String    @default("pending") // "pending" | "applied"
+  createdAt       DateTime  @default(now())
+
+  trip Trip @relation(fields: [tripId], references: [id], onDelete: Cascade)
+
+  @@index([tripId])
 }

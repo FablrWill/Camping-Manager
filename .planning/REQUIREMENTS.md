@@ -9,8 +9,8 @@ Requirements for v1.1 "Close the Loop." Each maps to roadmap phases.
 
 ### Stabilization
 
-- [ ] **STAB-01**: User can generate AI outputs (packing list, meal plan) without crashes from malformed Claude responses (Zod parseClaudeJSON utility)
-- [ ] **STAB-02**: User can view previously generated packing lists and meal plans after navigating away (persisted to database)
+- [x] **STAB-01**: User can generate AI outputs (packing list, meal plan) without crashes from malformed Claude responses (Zod parseClaudeJSON utility)
+- [x] **STAB-02**: User can view previously generated packing lists and meal plans after navigating away (persisted to database)
 - [ ] **STAB-03**: User can edit and delete trips from the trips page
 - [ ] **STAB-04**: User can edit vehicle profile and edit/delete vehicle mods
 - [ ] **STAB-05**: User can delete photos from the photo gallery
@@ -59,8 +59,8 @@ Requirements for v1.1 "Close the Loop." Each maps to roadmap phases.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| STAB-01 | Phase 6 | Pending |
-| STAB-02 | Phase 6 | Pending |
+| STAB-01 | Phase 6 | Complete |
+| STAB-02 | Phase 6 | Complete |
 | STAB-03 | Phase 6 | Pending |
 | STAB-04 | Phase 6 | Pending |
 | STAB-05 | Phase 6 | Pending |
