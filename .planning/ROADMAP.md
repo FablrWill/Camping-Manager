@@ -140,7 +140,12 @@ Plans:
   3. User can tap "Leaving Now" on a trip and have weather snapshot, packing list, meal plan, saved spots, and emergency info all available offline — written to IndexedDB, not service worker cache
   4. User can see cached map tiles for the trip area while offline (tiles visible at the time of "Leaving Now")
   5. User sees a clear indicator when the app is offline and knows how old the cached snapshot is
-**Plans**: TBD
+**Plans**: 4 plans
+Plans:
+- [ ] 08-01-PLAN.md — PWA foundation: manifest, icons, service worker with app shell caching, SW registration
+- [ ] 08-02-PLAN.md — Offline infrastructure: idb-keyval, offline storage, online status hook, offline banner, install banner
+- [ ] 08-03-PLAN.md — "Leaving Now" caching flow: sequential data fetcher, progress overlay, button, departure page integration
+- [ ] 08-04-PLAN.md — Map tile caching + offline UI polish: SpotMap crossOrigin, tile error placeholders, offline checklist states, staleness warning
 **UI hint**: yes
 
 ### Phase 9: Learning Loop
@@ -168,5 +173,5 @@ Phases execute in numeric order: 6 → 7 → 8 → 9
 | 5. Intelligence Features | v1.0 | 4/4 | Complete | 2026-04-01 |
 | 6. Stabilization | v1.1 | 5/5 | Complete | - |
 | 7. Day-Of Execution | v1.1 | 3/3 | Complete   | 2026-04-01 |
-| 8. PWA and Offline | v1.1 | 0/TBD | Not started | - |
+| 8. PWA and Offline | v1.1 | 0/4 | Planned | - |
 | 9. Learning Loop | v1.1 | 0/TBD | Not started | - |
