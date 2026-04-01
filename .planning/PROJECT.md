@@ -70,8 +70,8 @@ A personal second brain for car camping — an AI-powered knowledge system that 
 **Phase 3 — Intelligence & Agent:**
 - [ ] AI trip recommendations ("find me a spot within 2hrs")
 - [ ] Voice Ghostwriter / trip debrief
-- [ ] Chat interface (messenger-style agent)
-- [ ] NC camping knowledge base (RAG)
+- [x] Chat interface (messenger-style agent) — Validated in Phase 4: chat-agent
+- [x] NC camping knowledge base (RAG) — Validated in Phase 3: knowledge-base
 - [ ] Gear photo identification
 - [ ] Link/screenshot → gear import
 - [ ] Safety float plan
@@ -149,4 +149,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-30 after initialization*
+*Last updated: 2026-03-31 — Phase 4 chat-agent complete*
