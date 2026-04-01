@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/db';
 import { hybridSearch } from '@/lib/rag/search';
+import { executeGetWeather } from '@/lib/agent/tools/getWeather';
 import type { Tool } from '@anthropic-ai/sdk/resources/messages';
 
 export const recommendSpotsTool: Tool = {
@@ -30,6 +31,7 @@ interface Recommendation {
   source: 'saved' | 'knowledge_base';
   distanceNote: string | null;
   coordinates: { lat: number; lon: number } | null;
+  weatherSummary: { date: string; highF: number; lowF: number; precipPct: number; weatherCode: number }[] | null;
 }
 
 export async function executeRecommendSpots(input: { query: string; maxResults?: number }): Promise<string> {
@@ -68,6 +70,7 @@ export async function executeRecommendSpots(input: { query: string; maxResults?:
         source: 'saved',
         distanceNote: null,
         coordinates: loc.latitude && loc.longitude ? { lat: loc.latitude, lon: loc.longitude } : null,
+        weatherSummary: null,
       });
     }
 
@@ -97,6 +100,7 @@ export async function executeRecommendSpots(input: { query: string; maxResults?:
         source: 'knowledge_base',
         distanceNote: null,
         coordinates: null,
+        weatherSummary: null,
       });
     }
 
@@ -105,6 +109,25 @@ export async function executeRecommendSpots(input: { query: string; maxResults?:
       ...recommendations.filter((r) => r.source === 'saved'),
       ...recommendations.filter((r) => r.source === 'knowledge_base'),
     ].slice(0, maxResults);
+
+    // --- Source 3: Weather forecasts (best-effort enrichment) ---
+    const weatherPromises = sorted.map(async (rec) => {
+      if (!rec.coordinates) return;
+      try {
+        const raw = await executeGetWeather({
+          latitude: rec.coordinates.lat,
+          longitude: rec.coordinates.lon,
+          days: 3,
+        });
+        const parsed = JSON.parse(raw);
+        if (parsed.forecast) {
+          rec.weatherSummary = parsed.forecast.slice(0, 3);
+        }
+      } catch {
+        // Best-effort — leave weatherSummary as null
+      }
+    });
+    await Promise.allSettled(weatherPromises);
 
     return JSON.stringify({
       action: 'recommendations',
