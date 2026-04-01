@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback, useImperativeHandle, forwardRef } from "react";
+import { ConfirmDialog } from "@/components/ui";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "leaflet.markercluster/dist/MarkerCluster.css";
@@ -196,6 +197,7 @@ const SpotMap = forwardRef<SpotMapHandle, SpotMapProps>(function SpotMap(
   const animDotRef = useRef<L.CircleMarker | null>(null);
   const animLineRef = useRef<L.Polyline | null>(null);
   const [ready, setReady] = useState(false);
+  const [confirmDeletePhoto, setConfirmDeletePhoto] = useState<{ id: string; title: string } | null>(null);
 
   // Initialize map
   useEffect(() => {
@@ -300,6 +302,8 @@ const SpotMap = forwardRef<SpotMapHandle, SpotMapProps>(function SpotMap(
         ? `<a href="${photo.googleUrl}" target="_blank" style="color:#3b82f6;font-size:12px;">View in Google Photos</a>`
         : "";
 
+      const deleteBtn = `<button data-photo-delete="${photo.id}" style="margin-top:8px;padding:6px 12px;background:#dc2626;color:white;border:none;border-radius:6px;font-size:12px;cursor:pointer;width:100%;">Delete Photo</button>`;
+
       marker.bindPopup(`
         <div style="min-width:200px;font-family:system-ui;">
           <img src="${photo.imagePath}" alt="${photo.title}"
@@ -311,6 +315,7 @@ const SpotMap = forwardRef<SpotMapHandle, SpotMapProps>(function SpotMap(
           ${photo.altitude ? `<p style="margin:2px 0;color:#666;font-size:12px;">🏔️ ${Math.round(photo.altitude)}m</p>` : ""}
           ${visionBadge}
           ${googleLink}
+          ${deleteBtn}
         </div>
       `);
 
@@ -320,6 +325,26 @@ const SpotMap = forwardRef<SpotMapHandle, SpotMapProps>(function SpotMap(
     map.addLayer(cluster);
     clusterGroupRef.current = cluster;
   }, [photos, layers.photos, ready]);
+
+  // DOM event delegation for photo delete button in Leaflet popup (raw HTML, not React)
+  useEffect(() => {
+    const container = mapRef.current?.getContainer();
+    if (!container) return;
+
+    function handlePopupClick(e: Event) {
+      const target = e.target as HTMLElement;
+      const btn = target.closest('[data-photo-delete]') as HTMLElement | null;
+      if (btn) {
+        const photoId = btn.dataset.photoDelete;
+        if (photoId) {
+          setConfirmDeletePhoto({ id: photoId, title: 'this photo' });
+        }
+      }
+    }
+
+    container.addEventListener('click', handlePopupClick);
+    return () => container.removeEventListener('click', handlePopupClick);
+  }, [ready]);
 
   // Update location (spot) markers
   useEffect(() => {
@@ -579,6 +604,17 @@ const SpotMap = forwardRef<SpotMapHandle, SpotMapProps>(function SpotMap(
     onAnimationTime?.(null);
   }, [onAnimationTime]);
 
+  async function handleDeletePhoto(photoId: string) {
+    try {
+      const res = await fetch(`/api/photos/${photoId}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Failed to delete');
+      setConfirmDeletePhoto(null);
+      window.location.reload(); // Photo markers rebuild from server data on reload
+    } catch {
+      console.error('Failed to delete photo');
+    }
+  }
+
   useImperativeHandle(ref, () => ({ animatePath, stopAnimation }), [animatePath, stopAnimation]);
 
   return (
@@ -596,6 +632,16 @@ const SpotMap = forwardRef<SpotMapHandle, SpotMapProps>(function SpotMap(
         ref={containerRef}
         className="w-full h-full rounded-lg"
         style={{ minHeight: "400px" }}
+      />
+      {/* Photo delete confirmation — rendered outside Leaflet DOM */}
+      <ConfirmDialog
+        open={!!confirmDeletePhoto}
+        onClose={() => setConfirmDeletePhoto(null)}
+        onConfirm={() => confirmDeletePhoto && handleDeletePhoto(confirmDeletePhoto.id)}
+        title="Delete photo?"
+        message="This photo will be permanently removed. The file cannot be recovered."
+        confirmLabel="Delete"
+        confirmVariant="danger"
       />
     </>
   );

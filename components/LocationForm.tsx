@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Button, Input, Select, Textarea, ConfirmDialog } from "@/components/ui";
 
 export interface LocationData {
   id?: string;
@@ -83,6 +84,8 @@ export default function LocationForm({
   const [notes, setNotes] = useState(existing?.notes ?? "");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -133,227 +136,206 @@ export default function LocationForm({
 
   const handleDelete = async () => {
     if (!existing?.id || !onDelete) return;
-    if (!confirm("Delete this location?")) return;
-
+    setIsDeleting(true);
+    setError(null);
     try {
       const res = await fetch(`/api/locations/${existing.id}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Failed to delete");
       onDelete();
     } catch {
       setError("Failed to delete location");
+    } finally {
+      setIsDeleting(false);
+      setConfirmDelete(false);
     }
   };
 
   return (
-    <div className="absolute bottom-0 left-0 right-0 z-[1000] bg-white border-t-2 border-amber-500 rounded-t-2xl shadow-2xl max-h-[75vh] overflow-y-auto">
-      {/* Header */}
-      <div className="sticky top-0 bg-white px-4 pt-4 pb-2 border-b border-stone-200 flex items-center justify-between">
-        <h2 className="text-lg font-bold text-stone-800">
-          {isEdit ? "Edit Location" : "New Location"}
-        </h2>
-        <button
-          onClick={onCancel}
-          className="p-1.5 text-stone-400 hover:text-stone-600 text-xl leading-none"
-        >
-          &times;
-        </button>
-      </div>
-
-      <form onSubmit={handleSubmit} className="px-4 py-3 space-y-4">
-        {/* Coordinates display */}
-        <div className="text-xs text-stone-400 font-mono">
-          {lat.toFixed(6)}, {lng.toFixed(6)}
+    <>
+      <div className="absolute bottom-0 left-0 right-0 z-[1000] bg-white dark:bg-stone-900 border-t-2 border-amber-500 rounded-t-2xl shadow-2xl max-h-[75vh] overflow-y-auto">
+        {/* Header */}
+        <div className="sticky top-0 bg-white dark:bg-stone-900 px-4 pt-4 pb-2 border-b border-stone-200 dark:border-stone-700 flex items-center justify-between">
+          <h2 className="text-lg font-bold text-stone-800 dark:text-stone-50">
+            {isEdit ? "Edit Location" : "New Location"}
+          </h2>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onCancel}
+            aria-label="Close"
+            className="text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 text-xl leading-none"
+          >
+            &times;
+          </Button>
         </div>
 
-        {/* Name */}
-        <div>
-          <label className="block text-sm font-medium text-stone-700 mb-1">
-            Name <span className="text-red-400">*</span>
-          </label>
-          <input
+        <form onSubmit={handleSubmit} className="px-4 py-3 space-y-4">
+          {/* Coordinates display */}
+          <div className="text-xs text-stone-400 dark:text-stone-500 font-mono">
+            {lat.toFixed(6)}, {lng.toFixed(6)}
+          </div>
+
+          {/* Name */}
+          <Input
+            label="Name *"
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="e.g. South Rim Camp"
-            className="w-full px-3 py-2 border border-stone-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none"
             autoFocus
           />
-        </div>
 
-        {/* Date/time visited */}
-        <div>
-          <label className="block text-sm font-medium text-stone-700 mb-1">
-            Date &amp; time visited
-          </label>
-          <input
+          {/* Date/time visited */}
+          <Input
+            label="Date & time visited"
             type="datetime-local"
             value={visitedAt}
             onChange={(e) => setVisitedAt(e.target.value)}
-            className="w-full px-3 py-2 border border-stone-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none"
           />
-        </div>
 
-        {/* Type + Rating row */}
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="block text-sm font-medium text-stone-700 mb-1">Type</label>
-            <select
+          {/* Type + Rating row */}
+          <div className="grid grid-cols-2 gap-3">
+            <Select
+              label="Type"
               value={type}
               onChange={(e) => setType(e.target.value)}
-              className="w-full px-3 py-2 border border-stone-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none bg-white"
-            >
-              {LOCATION_TYPES.map((t) => (
-                <option key={t.value} value={t.value}>
-                  {t.label}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-stone-700 mb-1">Rating</label>
-            <div className="flex gap-1 py-1.5">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <button
-                  key={star}
-                  type="button"
-                  onClick={() => setRating(rating === star ? null : star)}
-                  className={`text-xl transition-colors ${
-                    rating && star <= rating ? "text-amber-400" : "text-stone-300"
-                  }`}
-                >
-                  ★
-                </button>
-              ))}
+              options={LOCATION_TYPES}
+            />
+            <div>
+              <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">Rating</label>
+              <div className="flex gap-1 py-1.5">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <Button
+                    key={star}
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setRating(rating === star ? null : star)}
+                    className={`text-xl transition-colors px-1 ${
+                      rating && star <= rating ? "text-amber-400" : "text-stone-300"
+                    }`}
+                  >
+                    ★
+                  </Button>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Road info */}
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="block text-sm font-medium text-stone-700 mb-1">Road condition</label>
-            <input
+          {/* Road info */}
+          <div className="grid grid-cols-2 gap-3">
+            <Input
+              label="Road condition"
               type="text"
               value={roadCondition}
               onChange={(e) => setRoadCondition(e.target.value)}
               placeholder="e.g. Gravel, well-maintained"
-              className="w-full px-3 py-2 border border-stone-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none"
             />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-stone-700 mb-1">Clearance needed</label>
-            <input
+            <Input
+              label="Clearance needed"
               type="text"
               value={clearanceNeeded}
               onChange={(e) => setClearanceNeeded(e.target.value)}
               placeholder="e.g. Standard, AWD"
-              className="w-full px-3 py-2 border border-stone-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none"
             />
           </div>
-        </div>
 
-        {/* Signal + Water */}
-        <div className="grid grid-cols-3 gap-3">
-          <div>
-            <label className="block text-sm font-medium text-stone-700 mb-1">Cell signal</label>
-            <select
+          {/* Signal + Water */}
+          <div className="grid grid-cols-3 gap-3">
+            <Select
+              label="Cell signal"
               value={cellSignal}
               onChange={(e) => setCellSignal(e.target.value)}
-              className="w-full px-3 py-2 border border-stone-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none bg-white"
-            >
-              {SIGNAL_OPTIONS.map((s) => (
-                <option key={s.value} value={s.value}>
-                  {s.label}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-stone-700 mb-1">Starlink</label>
-            <select
+              options={SIGNAL_OPTIONS}
+            />
+            <Select
+              label="Starlink"
               value={starlinkSignal}
               onChange={(e) => setStarlinkSignal(e.target.value)}
-              className="w-full px-3 py-2 border border-stone-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none bg-white"
-            >
-              {SIGNAL_OPTIONS.map((s) => (
-                <option key={s.value} value={s.value}>
-                  {s.label}
-                </option>
-              ))}
-            </select>
+              options={SIGNAL_OPTIONS}
+            />
+            <div>
+              <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">Water</label>
+              <Button
+                type="button"
+                variant={waterAccess ? "secondary" : "ghost"}
+                size="sm"
+                onClick={() => setWaterAccess(!waterAccess)}
+                className={`w-full ${
+                  waterAccess
+                    ? "bg-blue-50 border-blue-300 text-blue-700 dark:bg-blue-950/30 dark:border-blue-700 dark:text-blue-300"
+                    : "text-stone-400 dark:text-stone-500"
+                }`}
+              >
+                {waterAccess ? "💧 Yes" : "No"}
+              </Button>
+            </div>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-stone-700 mb-1">Water</label>
-            <button
-              type="button"
-              onClick={() => setWaterAccess(!waterAccess)}
-              className={`w-full px-3 py-2 rounded-lg text-sm font-medium border transition-colors ${
-                waterAccess
-                  ? "bg-blue-50 border-blue-300 text-blue-700"
-                  : "bg-white border-stone-300 text-stone-400"
-              }`}
-            >
-              {waterAccess ? "💧 Yes" : "No"}
-            </button>
-          </div>
-        </div>
 
-        {/* Description */}
-        <div>
-          <label className="block text-sm font-medium text-stone-700 mb-1">Description</label>
-          <textarea
+          {/* Description */}
+          <Textarea
+            label="Description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="What makes this spot special?"
             rows={2}
-            className="w-full px-3 py-2 border border-stone-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none resize-none"
           />
-        </div>
 
-        {/* Notes */}
-        <div>
-          <label className="block text-sm font-medium text-stone-700 mb-1">Notes</label>
-          <textarea
+          {/* Notes */}
+          <Textarea
+            label="Notes"
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             placeholder="Private notes, tips, reminders..."
             rows={2}
-            className="w-full px-3 py-2 border border-stone-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none resize-none"
           />
-        </div>
 
-        {/* Error */}
-        {error && (
-          <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg">{error}</p>
-        )}
-
-        {/* Actions */}
-        <div className="flex gap-2 pb-2">
-          <button
-            type="submit"
-            disabled={saving}
-            className="flex-1 px-4 py-2.5 bg-amber-600 text-white font-medium rounded-lg hover:bg-amber-700 disabled:opacity-50 transition-colors"
-          >
-            {saving ? "Saving..." : isEdit ? "Update" : "Save Location"}
-          </button>
-          {isEdit && onDelete && (
-            <button
-              type="button"
-              onClick={handleDelete}
-              className="px-4 py-2.5 text-red-600 bg-red-50 font-medium rounded-lg hover:bg-red-100 transition-colors"
-            >
-              Delete
-            </button>
+          {/* Error */}
+          {error && (
+            <p className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30 px-3 py-2 rounded-lg">{error}</p>
           )}
-          <button
-            type="button"
-            onClick={onCancel}
-            className="px-4 py-2.5 text-stone-600 bg-stone-100 font-medium rounded-lg hover:bg-stone-200 transition-colors"
-          >
-            Cancel
-          </button>
-        </div>
-      </form>
-    </div>
+
+          {/* Actions */}
+          <div className="flex gap-2 pb-2">
+            <Button
+              type="submit"
+              variant="primary"
+              className="flex-1"
+              loading={saving}
+            >
+              {isEdit ? "Update" : "Save Location"}
+            </Button>
+            {isEdit && onDelete && (
+              <Button
+                type="button"
+                variant="danger"
+                onClick={() => setConfirmDelete(true)}
+              >
+                Delete
+              </Button>
+            )}
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={onCancel}
+            >
+              Cancel
+            </Button>
+          </div>
+        </form>
+      </div>
+
+      {/* Delete location confirmation dialog */}
+      <ConfirmDialog
+        open={confirmDelete}
+        onClose={() => setConfirmDelete(false)}
+        onConfirm={handleDelete}
+        title="Delete location?"
+        message="This location will be permanently removed. This can't be undone."
+        confirmLabel="Delete"
+        confirmVariant="danger"
+        loading={isDeleting}
+      />
+    </>
   );
 }
