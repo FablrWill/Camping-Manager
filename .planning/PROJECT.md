@@ -14,7 +14,7 @@ A personal second brain for car camping — an AI-powered knowledge system that 
 - **Vehicle:** 2025 Hyundai Santa Fe Hybrid (car camping, not overlanding)
 - **Power:** EcoFlow portable power station + solar panels
 - **Upcoming:** Getting a dog soon — will need pet-aware trip planning
-- **Sessions completed:** 14 (foundation, maps, photos, timeline, weather, AI packing, meal plan, power budget)
+- **Sessions completed:** 20 (foundation through intelligence features, plus project review)
 - **Dev setup:** Local dev, Starlink for remote sessions, Mac mini at home for heavy ops
 
 ## Tech Stack
@@ -51,58 +51,47 @@ A personal second brain for car camping — an AI-powered knowledge system that 
 - ✓ Claude API packing list generator — existing
 - ✓ Seed data for dev (gear, locations, trips, mods) — existing
 
+## Current Milestone: v1.1 Close the Loop
+
+**Goal:** Stabilize the foundation, add offline capability, and build the learning loop — so the app survives a real camping trip and gets smarter from it.
+
+**Target features:**
+- Stabilize: fix critical bugs, add Zod validation, complete CRUD gaps, persist AI-generated data
+- Offline mode: PWA with "Leaving Now" trigger that caches trip data for field use
+- Learning loop: post-trip debrief that writes back to gear, locations, and packing logic
+- Day-of execution: Trip Day Sequencer, safety email, final weather/road check
+
 ### Active
 
-**Phase 2 — Trip Prep (finish the core loop):**
-- [ ] Meal planning with shopping list (Claude API, home prep vs camp cooking)
-- [ ] Power budget calculator (EcoFlow + solar + devices, weather-adjusted)
-- [ ] Executive trip prep flow (single view: weather → packing → meals → power → checklist)
-- [ ] Auto-tag photos to trips/locations (GPS proximity + timestamp)
+**v1.1 — Stabilize:**
+- [ ] Fix critical bugs (JSON parsing, missing deps, dashboard stat, LocationForm dark mode)
+- [ ] Add Zod validation for all Claude API responses (parseClaudeJSON utility)
+- [ ] Complete CRUD gaps (trip edit/delete UI, vehicle edit, mod edit/delete, photo delete)
+- [ ] Persist packing list and meal plan results to database
+- [ ] Adopt design system UI primitives across existing forms
 
-**Phase 3 — Smart Campsite:**
-- [ ] Smart device fields on GearItem model
-- [ ] Smart device UI in gear inventory
-- [ ] Campsite setup checklist in trip planning
-- [ ] Claude device suggestions
-- [ ] Home Assistant bridge — status dashboard
-- [ ] HA automation templates
+**v1.1 — Offline / Day-Of:**
+- [ ] PWA with service worker for offline trip data
+- [ ] "Leaving Now" trigger (cache weather, packing list, meal plan, map pins, emergency info)
+- [ ] Trip Day Sequencer (time-sequenced departure checklist from packing + meals + power)
+- [ ] Safety email (trip summary to emergency contact on departure)
 
-**Phase 3 — Intelligence & Agent:**
-- [x] AI trip recommendations ("find me a spot within 2hrs") — Validated in Phase 5: intelligence-features
-- [x] Voice Ghostwriter / trip debrief — Validated in Phase 5: intelligence-features
-- [x] Chat interface (messenger-style agent) — Validated in Phase 4: chat-agent
-- [x] NC camping knowledge base (RAG) — Validated in Phase 3: knowledge-base
-- [ ] Gear photo identification
-- [ ] Link/screenshot → gear import
-- [ ] Safety float plan
+**v1.1 — Learning Loop:**
+- [ ] Gear usage tracking (mark items used/unused post-trip)
+- [ ] Post-trip auto-review (packed but didn't use, forgot but needed)
+- [ ] Voice debrief → automatic system updates (gear notes, location ratings, packing improvements)
+- [ ] Feedback-driven packing list improvements (learn from trip history)
+
+**Future (v2.0+):**
+- [ ] Smart campsite / Home Assistant bridge (blocked on hardware)
+- [ ] Plan A/B/C fallback chain for trip planning
+- [ ] Photo auto-import from iCloud/Google Photos
 - [ ] Nearby trails & recreation API
-- [ ] User guide finder (auto-search product manuals)
 - [ ] Fuel & last stop planner
-- [ ] Permit & registration handling
-- [ ] Vehicle pre-trip checklist
-- [ ] Post-trip auto-review
-- [ ] Wear planning (weather-based clothing)
-- [ ] Wishlist deal finder
-- [ ] Agent orchestration layer
-
-**Phase 4 — Polish & Deploy:**
-- [ ] Offline-first / PWA
-- [ ] Download for offline pre-trip
-- [ ] Deploy to Vercel (SQLite → Postgres)
-- [ ] Trip timeline view
-- [ ] Shareable trip reports
-- [ ] Cost tracking per trip
-- [ ] Gear ROI tracker
-- [ ] Dark sky / sun / moon info
-- [ ] Water source tracking
+- [ ] Permit & reservation awareness
 - [ ] Dog planning (pet-friendly sites, packing, trail rules)
-- [ ] Leave No Trace checklist
-- [ ] Buddy trip mode
-- [ ] Gear lending tracker
-- [ ] Signal map (cell + Starlink quality per spot)
-- [ ] Seasonal ratings
-- [ ] GPX import
-- [ ] Google Maps list import
+- [ ] Knowledge base expansion (2500+ chunks)
+- [ ] Deploy to Vercel (database migration when ready)
 
 ### Out of Scope
 
@@ -121,6 +110,8 @@ A personal second brain for car camping — an AI-powered knowledge system that 
 | Leaflet over Google Maps | Free, no API key, open source | ✓ Validated |
 | No auth system | Single user, personal tool | Active — revisit if sharing |
 | Mobile-first design | Will primarily uses from phone | ✓ Validated |
+| Closed-loop system (Plan→Execute→Learn→Improve) | v2.0 vision — the app gets smarter from every trip | Active — v1.1 builds the foundation |
+| Tailscale before Vercel | Access from phone without database migration | Active — deploy to Vercel later |
 
 ## Constraints
 
@@ -149,4 +140,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-01 — Phase 5 intelligence-features complete (AI recommendations + voice debrief)*
+*Last updated: 2026-04-01 — Milestone v1.1 started (Close the Loop)*

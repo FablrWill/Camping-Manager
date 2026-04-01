@@ -1,33 +1,33 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: milestone
-status: executing
-last_updated: "2026-04-01T05:11:42.964Z"
+milestone: v1.1
+milestone_name: close-the-loop
+status: defining_requirements
+last_updated: "2026-04-01T12:00:00.000Z"
 last_activity: 2026-04-01
 progress:
-  total_phases: 5
-  completed_phases: 4
-  total_plans: 14
-  completed_plans: 14
-  percent: 25
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-03-30)
+See: .planning/PROJECT.md (updated 2026-04-01)
 
-**Core value:** Personal camping second brain — AI-powered system that knows more about camping logistics, gear, and local NC area than Will does
-**Current focus:** Phase 05 — intelligence-features
+**Core value:** Personal camping second brain — a closed-loop system that plans, executes, and learns from every trip
+**Current focus:** Milestone v1.1 — defining requirements
 
 ## Current Position
 
-Phase: 05
-Plan: Not started
-Status: Executing Phase 05
-Last activity: 2026-04-01
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-04-01 — Milestone v1.1 started
 
 Progress: [██░░░░░░░░] 25%
 
