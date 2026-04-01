@@ -57,11 +57,11 @@ Inherits existing system type scale. No new type sizes introduced.
 | Role | Size | Weight | Line Height | Usage in this phase |
 |------|------|--------|-------------|---------------------|
 | Body | 14px (text-sm) | 400 (regular) | 1.5 | Offline banner text, cache status messages, install banner body copy |
-| Label | 12px (text-xs) | 500 (medium) | 1.4 | Snapshot age stamp, progress step labels, tile coverage notice |
+| Label | 12px (text-xs) | 400 (regular) | 1.4 | Snapshot age stamp, progress step labels, tile coverage notice |
 | Heading | 18px (text-lg) | 700 (bold) | 1.2 | Progress overlay section headers ("Caching your trip...") |
 | Display | 20px (text-xl) | 700 (bold) | 1.2 | "Leaving Now" button label |
 
-Note: "Leaving Now" button uses `text-base` (16px) at Button lg size per existing `sizeStyles.lg`. Display row above describes the visual weight hierarchy, not a new size.
+Note: Label text at 12px is visually distinct from 14px body text through size alone — no weight differentiation needed. "Leaving Now" button uses `text-base` (16px) at Button lg size per existing `sizeStyles.lg`. Display row describes visual weight hierarchy, not a new size.
 
 ---
 
@@ -223,8 +223,8 @@ Full-screen modal overlay (uses existing Modal backdrop pattern). NOT dismissibl
 **Styling:**
 - Background: stone-800 (always dark — matches BottomNav aesthetic)
 - Text: stone-200 title (text-sm font-medium), stone-400 subtitle (text-xs)
-- Dismiss button: `X` Lucide, 16px, stone-400, top-right
-- Padding: 12px horizontal, 10px vertical
+- Dismiss button: `X` Lucide, 16px, stone-400, top-right, `aria-label="Dismiss install banner"`
+- Padding: 12px horizontal, 8px vertical
 - Border-bottom: 1px stone-700
 
 ### 5. OfflineSnapshotCard (inline component, not a separate file)
