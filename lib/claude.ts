@@ -1,5 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk'
-import { parseClaudeJSON, PackingListResultSchema, MealPlanResultSchema } from '@/lib/parse-claude'
+import { parseClaudeJSON, PackingListResultSchema, MealPlanResultSchema, DepartureChecklistResultSchema, DepartureChecklistResult } from '@/lib/parse-claude'
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -360,6 +360,115 @@ Rules for the JSON:
     message.content[0].type === 'text' ? message.content[0].text : ''
 
   const parseResult = parseClaudeJSON(text, MealPlanResultSchema)
+  if (!parseResult.success) {
+    throw new Error(parseResult.error)
+  }
+
+  return parseResult.data
+}
+
+export async function generateDepartureChecklist(params: {
+  tripName: string
+  startDate: string
+  endDate: string
+  packingItems: Array<{ name: string; category: string; packed: boolean }>
+  mealPlan: { result: string } | null
+  powerBudget: string | null
+  vehicleName: string | null
+  vehicleMods: Array<{ name: string; description: string | null }>
+  weatherNotes: string | null
+  tripNotes: string | null
+}): Promise<DepartureChecklistResult> {
+  const {
+    tripName,
+    startDate,
+    endDate,
+    packingItems,
+    mealPlan,
+    powerBudget,
+    vehicleName,
+    vehicleMods,
+    weatherNotes,
+    tripNotes,
+  } = params
+
+  const unpackedItems = packingItems.filter((i) => !i.packed)
+  const packedItems = packingItems.filter((i) => i.packed)
+
+  const packingSection = [
+    packedItems.length > 0
+      ? `Packed items (${packedItems.length}): ${packedItems.map((i) => i.name).join(', ')}`
+      : 'No items packed yet.',
+    unpackedItems.length > 0
+      ? `UNPACKED items (flag with isUnpackedWarning=true in checklist): ${unpackedItems.map((i) => i.name).join(', ')}`
+      : 'All packing items are packed.',
+  ].join('\n')
+
+  const modsSection =
+    vehicleMods.length > 0
+      ? vehicleMods
+          .map((m) => `- ${m.name}${m.description ? `: ${m.description}` : ''}`)
+          .join('\n')
+      : 'No vehicle mods on record.'
+
+  const prompt = `You are a camping trip departure planning assistant. Generate a time-ordered departure checklist organized into time slots.
+
+TRIP DETAILS:
+- Name: ${tripName}
+- Dates: ${startDate} to ${endDate}
+${vehicleName ? `- Vehicle: ${vehicleName}` : ''}
+${tripNotes ? `- Notes: ${tripNotes}` : ''}
+
+PACKING STATUS:
+${packingSection}
+
+VEHICLE MODS (generate specific check items for each):
+${modsSection}
+
+${mealPlan ? `MEAL PLAN: A meal plan exists. Include meal prep and cooler packing items.` : 'MEAL PLAN: None generated.'}
+
+${powerBudget ? `POWER BUDGET: A power budget exists. Include device charging and solar panel setup items.` : 'POWER BUDGET: None generated.'}
+
+${weatherNotes ? `WEATHER NOTES: ${weatherNotes}` : ''}
+
+INSTRUCTIONS:
+1. Organize checklist into 2-5 time-ordered slots (e.g. "Night Before - Pack Vehicle", "Morning of Departure - Kitchen & Cooler", "Before Driving - Final Safety Checks"). Choose slot names and count based on trip complexity.
+2. For each vehicle mod, generate at least one specific check item (e.g. "Check roof rack straps are tight", "Verify tire pressure is correct").
+3. For any UNPACKED items listed above, include them as checklist items with isUnpackedWarning=true.
+4. Add weather-aware tips if weather notes are provided (e.g. "Rain expected — pack tarps in easy-access spot").
+5. Include meal prep items if a meal plan exists (e.g. "Pack cooler with vacuum-sealed meals").
+6. Include power-related items if a power budget exists (e.g. "Charge all devices fully", "Pack solar panel cable in accessible location").
+7. Generate a unique ID for each item using format "chk-{slot_index}-{item_index}" (0-based).
+8. Keep item text concise and action-oriented (verb-first: "Check", "Pack", "Verify", "Load").
+
+Respond ONLY with valid JSON matching this exact structure:
+{
+  "slots": [
+    {
+      "label": "Night Before - Pack Vehicle",
+      "items": [
+        { "id": "chk-0-0", "text": "Pack sleeping bags and sleep system", "checked": false, "isUnpackedWarning": false },
+        { "id": "chk-0-1", "text": "Load camp chairs and table", "checked": false, "isUnpackedWarning": true }
+      ]
+    }
+  ]
+}
+
+Rules:
+- "checked" is always false in the generated output (users check off during departure)
+- "isUnpackedWarning" is true ONLY for items that are in the unpacked packing list above
+- Do NOT wrap JSON in markdown code blocks`
+
+  const message = await anthropic.messages.create({
+    model: 'claude-sonnet-4-20250514',
+    max_tokens: 2000,
+    messages: [{ role: 'user', content: prompt }],
+  })
+
+  const text =
+    message.content[0].type === 'text' ? message.content[0].text : ''
+
+  const parseResult = parseClaudeJSON(text, DepartureChecklistResultSchema)
   if (!parseResult.success) {
     throw new Error(parseResult.error)
   }
