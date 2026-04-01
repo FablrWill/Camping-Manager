@@ -302,6 +302,7 @@ export default function SpotsClient({
           onMapClick={handleMapClick}
           onLocationEdit={handleLocationEdit}
           onAnimationTime={setAnimTime}
+          onPhotoDeleted={(photoId) => setPhotos(prev => prev.filter(p => p.id !== photoId))}
         />
         {showLocationForm && pendingCoords && (
           <LocationForm

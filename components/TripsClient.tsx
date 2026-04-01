@@ -1,28 +1,12 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import {
-  Plus,
-  Calendar,
-  MapPin,
-  Car,
-  Camera,
-  Backpack,
-  ChevronRight,
-  Pencil,
-  Trash2,
-} from 'lucide-react'
-import Link from 'next/link'
+import { Plus } from 'lucide-react'
 import { Button, Input, Select, Textarea, Modal, ConfirmDialog } from '@/components/ui'
 import ChatContextButton from '@/components/ChatContextButton'
-import WeatherCard from '@/components/WeatherCard'
-import PackingList from '@/components/PackingList'
-import MealPlan from '@/components/MealPlan'
-import PowerBudget from '@/components/PowerBudget'
-import VoiceDebriefButton from './VoiceDebriefButton'
 import VoiceRecordModal from './VoiceRecordModal'
+import TripCard from './TripCard'
 import type { DayForecast, WeatherAlert } from '@/lib/weather'
-import { formatDateRange, daysUntil, tripNights } from '@/lib/trip-utils'
 
 interface TripData {
   id: string
@@ -219,168 +203,6 @@ export default function TripsClient({ initialTrips, locations, vehicles }: Trips
     }
   }
 
-  function TripCard({ trip }: { trip: TripData }) {
-    const nights = tripNights(trip.startDate, trip.endDate)
-    const days = daysUntil(trip.startDate)
-    const isPast = trip.endDate < now
-    const isActive = trip.startDate <= now && trip.endDate >= now
-    const isSelected = selectedTripId === trip.id
-
-    return (
-      <div
-        className={`bg-white dark:bg-stone-900 rounded-xl border overflow-hidden transition-colors cursor-pointer ${isSelected ? 'border-amber-400 dark:border-amber-500' : 'border-stone-200 dark:border-stone-700 hover:border-amber-400 dark:hover:border-amber-500'}`}
-        onClick={() => setSelectedTripId(isSelected ? null : trip.id)}
-      >
-        {/* Status ribbon */}
-        {isActive && (
-          <div className="bg-emerald-600 dark:bg-emerald-500 text-white dark:text-stone-900 text-xs font-medium px-3 py-1 text-center">
-            Currently Active
-          </div>
-        )}
-
-        <div className="p-4">
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <h3 className="font-semibold text-stone-900 dark:text-stone-50 text-base truncate">
-                  {trip.name}
-                </h3>
-                {/* Edit/delete buttons */}
-                <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => openEdit(trip)}
-                    aria-label="Edit trip"
-                  >
-                    <Pencil size={14} />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setConfirmDelete({ id: trip.id, name: trip.name })}
-                    aria-label="Delete trip"
-                    className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30"
-                  >
-                    <Trash2 size={14} />
-                  </Button>
-                </div>
-              </div>
-
-              {/* Date range */}
-              <div className="flex items-center gap-1.5 mt-1.5 text-sm text-stone-500 dark:text-stone-400">
-                <Calendar size={14} />
-                <span>{formatDateRange(trip.startDate, trip.endDate)}</span>
-                <span className="text-stone-300 dark:text-stone-600">·</span>
-                <span>{nights} night{nights !== 1 ? 's' : ''}</span>
-              </div>
-
-              {/* Location & Vehicle */}
-              <div className="flex flex-wrap gap-x-3 gap-y-1 mt-2 text-sm text-stone-500 dark:text-stone-400">
-                {trip.location && (
-                  <span className="flex items-center gap-1">
-                    <MapPin size={13} />
-                    {trip.location.name}
-                  </span>
-                )}
-                {trip.vehicle && (
-                  <span className="flex items-center gap-1">
-                    <Car size={13} />
-                    {trip.vehicle.name}
-                  </span>
-                )}
-              </div>
-
-              {/* Stats */}
-              <div className="flex gap-3 mt-2 text-xs text-stone-400 dark:text-stone-500">
-                {trip._count.packingItems > 0 && (
-                  <span className="flex items-center gap-1">
-                    <Backpack size={12} />
-                    {trip._count.packingItems} packed
-                  </span>
-                )}
-                {trip._count.photos > 0 && (
-                  <span className="flex items-center gap-1">
-                    <Camera size={12} />
-                    {trip._count.photos} photos
-                  </span>
-                )}
-              </div>
-
-              {trip.notes && (
-                <p className="text-sm text-stone-400 dark:text-stone-500 mt-2 line-clamp-2">
-                  {trip.notes}
-                </p>
-              )}
-
-              {/* Prepare link for upcoming / active trips */}
-              {!isPast && (
-                <div className="mt-2">
-                  <Link
-                    href={`/trips/${trip.id}/prep`}
-                    className="inline-flex items-center gap-1 text-sm font-medium text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    Prepare <ChevronRight size={14} />
-                  </Link>
-                </div>
-              )}
-
-              {/* Voice debrief button */}
-              <div className="mt-2 flex items-center" onClick={(e) => e.stopPropagation()}>
-                <VoiceDebriefButton
-                  tripId={trip.id}
-                  tripName={trip.name}
-                  locationId={trip.location?.id ?? null}
-                  onOpen={() => setDebriefTrip({ id: trip.id, name: trip.name, locationId: trip.location?.id ?? null })}
-                />
-              </div>
-            </div>
-
-            {/* Days countdown for upcoming */}
-            {!isPast && !isActive && days > 0 && (
-              <div className="text-center shrink-0">
-                <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">{days}</p>
-                <p className="text-[10px] text-stone-400 dark:text-stone-500 uppercase tracking-wider">
-                  day{days !== 1 ? 's' : ''}
-                </p>
-              </div>
-            )}
-
-            {/* Chevron for past trips */}
-            {isPast && (
-              <ChevronRight size={18} className="text-stone-300 dark:text-stone-600 shrink-0 mt-1" />
-            )}
-          </div>
-
-          {/* Weather card for upcoming trips with location */}
-          {!isPast && trip.location?.latitude && (
-            <div className="mt-3">
-              <WeatherCard
-                days={weatherByTrip[trip.id]?.days ?? []}
-                alerts={weatherByTrip[trip.id]?.alerts ?? []}
-                locationName={trip.location.name}
-                dateRange={formatDateRange(trip.startDate, trip.endDate)}
-                elevation={weatherByTrip[trip.id]?.elevation}
-                loading={weatherLoading[trip.id] ?? false}
-                error={weatherErrors[trip.id] ?? null}
-              />
-            </div>
-          )}
-
-          {/* AI prep tools for upcoming trips */}
-          {!isPast && (
-            <div className="mt-3 space-y-3">
-              <PackingList tripId={trip.id} tripName={trip.name} />
-              <MealPlan tripId={trip.id} tripName={trip.name} />
-              <PowerBudget tripId={trip.id} tripName={trip.name} />
-            </div>
-          )}
-        </div>
-      </div>
-    )
-  }
-
   return (
     <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
       {/* Header */}
@@ -508,7 +330,18 @@ export default function TripsClient({ initialTrips, locations, vehicles }: Trips
               </h2>
               <div className="space-y-3">
                 {upcoming.map((trip) => (
-                  <TripCard key={trip.id} trip={trip} />
+                  <TripCard
+                    key={trip.id}
+                    trip={trip}
+                    isSelected={selectedTripId === trip.id}
+                    onSelect={setSelectedTripId}
+                    onEdit={openEdit}
+                    onDelete={setConfirmDelete}
+                    weather={weatherByTrip[trip.id]}
+                    weatherLoading={weatherLoading[trip.id]}
+                    weatherError={weatherErrors[trip.id]}
+                    onDebrief={setDebriefTrip}
+                  />
                 ))}
               </div>
             </section>
@@ -522,7 +355,18 @@ export default function TripsClient({ initialTrips, locations, vehicles }: Trips
               </h2>
               <div className="space-y-3">
                 {past.map((trip) => (
-                  <TripCard key={trip.id} trip={trip} />
+                  <TripCard
+                    key={trip.id}
+                    trip={trip}
+                    isSelected={selectedTripId === trip.id}
+                    onSelect={setSelectedTripId}
+                    onEdit={openEdit}
+                    onDelete={setConfirmDelete}
+                    weather={weatherByTrip[trip.id]}
+                    weatherLoading={weatherLoading[trip.id]}
+                    weatherError={weatherErrors[trip.id]}
+                    onDebrief={setDebriefTrip}
+                  />
                 ))}
               </div>
             </section>

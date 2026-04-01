@@ -169,6 +169,7 @@ interface SpotMapProps {
   onMapClick?: (lat: number, lng: number) => void;
   onLocationEdit?: (locationId: string) => void;
   onAnimationTime?: (time: string | null) => void;
+  onPhotoDeleted?: (photoId: string) => void;
 }
 
 const SpotMap = forwardRef<SpotMapHandle, SpotMapProps>(function SpotMap(
@@ -183,6 +184,7 @@ const SpotMap = forwardRef<SpotMapHandle, SpotMapProps>(function SpotMap(
     onMapClick,
     onLocationEdit,
     onAnimationTime,
+    onPhotoDeleted,
   },
   ref
 ) {
@@ -609,7 +611,9 @@ const SpotMap = forwardRef<SpotMapHandle, SpotMapProps>(function SpotMap(
       const res = await fetch(`/api/photos/${photoId}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Failed to delete');
       setConfirmDeletePhoto(null);
-      window.location.reload(); // Photo markers rebuild from server data on reload
+      if (onPhotoDeleted) {
+        onPhotoDeleted(photoId);
+      }
     } catch {
       console.error('Failed to delete photo');
     }
