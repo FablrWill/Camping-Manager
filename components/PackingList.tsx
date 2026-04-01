@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Loader2, RotateCcw, Plus, X, Check } from 'lucide-react'
 import type { PackingListResult } from '@/lib/claude'
+import { Button } from '@/components/ui'
 
 interface PackingListProps {
   tripId: string
@@ -13,21 +14,56 @@ interface CheckedState {
   [categoryAndItem: string]: boolean
 }
 
+function formatRelativeTime(isoString: string | null): string {
+  if (!isoString) return 'recently'
+  const diff = Date.now() - new Date(isoString).getTime()
+  const minutes = Math.floor(diff / 60000)
+  const hours = Math.floor(diff / 3600000)
+  const days = Math.floor(diff / 86400000)
+  if (minutes < 1) return 'just now'
+  if (minutes < 60) return `${minutes}m ago`
+  if (hours < 24) return `${hours}h ago`
+  return `${days}d ago`
+}
+
 export default function PackingList({ tripId, tripName }: PackingListProps) {
   const [packingList, setPackingList] = useState<PackingListResult | null>(null)
-  const [loading, setLoading] = useState(false)
+  const [generatedAt, setGeneratedAt] = useState<string | null>(null)
+  const [loadingMounted, setLoadingMounted] = useState(true)  // loading saved on mount
+  const [generating, setGenerating] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [checked, setChecked] = useState<CheckedState>({})
   const [addingTo, setAddingTo] = useState<string | null>(null)
   const [newItemName, setNewItemName] = useState('')
+
+  // Load saved packing list on mount
+  useEffect(() => {
+    async function loadSaved() {
+      try {
+        const res = await fetch(`/api/packing-list?tripId=${tripId}`)
+        if (res.ok) {
+          const data = await res.json()
+          if (data.result) {
+            setPackingList(data.result)
+            setGeneratedAt(data.generatedAt)
+          }
+        }
+      } catch {
+        // Silent fail on load — user can generate fresh
+      } finally {
+        setLoadingMounted(false)
+      }
+    }
+    loadSaved()
+  }, [tripId])
 
   const totalItems = packingList
     ? packingList.categories.reduce((sum, cat) => sum + cat.items.length, 0)
     : 0
   const packedCount = Object.values(checked).filter(Boolean).length
 
-  async function generate() {
-    setLoading(true)
+  const handleGenerate = useCallback(async () => {
+    setGenerating(true)
     setError(null)
     setChecked({})
 
@@ -40,17 +76,19 @@ export default function PackingList({ tripId, tripName }: PackingListProps) {
 
       if (!res.ok) {
         const data = await res.json()
-        throw new Error(data.error || 'Failed to generate')
+        setError(data.error || "Couldn't generate -- Claude returned an unexpected response. Tap Retry to try again.")
+        return
       }
 
       const data: PackingListResult = await res.json()
       setPackingList(data)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong')
+      setGeneratedAt(new Date().toISOString())
+    } catch {
+      setError("Couldn't generate -- Claude returned an unexpected response. Tap Retry to try again.")
     } finally {
-      setLoading(false)
+      setGenerating(false)
     }
-  }
+  }, [tripId])
 
   async function togglePacked(key: string, gearId: string | undefined, newChecked: boolean) {
     setChecked(prev => ({ ...prev, [key]: newChecked }))
@@ -97,8 +135,20 @@ export default function PackingList({ tripId, tripName }: PackingListProps) {
     setAddingTo(null)
   }
 
-  // Not generated yet — show CTA
-  if (!packingList && !loading && !error) {
+  // Mount loading state
+  if (loadingMounted) {
+    return (
+      <div className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-700 p-4">
+        <div className="flex items-center gap-2">
+          <Loader2 size={16} className="animate-spin text-amber-500" />
+          <span className="text-sm text-stone-500 dark:text-stone-400">Loading packing list...</span>
+        </div>
+      </div>
+    )
+  }
+
+  // Not generated yet — empty state
+  if (!packingList && !generating) {
     return (
       <div className="bg-amber-50 dark:bg-amber-950/30 rounded-xl border border-amber-200 dark:border-amber-800 p-4">
         <div className="flex items-center justify-between">
@@ -107,22 +157,32 @@ export default function PackingList({ tripId, tripName }: PackingListProps) {
               🎒 Packing List
             </h3>
             <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
-              AI-generated from your gear + weather
+              No packing list yet
             </p>
           </div>
-          <button
-            onClick={generate}
-            className="bg-amber-600 hover:bg-amber-700 dark:bg-amber-500 dark:hover:bg-amber-400 text-white dark:text-stone-900 px-4 py-2 rounded-lg font-medium text-sm transition-colors"
-          >
-            Generate with Claude
-          </button>
+          <div className="flex flex-col items-end gap-2">
+            <Button variant="primary" size="sm" onClick={handleGenerate} loading={generating}>
+              Generate Packing List
+            </Button>
+            {error && (
+              <p className="text-xs text-red-600 dark:text-red-400 text-right max-w-[200px]">
+                {error}
+                <button
+                  onClick={handleGenerate}
+                  className="ml-1.5 font-medium text-amber-600 dark:text-amber-400 hover:underline"
+                >
+                  Retry
+                </button>
+              </p>
+            )}
+          </div>
         </div>
       </div>
     )
   }
 
-  // Loading state
-  if (loading) {
+  // Generating state (no existing result yet)
+  if (generating && !packingList) {
     return (
       <div className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-700 p-4">
         <div className="flex items-center gap-2 mb-4">
@@ -148,25 +208,7 @@ export default function PackingList({ tripId, tripName }: PackingListProps) {
     )
   }
 
-  // Error state
-  if (error) {
-    return (
-      <div className="bg-red-50 dark:bg-red-950/30 rounded-xl border border-red-200 dark:border-red-800 p-4">
-        <p className="text-sm text-red-600 dark:text-red-400">
-          {error}
-        </p>
-        <button
-          onClick={generate}
-          className="mt-2 text-sm text-red-600 dark:text-red-400 font-medium flex items-center gap-1.5 hover:text-red-700 dark:hover:text-red-300 transition-colors"
-        >
-          <RotateCcw size={14} />
-          Tap to retry
-        </button>
-      </div>
-    )
-  }
-
-  // Generated list
+  // Generated list (with optional regenerating overlay — shows while re-generating with existing result visible)
   return (
     <div className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-700 overflow-hidden">
       {/* Header with progress */}
@@ -175,15 +217,36 @@ export default function PackingList({ tripId, tripName }: PackingListProps) {
           <h3 className="text-sm font-semibold text-stone-900 dark:text-stone-100">
             🎒 Packing List
           </h3>
-          <button
-            onClick={generate}
-            className="text-xs text-stone-400 dark:text-stone-500 hover:text-amber-600 dark:hover:text-amber-400 flex items-center gap-1 transition-colors"
-            title="Regenerate"
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleGenerate}
+            loading={generating}
+            icon={!generating ? <RotateCcw size={12} /> : undefined}
           >
-            <RotateCcw size={12} />
             Regenerate
-          </button>
+          </Button>
         </div>
+
+        {/* Metadata line */}
+        {generatedAt && (
+          <p className="text-xs text-stone-500 dark:text-stone-400 mb-2">
+            Generated {formatRelativeTime(generatedAt)} — results reflect your gear and weather at that time.
+          </p>
+        )}
+
+        {/* Inline error + Retry */}
+        {error && (
+          <div className="text-xs text-red-600 dark:text-red-400 mb-2">
+            {error}
+            <button
+              onClick={handleGenerate}
+              className="ml-1.5 font-medium text-amber-600 dark:text-amber-400 hover:underline"
+            >
+              Retry
+            </button>
+          </div>
+        )}
 
         {/* Progress bar */}
         <div className="flex items-center gap-2">

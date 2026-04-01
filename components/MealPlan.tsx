@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Loader2, RotateCcw, ChevronDown, Check } from 'lucide-react'
 import type { MealPlanResult, ShoppingItem } from '@/lib/claude'
+import { Button } from '@/components/ui'
 
 const STORE_SECTIONS = [
   { key: 'produce', emoji: '🥬', label: 'Produce' },
@@ -20,19 +21,53 @@ interface MealPlanProps {
   tripName: string
 }
 
+function formatRelativeTime(isoString: string | null): string {
+  if (!isoString) return 'recently'
+  const diff = Date.now() - new Date(isoString).getTime()
+  const minutes = Math.floor(diff / 60000)
+  const hours = Math.floor(diff / 3600000)
+  const days = Math.floor(diff / 86400000)
+  if (minutes < 1) return 'just now'
+  if (minutes < 60) return `${minutes}m ago`
+  if (hours < 24) return `${hours}h ago`
+  return `${days}d ago`
+}
+
 export default function MealPlan({ tripId, tripName }: MealPlanProps) {
   const [mealPlan, setMealPlan] = useState<MealPlanResult | null>(null)
-  const [loading, setLoading] = useState(false)
+  const [generatedAt, setGeneratedAt] = useState<string | null>(null)
+  const [loadingMounted, setLoadingMounted] = useState(true)  // loading saved on mount
+  const [generating, setGenerating] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [shoppingChecked, setShoppingChecked] = useState<Record<string, boolean>>({})
   const [expandedMeal, setExpandedMeal] = useState<string | null>(null)
   const [showShopping, setShowShopping] = useState(false)
   const [showPrepTimeline, setShowPrepTimeline] = useState(false)
 
-  async function generate() {
-    setLoading(true)
+  // Load saved meal plan on mount
+  useEffect(() => {
+    async function loadSaved() {
+      try {
+        const res = await fetch(`/api/meal-plan?tripId=${tripId}`)
+        if (res.ok) {
+          const data = await res.json()
+          if (data.result) {
+            setMealPlan(data.result)
+            setGeneratedAt(data.generatedAt)
+          }
+        }
+      } catch {
+        // Silent fail on load — user can generate fresh
+      } finally {
+        setLoadingMounted(false)
+      }
+    }
+    loadSaved()
+  }, [tripId])
+
+  const handleGenerate = useCallback(async () => {
+    setGenerating(true)
     setError(null)
-    setMealPlan(null)
     setShoppingChecked({})
     setExpandedMeal(null)
     setShowShopping(false)
@@ -46,16 +81,18 @@ export default function MealPlan({ tripId, tripName }: MealPlanProps) {
       })
       if (!res.ok) {
         const data = await res.json()
-        throw new Error(data.error || 'Failed to generate meal plan')
+        setError(data.error || "Couldn't generate -- Claude returned an unexpected response. Tap Retry to try again.")
+        return
       }
       const data = await res.json()
       setMealPlan(data)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong')
+      setGeneratedAt(new Date().toISOString())
+    } catch {
+      setError("Couldn't generate -- Claude returned an unexpected response. Tap Retry to try again.")
     } finally {
-      setLoading(false)
+      setGenerating(false)
     }
-  }
+  }, [tripId])
 
   function toggleShopping(key: string) {
     setShoppingChecked((prev) => ({ ...prev, [key]: !prev[key] }))
@@ -80,32 +117,54 @@ export default function MealPlan({ tripId, tripName }: MealPlanProps) {
     navigator.clipboard.writeText(text)
   }
 
-  // CTA state
-  if (!loading && !error && !mealPlan) {
+  // Mount loading state
+  if (loadingMounted) {
     return (
-      <div className="bg-amber-50 dark:bg-amber-950/30 rounded-xl border border-amber-200 dark:border-amber-800 p-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-sm font-semibold text-stone-900 dark:text-stone-100">
-              🍳 Meal Plan
-            </h3>
-            <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
-              AI-generated meals + shopping list
-            </p>
-          </div>
-          <button
-            onClick={generate}
-            className="bg-amber-600 hover:bg-amber-700 dark:bg-amber-500 dark:hover:bg-amber-400 text-white dark:text-stone-900 px-4 py-2 rounded-lg font-medium text-sm transition-colors"
-          >
-            Generate with Claude
-          </button>
+      <div className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-700 p-4">
+        <div className="flex items-center gap-2">
+          <Loader2 size={16} className="animate-spin text-amber-500" />
+          <span className="text-sm text-stone-500 dark:text-stone-400">Loading meal plan...</span>
         </div>
       </div>
     )
   }
 
-  // Loading state
-  if (loading) {
+  // Not generated yet — empty state
+  if (!mealPlan && !generating) {
+    return (
+      <div className="bg-amber-50 dark:bg-amber-950/30 rounded-xl border border-amber-200 dark:border-amber-800 p-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-sm font-semibold text-stone-900 dark:text-stone-100">
+              🍽️ Meal Plan
+            </h3>
+            <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
+              No meal plan yet
+            </p>
+          </div>
+          <div className="flex flex-col items-end gap-2">
+            <Button variant="primary" size="sm" onClick={handleGenerate} loading={generating}>
+              Generate Meal Plan
+            </Button>
+            {error && (
+              <p className="text-xs text-red-600 dark:text-red-400 text-right max-w-[200px]">
+                {error}
+                <button
+                  onClick={handleGenerate}
+                  className="ml-1.5 font-medium text-amber-600 dark:text-amber-400 hover:underline"
+                >
+                  Retry
+                </button>
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Generating state (no existing result yet)
+  if (generating && !mealPlan) {
     return (
       <div className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-700 p-4">
         <div className="flex items-center gap-2 mb-4">
@@ -128,28 +187,6 @@ export default function MealPlan({ tripId, tripName }: MealPlanProps) {
     )
   }
 
-  // Error state
-  if (error) {
-    return (
-      <div
-        className="bg-red-50 dark:bg-red-950/30 rounded-xl border border-red-200 dark:border-red-800 p-4 cursor-pointer"
-        onClick={generate}
-      >
-        <div className="flex items-center gap-2">
-          <RotateCcw size={14} className="text-red-400 shrink-0" />
-          <div>
-            <p className="text-sm font-medium text-red-700 dark:text-red-400">
-              Failed to generate meal plan
-            </p>
-            <p className="text-xs text-red-500 dark:text-red-500 mt-0.5">
-              {error} · Tap to retry
-            </p>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
   // Generated state
   if (!mealPlan) return null
 
@@ -157,18 +194,40 @@ export default function MealPlan({ tripId, tripName }: MealPlanProps) {
     <div className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-700 overflow-hidden">
       {/* Header */}
       <div className="p-4 border-b border-stone-100 dark:border-stone-800">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-1">
           <h3 className="text-sm font-semibold text-stone-900 dark:text-stone-100">
             🍳 Meal Plan
           </h3>
-          <button
-            onClick={generate}
-            className="text-xs text-stone-400 dark:text-stone-500 hover:text-amber-600 dark:hover:text-amber-400 flex items-center gap-1 transition-colors"
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleGenerate}
+            loading={generating}
+            icon={!generating ? <RotateCcw size={12} /> : undefined}
           >
-            <RotateCcw size={12} />
             Regenerate
-          </button>
+          </Button>
         </div>
+
+        {/* Metadata line */}
+        {generatedAt && (
+          <p className="text-xs text-stone-500 dark:text-stone-400 mb-1">
+            Generated {formatRelativeTime(generatedAt)} — results reflect your gear and weather at that time.
+          </p>
+        )}
+
+        {/* Inline error + Retry */}
+        {error && (
+          <div className="text-xs text-red-600 dark:text-red-400">
+            {error}
+            <button
+              onClick={handleGenerate}
+              className="ml-1.5 font-medium text-amber-600 dark:text-amber-400 hover:underline"
+            >
+              Retry
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Day sections */}
