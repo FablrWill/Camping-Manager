@@ -8,6 +8,7 @@ All notable changes to Outland OS are tracked here.
 
 | Session | Date | Summary |
 |---------|------|---------|
+| [24](changelog/session-24.md) | 2026-04-01 | Phase 07 execution complete — departure checklist, float plan email, settings page |
 | [23](changelog/session-23.md) | 2026-04-01 | Phase 07 UI design contract — departure checklist, float plan, settings page |
 | [22](changelog/session-22.md) | 2026-04-01 | Phase 06 gap closure execution — packing-list persistence, TripCard extraction, ConfirmDialogs |
 | [21](changelog/session-21.md) | 2026-04-01 | Phase 06 full planning pipeline — discuss, research, UI-SPEC, plans, cross-AI review |

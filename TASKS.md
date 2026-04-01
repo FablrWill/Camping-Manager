@@ -1,6 +1,6 @@
 # Outland OS — Task Tracker
 
-> **Last updated:** 2026-04-01 (Session 23 — Phase 7 UI design contract)
+> **Last updated:** 2026-04-01 (Session 24 — Phase 7 execution complete)
 > **Start here** if you're picking up after a break.
 > **North star:** `docs/USER-JOURNEY.md` — read this before building anything new.
 
@@ -12,22 +12,16 @@ All 5 phases of v1.0 shipped. The app has: executive trip prep, NC camping knowl
 
 ## Milestone v1.1 — Close the Loop
 
-**Status:** Phase 6 complete. Phase 7 UI-SPEC approved, ready for planning.
+**Status:** Phase 7 complete. Phase 8 next.
 
 | Phase | Status | Summary |
 |-------|--------|---------|
 | 6. Stabilization | ✅ Complete | AI output persistence, CRUD gaps fixed, design system migration, packing list fixes |
-| 7. Day-Of Execution | 🎨 UI-SPEC approved | Departure checklist + float plan email. Next: `/gsd:plan-phase 7` |
+| 7. Day-Of Execution | ✅ Complete | Departure checklist + float plan email, settings page, Nodemailer Gmail integration |
 | 8. PWA and Offline | ○ Not started | Home screen install, "Leaving Now" offline snapshot |
 | 9. Learning Loop | ○ Not started | Post-trip gear usage tracking, Claude debrief, voice writeback |
 
-**Next:** `/gsd:plan-phase 7` — create execution plans for departure checklist and float plan
-
-**Phase 7 scope (EXEC-01, EXEC-02):**
-- Time-ordered departure checklist generated from packing list, meal plan, power data
-- Safety float plan email to emergency contact via Gmail
-- New pages: `/trips/[id]/depart`, `/settings`
-- Gmail integration via Nodemailer (App Password in `.env`)
+**Next:** `/gsd:plan-phase 8` — plan PWA and offline mode
 
 ---
 
@@ -93,7 +87,7 @@ All 5 phases of v1.0 shipped. The app has: executive trip prep, NC camping knowl
 | Chat interface | ✅ Done | Session 18 — Streaming SSE agent with BetaToolRunner, 11 tools (gear/trips/locations/weather/knowledge/write ops), conversation persistence, context-aware FAB, bottom nav Chat tab |
 | NC camping knowledge base (RAG) | ✅ Done | Session 17 — 237 chunks from 7 research files + external sources. Hybrid search (FTS5 + vec0/RRF). voyage-3-lite 512-dim embeddings. PDF + web parsers. POST /api/knowledge/search endpoint. |
 | Gear photo identification | ❌ Planned | Snap a photo → Claude identifies brand/type/specs |
-| Safety float plan | ❌ Ready | Phase 7 — UI-SPEC approved, planning next |
+| Safety float plan | ✅ Done | Phase 7 — Claude-composed plain text email via Gmail to emergency contact |
 | Nearby trails & recreation API | ❌ Planned | OSM, NPS, Recreation.gov near a saved location |
 | Fuel & last stop planner | ❌ Planned | Route-aware: last gas, grocery, ice before backcountry |
 | *...and more in FEATURE-PHASES.md* | | |
