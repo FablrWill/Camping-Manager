@@ -3,6 +3,29 @@ import { prisma } from '@/lib/db'
 import { generatePackingList } from '@/lib/claude'
 import { fetchWeather } from '@/lib/weather'
 
+export async function GET(request: NextRequest) {
+  try {
+    const tripId = request.nextUrl.searchParams.get('tripId')
+    if (!tripId) {
+      return NextResponse.json({ error: 'tripId is required' }, { status: 400 })
+    }
+    const trip = await prisma.trip.findUnique({
+      where: { id: tripId },
+      select: { packingListResult: true, packingListGeneratedAt: true },
+    })
+    if (!trip) {
+      return NextResponse.json({ error: 'Trip not found' }, { status: 404 })
+    }
+    return NextResponse.json({
+      result: trip.packingListResult ? JSON.parse(trip.packingListResult) : null,
+      generatedAt: trip.packingListGeneratedAt?.toISOString() ?? null,
+    })
+  } catch (error) {
+    console.error('Failed to fetch packing list:', error)
+    return NextResponse.json({ error: 'Failed to fetch packing list' }, { status: 500 })
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const { tripId } = await request.json()
@@ -79,18 +102,56 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Generate packing list via Claude
-    const packingList = await generatePackingList({
-      tripName: trip.name,
-      startDate,
-      endDate,
-      nights,
-      locationName: trip.location?.name,
-      locationType: trip.location?.type ?? undefined,
-      vehicleName: trip.vehicle?.name,
-      tripNotes: trip.notes ?? undefined,
-      gearInventory,
-      weather,
+    // Generate packing list via Claude (throws on Zod validation failure)
+    let packingList
+    try {
+      packingList = await generatePackingList({
+        tripName: trip.name,
+        startDate,
+        endDate,
+        nights,
+        locationName: trip.location?.name,
+        locationType: trip.location?.type ?? undefined,
+        vehicleName: trip.vehicle?.name,
+        tripNotes: trip.notes ?? undefined,
+        gearInventory,
+        weather,
+      })
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to generate packing list'
+      if (message.includes('schema mismatch') || message.includes('non-JSON')) {
+        console.error('Packing list Zod validation failed:', error)
+        return NextResponse.json({ error: message }, { status: 422 })
+      }
+      throw error
+    }
+
+    // Upsert PackingItems for gear-linked items
+    const gearItems = packingList.categories
+      .flatMap((cat) => cat.items)
+      .filter((item) => item.fromInventory && item.gearId)
+
+    for (const item of gearItems) {
+      await prisma.packingItem.upsert({
+        where: { tripId_gearId: { tripId, gearId: item.gearId! } },
+        create: { tripId, gearId: item.gearId!, packed: false },
+        update: {},
+      })
+    }
+
+    // D-04: Regeneration resets packed state — new list = clean slate
+    await prisma.packingItem.updateMany({
+      where: { tripId },
+      data: { packed: false },
+    })
+
+    // Persist packing list result to Trip
+    await prisma.trip.update({
+      where: { id: tripId },
+      data: {
+        packingListResult: JSON.stringify(packingList),
+        packingListGeneratedAt: new Date(),
+      },
     })
 
     return NextResponse.json(packingList)

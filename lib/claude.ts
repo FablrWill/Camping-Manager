@@ -1,4 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk'
+import { parseClaudeJSON, PackingListResultSchema, MealPlanResultSchema } from '@/lib/parse-claude'
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -6,7 +7,7 @@ const anthropic = new Anthropic({
 
 export interface PackingListItem {
   name: string
-  category: string
+  category?: string
   fromInventory: boolean
   gearId?: string
   reason?: string
@@ -62,7 +63,7 @@ interface WeatherAlert {
 
 export interface MealPlanMeal {
   name: string
-  prepType: 'home' | 'camp'
+  prepType: string  // "home" | "camp"
   prepNotes: string
   ingredients: string[]
   cookwareNeeded: string[]
@@ -206,16 +207,18 @@ Rules for the JSON:
   const text =
     message.content[0].type === 'text' ? message.content[0].text : ''
 
-  const parsed = JSON.parse(text)
+  const parseResult = parseClaudeJSON(text, PackingListResultSchema)
+  if (!parseResult.success) {
+    throw new Error(parseResult.error)
+  }
+  const parsed = parseResult.data
 
   const result: PackingListResult = {
-    categories: parsed.categories.map(
-      (cat: { name: string; items: PackingListItem[] }) => ({
-        name: cat.name,
-        emoji: CATEGORY_EMOJIS[cat.name] || '📦',
-        items: cat.items,
-      })
-    ),
+    categories: parsed.categories.map((cat) => ({
+      name: cat.name,
+      emoji: cat.emoji || CATEGORY_EMOJIS[cat.name] || '📦',
+      items: cat.items,
+    })),
     tips: parsed.tips || [],
   }
 
@@ -356,7 +359,10 @@ Rules for the JSON:
   const text =
     message.content[0].type === 'text' ? message.content[0].text : ''
 
-  const parsed = JSON.parse(text)
+  const parseResult = parseClaudeJSON(text, MealPlanResultSchema)
+  if (!parseResult.success) {
+    throw new Error(parseResult.error)
+  }
 
-  return parsed as MealPlanResult
+  return parseResult.data
 }

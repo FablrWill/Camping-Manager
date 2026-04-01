@@ -3,6 +3,28 @@ import { prisma } from '@/lib/db'
 import { generateMealPlan } from '@/lib/claude'
 import { fetchWeather } from '@/lib/weather'
 
+export async function GET(request: NextRequest) {
+  try {
+    const tripId = request.nextUrl.searchParams.get('tripId')
+    if (!tripId) {
+      return NextResponse.json({ error: 'tripId is required' }, { status: 400 })
+    }
+    const mealPlan = await prisma.mealPlan.findUnique({
+      where: { tripId },
+    })
+    if (!mealPlan) {
+      return NextResponse.json({ result: null, generatedAt: null })
+    }
+    return NextResponse.json({
+      result: JSON.parse(mealPlan.result),
+      generatedAt: mealPlan.generatedAt.toISOString(),
+    })
+  } catch (error) {
+    console.error('Failed to fetch meal plan:', error)
+    return NextResponse.json({ error: 'Failed to fetch meal plan' }, { status: 500 })
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const { tripId } = await request.json()
@@ -66,22 +88,35 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const mealPlan = await generateMealPlan({
-      tripName: trip.name,
-      startDate,
-      endDate,
-      nights,
-      people: 1,
-      locationName: trip.location?.name,
-      vehicleName: trip.vehicle?.name,
-      tripNotes: trip.notes ?? undefined,
-      cookingGear,
-      weather,
-    })
+    // Generate meal plan via Claude (throws on Zod validation failure)
+    let mealPlan
+    try {
+      mealPlan = await generateMealPlan({
+        tripName: trip.name,
+        startDate,
+        endDate,
+        nights,
+        people: 1,
+        locationName: trip.location?.name,
+        vehicleName: trip.vehicle?.name,
+        tripNotes: trip.notes ?? undefined,
+        cookingGear,
+        weather,
+      })
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to generate meal plan'
+      if (message.includes('schema mismatch') || message.includes('non-JSON')) {
+        console.error('Meal plan Zod validation failed:', error)
+        return NextResponse.json({ error: message }, { status: 422 })
+      }
+      throw error
+    }
 
-    await prisma.trip.update({
-      where: { id: tripId },
-      data: { mealPlanGeneratedAt: new Date() },
+    // D-03: Regeneration replaces — upsert persists to MealPlan model
+    await prisma.mealPlan.upsert({
+      where: { tripId },
+      create: { tripId, result: JSON.stringify(mealPlan) },
+      update: { result: JSON.stringify(mealPlan), generatedAt: new Date() },
     })
 
     return NextResponse.json(mealPlan)
