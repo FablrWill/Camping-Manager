@@ -11,6 +11,7 @@ import PowerBudget from '@/components/PowerBudget'
 import { PREP_SECTIONS, PrepState, PrepSection } from '@/lib/prep-sections'
 import { formatDateRange, daysUntil, tripNights } from '@/lib/trip-utils'
 import type { DayForecast, WeatherAlert } from '@/lib/weather'
+import type { DepartureChecklistResult } from '@/lib/parse-claude'
 
 interface TripPrepClientProps {
   trip: {
@@ -28,6 +29,11 @@ interface WeatherSectionData {
   alerts: WeatherAlert[]
   elevation?: number
   locationName?: string
+}
+
+interface DepartureChecklistData {
+  result: DepartureChecklistResult | null
+  generatedAt: string | null
 }
 
 function getCountdown(startDate: string, endDate: string): string {
@@ -52,6 +58,7 @@ export default function TripPrepClient({ trip }: TripPrepClientProps) {
   const [prepState, setPrepState] = useState<PrepState | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [departureChecklist, setDepartureChecklist] = useState<DepartureChecklistData | null>(null)
 
   async function fetchPrepState() {
     setLoading(true)
@@ -73,6 +80,19 @@ export default function TripPrepClient({ trip }: TripPrepClientProps) {
 
   useEffect(() => {
     fetchPrepState()
+    // Fetch departure checklist data independently for departure section status
+    async function fetchDepartureChecklist() {
+      try {
+        const res = await fetch(`/api/departure-checklist?tripId=${trip.id}`)
+        if (res.ok) {
+          const data = await res.json()
+          setDepartureChecklist({ result: data.result ?? null, generatedAt: data.generatedAt ?? null })
+        }
+      } catch {
+        // Silent fail — departure section will show not_started
+      }
+    }
+    fetchDepartureChecklist()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [trip.id])
 
@@ -149,8 +169,28 @@ export default function TripPrepClient({ trip }: TripPrepClientProps) {
             const section: PrepSection | undefined = prepState.sections.find(
               (s) => s.key === config.key
             )
-            const status = section?.status ?? 'not_started'
-            const summary = section?.summary ?? ''
+
+            // Departure section: derive status from fetched checklist data
+            let status = section?.status ?? 'not_started'
+            let summary = section?.summary ?? ''
+
+            if (config.key === 'departure') {
+              if (!departureChecklist || !departureChecklist.result) {
+                status = 'not_started'
+                summary = 'Not generated'
+              } else {
+                const allItems = departureChecklist.result.slots.flatMap((s) => s.items)
+                const checkedCount = allItems.filter((i) => i.checked).length
+                if (checkedCount === allItems.length && allItems.length > 0) {
+                  status = 'ready'
+                  summary = 'All tasks done'
+                } else {
+                  status = 'in_progress'
+                  summary = `${checkedCount} of ${allItems.length} tasks done`
+                }
+              }
+            }
+
             const defaultExpanded = getDefaultExpanded(prepState.sections, config.key)
 
             return (
@@ -189,6 +229,42 @@ export default function TripPrepClient({ trip }: TripPrepClientProps) {
 
                 {config.key === 'power' && (
                   <PowerBudget tripId={trip.id} tripName={trip.name} />
+                )}
+
+                {config.key === 'departure' && (
+                  <div className="py-2 space-y-3">
+                    {departureChecklist?.result ? (
+                      <>
+                        {/* Preview first slot items (up to 3) */}
+                        <div className="space-y-1">
+                          {departureChecklist.result.slots[0]?.items.slice(0, 3).map((item) => (
+                            <div key={item.id} className="flex items-center gap-2 text-sm text-stone-600 dark:text-stone-300">
+                              <span className={item.checked ? 'text-stone-400 line-through' : ''}>
+                                {item.checked ? '✓' : '○'} {item.text}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                        <Link
+                          href={`/trips/${trip.id}/depart`}
+                          className="text-sm font-medium text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 transition-colors"
+                        >
+                          Open full checklist →
+                        </Link>
+                      </>
+                    ) : (
+                      <p className="text-sm text-stone-400 dark:text-stone-500">
+                        Generate your departure checklist on the{' '}
+                        <Link
+                          href={`/trips/${trip.id}/depart`}
+                          className="text-amber-600 dark:text-amber-400 hover:underline"
+                        >
+                          departure page
+                        </Link>
+                        .
+                      </p>
+                    )}
+                  </div>
                 )}
               </TripPrepSection>
             )
