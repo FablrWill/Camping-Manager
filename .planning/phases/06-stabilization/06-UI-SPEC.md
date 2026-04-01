@@ -171,7 +171,9 @@ See copywriting section for specific copy per action.
 | Meal plan empty state body | "Generate one to get started." |
 | AI regenerate hint | "Generated [relative time] — results reflect your gear and weather at that time." |
 | AI error state | "Couldn't generate — Claude returned an unexpected response. Tap Retry to try again." |
-| API route error (generic) | "Something went wrong. Please try again." |
+| API save error | "Couldn't save — check your connection and try again." |
+| API load error | "Couldn't load your data — refresh the page to try again." |
+| API delete error | "Couldn't delete — try again or reload the page." |
 | Loading state (AI generation) | "Generating..." |
 | Regenerate button | "Regenerate" |
 | Retry button | "Retry" |
@@ -218,7 +220,7 @@ No third-party component registries. All components are hand-built in `component
 |----------|--------|
 | No shadcn, existing 9 primitives only | 06-CONTEXT.md D-07 |
 | Amber accent, stone dominant/secondary | `app/globals.css` (extracted) |
-| Button variants (primary/secondary/danger/ghost) | `components/ui/Button.tsx` (extracted) |
+| Button variants (primary/secondary/danger/ghost) | `components/ui/Button.tsx` (extracted pattern) |
 | ConfirmDialog for all destructive actions | `components/ui/Modal.tsx` (extracted pattern) |
 | Persist-on-generate + Regenerate button pattern | 06-CONTEXT.md D-01, D-02, D-03 |
 | Inline error + Retry (no modal) for AI errors | 06-CONTEXT.md D-12 |
@@ -228,3 +230,4 @@ No third-party component registries. All components are hand-built in `component
 | Spacing scale 4/8/16/24/32/48/64 | Tailwind defaults, confirmed against existing components |
 | Typography: 2 weights only (400, 700) | Checker revision — dropped 500/medium |
 | Spacing exceptions: py-3, gap-2, px-4 py-2 | Checker revision — replaced non-compliant values |
+| API error copy: 3 context-specific variants | Checker revision — replaced generic "try again" with domain-specific recovery actions |
