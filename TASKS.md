@@ -1,6 +1,6 @@
 # Outland OS — Task Tracker
 
-> **Last updated:** 2026-04-01 (Session 19 — Phase 5 Intelligence Features Complete, Milestone v1.0 Done)
+> **Last updated:** 2026-04-01 (Session 20 — Project review + milestone v1.1 kickoff)
 > **Start here** if you're picking up after a break.
 > **North star:** `docs/USER-JOURNEY.md` — read this before building anything new.
 
@@ -12,13 +12,19 @@ All 5 phases of v1.0 shipped. The app has: executive trip prep, NC camping knowl
 
 ## Up Next — Milestone v1.1
 
-Run `/gsd:new-milestone` to kick off planning. Candidates for v1.1:
+**Status:** In planning. Session 20 ran comprehensive project assessment + 4 expert agent audits.
 
-1. **Phase 1 Validation** — Never ran. Harden existing AI features (packing, meals, power) before adding more.
-2. **Deploy to Vercel** — SQLite → Postgres, get it live and usable from anywhere.
-3. **Smart Campsite / Home Assistant** — HA hardware arriving ~mid-April. Device registry, bridge, automation templates.
-4. **Bug fixes** — See Known Bugs section below. Several medium-severity issues.
-5. **Executive trip prep flow** — The "am I ready?" single view. Partially built in Phase 2 but not the full vision.
+**Waiting on:**
+- Will's vision brain dump doc (separate LLM conversation → `.planning/MILESTONE-CONTEXT.md`)
+- Expert review reports in `.planning/review/` (4 agents: code quality, UX, architecture, feature gaps)
+
+**Next:** Resume `/gsd:new-milestone` with vision doc + expert reviews to define scope.
+
+**Key findings from Session 20 assessment:**
+- 3 critical code bugs (JSON.parse, EXIF timestamps, timezone handling)
+- CRUD gaps (trips, vehicle, photos missing edit/delete)
+- AI-generated state not persisted (packing/meal plans lost on refresh)
+- Phase 1 Validation never executed — AI features untested for edge cases
 
 ### Quick wins worth doing first
 - Fix dashboard trips stat (hardcoded 0)

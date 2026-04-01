@@ -1,9 +1,9 @@
 # Project Status — Outland OS
 
 ## Quick Pickup
-> **Last session:** 2026-04-01 (Session 19)
+> **Last session:** 2026-04-01 (Session 20)
 > **Milestone v1.0:** Complete — all 5 phases shipped
-> **Next step:** `/gsd:new-milestone` to plan v1.1
+> **Next step:** Will doing vision brain dump → resume `/gsd:new-milestone` with expert reviews + vision doc
 > **App name:** Outland OS
 > **Task tracker:** See `TASKS.md` in project root — start there.
 > **North star:** See `docs/USER-JOURNEY.md` — defines what to build and why.
@@ -51,6 +51,7 @@
 - **Session 17** (2026-03-31) — Phase 3 Knowledge Base execution: RAG corpus, hybrid search, PDF/web parsers, search API.
 - **Session 18** (2026-03-31) — Phase 4 Chat Agent: streaming SSE, 11 tools, conversation persistence.
 - **Session 19** (2026-04-01) — Phase 5 gap closure + verification. Milestone v1.0 complete. Doc cleanup + forward plan.
+- **Session 20** (2026-04-01) — Project review + milestone v1.1 kickoff. 4 expert agent audits launched. Will doing vision brain dump separately.
 
 ## Key Files
 - `TASKS.md` — What's done, what's next, where to start
