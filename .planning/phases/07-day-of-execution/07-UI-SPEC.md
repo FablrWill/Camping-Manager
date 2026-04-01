@@ -53,19 +53,21 @@ Exceptions:
 | Role | Size | Weight | Line Height |
 |------|------|--------|-------------|
 | Body | 14px (`text-sm`) | 400 (regular) | 1.5 |
-| Label | 14px (`text-sm`) | 600 (semibold) | 1.4 |
+| Label | 14px (`text-sm`) | 700 (bold) | 1.4 |
 | Heading | 18px (`text-lg`) | 700 (bold) | 1.2 |
 | Display | 24px (`text-2xl`) | 700 (bold) | 1.2 |
+
+Two weights only: regular (400) and bold (700). No semibold.
 
 Usage notes:
 - Departure page title: Display (24px bold) via `PageHeader` component.
 - Checklist time slot headers (e.g. "Tonight — Pack Vehicle"): Heading (18px bold).
 - Checklist item text: Body (14px regular).
-- Progress percentage counter: Label (14px semibold), amber accent color.
-- Settings page section headers: Label (14px semibold), muted color.
+- Progress percentage counter: Label (14px bold), amber accent color.
+- Settings page section headers: Label (14px bold), muted color.
 - Float plan send confirmation copy: Body (14px regular), muted (`text-stone-500`).
 
-Source: Extrapolated from existing component patterns in `components/ui/` — `PageHeader` uses `text-2xl font-bold`, section labels use `text-sm font-semibold`, body content uses `text-sm`.
+Source: Extrapolated from existing component patterns in `components/ui/` — `PageHeader` uses `text-2xl font-bold`, section labels use `text-sm font-bold`, body content uses `text-sm`.
 
 ---
 
@@ -109,6 +111,8 @@ New components required for this phase:
 
 No net-new UI primitives — all new components compose from the existing `components/ui/` inventory.
 
+Accessibility note: The settings gear icon in `TopHeader` is icon-only. It must include `aria-label="Settings"` on the wrapping button or link element.
+
 ---
 
 ## Screen Inventory
@@ -117,12 +121,14 @@ No net-new UI primitives — all new components compose from the existing `compo
 
 Layout: Single scrollable column, mobile-first. `PageHeader` at top with trip name + departure date subtitle.
 
+Focal point: The progress bar row is the primary visual anchor — sticky position and amber color draws the eye to completion status immediately on load.
+
 Sections (top to bottom):
 1. **Progress bar row** — slim amber bar + "X of Y tasks done" label. Sticky within the page content area.
 2. **Time slot groups** — each group: slot header (bold, e.g. "Tonight — Pack Vehicle"), followed by checklist rows.
 3. **Unpacked warnings block** — amber-tinted rows at top of relevant slot for any packing list items not yet checked off. Each row: amber triangle icon + item name + "(not packed yet)" label.
 4. **Float plan action area** — bottom of page, full-width "Send Float Plan" primary button. If no emergency contact configured: inline amber prompt "No emergency contact set — add one in Settings" with amber underline link to `/settings`.
-5. **Regenerate row** — ghost button below checklist, "Regenerate checklist" — triggers ConfirmDialog before calling API.
+5. **Regenerate row** — ghost button below checklist, "Regenerate Checklist" — triggers ConfirmDialog before calling API.
 
 ### `/trips/[id]/prep` — Departure Summary Section (existing page)
 
@@ -136,7 +142,7 @@ Layout: Single scrollable column. `PageHeader` title "Settings". Sections groupe
 2. **Gmail Configuration** — informational card explaining that `GMAIL_USER` and `GMAIL_APP_PASSWORD` are set in `.env`. Read-only display of configured email (masked). No editable fields in UI — server-side config only.
 3. **Future sections placeholder** — single muted card "More settings coming in future phases."
 
-Settings page accessible via gear icon in `TopHeader` component.
+Settings page accessible via gear icon in `TopHeader` component (`aria-label="Settings"` required).
 
 ---
 
@@ -151,13 +157,13 @@ Settings page accessible via gear icon in `TopHeader` component.
 ### Float Plan Send
 - "Send Float Plan" button: primary variant, full-width on mobile.
 - If emergency contact missing: button is disabled, inline amber prompt shown below it.
-- Tap "Send Float Plan" → ConfirmDialog opens (not full Modal) with title "Send Float Plan?" and message showing the recipient email. Confirm button labeled "Send" (primary variant, not danger).
+- Tap "Send Float Plan" → ConfirmDialog opens (not full Modal) with title "Send Float Plan?" and message showing the recipient email. Confirm button labeled "Send Plan" (primary variant, not danger).
 - On send: button enters loading state ("Sending..."). On success: button replaced by success badge "Float plan sent [timestamp]" for the session duration. On error: inline error message below button ("Could not send email — check Gmail config in Settings").
 - Source: CONTEXT.md D-14 (confirmation before sending), D-08 (emergency contact from Settings).
 
 ### Checklist Regeneration
-- "Regenerate checklist" ghost button visible below the checklist.
-- Tap → ConfirmDialog: title "Regenerate Checklist?", message "This will replace your current checklist. Progress will be lost.", confirm button "Regenerate" (primary variant).
+- "Regenerate Checklist" ghost button visible below the checklist.
+- Tap → ConfirmDialog: title "Regenerate Checklist?", message "This will replace your current checklist. Progress will be lost.", confirm button "Regenerate Checklist" (primary variant).
 - On confirm: checklist enters loading skeleton state, new checklist generated via POST to API.
 - Source: CONTEXT.md D-04, Phase 6 pattern for regenerate with confirmation.
 
@@ -186,10 +192,10 @@ Settings page accessible via gear icon in `TopHeader` component.
 | Float plan sent confirmation | "Float plan sent to [name] at [time]" |
 | Regenerate confirmation title | "Regenerate Checklist?" |
 | Regenerate confirmation body | "This will replace your current checklist. Your check-off progress will be lost." |
-| Regenerate confirm button | "Regenerate" |
+| Regenerate confirm button | "Regenerate Checklist" |
 | Float plan confirm title | "Send Float Plan?" |
 | Float plan confirm body | "This will email your trip summary to [contact name] ([email])." |
-| Float plan confirm button | "Send" |
+| Float plan confirm button | "Send Plan" |
 | Unpacked item suffix | "(not packed yet)" |
 | Progress label | "X of Y tasks done" |
 | Settings page title | "Settings" |
