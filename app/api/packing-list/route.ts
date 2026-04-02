@@ -14,20 +14,23 @@ export async function GET(request: NextRequest) {
       select: {
         packingListResult: true,
         packingListGeneratedAt: true,
-        packingItems: { select: { gearId: true, packed: true } },
+        packingItems: { select: { gearId: true, packed: true, usageStatus: true } },
       },
     })
     if (!trip) {
       return NextResponse.json({ error: 'Trip not found' }, { status: 404 })
     }
     const packedState: Record<string, boolean> = {}
+    const usageState: Record<string, string | null> = {}
     for (const item of trip.packingItems) {
       packedState[item.gearId] = item.packed
+      usageState[item.gearId] = item.usageStatus ?? null
     }
     return NextResponse.json({
       result: trip.packingListResult ? JSON.parse(trip.packingListResult) : null,
       generatedAt: trip.packingListGeneratedAt?.toISOString() ?? null,
       packedState,
+      usageState,
     })
   } catch (error) {
     console.error('Failed to fetch packing list:', error)
