@@ -3,7 +3,7 @@
 ## Milestones
 
 - ✅ **v1.0 Foundation** - Phases 1-5 (shipped 2026-04-01)
-- 🚧 **v1.1 Close the Loop** - Phases 6-9 (in progress)
+- ✅ **v1.1 Close the Loop** - Phases 6-11 (complete)
 
 ## Phases
 
@@ -90,7 +90,7 @@ Plans:
 
 </details>
 
-### 🚧 v1.1 Close the Loop (In Progress)
+### v1.1 Close the Loop (In Progress)
 
 **Milestone Goal:** Stabilize the foundation, add offline capability, and build the learning loop — so the app survives a real camping trip and gets smarter from it.
 
@@ -142,11 +142,11 @@ Plans:
   5. User sees a clear indicator when the app is offline and knows how old the cached snapshot is
 **Plans**: 5 plans
 Plans:
-- [ ] 08-00-PLAN.md — Wave 0: Vitest install, test stub files for all Phase 8 modules
-- [ ] 08-01-PLAN.md — PWA foundation: manifest, icons, service worker with app shell caching, SW registration
-- [ ] 08-02-PLAN.md — Offline infrastructure: idb-keyval, offline storage, online status hook, offline banner, install banner
-- [ ] 08-03-PLAN.md — "Leaving Now" caching flow: sequential data fetcher, progress overlay, button, departure page integration
-- [ ] 08-04-PLAN.md — Map tile caching + offline UI polish: SpotMap crossOrigin, tile error placeholders, offline checklist states, staleness warning
+- [x] 08-00-PLAN.md — Wave 0: Vitest install, test stub files for all Phase 8 modules
+- [x] 08-01-PLAN.md — PWA foundation: manifest, icons, service worker with app shell caching, SW registration
+- [x] 08-02-PLAN.md — Offline infrastructure: idb-keyval, offline storage, online status hook, offline banner, install banner
+- [x] 08-03-PLAN.md — "Leaving Now" caching flow: sequential data fetcher, progress overlay, button, departure page integration
+- [x] 08-04-PLAN.md — Map tile caching + offline UI polish: SpotMap crossOrigin, tile error placeholders, offline checklist states, staleness warning
 **UI hint**: yes
 
 ### Phase 9: Learning Loop
@@ -157,13 +157,49 @@ Plans:
   1. User can open a completed trip and mark each packed item as "used," "didn't need," or "forgot but needed"
   2. User can request a post-trip summary and receive a Claude-generated 3-bullet debrief: what to drop, what was missing, and an updated location rating — generated from their actual usage data
   3. User can record a voice debrief and have it automatically update gear notes and location ratings — with a review screen to confirm before applying changes
-**Plans**: TBD
+**Plans**: 4 plans
+Plans:
+- [x] 09-00-PLAN.md — Wave 0: Vitest test stubs for all Phase 9 modules (usage tracking, trip summary, voice debrief)
+- [x] 09-01-PLAN.md — Usage tracking: PATCH /api/trips/[id]/usage, post-trip review section UI, usageState in packing list GET
+- [x] 09-02-PLAN.md — Trip summary: POST /api/trips/[id]/feedback, TripSummaryResultSchema, auto-generate trigger, summary display UI
+- [x] 09-03-PLAN.md — Voice debrief: wire VoiceRecordModal to TripFeedback persistence, InsightsReviewSheet integration, apply route TripFeedback write-back
 **UI hint**: yes
+
+### Phase 10: Offline Read Path & PWA Completion
+**Goal**: Cached trip data is actually accessible offline — components read IndexedDB snapshots via client-side detection, map tiles are proactively prefetched before departure, and offline check-offs queue for sync
+**Depends on**: Phase 8
+**Requirements**: OFF-01, OFF-02, OFF-03, OFF-04
+**Gap Closure:** Closes all 4 unsatisfied requirements, 2 integration gaps, and 1 broken E2E flow from v1.1 audit
+**Success Criteria** (what must be TRUE):
+  1. User can tap "Leaving Now," go offline, and see their trip data rendered from IndexedDB (packing list, meal plan, weather, spots)
+  2. Components use useOnlineStatus hook to detect offline state and read IndexedDB directly — client-side detection, not SW interception
+  3. Map tiles for the trip bounding box are proactively fetched and cached on "Leaving Now" — not just passively cached from prior views
+  4. Phase 8 has passing tests (not todo stubs), SUMMARY.md, and VERIFICATION.md
+**Plans**: 4 plans
+Plans:
+- [x] 10-01-PLAN.md — Test implementations: all 32 existing test stubs replaced with real assertions
+- [x] 10-02-PLAN.md — New modules: tile-prefetch, offline-write-queue, cache-trip tiles wiring
+- [x] 10-03-PLAN.md — Dual-mode components: offline read path for PackingList, MealPlan, DepartureChecklistClient + write queue
+- [x] 10-04-PLAN.md — Phase 8 documentation: SUMMARY.md and VERIFICATION.md
+
+### Phase 11: v1.1 Polish
+**Goal**: Fix tech debt and stale documentation identified by the milestone audit — VoiceDebriefButton guard, circular test, and doc consistency
+**Depends on**: Phase 9
+**Requirements**: (none — tech debt and documentation)
+**Gap Closure:** Closes tech debt items from v1.1 audit
+**Success Criteria** (what must be TRUE):
+  1. VoiceDebriefButton only renders for past trips (isPast guard)
+  2. usage-tracking.test.ts gearId validation test is logically sound (not circular)
+  3. REQUIREMENTS.md, ROADMAP.md, and STATE.md are consistent with actual implementation state
+**Plans**: 2 plans
+Plans:
+- [ ] 11-01-PLAN.md — Code fixes: VoiceDebriefButton isPast guard + circular test rewrite
+- [ ] 11-02-PLAN.md — Documentation consistency pass across REQUIREMENTS, ROADMAP, STATE, PROJECT
 
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 6 → 7 → 8 → 9
+Phases execute in numeric order: 6 → 7 → 8 → 9 → 10 → 11
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -172,7 +208,9 @@ Phases execute in numeric order: 6 → 7 → 8 → 9
 | 3. Knowledge Base | v1.0 | 4/4 | Complete | 2026-03-31 |
 | 4. Chat Agent | v1.0 | 4/4 | Complete | 2026-03-31 |
 | 5. Intelligence Features | v1.0 | 4/4 | Complete | 2026-04-01 |
-| 6. Stabilization | v1.1 | 5/5 | Complete | - |
-| 7. Day-Of Execution | v1.1 | 3/3 | Complete   | 2026-04-01 |
-| 8. PWA and Offline | v1.1 | 0/5 | Planned | - |
-| 9. Learning Loop | v1.1 | 0/TBD | Not started | - |
+| 6. Stabilization | v1.1 | 5/5 | Complete | 2026-04-01 |
+| 7. Day-Of Execution | v1.1 | 3/3 | Complete | 2026-04-01 |
+| 8. PWA and Offline | v1.1 | 5/5 | Complete | 2026-04-02 |
+| 9. Learning Loop | v1.1 | 4/4 | Complete | 2026-04-02 |
+| 10. Offline Read Path & PWA Completion | v1.1 | 4/4 | Complete | 2026-04-02 |
+| 11. v1.1 Polish | v1.1 | 0/2 | Executing | - |

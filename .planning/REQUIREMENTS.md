@@ -18,10 +18,10 @@ Requirements for v1.1 "Close the Loop." Each maps to roadmap phases.
 
 ### PWA / Offline Mode
 
-- [ ] **OFF-01**: User can install the app to their phone's home screen as a PWA
-- [ ] **OFF-02**: User can open the app offline and see the app shell (navigation, cached pages)
-- [ ] **OFF-03**: User can tap "Leaving Now" on a trip and have all trip data cached for offline use (weather snapshot, packing list, meal plan, spot coordinates, emergency info)
-- [ ] **OFF-04**: User can view cached map tiles for trip area while offline (tiles visible at time of "Leaving Now")
+- [x] **OFF-01**: User can install the app to their phone's home screen as a PWA
+- [x] **OFF-02**: User can open the app offline and see the app shell (navigation, cached pages)
+- [x] **OFF-03**: User can tap "Leaving Now" on a trip and have all trip data cached for offline use (weather snapshot, packing list, meal plan, spot coordinates, emergency info)
+- [x] **OFF-04**: User can view cached map tiles for trip area while offline (tiles visible at time of "Leaving Now")
 
 ### Day-Of Execution
 
@@ -30,9 +30,9 @@ Requirements for v1.1 "Close the Loop." Each maps to roadmap phases.
 
 ### Learning Loop
 
-- [ ] **LEARN-01**: User can mark packed items as "used" or "didn't need" after a trip
-- [ ] **LEARN-02**: User can view a Claude-generated post-trip summary (what to drop, what was missing, location rating) after completing gear usage tracking
-- [ ] **LEARN-03**: User can record a voice debrief that automatically updates gear notes and location ratings
+- [x] **LEARN-01**: User can mark packed items as "used" or "didn't need" after a trip
+- [x] **LEARN-02**: User can view a Claude-generated post-trip summary (what to drop, what was missing, location rating) after completing gear usage tracking
+- [x] **LEARN-03**: User can record a voice debrief that automatically updates gear notes and location ratings
 
 ## v2 Requirements (Deferred)
 
@@ -65,15 +65,15 @@ Requirements for v1.1 "Close the Loop." Each maps to roadmap phases.
 | STAB-04 | Phase 6 | Complete |
 | STAB-05 | Phase 6 | Complete |
 | STAB-06 | Phase 6 | Complete |
-| OFF-01 | Phase 8 | Pending |
-| OFF-02 | Phase 8 | Pending |
-| OFF-03 | Phase 8 | Pending |
-| OFF-04 | Phase 8 | Pending |
+| OFF-01 | Phase 10 | Complete |
+| OFF-02 | Phase 10 | Complete |
+| OFF-03 | Phase 10 | Complete |
+| OFF-04 | Phase 10 | Complete |
 | EXEC-01 | Phase 7 | Complete |
 | EXEC-02 | Phase 7 | Complete |
-| LEARN-01 | Phase 9 | Pending |
-| LEARN-02 | Phase 9 | Pending |
-| LEARN-03 | Phase 9 | Pending |
+| LEARN-01 | Phase 9 | Complete |
+| LEARN-02 | Phase 9 | Complete |
+| LEARN-03 | Phase 9 | Complete |
 
 **Coverage:**
 - v1.1 requirements: 15 total
@@ -82,4 +82,4 @@ Requirements for v1.1 "Close the Loop." Each maps to roadmap phases.
 
 ---
 *Requirements defined: 2026-04-01*
-*Last updated: 2026-04-01 — traceability filled after roadmap creation*
+*Last updated: 2026-04-02 — Phase 11 consistency pass*
