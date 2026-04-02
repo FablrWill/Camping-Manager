@@ -15,7 +15,9 @@ A personal second brain for car camping — an AI-powered knowledge system that 
 - **Power:** EcoFlow portable power station + solar panels
 - **Upcoming:** Getting a dog soon — will need pet-aware trip planning
 - **Sessions completed:** 25+ (foundation → intelligence → stabilization → offline → learning loop → polish)
-- **Dev setup:** Local dev, Starlink for remote sessions, Mac mini at home for heavy ops
+- **Dev setup:** MacBook for development, Mac mini at home for production hosting
+- **Production target:** Mac mini (always-on) — Node.js 20 LTS + PM2 + Tailscale, no Docker
+- **Remote access:** Tailscale mesh VPN (private, encrypted, no public exposure)
 - **Codebase:** 149 TS/TSX files, ~18K LOC app code, 190 test files (~38K LOC tests)
 
 ## Tech Stack
@@ -33,6 +35,8 @@ A personal second brain for car camping — an AI-powered knowledge system that 
 - **Voice:** Browser MediaRecorder + server-side transcription
 - **Testing:** Vitest + React Testing Library
 - **Auth:** None (single user)
+- **Hosting:** Mac mini (Node.js 20 LTS, PM2 process manager, no Docker/Nginx)
+- **Remote Access:** Tailscale (WireGuard mesh VPN, MagicDNS, automatic HTTPS)
 
 ## Requirements
 
@@ -104,6 +108,9 @@ A personal second brain for car camping — an AI-powered knowledge system that 
 - Reservation / permit API integration — recreation.gov API is brittle; paste confirmation URL
 - Rich text debrief editor — voice is the input modality, not keyboard
 - Real-time offline sync — single-user local-first app; offline snapshot is read-only
+- Docker containerization — single app on owned hardware, native deps are simpler without containers
+- Nginx / reverse proxy — Tailscale provides encrypted access directly, no proxy needed
+- CI/CD pipeline — single developer, deploy via git pull + pm2 restart
 
 ## Future (v2.0+)
 
@@ -138,6 +145,9 @@ A personal second brain for car camping — an AI-powered knowledge system that 
 | Plain text float plan email | HTML rendering varies across email clients; text is universal | ✓ Validated v1.1 |
 | Settings singleton via hardcoded id | Enforces one row, upsert always targets same record | ✓ Validated v1.1 |
 | Mac mini self-hosting over Vercel | Free, SQLite stays local, photos on disk, no cloud costs | — Pending v1.2 |
+| No Docker | Single app, single user, native deps on Apple Silicon, Docker adds complexity with no benefit | — Pending v1.2 |
+| Tailscale over Cloudflare Tunnel | Private mesh VPN, no public exposure, simpler for single-user | — Pending v1.2 |
+| PM2 over systemd/launchd scripts | Auto-restart, log rotation, boot persistence, ecosystem config | — Pending v1.2 |
 
 ## Constraints
 
