@@ -165,6 +165,29 @@ Plans:
 - [x] 09-03-PLAN.md — Voice debrief: wire VoiceRecordModal to TripFeedback persistence, InsightsReviewSheet integration, apply route TripFeedback write-back
 **UI hint**: yes
 
+### Phase 10: Offline Read Path & PWA Completion
+**Goal**: Cached trip data is actually accessible offline — the IndexedDB read path renders trip snapshots, the service worker falls back to cached data for API calls, and map tiles are proactively prefetched before departure
+**Depends on**: Phase 8
+**Requirements**: OFF-01, OFF-02, OFF-03, OFF-04
+**Gap Closure:** Closes all 4 unsatisfied requirements, 2 integration gaps, and 1 broken E2E flow from v1.1 audit
+**Success Criteria** (what must be TRUE):
+  1. User can tap "Leaving Now," go offline, and see their trip data rendered from IndexedDB (packing list, meal plan, weather, spots)
+  2. Service worker intercepts /api/ calls when offline and returns IndexedDB-cached data instead of `{ error: 'Offline' }`
+  3. Map tiles for the trip bounding box are proactively fetched and cached on "Leaving Now" — not just passively cached from prior views
+  4. Phase 8 has passing tests (not todo stubs), SUMMARY.md, and VERIFICATION.md
+**Plans**: TBD
+
+### Phase 11: v1.1 Polish
+**Goal**: Fix tech debt and stale documentation identified by the milestone audit — VoiceDebriefButton guard, circular test, and doc consistency
+**Depends on**: Phase 9
+**Requirements**: (none — tech debt and documentation)
+**Gap Closure:** Closes tech debt items from v1.1 audit
+**Success Criteria** (what must be TRUE):
+  1. VoiceDebriefButton only renders for past trips (isPast guard)
+  2. usage-tracking.test.ts gearId validation test is logically sound (not circular)
+  3. REQUIREMENTS.md, ROADMAP.md, and STATE.md are consistent with actual implementation state
+**Plans**: TBD
+
 ## Progress
 
 **Execution Order:**
@@ -179,5 +202,7 @@ Phases execute in numeric order: 6 → 7 → 8 → 9
 | 5. Intelligence Features | v1.0 | 4/4 | Complete | 2026-04-01 |
 | 6. Stabilization | v1.1 | 5/5 | Complete | - |
 | 7. Day-Of Execution | v1.1 | 3/3 | Complete   | 2026-04-01 |
-| 8. PWA and Offline | v1.1 | 5/5 | Complete | 2026-04-02 |
-| 9. Learning Loop | v1.1 | 4/4 | Executing | - |
+| 8. PWA and Offline | v1.1 | 5/5 | Partial (audit: read path missing) | 2026-04-02 |
+| 9. Learning Loop | v1.1 | 4/4 | Complete | 2026-04-02 |
+| 10. Offline Read Path & PWA Completion | v1.1 | 0/TBD | Not started | - |
+| 11. v1.1 Polish | v1.1 | 0/TBD | Not started | - |

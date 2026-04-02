@@ -32,7 +32,7 @@ Requirements for v1.1 "Close the Loop." Each maps to roadmap phases.
 
 - [x] **LEARN-01**: User can mark packed items as "used" or "didn't need" after a trip
 - [x] **LEARN-02**: User can view a Claude-generated post-trip summary (what to drop, what was missing, location rating) after completing gear usage tracking
-- [ ] **LEARN-03**: User can record a voice debrief that automatically updates gear notes and location ratings
+- [x] **LEARN-03**: User can record a voice debrief that automatically updates gear notes and location ratings
 
 ## v2 Requirements (Deferred)
 
@@ -65,15 +65,15 @@ Requirements for v1.1 "Close the Loop." Each maps to roadmap phases.
 | STAB-04 | Phase 6 | Complete |
 | STAB-05 | Phase 6 | Complete |
 | STAB-06 | Phase 6 | Complete |
-| OFF-01 | Phase 8 | Pending |
-| OFF-02 | Phase 8 | Pending |
-| OFF-03 | Phase 8 | Pending |
-| OFF-04 | Phase 8 | Pending |
+| OFF-01 | Phase 10 | Pending |
+| OFF-02 | Phase 10 | Pending |
+| OFF-03 | Phase 10 | Pending |
+| OFF-04 | Phase 10 | Pending |
 | EXEC-01 | Phase 7 | Complete |
 | EXEC-02 | Phase 7 | Complete |
 | LEARN-01 | Phase 9 | Complete |
 | LEARN-02 | Phase 9 | Complete |
-| LEARN-03 | Phase 9 | Pending |
+| LEARN-03 | Phase 9 | Complete |
 
 **Coverage:**
 - v1.1 requirements: 15 total
