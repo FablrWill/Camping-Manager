@@ -1,11 +1,27 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
+import { NextRequest } from 'next/server'
+import { PATCH } from '@/app/api/trips/[id]/usage/route'
+
+vi.mock('@/lib/db', () => ({
+  prisma: {
+    packingItem: {
+      update: vi.fn(),
+    },
+  },
+}))
 
 describe('Usage Tracking (LEARN-01)', () => {
   describe('PATCH /api/trips/[id]/usage', () => {
-    it('validates gearId is required', () => {
-      const validStatuses = ['used', "didn't need", 'forgot but needed', null]
-      const body = { usageStatus: 'used' }
-      expect('gearId' in body).toBe(false)
+    it('returns 400 when gearId is missing', async () => {
+      const req = new NextRequest('http://localhost/api/trips/trip-1/usage', {
+        method: 'PATCH',
+        body: JSON.stringify({ usageStatus: 'used' }),
+        headers: { 'content-type': 'application/json' },
+      })
+      const res = await PATCH(req, { params: Promise.resolve({ id: 'trip-1' }) })
+      expect(res.status).toBe(400)
+      const json = await res.json()
+      expect(json.error).toBe('gearId is required')
     })
 
     it('validates usageStatus must be one of the allowed values', () => {
