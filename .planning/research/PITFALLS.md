@@ -1,313 +1,202 @@
 # Pitfalls Research
 
-**Domain:** Adding PWA/offline mode, post-trip learning loop, trip day execution, and Zod stabilization to existing Next.js 16 + Prisma + SQLite camping app
-**Researched:** 2026-04-01
-**Confidence:** HIGH — all critical pitfalls verified against official docs and community reports
+**Domain:** Self-hosting Next.js 16 + SQLite app on Mac mini, tech debt cleanup
+**Researched:** 2026-04-02
+**Confidence:** HIGH (verified against official Next.js docs, community reports, project source)
 
 ---
 
 ## Critical Pitfalls
 
-Mistakes that cause rewrites, runaway costs, or deployment blockers.
+Mistakes that cause broken deploys, data loss, or security exposure.
 
 ---
 
-### Pitfall 1: Serwist Requires Webpack; Next.js 16 Defaults to Turbopack
+### Pitfall 1: Native Deps Break `npm run build` (Already Happening)
 
 **What goes wrong:**
-Next.js 16 ships with Turbopack as the default bundler (enabled in `next dev` and `next build`). Serwist (`@serwist/next`) — the only maintained App Router PWA library — requires Webpack for service worker compilation. If you add Serwist without adjusting your build scripts, the service worker file never gets generated, the PWA manifest is never injected, and offline mode silently doesn't work. Turbopack support exists in `@serwist/turbopack` (v9+) but is newer and less battle-tested.
+`npm run build` fails because webpack tries to bundle `better-sqlite3` and `sqlite-vec` native `.node` binaries. The project already has `serverExternalPackages` configured in `next.config.ts`, but the build still fails per the v1.1 audit. The likely cause: transitive dependencies or RAG code path imports these modules in a way that webpack still resolves during static analysis of client-side or shared code.
 
 **Why it happens:**
-The Turbopack migration in Next.js 16 is transparent for most features. Developers add Serwist, see no compile errors, and assume it's working — until they go offline and the app fails.
-
-**Consequences:**
-Service worker is never registered. Offline mode doesn't exist despite appearing to. "Leaving Now" cache trigger does nothing.
-
-**Warning signs:**
-- `navigator.serviceWorker.register()` returns a 404 for `/sw.js`
-- No service worker listed in Chrome DevTools > Application > Service Workers
-- PWA install prompt never appears
+Next.js statically analyzes all imports at build time. If any file imported by a page or layout (even indirectly) references a native module, webpack attempts to bundle it. `serverExternalPackages` only applies to server-side code paths. A single shared utility that imports `better-sqlite3` and is also imported by a client component creates the failure. Additionally, `better-sqlite3` v12.x has known build failures on Node.js 24+ and 25+ due to deprecated V8 APIs.
 
 **How to avoid:**
-Use `@serwist/next` v9+ with explicit build configuration. Either:
-1. Pin `next dev --webpack` and `next build` to stay on Webpack (simpler, stable)
-2. Or use `@serwist/turbopack` if Turbopack dev speed matters
+1. Audit every import chain from RAG/search code -- ensure no client component transitively imports native modules
+2. Use dynamic `import()` for native modules in server-only files
+3. Add `import 'server-only'` guard to any file that touches `better-sqlite3` or `sqlite-vec`
+4. Pin Node.js to 20 LTS or 22 LTS (avoid 24+; better-sqlite3 has C++ compilation failures on newer V8)
+5. Next.js 16.1 fixed transitive dependency handling for `serverExternalPackages` -- verify the project is on 16.1+ or upgrade
 
-Add to `package.json`:
-```json
-"dev": "next dev --webpack",
-"build": "next build"
-```
-And set `disable: process.env.NODE_ENV === 'development'` in `withSerwistInit` config to prevent service worker from interfering with dev.
+**Warning signs:**
+- `Module not found: Can't resolve 'better-sqlite3'` during build
+- C++ compilation errors mentioning `v8::CopyablePersistentTraits` during `npm install`
+- Build succeeds in `next dev` but fails with `next build`
 
-**Phase to address:** PWA Offline phase — before writing any service worker logic.
+**Phase to address:**
+Tech debt / build fix (first priority -- blocks all deployment)
 
 ---
 
-### Pitfall 2: Service Worker Caches Next.js API Routes as Stale Responses
+### Pitfall 2: Missing `output: 'standalone'` for Self-Hosting
 
 **What goes wrong:**
-If the service worker uses a `stale-while-revalidate` or `cache-first` strategy across all routes, it will cache `/api/gear`, `/api/trips`, and other API routes. After the initial cache, subsequent fetches return stale responses even when the user is online. The user edits a gear item, navigates away, comes back, and sees the old value — because the service worker served the cached API response.
+Without `output: 'standalone'` in `next.config.ts` (currently absent), `next build` produces output that expects the full `node_modules` directory at runtime. Deploying to Mac mini requires copying the entire project directory, and PM2 must run `next start` from the project root. Any `npm install` on the server that pulls a different version of a native dep causes silent breakage.
 
 **Why it happens:**
-Generic Workbox/Serwist configurations treat all same-origin requests identically. The default `defaultCache` in Serwist includes API routes unless explicitly excluded. Developers copy default configs without reading which URL patterns are covered.
-
-**Consequences:**
-Mutations appear to succeed (the database write happens) but the UI shows stale data until cache expires or user force-refreshes. This is subtle and hard to reproduce.
-
-**Warning signs:**
-- Edit a record, navigate away, come back — old data shows
-- DevTools Network tab shows API responses served "from ServiceWorker"
-- Only reproduced in PWA mode (installed on home screen), not browser tab
+Running `next start` from the project directory works in development and feels identical to production. But it is fragile -- the entire `node_modules` tree must be identical. Standalone mode produces a self-contained `server.js` with only the required files, making deployment atomic and reproducible.
 
 **How to avoid:**
-Explicitly exclude all `/api/` routes from service worker caching. Use `NetworkOnly` for any URL matching `/api/*`. Only cache static assets (`/_next/static/`, images) and the app shell (HTML pages). The offline strategy for data is IndexedDB snapshots, not service worker response caching.
-
+Add to `next.config.ts`:
 ```typescript
-// In sw.ts — explicit exclusion
-registerRoute(
-  ({ url }) => url.pathname.startsWith('/api/'),
-  new NetworkOnly()
-);
+const nextConfig: NextConfig = {
+  output: 'standalone',
+  serverExternalPackages: ['better-sqlite3', 'sqlite-vec', 'voyageai', 'pdf-parse', 'cheerio'],
+  // ... rest of config
+}
 ```
-
-**Phase to address:** PWA Offline phase — configure routing rules before any offline data work.
-
----
-
-### Pitfall 3: "Leaving Now" Snapshot Must Copy Data to IndexedDB, Not Rely on Service Worker Cache
-
-**What goes wrong:**
-The intuitive approach to "Leaving Now" caching is to pre-fetch all trip-related API routes so the service worker caches the responses. This works for one session but breaks when the data changes. If the user updates their packing list after clicking "Leaving Now," the service worker has the old response cached and serves it offline. Worse, if the service worker cache is invalidated (browser update, cache clearing), all offline data disappears.
-
-**Why it happens:**
-Service worker response caching feels like "offline storage" but it's really "HTTP response caching." It's not designed for explicit user-triggered snapshots with guaranteed retention.
-
-**Consequences:**
-Offline trip data is stale, incomplete, or silently missing. The feature appears to work until the user actually needs it in the field.
+Then deploy `.next/standalone/` plus copy `.next/static/` and `public/` alongside it.
 
 **Warning signs:**
-- Data appears offline but doesn't match what was shown before departure
-- Offline data disappears after browser update or cache pressure
-- iOS PWA storage cleared after 7 days of inactivity (iOS clears PWA storage aggressively)
+- Deployment requires running `npm install` on the target server
+- Different behavior between dev machine and server
+- Native module version mismatch errors at runtime
 
-**How to avoid:**
-Use IndexedDB for the "Leaving Now" snapshot, not service worker cache:
-1. On "Leaving Now" trigger: fetch all trip data from the API and write it to IndexedDB (using `idb` library)
-2. Service worker intercepts `/api/*` requests while offline and reads from IndexedDB — it does not cache the API responses itself
-3. This is an explicit copy-to-local-storage pattern, not automatic HTTP caching
-
-iOS caveat: IndexedDB on iOS is also subject to 7-day storage clearing if the PWA is not used. This is a hard platform limitation — document it, and add a "Refresh offline data" button.
-
-**Phase to address:** PWA Offline phase — core architecture decision; wrong approach requires full rewrite.
+**Phase to address:**
+Build fix phase (part of getting `npm run build` working)
 
 ---
 
-### Pitfall 4: Learning Loop Overwrites Original Data Instead of Recording Feedback Separately
+### Pitfall 3: Photos Stored in `public/` Get Deleted on Rebuild
 
 **What goes wrong:**
-Post-trip debrief writes changes directly to gear records, packing lists, and location ratings — mutating the source of truth. The `GearItem.notes` field gets overwritten with post-trip observations, replacing the pre-trip notes. A packing list gets regenerated with post-trip feedback baked in, so there's no record of what the original recommendation was. After 3 trips, the history is gone and the system can't explain why it's making certain recommendations.
+User-uploaded photos live at `public/photos/` (confirmed in `app/api/photos/upload/route.ts`). With `output: 'standalone'`, the build copies `public/` into standalone output. But user-uploaded content added after the build is not preserved. Redeployment either overwrites the directory or starts with a clean copy, losing all photos uploaded since the last build.
 
 **Why it happens:**
-Mutations are simpler to model than append-only feedback. "Update gear notes with trip observations" is one line of code. Building a separate feedback table feels like over-engineering for a personal app.
-
-**Consequences:**
-- No trip history to learn from — each trip overwrites the previous feedback
-- Cannot distinguish "always bring this" from "needed it once in unusual conditions"
-- Bugs in the debrief flow silently corrupt gear records
+Next.js treats `public/` as static build assets. User-uploaded runtime content does not belong there in production because the build process does not preserve runtime-created files.
 
 **How to avoid:**
-Model feedback as events, not mutations:
+1. Move photo storage outside the project directory: `~/outland-data/photos/`
+2. Symlink `public/photos` to the external directory: `ln -s ~/outland-data/photos public/photos`
+3. Or serve photos via a dedicated API route (`/api/photos/[filename]`) that reads from the external directory
+4. For Mac mini single-user: the symlink approach is simplest. Create the external dir once, symlink, and the build never touches uploaded photos.
 
-Add a `TripFeedback` table:
-```prisma
-model TripFeedback {
-  id          Int      @id @default(autoincrement())
-  tripId      Int
-  gearItemId  Int?
-  locationId  Int?
-  type        String   // "used", "unused", "forgot_needed", "gear_note", "location_rating"
-  value       String?
-  createdAt   DateTime @default(now())
+**Warning signs:**
+- Photos disappear after redeployment
+- `public/photos/` is empty on the server after build
+- Build output size does not include previously uploaded photos
+
+**Phase to address:**
+Deployment phase (before first production deploy)
+
+---
+
+### Pitfall 4: SQLite Database Path Breaks in Standalone Mode
+
+**What goes wrong:**
+Prisma's `DATABASE_URL=file:./dev.db` is relative to the Prisma schema location. In standalone mode, the working directory changes to `.next/standalone/`. The database file is not found, or a new empty database is silently created in the wrong location, losing all existing data.
+
+**Why it happens:**
+Relative paths in `DATABASE_URL` resolve differently depending on the working directory at runtime. Standalone mode changes the runtime directory structure. Prisma does not warn about this.
+
+**How to avoid:**
+1. Use an absolute path in production `.env`: `DATABASE_URL=file:/Users/willis/outland-data/outland.db`
+2. Set the env var in PM2's ecosystem config, not just `.env`
+3. Run `prisma migrate deploy` against the absolute path before starting the app
+4. Back up the database before every deployment: `cp outland.db outland.db.bak`
+
+**Warning signs:**
+- App starts but shows zero data (all stats read 0 on dashboard)
+- Two database files exist in different locations
+- Prisma errors about missing tables (fresh DB auto-created at wrong path)
+
+**Phase to address:**
+Deployment phase (environment configuration)
+
+---
+
+### Pitfall 5: No Auth + Public Tunnel = Anyone Can Access Everything
+
+**What goes wrong:**
+Exposing the app via Cloudflare Tunnel without authentication means anyone with the URL can view all personal data, trigger Claude API calls (real money), delete gear/trips, and upload files. Bots and scanners find public tunnel URLs within hours.
+
+**Why it happens:**
+The app was designed for single-user local use with no auth. Adding a tunnel turns a local-only app into a public web service. "Single user" does not mean "no authentication" -- it means "one account."
+
+**How to avoid:**
+- **Recommended: Tailscale only.** Creates a private mesh VPN using WireGuard. Only Will's devices (phone, laptop) can reach the Mac mini. No public URL, no auth needed, no attack surface. Zero configuration beyond installing the app on each device.
+- **If public access needed:** Use Cloudflare Tunnel + Cloudflare Access (free tier) with email OTP before the tunnel reaches the app. This is Cloudflare's built-in zero-trust auth layer.
+- **Never:** Expose the raw Next.js port via Cloudflare Tunnel without an auth layer in front.
+- Tailscale is the clear winner here: simpler, more secure (no public exposure at all), and Will already has it on his roadmap.
+
+**Warning signs:**
+- Access logs showing unknown IPs or user agents
+- Unexpected Claude API charges on Anthropic dashboard
+- Data appearing that Will did not create
+
+**Phase to address:**
+Deployment phase (network access -- must be decided before going live)
+
+---
+
+### Pitfall 6: PM2 Memory Growth + Watch Mode Restart Loop
+
+**What goes wrong:**
+PM2 running Next.js can accumulate memory over time (reported: 35MB to 100MB+ in 10 minutes). If `max_memory_restart` is too low, PM2 restarts frequently, causing brief downtime on every restart. If `watch: true` is set in the PM2 config, SQLite WAL file changes and photo uploads trigger filesystem events, causing PM2 to restart the app in an infinite loop.
+
+**Why it happens:**
+Next.js caches server-rendered pages and data in memory. PM2's `watch` option monitors the entire working directory for file changes. SQLite in WAL mode writes `-wal` and `-shm` files on every transaction, and photo uploads create new files -- both trigger PM2's file watcher.
+
+**How to avoid:**
+```javascript
+// ecosystem.config.cjs
+module.exports = {
+  apps: [{
+    name: 'outland-os',
+    script: '.next/standalone/server.js',
+    env: {
+      NODE_ENV: 'production',
+      PORT: 3000,
+      HOSTNAME: '0.0.0.0',
+    },
+    watch: false,               // CRITICAL: never watch in production
+    max_memory_restart: '512M', // generous for single-user
+    instances: 1,               // single instance for SQLite
+    autorestart: true,
+  }]
 }
 ```
 
-The packing list generator reads historical feedback as context (not as mutations to the gear records). Location ratings are averaged from feedback events, not overwritten. Gear notes accumulate in `TripFeedback`, and the AI synthesizes them on demand.
+**Warning signs:**
+- App randomly restarts (check `pm2 logs`)
+- Memory climbing continuously in `pm2 monit`
+- "SIGTERM" messages in logs after photo uploads or database writes
 
-**Phase to address:** Learning Loop phase — data model must be right before building the debrief UI.
+**Phase to address:**
+Deployment phase (PM2 configuration)
 
 ---
 
-### Pitfall 5: Zod Added to Claude API Responses Using `.parse()` Throws and Breaks Existing Error Handling
+### Pitfall 7: SQLite + PM2 Cluster Mode = Database Locked
 
 **What goes wrong:**
-The existing API routes in this codebase use try-catch with `NextResponse.json({ error: '...' }, { status: 500 })` for error handling. If Zod validation is added using `.parse()` (which throws a `ZodError` on failure), the ZodError is caught by the outer try-catch but the error message is a Zod internal object, not a user-friendly string. Worse, the 500 response is returned instead of a 400 (validation failure vs. server error), confusing error monitoring.
+If PM2 is configured with `instances: 2+` (cluster mode), multiple Node.js processes write to SQLite simultaneously. SQLite serializes writes via file-level locking. Under even light concurrent writes, this causes `SQLITE_BUSY` or `database is locked` errors.
 
 **Why it happens:**
-`.parse()` is the default Zod example in docs. Developers add it inside existing try-catch blocks without realizing `.parse()` throws a different error type than they're handling.
-
-**Consequences:**
-Validation errors look like server crashes. The API returns 500 for bad Claude output instead of surfacing the real issue. Debugging is harder because the ZodError is swallowed.
+PM2 cluster mode is the standard recommendation for Node.js production apps. But SQLite is not a client-server database -- it uses file-level locking. Multiple processes competing for write locks causes contention that PM2 tutorials do not warn about.
 
 **How to avoid:**
-Use `.safeParse()` universally for Claude API response validation:
+1. Run exactly 1 PM2 instance (`instances: 1`) -- more than sufficient for single-user
+2. Enable WAL mode: `PRAGMA journal_mode=WAL` (better read concurrency)
+3. Set busy timeout: `PRAGMA busy_timeout=5000` (retries instead of immediate failure)
+4. Never use PM2 cluster mode or `instances: 'max'` with SQLite
 
-```typescript
-const result = PackingListSchema.safeParse(parsed);
-if (!result.success) {
-  console.error('Claude response schema mismatch:', result.error.issues);
-  return NextResponse.json(
-    { error: 'AI response format unexpected', raw: text },
-    { status: 422 }
-  );
-}
-return NextResponse.json(result.data);
-```
+**Warning signs:**
+- Intermittent 500 errors on write operations (save gear, upload photo)
+- `SqliteError: database is locked` in PM2 logs
+- Data not saving reliably despite no visible errors in UI
 
-Build a shared `parseClaudeJSON<T>(text: string, schema: ZodSchema<T>)` utility in `lib/claude.ts` that handles JSON.parse + Zod safeParse in one call. All Claude API routes use this instead of naked `JSON.parse()`.
-
-**Phase to address:** Stabilization phase — fix before adding new AI features.
-
----
-
-### Pitfall 6: Zod Schema Added to Existing API Inputs Breaks Clients That Send Optional Fields as Null vs. Undefined
-
-**What goes wrong:**
-Existing API routes accept loose JSON bodies. Adding Zod input validation with `.parse()` will reject previously-valid requests if the schema is stricter than what clients actually send. A gear item form might send `{ brand: null }` but the Zod schema uses `z.string().optional()` which expects `undefined`, not `null`. All existing clients break with 400 errors after validation is added.
-
-**Why it happens:**
-TypeScript types and Zod schemas use `undefined` for optional fields, but JSON serialization turns `undefined` into omission and `null` stays `null`. The mismatch is invisible until runtime.
-
-**Consequences:**
-Adding Zod to an existing API route immediately breaks the UI if the schema doesn't match what the existing client sends. This is a silent regression — forms stop working after "adding validation."
-
-**How to avoid:**
-Use `.nullable()` generously when adding Zod to existing endpoints:
-```typescript
-z.object({
-  brand: z.string().nullable().optional(), // accepts null, undefined, or string
-})
-```
-Or use `.preprocess()` to coerce null to undefined for optional string fields. Audit the actual request bodies being sent (check browser DevTools network tab) before writing the schema.
-
-Also: add Zod as `safeParse` with logging only first (no rejection), verify it passes on real traffic, then switch to enforcement.
-
-**Phase to address:** Stabilization phase — test schemas against real client payloads before enforcing.
-
----
-
-## Moderate Pitfalls
-
----
-
-### Pitfall 7: iOS PWA Storage Cleared Aggressively — Offline Data Disappears
-
-**What goes wrong:**
-iOS has a 7-day cap on script-writable storage (IndexedDB, Cache Storage) for PWAs. If the app isn't actively used for 7 days, iOS clears all stored data — including the "Leaving Now" offline snapshot. A user who prepares their offline data on Thursday and leaves for a camping trip the following Friday arrives with an empty offline cache.
-
-**Why it happens:**
-Apple's Intelligent Tracking Prevention and storage management policies treat PWA data as non-essential. This behavior is consistent since iOS 13.4 and has not changed.
-
-**Consequences:**
-The "Leaving Now" feature is unreliable as a pre-trip preparation tool if the user prepares more than a week ahead.
-
-**How to avoid:**
-1. Document this limitation clearly in the UI: "Offline data expires after 7 days of inactivity. Refresh before departing."
-2. Show the "Last snapshot taken: [date]" in the Leaving Now UI so the user knows if it's stale
-3. Trigger the snapshot as late as possible (day of departure, not days ahead)
-4. Consider a "Refresh offline data" button on the trip day view
-
-**Phase to address:** PWA Offline phase — surface the limitation in the UI.
-
----
-
-### Pitfall 8: Trip Day Sequencer Time Logic Breaks Without Explicit Timezone Handling
-
-**What goes wrong:**
-The sequencer generates a departure checklist with time-based steps ("check weather at 7am," "pack cooler 30 min before departure"). The logic uses `new Date()` and relative time arithmetic. When the device timezone doesn't match the trip destination timezone, all times are off. A 7am reminder fires at 4am local time.
-
-**Why it happens:**
-JavaScript `Date` objects are timezone-aware but most date arithmetic ignores this. `new Date()` returns local time, but comparisons and displays are inconsistent without explicit timezone normalization.
-
-**Consequences:**
-Sequencer shows wrong times. Time-sensitive steps (weather check, safety email) trigger at wrong moments.
-
-**How to avoid:**
-Store all times as UTC in the database. Display times using the Intl.DateTimeFormat API with an explicit timezone:
-```typescript
-new Intl.DateTimeFormat('en-US', {
-  timeZone: trip.locationTimezone || 'America/New_York',
-  hour: '2-digit',
-  minute: '2-digit'
-}).format(new Date(step.scheduledAt))
-```
-For v1.1, the simpler fix is: use device local time only, make no assumptions about destination timezone, and document this constraint. The camping destinations are in the same region as the device (NC/SE US).
-
-**Phase to address:** Trip Execution phase — use UTC + display formatting from the start.
-
----
-
-### Pitfall 9: Safety Email Requires a Server-Side Route — Cannot Send from the Browser
-
-**What goes wrong:**
-Sending email from a browser requires either a public SMTP relay or a service with a publicly-exposed API key. If the Nodemailer or SendGrid API key is put in client-side code (even in `NEXT_PUBLIC_` env vars), it will be visible in browser DevTools and could be abused to send spam. SMTP credentials in client-side code are a hard security failure.
-
-**Why it happens:**
-The app has no traditional backend — it's a Next.js app with API routes. It's easy to accidentally write email-sending logic in a client component.
-
-**Consequences:**
-Either the email feature is built in a way that exposes credentials (security failure), or it's blocked by browser security policies (CORS, no direct SMTP from browser).
-
-**How to avoid:**
-Build the safety email as a Next.js API route (`POST /api/trips/[id]/safety-email`). The route runs server-side and can safely use Nodemailer with environment variable credentials. The client sends a single POST request to trigger it.
-
-For simplicity with a single-user app: use Nodemailer with a Gmail App Password (not a Google OAuth flow). The credential lives in `.env` as `EMAIL_SMTP_PASSWORD`. This is the fastest path to working email with no external service dependency.
-
-**Phase to address:** Trip Execution phase — route architecture decision, not just implementation detail.
-
----
-
-### Pitfall 10: Post-Trip Voice Debrief via Web Speech API Fails on iOS Safari PWA
-
-**What goes wrong:**
-The Web Speech API (`SpeechRecognition`) works well in desktop Chrome. On iOS, all browsers use WebKit — Chrome on iOS is WebKit with Chrome UI, not Blink. The Web Speech API is partially supported in Safari on iOS but has documented bugs: `isFinal` is sometimes always `false`, the API fails silently in PWA/home screen mode, and microphone permission prompts don't appear consistently.
-
-**Why it happens:**
-App Store rules require all iOS browsers to use WebKit. Desktop Chrome behavior does not translate to iOS Chrome.
-
-**Consequences:**
-Voice debrief built for desktop Chrome doesn't work on iPhone — the primary device for post-trip use.
-
-**How to avoid:**
-Build the debrief input as text-first with voice as progressive enhancement:
-1. Default: textarea for typed debrief notes
-2. Enhancement: voice button using Web Speech API with runtime feature detection
-3. If voice is important: use the Anthropic API with Whisper or a similar service — record audio via `MediaRecorder` API, POST the audio blob to a Next.js API route, transcribe server-side
-
-Test on actual iOS Safari before building the UI around voice.
-
-**Phase to address:** Learning Loop phase — build text input first, voice second.
-
----
-
-### Pitfall 11: Prisma Schema Additions for Learning Loop Can Break in Dev Due to SQLite ALTER TABLE Limitations
-
-**What goes wrong:**
-SQLite has extremely limited `ALTER TABLE` support — it cannot add `NOT NULL` columns without a default value to an existing table that has rows. If the `TripFeedback` table or new columns are added via `prisma migrate dev` on a database that already has seed data, the migration may fail with a generic SQLite error or silently produce wrong schema.
-
-**Why it happens:**
-Prisma generates standard SQL that works in Postgres but hits SQLite's `ALTER TABLE` limitations. The error messages from SQLite are often unhelpful ("near 'NOT NULL': syntax error").
-
-**Consequences:**
-Migration fails in dev. Developer resets the database to recover. Seed data is lost and must be re-run.
-
-**How to avoid:**
-1. All new columns on existing tables should have a default value or be nullable in the Prisma schema
-2. When adding a table with required fields, run `prisma migrate dev` before seeding the database
-3. Keep `npm run db:reset` handy — for a personal dev app, resetting + reseeding is an acceptable recovery
-4. Before running any migration that touches existing tables with data, backup the dev database: `cp prisma/dev.db prisma/dev.db.bak`
-
-**Phase to address:** Stabilization phase and Learning Loop phase — both add schema changes.
+**Phase to address:**
+Deployment phase (PM2 config -- enforce `instances: 1`)
 
 ---
 
@@ -317,70 +206,92 @@ Shortcuts that seem reasonable but create long-term problems.
 
 | Shortcut | Immediate Benefit | Long-term Cost | When Acceptable |
 |----------|-------------------|----------------|-----------------|
-| Using `localStorage` for "Leaving Now" offline data | 5 min to implement | 5MB limit hit immediately with packing list + photos; breaks service worker integration | Never — use IndexedDB |
-| Mutating gear records directly in post-trip debrief | Simpler data model | No trip history, no undo, learning loop corrupts source of truth | Never — always append feedback |
-| Caching `/api/*` responses in service worker | "Free" offline API | Stale mutations, data mismatches, confusing debugging | Never — use NetworkOnly for API routes |
-| Using `.parse()` instead of `.safeParse()` in existing routes | Shorter code | ZodError swallowed by outer catch, 500 instead of 400, hard to debug | Only in new isolated routes with dedicated error middleware |
-| Skipping timezone handling in sequencer | Simpler date logic | Wrong times displayed for users in different zones | Acceptable if scoped to local device timezone only (document the constraint) |
-| Sending safety email from client using EmailJS | No server code needed | API key exposed in browser JS | Never — use server-side API route |
-| Disabling service worker entirely in production for simplicity | No caching bugs | No offline capability — the whole PWA feature doesn't work | Only as a temporary debug step, never ship disabled |
+| Skipping `output: 'standalone'` | Simpler deploy (just `next start`) | Fragile deploys, node_modules drift between machines | Never for production self-hosting |
+| Photos in `public/` without symlink | Works in dev, zero config | Data loss on redeploy | Dev only; symlink or external dir in production |
+| Relative `DATABASE_URL` | Works from project root | Breaks in standalone mode, hard to locate DB | Dev only; absolute path in production |
+| `variant="outline"` left broken | Does not crash (renders unstyled) | Inconsistent UI, user hesitates to click Retry | Fix in tech debt phase -- 5 min fix |
+| `it.todo` test stubs left in place | Documents future intent | Inflates test count, gives false impression of coverage | Track and either implement or remove |
+| Settings placeholder card | Page exists in nav | Looks unfinished, confuses user | Remove or populate with real settings |
+| Raw `<button>` in PackingList/MealPlan | Works functionally | Inconsistent with design system, looks different from all other buttons | Fix in tech debt phase -- swap to Button component |
 
 ---
 
 ## Integration Gotchas
 
-Common mistakes when connecting to external services.
+Common mistakes when connecting services for this deployment.
 
 | Integration | Common Mistake | Correct Approach |
 |-------------|----------------|------------------|
-| Serwist + Next.js 16 | Assuming Turbopack works out of the box | Use `--webpack` flag for builds; or use `@serwist/turbopack` v9+ explicitly |
-| Serwist dev mode | Testing offline behavior in development | `disable: process.env.NODE_ENV === 'development'` — dev mode disables the SW; test offline in production build only |
-| Nodemailer + Gmail | Using regular Gmail password | Use Gmail App Password via Google Account security settings; regular password fails with modern Google auth |
-| IndexedDB on iOS | Assuming 5GB quota like desktop | iOS PWA has ~50MB Cache API quota and clears after 7 days inactivity |
-| Zod + Prisma types | Assuming Prisma types = Zod schema | They're separate — a `GearItem` from Prisma has `Date` objects; Zod may receive ISO strings from JSON; use `z.coerce.date()` for date fields |
-| Claude API responses | Trusting JSON.parse without schema | Claude sometimes returns JSON with extra text, markdown fences, or truncated output; always extract + validate |
+| PM2 + standalone | Running `next start` instead of `node server.js` | Use `node .next/standalone/server.js` with PORT and HOSTNAME env vars |
+| PM2 + env vars | Setting NODE_ENV only in `.env` file | Set in PM2 ecosystem config; use `pm2 restart --update-env` when changing |
+| Tailscale + Next.js | Binding to `localhost` only | Set `HOSTNAME=0.0.0.0` so Tailscale IP (100.x.x.x) can reach the server |
+| Cloudflare Tunnel | Tunneling to `localhost:3000` without auth | Put Cloudflare Access (free tier, email OTP) in front of tunnel |
+| Prisma + standalone | Running `prisma migrate` inside the standalone output dir | Run migrations from the source project dir against the production DB path |
+| Service worker + deploy | SW caches old static assets after redeployment | Version the SW cache name; increment on each deploy; add cache-busting |
+| Claude API key | Key in `.env` committed to git or missing from PM2 config | `.env` in `.gitignore`; key in PM2 ecosystem env or system environment |
+| Photo uploads + standalone | Photos written inside the standalone output dir | Write to external persistent directory; symlink `public/photos` |
+| Node.js version | Using latest (24/25) with better-sqlite3 | Pin to Node 20 LTS or 22 LTS; use nvm `.nvmrc` file |
+| `npm run build` on server | Building on Mac mini with different arch/Node than dev | Build on same machine or use standalone mode which bundles everything |
 
 ---
 
 ## Performance Traps
 
-Patterns that work at small scale but fail as usage grows.
-
 | Trap | Symptoms | Prevention | When It Breaks |
 |------|----------|------------|----------------|
-| Caching entire trip dataset in IndexedDB on every "Leaving Now" | Slow snapshot trigger, high memory | Only cache the active trip's data: packing list, weather, key locations | Over 5 trips with photos each |
-| Service worker intercepts and reads IndexedDB on every API request | 100–300ms added latency for all requests | Only intercept when offline (`navigator.onLine === false`) | Every page load |
-| Packing list learning query scans all TripFeedback rows | Slow list generation as trips accumulate | Add index on `TripFeedback.gearItemId`; limit feedback query to last 10 trips | After 20+ trips |
-| Running Claude API call to generate learning summary on every debrief save | Slow save, high API cost | Batch debrief feedback writes; generate AI summary async or on-demand | Every save event |
+| SQLite DB on network drive or external disk | Slow queries, lock timeouts | Keep DB on Mac mini's internal SSD | Any network latency to storage |
+| Unbounded photo directory (flat) | Slow `readdir`, large `public/` slows builds | Organize into date-based subdirs (`YYYY/MM/`) | 1000+ photos |
+| No image optimization in production | Large photos served raw, slow mobile load on Tailscale | Use sharp to compress on upload (already present); verify it runs in production | Any photo-heavy page |
+| SW caching entire app shell on install | Large initial SW download blocks first use | Cache critical routes only; lazy-cache rest | App shell exceeds 2MB |
+| WAL file grows unbounded | Disk usage climbs, slightly slower writes | Run `PRAGMA wal_checkpoint(TRUNCATE)` periodically or on app start | After months of writes without restart |
+
+---
+
+## Security Mistakes
+
+Domain-specific security issues for a self-hosted personal app.
+
+| Mistake | Risk | Prevention |
+|---------|------|------------|
+| No auth with public URL | Full data access, AI cost abuse, data deletion | Tailscale (private mesh) or Cloudflare Access (zero-trust) |
+| API key in git or in server `.env` without protection | Claude API key leaked = unauthorized charges | Env var in PM2 config or system-level; never commit `.env`; `chmod 600 .env` |
+| No rate limiting on AI routes | Accidental or malicious repeated calls = large Anthropic bill | Simple in-memory rate limiter: max 5 AI calls per minute |
+| SQLite DB world-readable | Any local user/process on Mac mini can read all data | `chmod 600` on `.db` file; run PM2 as Will's user account |
+| Photo upload accepts any file | Malicious files stored on server filesystem | Validate MIME type + extension; reject if sharp cannot process it; limit file size |
+| SW serves stale content after security fix | User runs vulnerable old code from SW cache | Version SW cache; force update on deploy; consider `skipWaiting()` for security patches |
+| PM2 logs contain API keys or personal data | Log files readable by other processes | Scrub sensitive data from error logging; rotate PM2 logs (`pm2 install pm2-logrotate`) |
 
 ---
 
 ## UX Pitfalls
 
-Common user experience mistakes in this domain.
-
 | Pitfall | User Impact | Better Approach |
 |---------|-------------|-----------------|
-| Silent service worker update (skipWaiting without notification) | User mid-session sees page reload; state lost | Show "Update available — tap to refresh" banner; let user control timing |
-| "Leaving Now" button with no feedback or confirmation | User doesn't know if snapshot worked; leaves without offline data | Show spinner during snapshot, then "Ready for offline — X items cached" confirmation |
-| Debrief form too long (rate every item, rate every day) | ADHD-hostile; user skips it entirely | One screen: "Anything you'd do differently?" + checkboxes for unused gear. Short wins. |
-| Sequencer shows all steps at once | Overwhelming pre-departure checklist | Progressive disclosure: show current step + next 2. Mark done as you go. |
-| Offline mode with no indicator | User confused why saves aren't working | Always-visible offline indicator when service worker is in offline mode |
-| Safety email as a buried settings feature | User never finds it; doesn't set up emergency contact | Surface it in trip creation flow: "Add emergency contact email (optional)" |
+| Broken `variant="outline"` on PostTripReview Retry | Button looks unstyled/broken, user hesitates to click | Fix ButtonVariant types; use valid variant like `secondary` |
+| Settings placeholder card | User taps settings expecting functionality, finds dead card | Remove placeholder or populate with real settings (emergency contact, data export, API key status) |
+| SW missing dynamic routes (`/trips/[id]/prep`, `/trips/[id]/depart`) | User visits online, goes offline, trip prep page fails | Pre-cache visited dynamic routes; or show clear "not available offline" message |
+| No deploy status indicator | After redeploy, user does not know if they have latest version | Show build version/timestamp in settings or footer |
+| No backup/export option | User has no way to back up their data | Add data export API route (JSON dump of all tables) |
 
 ---
 
 ## "Looks Done But Isn't" Checklist
 
-Things that appear complete but are missing critical pieces.
+Things that appear complete but are missing critical pieces for production.
 
-- [ ] **PWA/Offline:** Service worker registered and showing in DevTools — verify it actually serves cached content by throttling to Offline in DevTools. Registration success does not mean offline works.
-- [ ] **Leaving Now:** Button click triggers API calls — verify data is actually in IndexedDB (DevTools > Application > IndexedDB) after the snapshot completes.
-- [ ] **Safety Email:** API route returns 200 — verify the email actually arrives in the inbox. SMTP config issues surface only at send time.
-- [ ] **Zod Validation:** Schema added to Claude API route — verify schema matches the actual Claude output by logging a real response and running it through the schema in a test.
-- [ ] **Learning Loop:** Post-trip feedback saved — verify feedback rows appear in `TripFeedback` table (Prisma Studio), not just that the save call returned 200.
-- [ ] **Sequencer:** Steps generated and displayed — verify the time calculations are correct by setting device clock forward and checking step order.
-- [ ] **Offline Maps:** App works offline — verify specifically that the Spots map shows tiles, not just that the app shell loads. Tiles and app shell are separate caches.
+- [ ] **Build works:** `npm run build` completes without errors -- currently broken, first thing to verify
+- [ ] **Standalone output:** `.next/standalone/server.js` exists and starts with `node server.js`
+- [ ] **Database persists:** Stop and restart PM2 -- all data is still present
+- [ ] **Photos persist:** Redeploy app -- previously uploaded photos still accessible
+- [ ] **Env vars set:** All required env vars present in PM2 config (ANTHROPIC_API_KEY, DATABASE_URL, etc.)
+- [ ] **SW updates:** Deploy new code, verify SW picks up changes within one refresh
+- [ ] **Mobile access:** Phone reaches app via Tailscale IP or tunnel URL
+- [ ] **AI features work:** Claude API calls succeed in production (test packing list generation)
+- [ ] **Error pages render:** 404 and 500 pages display correctly, not raw stack traces
+- [ ] **WAL mode active:** Check with `PRAGMA journal_mode;` -- should return `wal`
+- [ ] **PM2 survives reboot:** Configure `pm2 startup` + `pm2 save` so app auto-starts after Mac mini restart
+- [ ] **All 11 tech debt items resolved:** Button variants, placeholder card, test stubs, build, docs
+- [ ] **No stale ROADMAP.md references:** v1.1 marked complete, Phase 11 checkboxes checked
 
 ---
 
@@ -390,13 +301,14 @@ When pitfalls occur despite prevention, how to recover.
 
 | Pitfall | Recovery Cost | Recovery Steps |
 |---------|---------------|----------------|
-| Service worker caching API routes, stale data | MEDIUM | Clear service worker in DevTools > Application > Service Workers > Unregister; add NetworkOnly rule; redeploy |
-| Zod .parse() throwing ZodError caught as 500 | LOW | Switch to .safeParse(); add `instanceof ZodError` check in catch blocks to return 400 |
-| Learning loop mutated gear records with bad debrief data | HIGH | No automatic undo if mutation-based; add TripFeedback table and migrate to event model before this is possible |
-| iOS cleared IndexedDB offline snapshot | LOW | User re-triggers "Leaving Now" and takes a new snapshot; add refresh reminder to UI |
-| Prisma migration failed, dev.db corrupted | LOW | `npm run db:reset` resets + reseeds; add `cp prisma/dev.db prisma/dev.db.bak` to pre-migration habit |
-| Safety email SMTP credentials wrong in production | LOW | Rotate Gmail App Password; update `.env`; retry |
-| Serwist/Turbopack build conflict | MEDIUM | Add `--webpack` flag to build script; clear `.next` cache; rebuild |
+| Photos lost on redeploy | MEDIUM | Restore from Time Machine backup; set up symlink to prevent recurrence |
+| Wrong database path (empty DB) | LOW | Stop PM2; find correct DB file; update DATABASE_URL to absolute path; restart |
+| Native dep build failure | MEDIUM | Pin Node.js with nvm; `npm rebuild better-sqlite3`; verify serverExternalPackages |
+| PM2 restart loop | LOW | `pm2 stop outland-os`; check `pm2 logs`; set `watch: false`; restart |
+| Unauthorized access via tunnel | HIGH | Disable tunnel immediately; rotate Claude API key; audit data; add auth before re-enabling |
+| Database locked errors | LOW | Restart PM2 (clears stale locks); verify single instance; enable WAL mode |
+| Memory growth in Node.js | LOW | PM2 auto-restarts on memory limit; investigate with `node --inspect` if frequent |
+| Stale SW after deploy | LOW | Increment SW cache version; users get update on next visit |
 
 ---
 
@@ -406,38 +318,37 @@ How roadmap phases should address these pitfalls.
 
 | Pitfall | Prevention Phase | Verification |
 |---------|------------------|--------------|
-| Serwist requires Webpack build flag | PWA Offline — first task | `next build` produces `/sw.js`; DevTools shows service worker registered |
-| API routes cached as stale responses | PWA Offline — routing config | Network tab while online shows API calls hit server, not service worker |
-| Leaving Now uses IndexedDB, not SW cache | PWA Offline — architecture | DevTools IndexedDB shows trip data after snapshot; data survives browser restart |
-| iOS 7-day storage clearing | PWA Offline — UI copy | Snapshot age shown in UI; refresh reminder present |
-| Learning loop appends feedback, doesn't mutate | Learning Loop — schema first | `TripFeedback` table exists; gear records unchanged after debrief |
-| Zod uses safeParse, not parse | Stabilization — shared utility | `parseClaudeJSON` utility in `lib/claude.ts`; all AI routes use it |
-| Null vs undefined breaks existing clients | Stabilization — schema audit | Test each updated endpoint with actual browser request from existing UI |
-| Safety email server-side only | Trip Execution — route design | No NEXT_PUBLIC_ env vars used for email credentials |
-| Voice debrief iOS fallback | Learning Loop — text-first UI | Text input works without microphone; voice button hidden on unsupported browsers |
-| Timezone in sequencer | Trip Execution — UTC storage | All scheduled times stored as UTC; displayed with Intl.DateTimeFormat |
-| Prisma ALTER TABLE SQLite limits | Stabilization + Learning Loop | `prisma migrate dev` succeeds; `prisma db:reset` tested after each schema addition |
+| Native deps break build | Tech debt / build fix (first) | `npm run build` exits 0; `.next/standalone/server.js` exists |
+| Missing standalone output | Build fix phase | `ls .next/standalone/server.js` succeeds after build |
+| Photos lost on redeploy | Deployment config phase | Upload photo, redeploy, verify photo still accessible |
+| Database path breaks | Deployment config phase | Restart PM2, verify all data persists; confirm absolute path in env |
+| No auth on tunnel | Network access phase | App unreachable without Tailscale connection or CF Access auth |
+| PM2 memory/restart issues | Deployment config phase | Run `pm2 monit` for 30 min; no unexpected restarts |
+| SQLite cluster lock | Deployment config phase | `instances: 1` in ecosystem.config; no SQLITE_BUSY errors |
+| Broken button variants | Tech debt cleanup phase | All buttons render with correct design system styling |
+| Test stubs unresolved | Tech debt cleanup phase | `grep -c 'it.todo'` returns 0 or all stubs implemented |
+| Settings placeholder | Tech debt cleanup phase | Settings page shows real content or placeholder removed |
+| ROADMAP.md inconsistencies | Tech debt cleanup phase | v1.1 header says "complete"; Phase 11 checkboxes checked |
+| SW stale after deploy | Deployment verification | Deploy change, SW updates within 1 page refresh |
+| Node.js version mismatch | Build fix phase | `.nvmrc` file present; CI/deploy scripts use pinned version |
 
 ---
 
 ## Sources
 
-- [Build a Next.js 16 PWA with true offline support — LogRocket Blog](https://blog.logrocket.com/nextjs-16-pwa-offline-support/)
-- [Serwist Getting Started — @serwist/next](https://serwist.pages.dev/docs/next/getting-started)
-- [Serwist Turbopack support issue #54](https://github.com/serwist/serwist/issues/54)
-- [Building Offline-First Next.js 15 App Router — vercel/next.js Discussion #82498](https://github.com/vercel/next.js/discussions/82498)
-- [Next.js PWA Guide (Official)](https://nextjs.org/docs/app/guides/progressive-web-apps)
-- [PWA iOS Limitations and Safari Support 2026 — MagicBell](https://www.magicbell.com/blog/pwa-ios-limitations-safari-support-complete-guide)
-- [Offline-First Frontend Apps 2025 — LogRocket Blog](https://blog.logrocket.com/offline-first-frontend-apps-2025-indexeddb-sqlite/)
-- [PWA Offline Storage Strategies — DEV Community](https://dev.to/tianyaschool/pwa-offline-storage-strategies-indexeddb-and-cache-api-3570)
-- [Zod safeParse vs parse — Codú](https://www.codu.co/niall/zod-parse-versus-safeparse-what-s-the-difference-7t_tjfne)
-- [Using Zod to validate Next.js API routes — Dub](https://dub.co/blog/zod-api-validation)
-- [Common Data Loss Scenarios in Prisma Schema Changes — DEV Community](https://dev.to/vatul16/common-data-loss-scenarios-solutions-in-prisma-schema-changes-52id)
-- [Prisma Migrate Limitations and Known Issues — Prisma Docs](https://www.prisma.io/docs/orm/prisma-migrate/understanding-prisma-migrate/limitations-and-known-issues)
-- [Nodemailer vs EmailJS comparison — Mailtrap](https://mailtrap.io/blog/nodemailer-vs-emailjs/)
-- [Overcoming challenges in AI feedback loop integration — Glean](https://www.glean.com/perspectives/overcoming-challenges-in-ai-feedback-loop-integration)
-- [Stale data and caching debugging in React apps — freeCodeCamp](https://www.freecodecamp.org/news/why-your-ui-wont-update-debugging-stale-data-and-caching-in-react-apps/)
+- [Next.js Self-Hosting Guide](https://nextjs.org/docs/app/guides/self-hosting) -- official docs on standalone mode, env vars, PM2
+- [Next.js serverExternalPackages](https://nextjs.org/docs/app/api-reference/config/next-config-js/serverExternalPackages) -- excluding native modules from bundling
+- [Next.js 16.1 release notes](https://nextjs.org/blog/next-16-1) -- transitive dependency fix for serverExternalPackages
+- [better-sqlite3 Node 25 build failure](https://github.com/WiseLibs/better-sqlite3/issues/1411) -- C++ compilation errors on newer Node
+- [better-sqlite3 database locked in Next.js](https://github.com/WiseLibs/better-sqlite3/issues/1155) -- multi-process SQLite locking
+- [PM2 Ecosystem File docs](https://pm2.keymetrics.io/docs/usage/application-declaration/) -- configuration reference
+- [PM2 memory leak report](https://github.com/Unitech/pm2/issues/4510) -- known memory growth issue
+- [Tailscale vs Cloudflare Tunnel (2026)](https://www.lowerhomeserver.vip/blog/use-cases/secure-remote-access-comparison) -- security tradeoffs for home servers
+- [Secrets of Self-hosting Next.js at Scale (2025)](https://www.sherpa.sh/blog/secrets-of-self-hosting-nextjs-at-scale-in-2025) -- production gotchas
+- [Self-Host Next.js with PM2 and Nginx](https://www.headystack.com/self-host-nextjs) -- PM2 configuration patterns
+- [Managing Next.js in Production with PM2](https://dev.to/mochafreddo/managing-nextjs-and-nestjs-applications-in-production-with-pm2-3j25) -- ecosystem config best practices
+- Project source: `next.config.ts`, `package.json`, `.planning/milestones/v1.1-MILESTONE-AUDIT.md`
 
 ---
-*Pitfalls research for: Outland OS v1.1 — Close the Loop (PWA, learning loop, trip execution, stabilization)*
-*Researched: 2026-04-01*
+*Pitfalls research for: Outland OS v1.2 — Ship It (self-hosting, tech debt cleanup, Mac mini deployment)*
+*Researched: 2026-04-02*

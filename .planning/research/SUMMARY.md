@@ -1,193 +1,176 @@
 # Project Research Summary
 
-**Project:** Outland OS — v1.1 Close the Loop
-**Domain:** Personal camping second brain — PWA/offline, post-trip learning loop, trip execution
-**Researched:** 2026-04-01
+**Project:** Outland OS
+**Domain:** Self-hosted Next.js PWA deployment on Mac mini + tech debt cleanup + cross-AI code review
+**Researched:** 2026-04-02
 **Confidence:** HIGH
 
 ## Executive Summary
 
-Outland OS v1.1 is an incremental milestone on a well-established foundation. The existing stack (Next.js 16, Prisma/SQLite, Claude API, Leaflet, Tailwind) needs only three new libraries: `zod` for runtime validation of Claude API responses, `nodemailer` for the safety float plan email, and `idb` for offline trip data snapshots. All four feature areas — PWA/offline, day-of execution, learning loop, and stabilization — integrate with the existing architecture without disrupting it. The recommended build order is: stabilize first (fix bugs + add Zod validation + persist AI outputs), then ship offline and day-of features in parallel, then close the loop with gear usage tracking and post-trip review.
+Outland OS v1.2 "Ship It" is a deployment milestone, not a feature milestone. The app is already built across 25+ sessions (gear management, trip planning, maps, AI packing/meals/checklists, PWA offline, learning loop, voice debrief). The goal is to get it running in production on Will's Mac mini so he can access it from his phone anywhere via Tailscale VPN. The deployment is straightforward -- PM2 process management, Tailscale for private remote access, standard Next.js production build -- but one critical blocker exists: `npm run build` currently fails due to native SQLite dependencies (better-sqlite3, sqlite-vec) leaking into webpack's client-side bundle analysis.
 
-The most important architectural decision in this milestone is how the "Leaving Now" offline snapshot works. The correct approach is IndexedDB (via `idb`) for trip data — not service worker response caching. Service worker caching is appropriate for the app shell and static assets; it is explicitly wrong for dynamic API data because stale responses silently replace fresh ones. The offline strategy is two-layer: service worker for the app shell, IndexedDB snapshot for trip content written at departure time. This is non-negotiable — the wrong approach requires a full rewrite to fix.
+The recommended approach is: fix the build first (likely a single import chain issue), skip standalone output mode in favor of standard `next build` + `next start` with full `node_modules` (simpler with native deps on a single Mac mini), configure persistent data paths for SQLite and photos outside the project directory, wrap it in PM2 for process management, and use Tailscale for encrypted private access. There is strong consensus across all four research files on this stack and approach. A cross-AI code review using Gemini's 1M-token context is a valuable differentiator -- a different model catches different blind spots after 25+ sessions of Claude-only development.
 
-The biggest risk in this milestone is the learning loop data model. Post-trip feedback must be appended as events to a `TripFeedback` table, not written back to the source `GearItem` or `Location` records. Mutating source records destroys trip history, makes the feedback loop impossible to build, and has no undo path. The schema must be right before the debrief UI is built. A secondary risk is Serwist's hard dependency on Webpack — Next.js 16 defaults to Turbopack, so build scripts must be explicitly configured or the service worker silently doesn't generate. iOS storage clearing (7-day limit) is a real-world constraint that must be surfaced in the UI.
+The key risks are: (1) the build failure is the single blocker and must be debugged first, (2) photo storage in `public/` will be lost on redeploy without a symlink to persistent storage, and (3) relative SQLite paths will silently create empty databases in the wrong location. All three have clear, well-documented fixes. The 11 tech debt items from the v1.1 audit are minor but should be resolved before shipping for a clean baseline. Overall, this is a well-understood deployment pattern with high confidence across the board.
 
 ## Key Findings
 
 ### Recommended Stack
 
-Three new libraries are all that's needed for v1.1. Everything else builds on the existing stack. The new libraries are minimal, well-established, and chosen to solve specific problems with the least surface area.
+The existing stack (Next.js 16.2.1, Prisma, SQLite, Tailwind, React 19, Leaflet) is validated and unchanged. Three additions are needed for production deployment.
 
-**New libraries for v1.1:**
-- `zod` (4.3.6): Runtime validation for all Claude API responses — prevents crashes when Claude returns malformed JSON. Import from `"zod"` (not `"zod/v4"` — deprecated). Use `.safeParse()`, never `.parse()`, to preserve existing error handling.
-- `nodemailer` (8.0.4): Safety float plan email via Gmail SMTP with App Password. Server-side API route only — credentials must never touch client code. Three new env vars: `EMAIL_FROM`, `EMAIL_APP_PASSWORD`, `EMAIL_EMERGENCY_CONTACT`.
-- `idb` (8.0.3): IndexedDB wrapper for the "Leaving Now" offline snapshot. 1.19kB, authored by the IDB spec co-author, no abstraction overhead. Browser-only — guard with `typeof window !== 'undefined'`.
+See [STACK.md](./STACK.md) for full details.
 
-**Key config detail:**
-Serwist requires Webpack. The `package.json` dev script must be `next dev` (without `--turbopack`) and the service worker must be disabled in dev mode. Alternative: skip Serwist entirely and write a manual `public/sw.js` (~80 lines) — avoids the Webpack/Turbopack dependency entirely and is sufficient for a single-user app.
+**New additions:**
+- **PM2 6.x**: Process management -- auto-restart on crash, boot persistence via launchd, log rotation. Industry standard for self-hosted Node.js. Fork mode only (cluster mode breaks SQLite).
+- **Tailscale**: Encrypted mesh VPN -- private remote access from Will's phone, no port forwarding, no public exposure, free personal plan (100 devices). WireGuard-based with 5-15ms added latency.
+- **Standard build (not standalone)**: `next build` + `next start` with full `node_modules/` -- avoids the complexity of manually copying native `.node` binaries into standalone output. The Mac mini has plenty of disk space; the ~200MB savings is irrelevant.
 
-**Unchanged from prior milestone research (no re-evaluation needed):**
-`@serwist/next`, `leaflet.offline`, `react-speech-recognition`, `ai` + `@ai-sdk/anthropic`, `sqlite-vec`, `@anthropic-ai/sdk`
+**Critical version requirement:** Pin Node.js to 20 LTS or 22 LTS. better-sqlite3 has C++ compilation failures on Node 24+.
+
+**Notable divergence across research:** STACK.md recommends `output: 'standalone'`, while ARCHITECTURE.md argues against it for this use case (native deps + single deployment target). ARCHITECTURE.md's reasoning is stronger -- standalone mode is designed for Docker/CI deployments where minimizing bundle size matters. On a Mac mini with 256GB+ SSD, standard build with full `node_modules` is simpler and avoids the native dep copy problem entirely. **Recommendation: skip standalone, use standard build.**
 
 ### Expected Features
 
-**Must have (table stakes — v1.1 cannot ship without these):**
-- Offline access to trip data (packing list, meal plan, saved spots) — app is useless at a campsite without signal
-- PWA installable to home screen — manifest.json + icons + HTTPS
-- API response validation (Zod on all Claude outputs) — production app cannot crash on malformed AI responses
-- CRUD completeness — trip edit/delete, vehicle edit, mod edit/delete, photo delete — gaps break trust in the tool
-- Persist packing list + meal plan to DB — prerequisite for both "Leaving Now" and gear usage tracking
+See [FEATURES.md](./FEATURES.md) for full details.
 
-**Should have (differentiators that make v1.1 worth building):**
-- "Leaving Now" one-tap cache trigger — no camping app does this; coordinates weather snapshot, packing list, meal plan, spots, and emergency contact into one offline-ready bundle
-- Trip Day Sequencer — dynamic departure checklist derived from actual trip data (not a static template); ADHD-friendly progressive disclosure (current step + next 2)
-- Safety float plan email — sends trip summary to emergency contact at departure; fills a real gap in camping tools
-- Gear usage tracking — mark items used/not-used post-trip; foundation for all future packing intelligence
-- Post-trip auto-review summary — Claude generates 3-bullet debrief from usage data; zero typing required
+**Must have (table stakes):**
+- Fix `npm run build` -- nothing else works without this
+- PM2 process management with boot persistence
+- `HOSTNAME=0.0.0.0` binding for LAN/Tailscale access
+- Remote access via Tailscale
+- HTTPS via Tailscale MagicDNS (required for PWA service worker)
+- Stable SQLite path (absolute, outside project dir)
+- Stable photo directory (symlink to persistent storage)
+- Environment variable management (.env.production)
+- Resolve 11 tech debt items from v1.1 audit
 
-**Defer (v2+):**
-- Feedback-driven packing improvement — requires 3+ completed trips with usage data to be meaningful
-- Dead man's switch check-in timer — requires persistent background job; local dev architecture doesn't support it reliably
-- Full offline map tile pre-download — 100MB–2GB per region; Gaia GPS fills this adequately
-- Dog-aware trip planning — waiting for dog to arrive and needs assessment
+**Should have (differentiators):**
+- Cross-AI code review (Gemini 1M-token full-project audit)
+- SQLite backup cron job (daily `.backup` command)
+- Deploy script (one-command: pull, build, restart)
+- PM2 exponential backoff restart + memory limit
+- Startup env validation (fail fast on missing vars)
+- PM2 log rotation
+
+**Defer to v2.0+:**
+- Docker, CI/CD, Cloudflare Tunnel, Litestream, Vercel, cluster mode, auth system, automated Gemini review
 
 ### Architecture Approach
 
-All v1.1 features integrate as parallel additions to the existing Server Components → Client Components → REST API Routes → Prisma/SQLite architecture. No existing layers are replaced. The PWA offline layer (service worker + IndexedDB) sits between the browser and the network, transparent to everything below it. The learning loop is a post-trip state transition that writes to a new `TripFeedback` model (append-only) rather than mutating existing gear or location records.
+The production architecture is minimal by design: PM2 manages a single Next.js process on the Mac mini, SQLite and photos live in a persistent `/data/outland/` directory outside the project, and Tailscale provides encrypted private access from Will's phone. No reverse proxy (Nginx/Caddy) is needed for single-user Tailscale-only access. The app code requires zero changes -- the difference between dev and production is purely configuration (DATABASE_URL, HOSTNAME, NODE_ENV).
 
-**New components and their responsibilities:**
-1. `public/sw.js` — Service worker; app shell with stale-while-revalidate; NetworkOnly for all `/api/*` routes; registered production-only
-2. `app/manifest.ts` — Next.js built-in PWA manifest; zero dependencies
-3. `lib/offline/useOnlineStatus.ts` — Hook exposing `navigator.onLine` with window event listeners
-4. `lib/offline/tripCache.ts` — The only place that reads/writes IndexedDB trip snapshots; prevents scattered IDB calls
-5. `components/OfflineBar.tsx` — Always-visible offline indicator when service worker is in offline mode
-6. `app/api/trips/[id]/cache/route.ts` — Server-side data aggregator; assembles full trip snapshot JSON on "Leaving Now"
-7. `app/api/trips/[id]/sequencer/route.ts` — Builds time-ordered departure checklist from packing + meals + gear battery status
-8. `app/api/trips/[id]/safety-email/route.ts` — Formats and sends float plan via Nodemailer; credentials server-side only
-9. `components/TripSequencer.tsx` — Departure checklist with progressive disclosure
-10. `components/GearUsageTracker.tsx` — Post-trip used/unused/forgot checkboxes; batches to `/api/gear/usage`
-11. `lib/parseClaudeJSON.ts` — Shared utility: JSON.parse + Zod safeParse in one call; all AI routes use this
+See [ARCHITECTURE.md](./ARCHITECTURE.md) for full details.
 
-**Schema additions (one Prisma migration, run early in Phase 2):**
-- `PackingItem`: add `usedOnTrip Boolean?`, `forgotNeeded Boolean?`, `reviewedAt DateTime?`
-- New `TripFeedback` model: append-only feedback events linked to trip, gear item, and location
-
-**Build order (dependency graph):**
-Block 1 (Stabilization) → Block 2 (Schema migration) → Block 3 (Day-Of) and Block 4 (PWA, parallel) → Block 5 (Learning Loop)
+**Major components:**
+1. **Next.js production server** -- `next start` via PM2, serves SSR pages, API routes, and static assets
+2. **Persistent data layer** -- `/data/outland/outland.db` (SQLite) + `/data/outland/photos/` (symlinked from `public/photos`)
+3. **PM2 process manager** -- ecosystem.config.cjs with fork mode, memory limit, log rotation, boot persistence
+4. **Tailscale VPN** -- encrypted mesh network between Mac mini and iPhone, MagicDNS for HTTPS
 
 ### Critical Pitfalls
 
-1. **Serwist requires Webpack; Next.js 16 defaults to Turbopack** — Set `"dev": "next dev"` (remove `--turbopack`); set `disable: process.env.NODE_ENV === 'development'` in Serwist config. Service worker silently doesn't generate if this is wrong. Verify with DevTools > Application > Service Workers before assuming offline works.
+See [PITFALLS.md](./PITFALLS.md) for full details.
 
-2. **"Leaving Now" snapshot must use IndexedDB, not service worker response caching** — Service worker HTTP caching is volatile, subject to cache pressure, and iOS clears it after 7 days of inactivity. IndexedDB is the explicit user-triggered local store. Wrong approach = full rewrite to fix.
-
-3. **Learning loop must append to `TripFeedback`, not mutate `GearItem`** — Mutating source records destroys trip history, makes the learning loop impossible to reconstruct, and has no undo path. Schema must be finalized before any debrief UI is written.
-
-4. **Use `safeParse()`, not `parse()` for Zod validation** — `.parse()` throws a ZodError that the existing try-catch catches as a generic 500. Build the shared `parseClaudeJSON<T>` utility first; all AI routes use it. Return 422 for schema mismatches, not 500.
-
-5. **Safety email credentials must live in server-side env vars only** — No `NEXT_PUBLIC_` prefix, no client component email logic. All email sending goes through the API route at `/api/trips/[id]/safety-email`.
+1. **Native deps break `npm run build`** -- Audit import chains to ensure no client component transitively imports better-sqlite3/sqlite-vec. Add `import 'server-only'` guards. Pin Node.js to 20/22 LTS.
+2. **Photos in `public/` lost on redeploy** -- Symlink `public/photos` to `/data/outland/photos/`. Zero code changes, one line in deploy script.
+3. **Relative DATABASE_URL creates empty DB** -- Use absolute path `file:/data/outland/outland.db` in production env. Verify data persists across PM2 restarts.
+4. **PM2 watch mode + SQLite = restart loop** -- Set `watch: false` in ecosystem.config. SQLite WAL file changes and photo uploads trigger filesystem events.
+5. **No auth + public tunnel = full data exposure** -- Use Tailscale (private mesh), never expose raw port via Cloudflare Tunnel without Cloudflare Access auth layer.
 
 ## Implications for Roadmap
 
-Research confirms a 5-block build order with clear dependency boundaries. Blocks 3 and 4 are independent of each other and can be built in parallel or either order after Block 1 completes.
+Based on research, suggested phase structure (4 phases):
 
-### Phase 1: Stabilization
+### Phase 1: Fix the Build + Tech Debt Cleanup
 
-**Rationale:** Bugs and gaps in the existing system block every downstream feature. Packing list + meal plan persistence is required by "Leaving Now" AND gear usage tracking. Zod must precede any feature that caches Claude responses offline — malformed data cached offline is a broken app with no retry path. CRUD gaps destroy trust. Fix the floor before building upward.
-**Delivers:** Reliable existing features; Zod validation on all Claude routes via shared `parseClaudeJSON<T>` utility; packing list + meal plan persisted to DB; complete CRUD coverage for trips, vehicle, mods, photos; design system consistency across forms.
-**Addresses:** API validation (table stakes), CRUD completeness (table stakes), AI response reliability.
-**Avoids:** Pitfall 5 (Zod `.parse()` breaking error handling), Pitfall 6 (null/undefined schema mismatch breaking existing clients).
+**Rationale:** The `npm run build` failure is the single blocker for everything else. Tech debt items are independent and can be resolved in parallel.
+**Delivers:** A working production build; clean codebase baseline
+**Addresses:** Build fix (table stakes), 11 tech debt items (table stakes), Node.js version pinning
+**Avoids:** Pitfall 1 (native deps break build), tech debt patterns from PITFALLS.md
+**Estimated complexity:** Medium -- build fix requires debugging import chains; tech debt items are individually small
 
-### Phase 2: Schema Migration
+### Phase 2: Cross-AI Code Review
 
-**Rationale:** A single Prisma migration that adds `PackingItem` usage fields and the `TripFeedback` model unblocks both Phase 4 learning loop and future packing intelligence. Run it once, early, before any debrief code is written. SQLite ALTER TABLE limitations make migration order matter — nullable columns only on existing tables.
-**Delivers:** `PackingItem.usedOnTrip`, `PackingItem.forgotNeeded`, `PackingItem.reviewedAt`; new `TripFeedback` append-only model.
-**Avoids:** Pitfall 4 (mutating source records), Pitfall 11 (SQLite ALTER TABLE failures — all new columns nullable or with defaults).
+**Rationale:** Run Gemini audit while the build is fixed and before deploying to production. Different model catches different blind spots from 25+ sessions of Claude-only development. Findings feed into remaining phases.
+**Delivers:** Actionable issue list triaged by severity; confidence that architectural issues are caught before production
+**Addresses:** Cross-AI review (differentiator)
+**Avoids:** Shipping unreviewed code to production
+**Estimated complexity:** Medium -- requires preparing context bundle and triaging findings
 
-### Phase 3: Day-Of Execution
+### Phase 3: Production Data Layout + PM2 Setup
 
-**Rationale:** No offline dependency — these features work fully online and can be built and tested without a service worker. Trip Sequencer and safety email are independent routes that read from existing data. Ship these while PWA work runs in parallel.
-**Delivers:** Trip Day Sequencer (time-ordered departure checklist); safety float plan email; "Send Float Plan" button integrated into the departure flow.
-**Uses:** `nodemailer`, existing Claude API, existing Prisma models.
-**Implements:** `/api/trips/[id]/sequencer`, `/api/trips/[id]/safety-email`, `TripSequencer` component.
-**Avoids:** Pitfall 9 (email credentials in client code), Pitfall 8 (timezone handling — UTC storage + Intl.DateTimeFormat display from the start).
+**Rationale:** With a working build, configure the production environment. Data paths must be set before the app runs in production to avoid the silent empty-database pitfall.
+**Delivers:** Running production app on Mac mini, persistent data, auto-restart on crash/reboot
+**Addresses:** Stable SQLite path, stable photo directory, .env.production, PM2 config, boot persistence, log rotation, deploy script, SQLite backup cron
+**Avoids:** Pitfall 2 (photos lost), Pitfall 3 (database path breaks), Pitfall 4 (PM2 watch/memory), Pitfall 7 (cluster mode)
+**Estimated complexity:** Low-Medium -- well-documented patterns, mostly configuration
 
-### Phase 4: PWA and Offline Mode
+### Phase 4: Remote Access + PWA Verification
 
-**Rationale:** The service worker and IndexedDB infrastructure is independent of the learning loop. Can be built in parallel with Phase 3 after Phase 1 completes. "Leaving Now" depends on packing list + meal plan persistence (Phase 1) but not on gear usage tracking (Phase 5).
-**Delivers:** PWA installability (manifest + icons); app shell offline via service worker; "Leaving Now" cache trigger with IndexedDB snapshot; offline indicator bar; iOS 7-day limitation surfaced clearly in the UI.
-**Uses:** `idb`, manual `public/sw.js` (recommended) or Serwist with explicit Webpack flag, `app/manifest.ts`.
-**Implements:** `lib/offline/tripCache.ts`, `lib/offline/useOnlineStatus.ts`, `OfflineBar`, `/api/trips/[id]/cache`, "Leaving Now" button in `TripPrepClient`.
-**Avoids:** Pitfall 1 (Serwist/Turbopack conflict), Pitfall 2 (API routes cached as stale), Pitfall 3 (SW cache instead of IndexedDB for snapshot), Pitfall 7 (iOS 7-day storage clearing — show snapshot age in UI).
-
-### Phase 5: Learning Loop
-
-**Rationale:** Depends on Phase 2 schema. Cannot be built without `TripFeedback` model and `PackingItem` usage fields in place. Voice debrief already exists — this phase wires it to write back to the new feedback model and surfaces the gear usage tracker as a post-trip review flow in `TripsClient`.
-**Delivers:** Gear usage tracker (used/unused/forgot checkboxes); post-trip auto-review Claude summary (3 bullets); voice debrief writes back to gear notes and location ratings; packing list generator reads gear usage history as prompt context.
-**Uses:** Existing Claude API, existing voice debrief infrastructure (`InsightsReviewSheet`, `voice/apply` route).
-**Implements:** `GearUsageTracker`, `/api/gear/usage`, post-trip review state in `TripsClient`, `getGearUsageHistory()` query in `lib/claude.ts`.
-**Avoids:** Pitfall 4 (learning loop mutating source records), Pitfall 10 (voice debrief iOS fallback — text input always present; voice as progressive enhancement only).
+**Rationale:** Tailscale is the final layer that makes the app accessible from Will's phone anywhere. HTTPS via MagicDNS is required for PWA service worker functionality.
+**Delivers:** Will can access Outland OS from his phone anywhere; PWA install works; offline mode works remotely
+**Addresses:** Tailscale setup, HTTPS for service worker, PWA verification, mobile access
+**Avoids:** Pitfall 5 (no auth + public exposure)
+**Estimated complexity:** Low -- install Tailscale on two devices, verify access
 
 ### Phase Ordering Rationale
 
-- Phase 1 before everything: packing list persistence is a hard blocker for Phases 4 and 5; Zod utility is a hard blocker for offline caching of AI responses.
-- Phase 2 immediately after Phase 1: schema migration is cheap and must precede all learning loop code. Running it early avoids conflicts with later data writes.
-- Phases 3 and 4 are independent: neither depends on the other; both depend only on Phase 1 completion. Build in parallel or sequentially based on capacity.
-- Phase 5 last: requires Phase 2 schema; benefits from Phase 4's "Leaving Now" trigger surfacing the post-trip review context; voice writeback is highest complexity and benefits from the stable foundation underneath it.
+- Build fix MUST come first -- every other phase depends on a working `npm run build`
+- Gemini review before production deploy catches issues while they are cheap to fix
+- Data layout before PM2 start prevents the silent empty-database pitfall
+- Tailscale last because it is independent of all other work and has the lowest complexity
+- Tech debt parallelizes with build fix (different files, no conflicts)
 
 ### Research Flags
 
-Phases with well-documented patterns (skip `/gsd:research-phase`):
-- **Phase 1 (Stabilization):** Pure bug fixes + Zod integration. safeParse pattern fully documented. No external integrations.
-- **Phase 2 (Schema Migration):** Prisma migration mechanics well-understood. Nullable column rule for SQLite is known.
-- **Phase 3 (Day-Of Execution):** Nodemailer Gmail SMTP is canonical and well-documented. Sequencer is pure data sorting logic over existing models.
+Phases likely needing deeper research during planning:
+- **Phase 1 (build fix):** The exact import chain causing the native dep leak needs debugging. Research identified the likely cause but the specific file needs to be traced. Consider `/gsd:research-phase` if the initial fix attempt fails.
+- **Phase 2 (Gemini review):** The review prompt structure and context bundle preparation may benefit from research into effective multi-model review prompts.
 
-Phases that benefit from a quick spike before implementation:
-- **Phase 4 (PWA/Offline):** Validate the manual `public/sw.js` approach against Next.js App Router URL patterns before writing production SW code. 2-hour spike to confirm the manual SW correctly intercepts App Router routes before committing to the approach.
-- **Phase 5 (Learning Loop — voice writeback):** The extraction schema (what fields Claude should identify and return from a voice debrief) needs a prompt engineering spike with a real audio sample before the UI is built.
+Phases with standard patterns (skip research-phase):
+- **Phase 3 (PM2 + data layout):** Extremely well-documented. PM2 ecosystem config, symlinks, absolute paths, cron jobs -- all standard ops.
+- **Phase 4 (Tailscale):** Install app on two devices, done. Zero ambiguity.
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | All three new libraries verified via official npm, official docs, and multiple independent sources. Versions confirmed as of 2026-04-01. No experimental dependencies. |
-| Features | HIGH | Feature list tightly scoped to the milestone. Dependency graph is explicit and cross-verified across all four research files. Table stakes / differentiators / v2+ deferral is well-reasoned. |
-| Architecture | HIGH | Existing architecture is documented in CLAUDE.md. New additions are purely additive. PWA patterns verified against official Next.js docs (updated 2026-03-31). IndexedDB approach confirmed via multiple offline-first sources and the idb library author's own documentation. |
-| Pitfalls | HIGH | All critical pitfalls verified against official docs, GitHub issues, and community reports. Serwist/Turbopack conflict, iOS 7-day storage, Zod parse vs safeParse, and SQLite ALTER TABLE limitations are confirmed real-world failure modes with documented examples and recovery paths. |
+| Stack | HIGH | Official Next.js docs, PM2 docs, Tailscale docs all directly applicable. No exotic technologies. |
+| Features | HIGH | Clear table stakes / differentiator / anti-feature separation. Feature list is small and well-scoped. |
+| Architecture | HIGH | Single-app single-user deployment is the simplest possible case. One divergence (standalone vs standard build) resolved in favor of simplicity. |
+| Pitfalls | HIGH | All pitfalls verified against official docs, GitHub issues, and community reports. The build failure is already observed in the project. |
 
 **Overall confidence:** HIGH
 
 ### Gaps to Address
 
-- **Manual service worker vs. Serwist decision:** Research documents both paths and leans toward the manual approach as simpler for this app's needs. Validate with a 2-hour spike before Phase 4 to confirm the manual SW handles Next.js App Router URL patterns correctly. If it doesn't, fall back to Serwist with `--webpack` flag — well-documented fallback.
-- **Voice debrief extraction schema:** The fields Claude should extract from a voice debrief (gear notes, location rating, trip notes) need to be defined and tested with a real audio sample before the `GearUsageTracker` and feedback write paths are built. Prompt engineering task, not architecture.
-- **Feedback-driven packing improvement timing:** Deferred to v2+ but foundation is being built now. Reassess after Phase 5 ships and Will has 2-3 trips with usage tracking data. The feature may be ready earlier than expected.
+- **Build failure root cause:** Research identifies the likely cause (client-side import leakage of native modules) but the specific file/import chain has not been traced. This needs hands-on debugging in Phase 1.
+- **Standalone vs standard build:** STACK.md and ARCHITECTURE.md disagree. This summary recommends standard build, but if disk space or deployment atomicity becomes important later, standalone can be revisited.
+- **HTTPS for local WiFi:** Tailscale MagicDNS provides HTTPS over the tailnet, but if Will wants HTTPS on local WiFi without Tailscale active, Caddy would be needed. Deferred unless Will raises it.
+- **Service worker cache versioning:** The current SW uses a static cache name (`outland-shell-v1`). The deploy script should increment this, but the mechanism (manual bump vs build hash) is not decided.
 
 ## Sources
 
 ### Primary (HIGH confidence)
-- [Next.js PWA Official Guide](https://nextjs.org/docs/app/guides/progressive-web-apps) — PWA manifest, service worker, Serwist patterns (updated 2026-03-31)
-- [Zod v4 versioning docs](https://zod.dev/v4/versioning) — import path confirmation; `"zod"` root exports v4; `"zod/v4"` subpath deprecated
-- [Zod 4.3.6 on npm](https://www.npmjs.com/package/zod) — version confirmed
-- [nodemailer 8.0.4 on npm](https://www.npmjs.com/package/nodemailer) — version confirmed; v8 has bundled TypeScript types
-- [idb 8.0.3 — Jake Archibald, GitHub](https://github.com/jakearchibald/idb) — MDN-referenced, IDB spec co-author
-- [Serwist @serwist/next on npm](https://www.npmjs.com/package/@serwist/next) — Turbopack support issue confirmed
-- [Workbox caching strategies (web.dev)](https://web.dev/learn/pwa/workbox) — NetworkOnly for API routes confirmed
-- [Prisma Migrate limitations](https://www.prisma.io/docs/orm/prisma-migrate/understanding-prisma-migrate/limitations-and-known-issues) — SQLite ALTER TABLE constraints confirmed
-- [InfoQ: Zod v4 stable release](https://www.infoq.com/news/2025/08/zod-v4-available/) — August 2025 stable release confirmed
+- [Next.js Self-Hosting Guide](https://nextjs.org/docs/app/guides/self-hosting)
+- [Next.js output configuration](https://nextjs.org/docs/app/api-reference/config/next-config-js/output)
+- [Next.js serverExternalPackages](https://nextjs.org/docs/app/api-reference/config/next-config-js/serverExternalPackages)
+- [PM2 Ecosystem File](https://pm2.keymetrics.io/docs/usage/application-declaration/)
+- [PM2 Quick Start](https://pm2.keymetrics.io/docs/usage/quick-start/)
+- [Tailscale Getting Started](https://tailscale.com/kb/1017/install)
+- [Tailscale Pricing](https://tailscale.com/pricing)
 
 ### Secondary (MEDIUM confidence)
-- [LogRocket: Next.js 16 PWA offline support](https://blog.logrocket.com/nextjs-16-pwa-offline-support/) — Serwist + idb approach confirmation
-- [Next.js Offline-First discussion #82498](https://github.com/vercel/next.js/discussions/82498) — community patterns for App Router
-- [Mailtrap Next.js email guide 2026](https://mailtrap.io/blog/nextjs-send-email/) — Gmail App Password SMTP pattern for personal-use apps
-- [PWA iOS limitations 2026 — MagicBell](https://www.magicbell.com/blog/pwa-ios-limitations-safari-support-complete-guide) — 7-day storage clearing confirmed
-- [Zod safeParse vs parse — Codú](https://www.codu.co/niall/zod-parse-versus-safeparse-what-s-the-difference-7t_tjfne) — error handling behavior confirmed
-- [Offline-First Frontend Apps 2025 — LogRocket](https://blog.logrocket.com/offline-first-frontend-apps-2025-indexeddb-sqlite/) — IndexedDB vs Cache API decision patterns
+- [Tailscale vs Cloudflare Tunnel comparison](https://www.lowerhomeserver.vip/blog/optimization/tailscale-vs-cloudflare-tunnel)
+- [Multi-Model AI Code Review](https://zylos.ai/research/2026-02-17-multi-model-ai-code-review)
+- [Self-hosting Next.js with PM2](https://www.headystack.com/self-host-nextjs)
+- [Gemini CLI Code Analysis Codelab](https://codelabs.developers.google.com/gemini-cli-code-analysis)
+- [better-sqlite3 Node 25 build failure](https://github.com/WiseLibs/better-sqlite3/issues/1411)
 
-### Tertiary (informational)
-- Competitor feature analysis (Homebound, HikerAlert, Gaia GPS, RV Checklist app) — general patterns; no API access to verify specific behavior
+### Tertiary (LOW confidence)
+- [PM2 memory leak report](https://github.com/Unitech/pm2/issues/4510) -- known issue, mitigated by max_memory_restart config
 
 ---
-*Research completed: 2026-04-01*
+*Research completed: 2026-04-02*
 *Ready for roadmap: yes*

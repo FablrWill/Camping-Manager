@@ -1,447 +1,449 @@
-# Architecture Research
+# Architecture Research: Self-Hosting Deployment
 
-**Domain:** Personal camping assistant — v1.1 Close the Loop (PWA/offline, learning loop, trip execution)
-**Researched:** 2026-04-01
-**Confidence:** HIGH for PWA/offline patterns; HIGH for learning loop (existing voice debrief infrastructure); HIGH for trip sequencer (existing prep infrastructure)
+**Domain:** Production deployment of Next.js 16 + SQLite camping app on Mac mini
+**Researched:** 2026-04-02
+**Confidence:** HIGH for Next.js standalone deployment; HIGH for PM2 process management; MEDIUM for native dep handling (better-sqlite3 build on target machine); HIGH for Tailscale remote access
 
 ---
 
 ## Existing Architecture Baseline
 
-Before examining new integration points, the existing system is:
-
 ```
-Browser (Client)
-  └── Server Components (data fetch via Promise.all)
-        └── Client Components (useState, useCallback, useEffect)
-              └── REST API Routes (try/catch, NextResponse.json)
-                    └── Prisma ORM → SQLite file
-                    └── External Services (Claude API, Open-Meteo, OpenAI Whisper)
+Browser (Phone/Desktop)
+  --> Server Components (data fetch via Promise.all)
+        --> Client Components (useState, useCallback, useEffect)
+              --> REST API Routes (try/catch, NextResponse.json)
+                    --> Prisma ORM --> SQLite file (prisma/dev.db)
+                    --> better-sqlite3 + sqlite-vec --> same SQLite file (RAG)
+                    --> External Services (Claude API, Open-Meteo, OpenAI Whisper, Voyage AI)
 
-lib/
-  ├── claude.ts        — packing list, meal plan generation
-  ├── weather.ts       — Open-Meteo wrapper
-  ├── rag/             — FTS5 + sqlite-vec hybrid search
-  ├── agent/           — Claude tool-use orchestrator + SSE streaming
-  └── voice/           — Whisper transcription + insight extraction
+Static assets:
+  public/sw.js       -- PWA service worker
+  public/photos/*    -- uploaded/imported photos (on disk, not in DB)
+
+Environment:
+  DATABASE_URL       -- file:./dev.db (relative to prisma/)
+  ANTHROPIC_API_KEY  -- Claude AI features
+  OPENAI_API_KEY     -- Whisper voice transcription
+  VOYAGE_API_KEY     -- knowledge base embeddings
+  GMAIL_USER         -- float plan email
+  GMAIL_APP_PASSWORD -- Gmail SMTP
 ```
 
-All four v1.1 feature areas integrate with this baseline without disrupting it. Each adds a layer alongside existing layers.
+The deployment challenge: this is NOT a typical Vercel-friendly Next.js app. It has native Node.js bindings (better-sqlite3, sqlite-vec), on-disk photo storage, and a SQLite file database. These are strengths for self-hosting (zero cloud costs, data stays local) but mean the deployment must handle native compilation on the target machine.
 
 ---
 
-## System Overview
+## Target Architecture: Production on Mac mini
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                        Browser (Client)                          │
-│  ┌──────────┐  ┌──────────┐  ┌──────────────┐  ┌────────────┐  │
-│  │TripsClient│  │TripPrep  │  │VoiceDebrief  │  │OfflineBar  │  │
-│  │(enhanced)│  │(+Sequencer│  │(+Learning    │  │(new)       │  │
-│  │          │  │+Safety   │  │ Loop)        │  │            │  │
-│  └────┬─────┘  └────┬─────┘  └──────┬───────┘  └──────┬─────┘  │
-│       │              │               │                  │        │
-├───────┴──────────────┴───────────────┴──────────────────┴────────┤
-│                    Service Worker (public/sw.js)                  │
-│  App Shell → stale-while-revalidate                              │
-│  Trip API  → network-first, offline fallback                     │
-│  Map tiles → cache-first, 50MB quota                             │
-├─────────────────────────────────────────────────────────────────┤
-│                      Next.js API Routes                          │
-│  /api/trips/[id]/cache       (new — "Leaving Now" snapshot)      │
-│  /api/trips/[id]/sequencer   (new — day-of checklist)            │
-│  /api/trips/[id]/safety-email (new — departure float plan)       │
-│  /api/voice/apply (existing) + /api/voice/extract (existing)     │
-│  /api/gear/usage             (new — mark used/unused post-trip)  │
-└─────────────────────────────────────────────────────────────────┘
-│
-┌─────────────────────────────────────────────────────────────────┐
-│                    Prisma ORM + SQLite                           │
-│  Trip (enhanced: cachedAt, cacheData fields)                     │
-│  PackingItem (enhanced: usedOnTrip, notUsed, forgotNeeded)       │
-│  GearItem (existing: notes field — debrief appends here)         │
-│  Location (existing: rating — debrief can update)                │
-└─────────────────────────────────────────────────────────────────┘
+                    Internet
+                       |
+              ┌────────┴────────┐
+              │   Tailscale     │  (VPN mesh -- Will's phone + Mac mini)
+              │   or Cloudflare │  (Tunnel -- if public access needed)
+              └────────┬────────┘
+                       |
+              ┌────────┴────────┐
+              │    Mac mini     │  (always-on, Asheville)
+              │   macOS 15+    │
+              │                 │
+              │  ┌────────────┐ │
+              │  │    PM2     │ │  Process manager (auto-restart, logs)
+              │  │            │ │
+              │  │  ┌────────┐│ │
+              │  │  │Next.js ││ │  Standalone build (.next/standalone/server.js)
+              │  │  │:3000   ││ │  PORT=3000
+              │  │  └───┬────┘│ │
+              │  └──────┼─────┘ │
+              │         |       │
+              │  ┌──────┴─────┐ │
+              │  │  SQLite DB │ │  /data/outland/outland.db
+              │  │  (WAL mode)│ │
+              │  └────────────┘ │
+              │                 │
+              │  ┌────────────┐ │
+              │  │   Photos   │ │  /data/outland/photos/
+              │  └────────────┘ │
+              └─────────────────┘
 ```
+
+### Key Decision: No Reverse Proxy Needed
+
+Nginx/Caddy is recommended for multi-service or public-facing production. For a single-user app accessed via Tailscale VPN, it adds complexity with zero benefit. Next.js's built-in server handles static files, API routes, and SSR. Skip the reverse proxy.
+
+If Will later wants public access (sharing trip maps), add Cloudflare Tunnel at that point -- it terminates TLS at Cloudflare's edge, so still no local reverse proxy needed.
 
 ---
 
-## Component Responsibilities
+## Component Changes: Dev vs Production
 
-| Component | Responsibility | Status |
-|-----------|---------------|--------|
-| `public/sw.js` | Intercept fetches, cache app shell + API + tiles | New |
-| `app/manifest.ts` | PWA install metadata | New |
-| `lib/offline/useOnlineStatus.ts` | Hook: window online/offline events | New |
-| `lib/offline/tripCache.ts` | Snapshot trip data to IndexedDB on "Leaving Now" | New |
-| `components/OfflineBar.tsx` | Banner shown when `useOnlineStatus` returns false | New |
-| `app/api/trips/[id]/cache/route.ts` | Server: assemble + return full trip snapshot JSON | New |
-| `components/TripSequencer.tsx` | Day-of departure checklist ordered by time | New |
-| `app/api/trips/[id]/sequencer/route.ts` | Server: build ordered checklist from packing + meals + power | New |
-| `app/api/trips/[id]/safety-email/route.ts` | Server: format + send trip summary email via Nodemailer | New |
-| `components/InsightsReviewSheet.tsx` | Existing — review voice debrief before applying | Exists |
-| `components/VoiceDebriefButton.tsx` | Existing — trigger debrief modal | Exists |
-| `app/api/voice/apply/route.ts` | Existing — write gear notes, location rating, trip notes | Exists |
-| `components/GearUsageTracker.tsx` | Post-trip: mark each packing item used/unused/forgot | New |
-| `app/api/gear/usage/route.ts` | Server: batch update PackingItem usedOnTrip/notUsed flags | New |
+### Modified Components
 
----
+| Component | Dev Behavior | Production Change | Why |
+|-----------|-------------|-------------------|-----|
+| `next.config.ts` | Default output | Add `output: 'standalone'` | Creates minimal deployable bundle |
+| `prisma/schema.prisma` | `file:./dev.db` | `file:/data/outland/outland.db` via env | Absolute path outside project dir |
+| `public/sw.js` | Skipped (NODE_ENV check) | Active, caches app shell + API | PWA offline support |
+| Photo upload routes | Write to `public/photos/` | Write to `/data/outland/photos/` | Persistent storage outside build dir |
+| `lib/rag/db.ts` | Resolves relative path | Same logic works with absolute path | `resolveDbPath()` already handles absolute paths |
 
-## Recommended Project Structure (New Files Only)
+### New Components
 
-```
-public/
-├── sw.js                        # Manual service worker (no Serwist needed)
-├── icon-192x192.png             # PWA icons
-└── icon-512x512.png
+| Component | Purpose | Notes |
+|-----------|---------|-------|
+| `ecosystem.config.cjs` | PM2 process config | Defines env vars, restart policy, log paths |
+| `scripts/deploy.sh` | Build + copy + restart script | Runs on Mac mini after git pull |
+| `.env.production` | Production environment variables | Lives on Mac mini, NOT in repo |
 
-app/
-├── manifest.ts                  # Next.js built-in PWA manifest
-├── api/trips/[id]/
-│   ├── cache/route.ts           # "Leaving Now" data snapshot
-│   ├── sequencer/route.ts       # Day-of departure checklist
-│   └── safety-email/route.ts    # Departure float plan email
-├── api/gear/
-│   └── usage/route.ts           # Batch gear usage flags
+### Unchanged Components
 
-lib/
-└── offline/
-    ├── useOnlineStatus.ts       # Hook: navigator.onLine + events
-    └── tripCache.ts             # IndexedDB get/set for trip snapshot
-
-components/
-├── OfflineBar.tsx               # "You're offline — trip data cached" banner
-├── TripSequencer.tsx            # Departure checklist component
-└── GearUsageTracker.tsx         # Post-trip used/unused tracker
-```
-
-### Structure Rationale
-
-- **`public/sw.js`:** Service workers must be at the root origin to intercept all requests. A manual file avoids Serwist's Webpack requirement and is sufficient for a single-user app.
-- **`lib/offline/`:** Keeps IndexedDB logic separate from components. `tripCache.ts` is the only place that reads/writes the offline snapshot — prevents scattered IndexedDB calls.
-- **`app/api/trips/[id]/`:** Groups all trip-specific operations together. The cache route is a read-only data aggregator; the sequencer and safety-email routes compute from existing data.
+Everything else works as-is. Server Components, Client Components, API routes, Prisma queries, Claude integration, weather API, email -- all unchanged. The app does not know or care that it is running on a Mac mini vs `next dev`.
 
 ---
 
-## Architectural Patterns
+## Critical Integration Points
 
-### Pattern 1: "Leaving Now" Snapshot
+### 1. Native Dependencies (better-sqlite3, sqlite-vec)
 
-**What:** When Will taps "Leaving Now", the client calls `/api/trips/[id]/cache` which assembles all trip data into one JSON payload: packing list, meal plan, weather forecast, location details, map center point. The client writes this to IndexedDB. The service worker serves this data when offline.
+**The problem:** `npm run build` currently fails because better-sqlite3 and sqlite-vec have native C++ bindings that must be compiled for the target platform. The build step tries to bundle them, which fails.
 
-**When to use:** At the departure trigger point. Not a background sync — it is an explicit user action.
+**The solution (already partially in place):**
 
-**Trade-offs:** Simple to implement, no continuous sync complexity. Snapshot is stale-as-of-departure (no live updates). Acceptable for trip use: weather was checked at departure, packing list finalized.
-
-**Example:**
+The project already has `serverExternalPackages` in `next.config.ts`:
 ```typescript
-// lib/offline/tripCache.ts
-const DB_NAME = 'outland-offline'
-const STORE = 'trip-snapshots'
-
-export async function saveTripSnapshot(tripId: string, data: TripSnapshot) {
-  const db = await openDB(DB_NAME, 1, {
-    upgrade(db) { db.createObjectStore(STORE) }
-  })
-  await db.put(STORE, data, tripId)
-}
-
-export async function getTripSnapshot(tripId: string): Promise<TripSnapshot | undefined> {
-  const db = await openDB(DB_NAME, 1)
-  return db.get(STORE, tripId)
-}
+serverExternalPackages: ['better-sqlite3', 'sqlite-vec', 'voyageai', 'pdf-parse', 'cheerio']
 ```
 
-### Pattern 2: Network-First API Caching
+This tells Next.js to NOT bundle these packages -- they stay as external `require()` calls. The standalone build will look for them in `node_modules/` at runtime.
 
-**What:** The service worker intercepts `fetch` calls to `/api/*` routes. It tries the network first; on failure (offline), it returns the last cached response for that URL. Non-API fetches (app shell, static assets) use stale-while-revalidate.
+**What needs to happen for production build:**
 
-**When to use:** All REST API calls during trips. This handles incidental offline reads (checking packing list, viewing weather last-fetched, reading meal plan).
+1. Build MUST happen on the Mac mini (or on a machine with the same architecture -- Apple Silicon)
+2. `npm install` compiles native bindings for the target platform
+3. `next build` with `output: 'standalone'` creates `.next/standalone/`
+4. The standalone output does NOT include all of `node_modules/` -- only traced dependencies
+5. Native packages excluded via `serverExternalPackages` must be manually copied: `.next/standalone/node_modules/better-sqlite3/` and `.next/standalone/node_modules/sqlite-vec/`
 
-**Trade-offs:** Dead-simple. No sync queue needed for read-heavy use (which trip execution is). Write operations (checking off packing items) still require connectivity OR a separate offline queue. For v1.1, packing item checks can fail gracefully with a "saved when back online" toast — full offline writes are a v2 concern.
+**Alternative approach (simpler, recommended):** Do NOT use standalone output. Instead, do a standard `npm run build` + `npm run start` on the Mac mini with the full `node_modules/` in place. The standalone output optimization (smaller deployment) is designed for Docker/CI -- for a Mac mini with plenty of disk space, a full `node_modules/` is simpler and avoids the native dep copy problem entirely.
 
-**Example:**
+**Recommendation:** Use standard build (not standalone) because:
+- Single deployment target (Mac mini) -- no need to minimize bundle
+- Native deps (better-sqlite3, sqlite-vec) just work with full node_modules
+- Less deployment complexity
+- PM2 runs `next start` which uses the `.next/` build output + `node_modules/`
+
+### 2. SQLite Database Path
+
+**Dev:** `DATABASE_URL="file:./dev.db"` -- resolves to `prisma/dev.db` relative to schema
+**Production:** `DATABASE_URL="file:/data/outland/outland.db"` -- absolute path
+
+Why `/data/outland/`:
+- Outside the project directory (survives `git pull`, `npm install`, rebuilds)
+- Easy to back up (single directory with DB + photos)
+- macOS convention for app data (or use `~/outland-data/` if `/data/` feels heavy)
+
+The existing `lib/rag/db.ts` `resolveDbPath()` already handles absolute paths (line 18: `if (relativePath.startsWith('/')) return relativePath`). No code change needed.
+
+**Migration from dev.db:** Copy `prisma/dev.db` to `/data/outland/outland.db` once. Run `npx prisma migrate deploy` (not `migrate dev`) in production to apply any pending migrations without resetting data.
+
+### 3. Photo Storage
+
+**Dev:** Photos saved to `public/photos/` and served via Next.js static file serving
+**Production problem:** The `public/` directory is part of the build. Photos should persist outside the build directory.
+
+**Options:**
+
+A. **Symlink (recommended):** `public/photos -> /data/outland/photos/`. Zero code changes. Next.js serves files from the symlink transparently. Create the symlink in the deploy script.
+
+B. **Custom API route for serving photos:** Add `GET /api/photos/[filename]` that reads from `/data/outland/photos/` and streams the file. Requires changing all photo URL references.
+
+C. **Keep photos in public/ but outside git:** Add `public/photos/` to `.gitignore` (already likely is), accept that photos live inside the project dir. Simpler but couples data to deploy location.
+
+**Recommendation:** Symlink (Option A). It is one line in the deploy script (`ln -sf /data/outland/photos public/photos`) and requires zero code changes. The upload routes already write to `public/photos/` -- they continue to do so, and the symlink redirects to persistent storage.
+
+### 4. Service Worker in Production
+
+The service worker is already gated behind `NODE_ENV === 'production'`. In production, it will:
+- Cache the app shell (/, /gear, /trips, /spots, /vehicle, /settings)
+- Cache API responses (network-first with fallback)
+- Cache map tiles
+
+No changes needed. It will work on the Mac mini's `next start` because `NODE_ENV=production` is set automatically.
+
+**One consideration:** The SW caches the app shell on first visit. After a deploy, the SW serves stale cached pages until the user refreshes. The existing `CACHE_NAME = 'outland-shell-v1'` should be bumped on deploy (e.g., `outland-shell-v2`). Add a version bump to the deploy script, or use a build hash.
+
+### 5. Environment Variables
+
+Production `.env.production` on Mac mini (NOT committed to git):
+
+```bash
+# Database
+DATABASE_URL="file:/data/outland/outland.db"
+
+# AI Services
+ANTHROPIC_API_KEY=sk-ant-...
+OPENAI_API_KEY=sk-...
+VOYAGE_API_KEY=pa-...
+
+# Email (float plan)
+GMAIL_USER=will@...
+GMAIL_APP_PASSWORD=xxxx-xxxx-xxxx-xxxx
+
+# Server
+PORT=3000
+HOSTNAME=0.0.0.0
+```
+
+`HOSTNAME=0.0.0.0` is important -- it makes Next.js listen on all interfaces, not just localhost. Required for Tailscale to reach the server.
+
+---
+
+## Process Management: PM2
+
+PM2 is the standard Node.js process manager. Use it because:
+- Auto-restarts on crash
+- Starts on Mac mini boot (via `pm2 startup`)
+- Log rotation built-in
+- Simple to configure
+- No Docker overhead for a single-app deployment
+
+### PM2 Configuration
+
 ```javascript
-// public/sw.js (simplified)
-self.addEventListener('fetch', (event) => {
-  const url = new URL(event.request.url)
-
-  if (url.pathname.startsWith('/api/')) {
-    event.respondWith(
-      fetch(event.request)
-        .then(res => {
-          const clone = res.clone()
-          caches.open('api-v1').then(cache => cache.put(event.request, clone))
-          return res
-        })
-        .catch(() => caches.match(event.request))
-    )
-    return
-  }
-
-  // App shell: stale-while-revalidate
-  event.respondWith(
-    caches.match(event.request).then(cached => cached || fetch(event.request))
-  )
-})
+// ecosystem.config.cjs
+module.exports = {
+  apps: [{
+    name: 'outland',
+    script: 'node_modules/.bin/next',
+    args: 'start',
+    cwd: '/Users/willis/outland-os',
+    env: {
+      NODE_ENV: 'production',
+      PORT: 3000,
+      HOSTNAME: '0.0.0.0',
+    },
+    env_file: '.env.production',
+    max_memory_restart: '512M',
+    log_date_format: 'YYYY-MM-DD HH:mm:ss',
+    error_file: '/data/outland/logs/error.log',
+    out_file: '/data/outland/logs/out.log',
+    merge_logs: true,
+  }]
+};
 ```
 
-### Pattern 3: Post-Trip Learning Loop
+### PM2 Startup on Boot
 
-**What:** After a trip completes, the system offers two parallel flows: (1) Gear Usage Tracker — Will marks each packing item as used/not used/forgot; (2) Voice Debrief — existing `InsightsReviewSheet` already handles gear notes, location ratings, trip notes. The learning loop is not a new architectural layer — it is a post-trip state transition that writes back to existing models.
-
-**When to use:** Trip status transitions from "in progress" to "completed" (based on `endDate` passing). Surface both flows on the trip detail page when `now > endDate`.
-
-**Trade-offs:** Reuses existing `InsightsReviewSheet` and `voice/apply` route, which already handle gear/location/trip note updates. The only new piece is the gear usage flag batch update and the "packed but didn't use" intelligence query at packing list generation time.
-
-**Data model additions needed:**
-```prisma
-// PackingItem additions (new migration)
-model PackingItem {
-  // ... existing fields
-  usedOnTrip   Boolean?   // null=not tracked, true=used, false=not used
-  forgotNeeded Boolean?   // true=forgot this + needed it
-  reviewedAt   DateTime?  // when Will reviewed this trip's gear
-}
+```bash
+pm2 startup    # generates launchd config for macOS
+pm2 save       # saves current process list
 ```
 
-**Closed-loop packing improvement:**
-
-The existing `generatePackingList` in `lib/claude.ts` already takes gear inventory as context. After the learning loop adds usage data, the next packing list generation can include a history section in the prompt:
-
-```
-GEAR HISTORY (from past trips):
-- Headlamp: used 4/4 trips — always pack
-- Camp chair (heavier): used 1/4 trips — pack only for 2+ nights
-- Rain jacket: not packed but needed 1 trip (rainy weekend trip)
-```
-
-This requires a `getGearUsageHistory()` query that aggregates PackingItem usage flags across trips, grouped by gearId.
+This creates a macOS LaunchAgent that starts PM2 (and Outland) when the Mac mini boots.
 
 ---
 
-## Data Flow
+## Remote Access: Tailscale
 
-### Request Flow: "Leaving Now"
+**Use Tailscale, not Cloudflare Tunnel.** Rationale:
 
-```
-Will taps "Leaving Now" button
-    ↓
-TripPrepClient → POST /api/trips/[id]/cache
-    ↓
-Server: assembles TripSnapshot {
-  trip, location, weather, packingItems, mealPlan, photos with GPS
-}
-    ↓
-Client: saveTripSnapshot(id, data) → IndexedDB
-    ↓
-SW: caches all trip API routes for offline
-    ↓
-Confirmation: "Trip data saved. You're ready to go."
-```
+| Factor | Tailscale | Cloudflare Tunnel |
+|--------|-----------|-------------------|
+| Setup | Install app, sign in, done | Install cloudflared, configure tunnel, DNS records |
+| Security | End-to-end encrypted, no middleman | Cloudflare terminates TLS, sees traffic |
+| Use case fit | Private access for one user | Public-facing services |
+| Phone access | Tailscale app on iPhone, always-on VPN | Access via public URL |
+| Cost | Free for personal (up to 100 devices) | Free tier available |
+| Latency | Direct P2P connection (WireGuard) | Routed through Cloudflare edge |
 
-### Request Flow: Post-Trip Learning Loop
+Will accesses `http://100.x.y.z:3000` (Tailscale IP) from his phone. No DNS, no TLS certificate management, no public exposure.
 
-```
-Trip endDate passes (or Will taps "Trip Complete")
-    ↓
-TripsClient shows "Review this trip" prompt
-    ↓
-Path A: GearUsageTracker
-  Will checks off used/unused/forgot items
-  → POST /api/gear/usage { tripId, items: [{gearId, usedOnTrip, forgotNeeded}] }
-  → Server: batch update PackingItem rows
-  → Next packing list for similar trip includes usage history
+**If public access is needed later** (sharing a trip map link with a friend), add Cloudflare Tunnel as a second layer. Tailscale stays as the private admin channel.
 
-Path B: VoiceDebrief (existing)
-  Will records voice notes
-  → Whisper transcription → Claude insight extraction
-  → InsightsReviewSheet UI
-  → POST /api/voice/apply → gear notes, location rating, trip notes updated
-```
+### Tailscale Setup
 
-### Request Flow: Day-Of Sequencer
+1. Install Tailscale on Mac mini + iPhone
+2. Both devices join Will's Tailscale network (tailnet)
+3. Mac mini gets a stable IP (e.g., `100.64.0.1`)
+4. iPhone accesses `http://100.64.0.1:3000`
+5. Optional: enable MagicDNS for `mac-mini.tail12345.ts.net:3000`
 
-```
-Will opens trip on departure day
-    ↓
-TripPrepClient shows "Day Of" tab (visible when now >= startDate - 1 day)
-    ↓
-GET /api/trips/[id]/sequencer
-    ↓
-Server builds time-ordered checklist:
-  1. Charge gear with batteries (hasBattery=true from GearItem)
-  2. Load packing items by category (shelter/sleep/cook → load in reverse)
-  3. Pre-trip meal prep tasks (from mealPlan.prepTimeline)
-  4. Safety email trigger
-  5. "Leaving Now" button (triggers cache snapshot)
-    ↓
-TripSequencer component: displays ordered cards, checkable steps
+---
+
+## Deployment Flow
+
+### Initial Setup (one-time)
+
+```bash
+# On Mac mini
+mkdir -p /data/outland/{photos,logs,backups}
+cd ~/outland-os
+git clone <repo> .
+npm install                    # compiles native deps for Apple Silicon
+cp .env.example .env.production
+# Edit .env.production with production values
+npx prisma migrate deploy      # apply migrations without reset
+ln -sf /data/outland/photos public/photos
+npm run build
+npm install -g pm2
+pm2 start ecosystem.config.cjs
+pm2 startup
+pm2 save
 ```
 
-### State Management
+### Subsequent Deploys
 
+```bash
+# scripts/deploy.sh
+#!/bin/bash
+set -e
+cd ~/outland-os
+git pull origin main
+npm install                    # recompiles native deps if needed
+npx prisma migrate deploy      # apply any new migrations
+npm run build
+pm2 restart outland
+echo "Deploy complete. Outland is running."
 ```
-Online state:         useOnlineStatus hook (window events) → OfflineBar
-Trip snapshot state:  IndexedDB via tripCache.ts (persists across sessions)
-Sequencer state:      useState in TripSequencer (ephemeral — resets per departure)
-Gear usage state:     useState in GearUsageTracker → batched POST on "Save"
+
+### Data Backup
+
+```bash
+# Cron job: daily SQLite backup
+# SQLite .backup command is safe for WAL mode (consistent snapshot)
+0 3 * * * sqlite3 /data/outland/outland.db ".backup '/data/outland/backups/outland-$(date +\%Y\%m\%d).db'"
 ```
 
 ---
 
-## Integration Points
+## Data Flow: Production vs Dev
 
-### Existing System → New Features
+```
+Dev:
+  npm run dev --> Turbopack dev server --> prisma/dev.db
+                                      --> public/photos/ (local dir)
 
-| Existing Component | How v1.1 Integrates |
-|-------------------|---------------------|
-| `TripPrepClient.tsx` | Add "Day Of" tab that renders `TripSequencer`; add "Leaving Now" button that calls cache route |
-| `TripsClient.tsx` | Add "Review trip" state when `now > endDate`; renders `GearUsageTracker` + debrief prompt |
-| `lib/claude.ts generatePackingList()` | Add `gearUsageHistory` param; inject packed-but-unused history into prompt |
-| `app/api/trips/[id]/prep/route.ts` | Already returns packing + weather — this feeds the cache snapshot route |
-| `PackingItem` model | Add `usedOnTrip`, `forgotNeeded`, `reviewedAt` fields (new migration) |
-| `InsightsReviewSheet.tsx` | No changes needed — existing component handles voice debrief review |
-| `app/api/voice/apply/route.ts` | No changes needed — already writes back to gear, location, trip |
+Production:
+  pm2 start --> next start --> .next/ build output
+                           --> node_modules/ (full, with native deps)
+                           --> /data/outland/outland.db (via DATABASE_URL)
+                           --> /data/outland/photos/ (via symlink from public/photos)
+                           --> Tailscale VPN --> Will's phone
+```
 
-### New External Dependencies
-
-| Service | Integration Pattern | Notes |
-|---------|---------------------|-------|
-| Nodemailer (npm) | Server-side: `lib/email.ts` wraps nodemailer; safety-email route calls it | Needs `EMAIL_FROM`, `EMAIL_TO`, `SMTP_*` env vars |
-| IndexedDB (native) | Client-side: `lib/offline/tripCache.ts` uses `idb` npm wrapper | `idb` is 1KB; simpler than raw IndexedDB API |
-| Service Worker API (native) | `public/sw.js` registered in `AppShell.tsx` useEffect | Register only in production; skip in dev |
-| Web App Manifest | `app/manifest.ts` (Next.js built-in) | Zero dependencies |
-
-### Internal Boundaries
-
-| Boundary | Communication | Notes |
-|----------|---------------|-------|
-| `TripPrepClient` ↔ cache route | HTTP POST → JSON snapshot | Snapshot is read-only; no writes from offline client |
-| `TripSequencer` ↔ sequencer route | HTTP GET → ordered checklist | Stateless — regenerates each visit |
-| `GearUsageTracker` ↔ gear usage route | HTTP POST → batch update | Idempotent: uses upsert on (tripId, gearId) |
-| `AppShell` ↔ service worker | `navigator.serviceWorker.register` | SW registered once on app load; `skipWaiting` + `clients.claim` for immediate activation |
+No code changes to the app. The difference is purely configuration:
+- `DATABASE_URL` points to production DB path
+- `HOSTNAME=0.0.0.0` allows external connections
+- PM2 manages the process lifecycle
+- Tailscale provides the network path
 
 ---
 
-## Anti-Patterns
+## Anti-Patterns to Avoid
 
-### Anti-Pattern 1: Serwist/next-pwa for a simple offline requirement
+### Anti-Pattern 1: Docker for a Single-App Mac mini
 
-**What people do:** Install `@serwist/next` or `next-pwa`, add webpack plugin config, write complex SW rules.
+**What people do:** Containerize the Next.js app in Docker, manage with docker-compose.
 
-**Why it's wrong:** Serwist requires Webpack (not Turbopack). Next.js 16 defaults to Turbopack for dev. Adds build complexity and a large dependency for what is ultimately ~80 lines of custom service worker code.
+**Why it is wrong here:** Docker adds a virtualization layer that complicates native dep compilation (must match container arch to host arch), file system access (volume mounts for SQLite + photos), and debugging. For a single app on a dedicated machine, Docker provides isolation benefits that are not needed.
 
-**Do this instead:** Write a manual `public/sw.js`. Register it in `AppShell.tsx`. Cache the routes you actually need (trip API, app shell). Takes 2 hours to build, zero build tool friction.
+**Do instead:** Run directly on macOS with PM2. Native deps compile for the host architecture. File paths are direct. Debugging is `pm2 logs outland`.
 
-### Anti-Pattern 2: Full offline-write sync queue for v1.1
+### Anti-Pattern 2: Standalone Output with Native Dependencies
 
-**What people do:** Build IndexedDB mutation queue + Background Sync API + server-side replay logic for all write operations.
+**What people do:** Set `output: 'standalone'` in next.config and deploy the minimal `.next/standalone/` directory.
 
-**Why it's wrong:** Background Sync API has limited iOS Safari support. A sync queue requires idempotency keys on every mutation model, conflict resolution logic, and debugging complexity that is completely disproportionate for a single-user app where "offline writes" means checking off packing items at a campsite.
+**Why it is wrong here:** Standalone output traces JavaScript dependencies but does NOT automatically include native `.node` binary files from `serverExternalPackages`. You end up manually copying native module directories into the standalone output, which is fragile and error-prone.
 
-**Do this instead:** For v1.1, offline writes fail gracefully with a "Syncing when back online" toast. The "Leaving Now" snapshot covers all reads. True offline writes are a v2 concern if they prove to be a real gap during actual trip use.
+**Do instead:** Standard build (`next build` without standalone) + full `node_modules/`. The Mac mini has plenty of disk space. The ~200MB `node_modules/` is irrelevant.
 
-### Anti-Pattern 3: Re-generating the packing list as the learning loop output
+### Anti-Pattern 3: Using `next dev` in Production
 
-**What people do:** Run Claude on trip completion to "improve" the packing list and overwrite it.
+**What people do:** Run `next dev` on the server because "it works."
 
-**Why it's wrong:** Overwrites Will's manual packing decisions. If he deliberately excluded an item, the AI shouldn't add it back.
+**Why it is wrong:** Dev mode recompiles on every request, has no caching, leaks detailed error messages, and the service worker is disabled. Performance is 10-50x worse than production build.
 
-**Do this instead:** Keep usage history as input to the next *new* packing list generation. The existing packing list stays untouched. When generating a new list for a similar trip, inject the history as a context section (packed/used, packed/unused, forgot/needed). Claude uses it as signal, not gospel.
+**Do instead:** Always `next build` + `next start` (or via PM2). Production mode enables all optimizations, static generation, and response caching.
 
-### Anti-Pattern 4: Service worker in development
+### Anti-Pattern 4: Exposing Next.js Directly to the Internet
 
-**What people do:** Register the SW unconditionally in `AppShell.tsx`.
+**What people do:** Port-forward 3000 on their router.
 
-**Why it's wrong:** SW caches API responses. Dev changes to data or routes don't appear. Hours of debugging "why isn't my change working" that turns out to be a stale cached response.
+**Why it is wrong:** No TLS, no DDoS protection, exposes home IP, no rate limiting. Next.js is not designed to be internet-facing without a proxy.
 
-**Do this instead:**
-```typescript
-// AppShell.tsx
-useEffect(() => {
-  if (process.env.NODE_ENV === 'production' && 'serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js', { scope: '/' })
-  }
-}, [])
-```
-
-### Anti-Pattern 5: Safety email via a third-party email SaaS
-
-**What people do:** Sign up for SendGrid or Resend, add API keys, handle webhooks.
-
-**Why it's wrong:** Overkill for one email per trip to one recipient. Will doesn't need delivery tracking, templates, or a dashboard.
-
-**Do this instead:** Nodemailer with Will's Gmail via App Password (SMTP). One npm package, one `.env` entry, done. If Gmail SMTP proves unreliable, swap to Resend's free tier (100/day) later — same interface, same code.
+**Do instead:** Tailscale for private access (encrypted, no port forwarding). If public access is needed, Cloudflare Tunnel (TLS termination at edge, DDoS protection, hides home IP).
 
 ---
 
-## Build Order (v1.1 Dependency Graph)
+## Build Order: Deployment Phases
 
-Build in this sequence to avoid rework:
+Dependencies flow top-down:
 
 ```
-Block 1 — Stabilization (no new architecture, just fixes):
-  1. Fix critical bugs (JSON.parse, upsert, CRUD gaps)
-  2. Add Zod validation (parseClaudeJSON utility)
-  3. Persist packing list + meal plan results to DB
+Phase 1: Fix Build (BLOCKER -- nothing else works without this)
+  1. Fix npm run build failure (native deps)
+  2. Verify next build succeeds on Mac mini
+  3. Verify next start serves the app correctly
 
-Block 2 — Schema additions (run migration once, unblocks everything):
-  4. Add PackingItem: usedOnTrip, forgotNeeded, reviewedAt
-  (No Trip schema changes needed — TripSnapshot stored in IndexedDB, not SQLite)
+Phase 2: Production Data Layout
+  4. Create /data/outland/ directory structure
+  5. Migrate dev.db to production path
+  6. Set up photo symlink
+  7. Create .env.production
+  8. Run prisma migrate deploy
 
-Block 3 — Day-Of features (no offline dependency):
-  5. Trip Sequencer route + TripSequencer component
-     - GET /api/trips/[id]/sequencer
-     - Reads existing packing + meals + gear.hasBattery
-     - Adds "Day Of" tab to TripPrepClient
-  6. Safety email route + UI trigger
-     - POST /api/trips/[id]/safety-email
-     - Nodemailer + lib/email.ts
-     - "Send Float Plan" button in sequencer
+Phase 3: Process Management
+  9. Install PM2 globally
+  10. Create ecosystem.config.cjs
+  11. Start app via PM2
+  12. Configure PM2 startup (boot persistence)
+  13. Set up log rotation
 
-Block 4 — PWA / Offline (can be parallel with Block 3):
-  7. app/manifest.ts + PWA icons
-  8. public/sw.js (app shell + network-first API caching)
-  9. AppShell.tsx SW registration (production only)
-  10. lib/offline/useOnlineStatus.ts + OfflineBar component
-  11. lib/offline/tripCache.ts (IndexedDB snapshot)
-  12. /api/trips/[id]/cache route + "Leaving Now" button in TripPrepClient
+Phase 4: Remote Access
+  14. Install Tailscale on Mac mini
+  15. Install Tailscale on iPhone
+  16. Verify phone can reach Mac mini on Tailscale IP
+  17. Add PWA to iPhone home screen via Tailscale URL
 
-Block 5 — Learning Loop (depends on Block 2 schema):
-  13. GearUsageTracker component
-  14. /api/gear/usage route (batch upsert)
-  15. Post-trip "Review" state in TripsClient
-  16. Inject usage history into generatePackingList() in lib/claude.ts
+Phase 5: Operational
+  18. Set up SQLite backup cron
+  19. Document deploy script
+  20. Test deploy cycle (git pull -> build -> restart)
 ```
 
-**Key dependency rule:** Block 5 requires Block 2's schema migration. Everything else is independent — Blocks 3 and 4 can be built in any order after Block 1.
+**Phase 1 is the critical blocker.** The `npm run build` failure must be fixed before any deployment work. This is the existing tech debt item from Phase 3 RAG: native deps (better-sqlite3, sqlite-vec) cause the build to fail.
 
 ---
 
-## Scalability Notes
+## Scalability Considerations
 
-This is a single-user app. Scalability means "works well across years of data."
+| Concern | At Launch | At 1 Year | At 3 Years |
+|---------|-----------|-----------|------------|
+| SQLite DB size | ~5MB | ~50MB (photos metadata, trips, RAG chunks) | ~200MB |
+| Photo storage | ~500MB | ~5GB | ~20GB |
+| Response time | <100ms (local network) | Same | Same (SQLite scales to GB) |
+| Backup size | Trivial | ~5GB (DB + photos) | ~20GB |
+| Memory usage | ~200MB (Next.js) | Same | Same |
 
-| Concern | v1.1 approach | If it grows |
-|---------|--------------|-------------|
-| IndexedDB snapshot size | One snapshot per active trip, ~50KB JSON | Prune snapshots older than 30 days |
-| Gear usage history query | Simple JOIN on PackingItem + GearItem | Stays fast; add index on (gearId, reviewedAt) if > 500 trips |
-| Service worker cache | App shell + last 50 API responses | Set `maxEntries: 50` in SW fetch handler |
-| Safety email | Nodemailer SMTP, one email per trip | No scaling concern for personal use |
-| Packing list with history context | ~500 extra tokens in Claude prompt | No cost concern for personal use |
+Mac mini (16GB+ RAM, 256GB+ SSD) handles this easily for years. SQLite with WAL mode supports the single-writer/multiple-reader pattern. No database migration needed.
+
+**When to migrate off Mac mini:** If Will wants always-available public access, multi-device sync, or the Mac mini hardware fails. At that point, consider Fly.io with LiteFS (SQLite replication) or migrate to Postgres on a VPS.
 
 ---
 
 ## Sources
 
-- [Next.js PWA Official Guide](https://nextjs.org/docs/app/guides/progressive-web-apps) — HIGH confidence, official docs, updated 2026-03-31
-- [LogRocket: Next.js 16 PWA with offline support](https://blog.logrocket.com/nextjs-16-pwa-offline-support/) — MEDIUM confidence (editorial, covers Serwist + idb approach)
-- [Next.js: Offline-First with App Router discussion](https://github.com/vercel/next.js/discussions/82498) — MEDIUM confidence (community thread, confirms patterns)
-- [idb library](https://dexie.org/) — HIGH confidence (widely used, minimal API surface)
-- [Workbox caching strategies (web.dev)](https://web.dev/learn/pwa/workbox) — HIGH confidence, Google reference
+- [Next.js Self-Hosting Guide](https://nextjs.org/docs/app/guides/self-hosting) -- HIGH confidence, official docs
+- [Next.js output configuration](https://nextjs.org/docs/app/api-reference/config/next-config-js/output) -- HIGH confidence, official docs
+- [Next.js serverExternalPackages](https://nextjs.org/docs/app/api-reference/config/next-config-js/serverExternalPackages) -- HIGH confidence, official docs
+- [PM2 Production Deployment Guide](https://pm2.keymetrics.io/docs/usage/quick-start/) -- HIGH confidence, official docs
+- [Tailscale Getting Started](https://tailscale.com/kb/1017/install) -- HIGH confidence, official docs
+- [Tailscale vs Cloudflare Tunnel comparison](https://www.lowerhomeserver.vip/blog/optimization/tailscale-vs-cloudflare-tunnel) -- MEDIUM confidence, third-party comparison
+- [Self-hosting Next.js with PM2](https://www.headystack.com/self-host-nextjs) -- MEDIUM confidence, community guide
+- [Next.js Standalone Build guide](https://prototypr.io/note/nextjs-standalone-build-local-production) -- MEDIUM confidence, community guide
 
 ---
 
-*Architecture research for: Outland OS v1.1 Close the Loop*
-*Researched: 2026-04-01*
+*Architecture research for: Outland OS v1.2 Ship It -- Self-Hosting Deployment*
+*Researched: 2026-04-02*

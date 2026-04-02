@@ -1,290 +1,270 @@
-# Stack Research — v1.1 Close the Loop (Additions Only)
+# Technology Stack — v1.2 Ship It (Deployment & Tech Debt)
 
-**Project:** Outland OS (camping second brain)
-**Researched:** 2026-04-01
-**Scope:** NEW libraries needed for v1.1 features only. Does NOT re-document the existing stack (Next.js 16, Prisma, SQLite, Leaflet, Claude API, Tailwind, Vercel AI SDK, sqlite-vec, react-speech-recognition, serwist, leaflet.offline — all documented in the previous milestone research).
+**Project:** Outland OS
+**Researched:** 2026-04-02
+**Focus:** Self-hosting on Mac mini, remote access, production build fixes
+**Scope:** NEW additions only. Existing stack (Next.js 16, Prisma, SQLite, etc.) is validated and not re-researched.
 
----
+## Recommended Stack Additions
 
-## What This Milestone Adds
-
-The four v1.1 feature areas and their library needs:
-
-| Feature Area | New Library Needed? | Verdict |
-|---|---|---|
-| Zod validation (Claude API response parsing) | Yes — Zod 4 | Add now |
-| PWA / offline — "Leaving Now" cache | Already researched (serwist, leaflet.offline) | No new library; clarify config pattern below |
-| Safety email on departure | Yes — nodemailer | Add now |
-| Trip Day Sequencer / learning loop | No new library | Pure logic on existing stack |
-| Offline data reads (trip data in field) | Partially covered — clarify IndexedDB pattern | idb for structured read cache |
-
----
-
-## New Libraries for v1.1
-
-### 1. Zod — Runtime Validation for Claude API Responses
+### Process Management
 
 | Technology | Version | Purpose | Why |
 |------------|---------|---------|-----|
-| `zod` | 4.3.6 | Parse and validate all Claude API JSON responses | Claude returns untyped JSON. TypeScript only catches type errors at compile time — Zod catches schema errors at runtime. The `parseClaudeJSON<T>` utility (already in TASKS.md) wraps every Claude response in a Zod schema before it reaches the UI. Prevents the "JSON parsing" bugs listed in the v1.1 stabilize list. |
+| PM2 | 6.x (latest: ~6.0.14) | Node.js process manager | Auto-restart on crash, startup persistence across reboots, log rotation, zero-config for fork mode. Industry standard for self-hosted Node.js. |
 
-**Install:**
+**Why PM2 over alternatives:**
+- **vs systemd:** PM2 is Node-aware (monitors event loop, memory), provides `pm2 logs`, `pm2 monit`, and ecosystem.config.js for declarative config. systemd works but requires manual log setup and no Node-specific monitoring.
+- **vs Docker:** Overkill for a single-user app on a Mac mini. Adds container overhead, complicates SQLite file access and photo storage. Docker is for when you need reproducible deploys across environments — Will has one Mac mini.
+- **vs forever:** Abandoned/unmaintained. PM2 is actively maintained with 40k+ GitHub stars.
+
+**Critical config:** Use `fork` mode (not `cluster`). Next.js manages its own internal workers; cluster mode causes port conflicts.
+
+**Installation:**
 ```bash
-npm install zod
+npm install -g pm2
 ```
 
-**Import pattern (v4):**
-```typescript
-import { z } from 'zod'
-```
-
-The package root exports Zod 4 as of August 2025. Do not use `zod/v4` subpath — that was a transitional pattern that is now deprecated.
-
-**Usage pattern for `parseClaudeJSON<T>`:**
-```typescript
-// lib/parseClaudeJSON.ts
-import { z, ZodSchema } from 'zod'
-
-export function parseClaudeJSON<T>(raw: string, schema: ZodSchema<T>): T {
-  const json = JSON.parse(raw)
-  return schema.parse(json)
-}
-
-// Example schema for packing list
-const PackingListSchema = z.object({
-  items: z.array(z.object({
-    name: z.string(),
-    category: z.string(),
-    priority: z.enum(['essential', 'recommended', 'optional']),
-    reason: z.string().optional(),
-  })),
-  weather_note: z.string().optional(),
-})
-```
-
-Apply to: packing list route, meal plan route, voice debrief extraction route, trip recommendation route.
-
-**Version status:** Zod 4.3.6, published ~March 2026. Zod 4 is stable (shipped August 2025). Not breaking from Zod 3 for standard validation patterns.
-
-**Confidence:** HIGH — official npm, 40M+ weekly downloads, Zod 4 stable confirmed via official release notes and InfoQ announcement.
-
----
-
-### 2. Nodemailer — Safety Email on Departure
+### Remote Access
 
 | Technology | Version | Purpose | Why |
 |------------|---------|---------|-----|
-| `nodemailer` | 8.0.4 | Send the "trip float plan" safety email to an emergency contact when the user taps "Leaving Now" | Standard Node.js email library. Used in Next.js API routes. Handles SMTP transports — Gmail with an App Password is the zero-cost path for a personal tool. No external email service account needed for personal use. The safety email is a one-shot send (not a marketing campaign), so deliverability complexity doesn't apply here. |
+| Tailscale | Latest (auto-updates) | Encrypted mesh VPN for remote access | Zero-config networking, WireGuard-based, works behind CGNAT/carrier NAT, free Personal plan (100 devices, 3 users), no port forwarding needed, no exposed ports. |
 
-**Install:**
-```bash
-npm install nodemailer
-npm install -D @types/nodemailer
-```
+**Why Tailscale over Cloudflare Tunnel:**
+- **Use case fit:** Will needs *private* access from his phone to his Mac mini. Not public access. Tailscale is purpose-built for this — it creates a private encrypted network between his devices.
+- **Simplicity:** Install on Mac mini + phone. Done. No DNS config, no domain purchase, no TLS certificates, no cloudflared daemon config.
+- **Performance:** Direct WireGuard connections add 5-15ms latency (peer-to-peer when possible). Cloudflare routes all traffic through their edge, adding variable latency.
+- **Privacy:** Traffic never passes through Tailscale servers in decrypted form. Cloudflare terminates TLS and inspects traffic at their edge.
+- **No public exposure:** Mac mini stays invisible to the internet. Cloudflare Tunnel exposes services publicly by design.
 
-**nodemailer has bundled TypeScript types in v8** — the `@types/nodemailer` package (v7.0.11) is still needed for older versions but should be checked at install time. As of v8, built-in types may replace the DefinitelyTyped package. Install both, let TypeScript resolve.
+**When to reconsider Cloudflare Tunnel:** If Will ever needs to share a public URL (e.g., live location sharing in v2.0+). Cloudflare Tunnel is better for public-facing services. Can layer it on later without removing Tailscale.
 
-**Transport config (Gmail App Password — personal use):**
-```typescript
-// lib/email.ts
-import nodemailer from 'nodemailer'
+**Free plan limits:** 100 devices, 3 users — more than sufficient for single-user personal tool.
 
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_FROM,
-    pass: process.env.EMAIL_APP_PASSWORD, // Gmail App Password, not account password
-  },
-})
-```
-
-**Required env vars:**
-```
-EMAIL_FROM=your.email@gmail.com
-EMAIL_APP_PASSWORD=xxxx xxxx xxxx xxxx   # Google account → Security → App Passwords
-EMAIL_EMERGENCY_CONTACT=emergency@example.com
-```
-
-**What the safety email contains:** Trip name, destination, expected return date, saved location GPS coords, vehicle description, emergency note. All data from existing Prisma models — no new DB schema needed.
-
-**Alternative considered:** Resend, SendGrid, Postmark — all require account setup, API keys, domain verification. Overkill for one email sent per trip to a single contact. Gmail SMTP is sufficient and free.
-
-**Confidence:** HIGH — nodemailer 8.0.4 confirmed active (published April 2026). Gmail App Password SMTP pattern is the documented personal-use approach in the official nodemailer docs.
-
----
-
-### 3. idb — IndexedDB Wrapper for Offline Trip Data Cache
+### Production Build Configuration
 
 | Technology | Version | Purpose | Why |
 |------------|---------|---------|-----|
-| `idb` | 8.0.3 | Store trip data snapshot in browser IndexedDB for field access when offline | The "Leaving Now" flow needs to write trip data (packing list, meal plan, map pins, weather) into browser storage so the app works offline in the field without network access. The Prisma/SQLite database runs server-side — it's not accessible offline. `idb` wraps the IndexedDB API with promises/async-await, reducing ~80% of boilerplate. Used alongside serwist (which caches the app shell) to give the full offline experience. |
+| Next.js `output: 'standalone'` | (built-in to Next.js 16) | Minimal production build | Creates self-contained `.next/standalone/` with only needed files + minimal `node_modules`. ~50MB vs ~300MB full install. Includes `server.js` entry point. |
 
-**Install:**
-```bash
-npm install idb
+**Why standalone output:**
+- PM2 runs `node .next/standalone/server.js` directly — no `npm start` wrapper needed
+- Drastically smaller deployment footprint
+- Native modules (better-sqlite3, sqlite-vec) get copied into standalone `node_modules` automatically when listed in `serverExternalPackages`
+- Standard self-hosting pattern recommended by Next.js docs
+
+## Native SQLite Build Fix
+
+### The Problem
+
+`npm run build` fails because `better-sqlite3` and `sqlite-vec` are native Node.js modules (C++ bindings compiled with `node-gyp`). Next.js webpack bundler tries to bundle them and fails on the native `.node` binary files.
+
+### Current Mitigation (Partial)
+
+```typescript
+// next.config.ts — already present
+serverExternalPackages: ['better-sqlite3', 'sqlite-vec', 'voyageai', 'pdf-parse', 'cheerio'],
 ```
 
-**Usage pattern:**
+This tells Next.js to `require()` these at runtime instead of bundling them. This is correct and necessary.
+
+### What's Likely Still Broken
+
+The `serverExternalPackages` config should work for the production build. The remaining build failure is likely one of:
+
+1. **Client-side import leakage:** If any client component (or shared module imported by a client component) transitively imports `lib/rag/db.ts`, webpack will try to resolve `better-sqlite3` for the client bundle. The dynamic `import()` in `getVecDb()` helps but may not fully prevent static analysis.
+
+2. **Missing native binary:** The `.node` file for better-sqlite3 or sqlite-vec may not be compiled for the build machine's platform/architecture. Run `npm rebuild better-sqlite3` after `npm install`.
+
+3. **Next.js 16.1 transitive dep fix:** Next.js 16.1 fixed transitive dependency resolution for `serverExternalPackages` with Turbopack. If the build uses Turbopack, ensure Next.js is at 16.1+. Current version is 16.2.1 — should be fine.
+
+### Fix Strategy (Confidence: HIGH)
+
 ```typescript
-// lib/offlineCache.ts — write on "Leaving Now"
-import { openDB } from 'idb'
+// next.config.ts — add standalone output
+const nextConfig: NextConfig = {
+  output: 'standalone',
+  serverExternalPackages: ['better-sqlite3', 'sqlite-vec', 'voyageai', 'pdf-parse', 'cheerio'],
+  // ... existing headers config
+};
+```
 
-const DB_NAME = 'outland-offline'
-const DB_VERSION = 1
+Then verify:
+1. No client component imports from `lib/rag/` (grep for imports)
+2. `npm rebuild better-sqlite3 sqlite-vec` before build
+3. `npm run build` succeeds
+4. `node .next/standalone/server.js` starts correctly
 
-export async function cacheTrip(tripId: string, data: OfflineTripData) {
-  const db = await openDB(DB_NAME, DB_VERSION, {
-    upgrade(db) {
-      db.createObjectStore('trips', { keyPath: 'id' })
+If client-side import leakage exists, fix with conditional dynamic imports or by splitting the RAG module so server-only code is in a separate file that no client component can reach.
+
+## Deployment Architecture
+
+### Files and Directories
+
+```
+Mac mini (production)
+├── ~/outland-os/                    # App root (git clone)
+│   ├── .next/standalone/            # Production build output
+│   │   ├── server.js                # Entry point for PM2
+│   │   └── node_modules/            # Minimal, auto-traced
+│   ├── .next/static/                # Static assets (must be copied)
+│   ├── public/                      # Static files + uploaded photos
+│   ├── prisma/dev.db                # SQLite database
+│   └── ecosystem.config.js          # PM2 configuration
+├── Tailscale                        # VPN daemon (system service)
+└── PM2                              # Process manager (global)
+```
+
+### ecosystem.config.js
+
+```javascript
+module.exports = {
+  apps: [{
+    name: 'outland-os',
+    script: '.next/standalone/server.js',
+    env: {
+      NODE_ENV: 'production',
+      PORT: 3000,
+      HOSTNAME: '0.0.0.0',           // Listen on all interfaces (needed for Tailscale)
+      DATABASE_URL: 'file:./prisma/dev.db',
+      ANTHROPIC_API_KEY: '...',       // From .env, not committed
     },
-  })
-  await db.put('trips', { id: tripId, ...data, cachedAt: Date.now() })
-}
-
-export async function getCachedTrip(tripId: string): Promise<OfflineTripData | undefined> {
-  const db = await openDB(DB_NAME, DB_VERSION)
-  return db.get('trips', tripId)
-}
+    instances: 1,                     // Fork mode (NOT cluster)
+    exec_mode: 'fork',
+    autorestart: true,
+    watch: false,                     // No file watching in production
+    max_memory_restart: '512M',       // Restart if memory exceeds 512MB
+    log_date_format: 'YYYY-MM-DD HH:mm:ss',
+  }]
+};
 ```
 
-**What gets cached in IndexedDB on "Leaving Now":**
-- Trip details (name, dates, destination)
-- Packed items list (from PackingItem table)
-- Meal plan (from DB or last AI generation)
-- Saved location data for destination (coords, notes, road info)
-- Weather snapshot for trip dates
-- Emergency contact info
-
-**Why not raw IndexedDB:** The native API is callback-based and verbose. `idb` is the canonical lightweight wrapper (1.19kB brotli'd), authored by Jake Archibald (ex-Google, web standards contributor). No abstraction overhead — mirrors the native API with promises added.
-
-**Why not Dexie.js:** Dexie adds cloud sync, realtime, and React hooks — all unnecessary for a single-user local cache. idb is the minimal correct tool here.
-
-**Confidence:** HIGH — idb 8.0.3 is the widely-used standard wrapper, authored by the person who co-created the IDB spec. Active GitHub, MDN-referenced.
-
----
-
-## What NOT to Add for v1.1
-
-| Avoid | Why | Use Instead |
-|-------|-----|-------------|
-| Resend / Postmark / SendGrid | Requires account + domain verification + API key for a single-trip safety email | nodemailer + Gmail App Password |
-| Dexie.js | Cloud sync and React hooks are unnecessary for a read-only offline trip snapshot | idb (1.19kB) |
-| WatermelonDB / RxDB | Full offline-first database sync — massive overkill for "cache one trip snapshot" | idb for write-on-departure, Serwist for app shell |
-| react-hook-form | Will has no complex multi-step form validation needs in v1.1; Zod is the validation layer, not RHF | Plain `useState` + Zod `safeParse` on submit |
-| email-templates / mjml | HTML email templating is unnecessary for a plain-text float plan email | Plain text nodemailer email — readable on any device |
-| Zod 3 (via `zod@3.x`) | Zod 4 is stable and the package root default as of August 2025. No reason to pin v3. | `import { z } from 'zod'` |
-
----
-
-## Pattern: PWA Config Clarification (No New Library, Just Config)
-
-Serwist was already selected in the previous milestone research. The v1.1 "Leaving Now" feature requires clarifying the service worker caching strategy, not adding new libraries.
-
-**Two-layer offline strategy:**
-
-| Layer | Tool | What It Caches |
-|-------|------|----------------|
-| App shell | `@serwist/next` (Serwist) | JS/CSS/HTML bundles — app loads without network |
-| Trip data | `idb` (IndexedDB) | Dynamic trip content written on "Leaving Now" tap |
-| Map tiles | `leaflet.offline` (existing) | OSM tiles for destination area |
-
-**Key config detail:** Next.js 16 defaults to Turbopack in `next dev`. Serwist requires Webpack. Change `package.json`:
-```json
-"dev": "next dev"
-```
-(Remove `--turbopack` flag if present.) Build remains webpack-based by default.
-
----
-
-## Learning Loop — No New Libraries
-
-The post-trip learning loop (gear usage tracking, post-trip debrief, feedback-driven packing improvements) is pure application logic on the existing stack:
-
-- **Gear usage tracking** — new Prisma fields on `PackingItem` (used: Boolean, usageNote: String)
-- **Post-trip review** — Claude API call (existing `@anthropic-ai/sdk`) with packed items + usage data as context
-- **Voice debrief** — already built in v1.0 (react-speech-recognition + Claude extraction)
-- **Feedback-driven packing** — pass trip history as context to the packing list generator (existing Claude route)
-
-No new library needed. All learning loop features are data model changes + Claude prompt engineering.
-
----
-
-## Trip Day Sequencer — No New Libraries
-
-The Trip Day Sequencer (time-sequenced departure checklist from packing + meals + power) is a derived view over existing data. Implementation is:
-
-1. A new API route that reads PackingItem, MealPlan, and PowerBudget for a given trip
-2. Sorts and sequences items by time-of-day logic (morning camp breakdown, drive, arrival setup)
-3. Renders as a checklist component with completion state in `useState`
-
-No new library. Optional: `date-fns` for time arithmetic — but it's already likely in the project or can be avoided with plain JS Date methods for this use case.
-
----
-
-## Full Installation for v1.1 New Libraries
+### PM2 Startup Persistence
 
 ```bash
-# Validation
-npm install zod
-
-# Safety email
-npm install nodemailer
-npm install -D @types/nodemailer
-
-# Offline trip data cache
-npm install idb
+# After first pm2 start:
+pm2 start ecosystem.config.js
+pm2 save                            # Save process list
+pm2 startup                         # Generate OS startup script
+# Follow the printed command (sudo ...) to install the launchd plist on macOS
 ```
 
----
+### Tailscale Access Pattern
 
-## New Environment Variables for v1.1
+```
+Will's iPhone (Tailscale app)
+  └── 100.x.y.z:3000  ─── Tailscale VPN tunnel ──→  Mac mini (100.a.b.c:3000)
+                                                        └── PM2 → Next.js server
+```
+
+- Mac mini gets a stable Tailscale IP (100.x.x.x) + MagicDNS hostname (e.g., `mac-mini.tail12345.ts.net`)
+- Will bookmarks `http://mac-mini:3000` on his phone
+- No HTTPS needed over Tailscale (already encrypted end-to-end via WireGuard)
+- No Nginx/reverse proxy needed (single app, single user, no TLS termination needed)
+
+## What NOT to Add
+
+| Technology | Why Not |
+|------------|---------|
+| Nginx / Caddy | Unnecessary reverse proxy for single-user app. PM2 + Tailscale handles everything. Add only if multiple services share the Mac mini later. |
+| Docker | Adds complexity, complicates SQLite file access and photo storage, overkill for single deployment target. |
+| HTTPS / Let's Encrypt | Tailscale provides end-to-end WireGuard encryption. HTTP over Tailscale is already encrypted. |
+| Cloudflare Tunnel | Designed for public exposure. Will needs private access. Tailscale is simpler and more secure for this use case. |
+| systemd / launchd (direct) | PM2 handles startup persistence via `pm2 startup` which generates a launchd plist. No need to write one manually. |
+| Cluster mode (PM2) | Next.js manages its own workers. Cluster mode causes port conflicts. Fork mode with `instances: 1` is correct. |
+| Database migration to Postgres | SQLite works fine for single user. Mac mini deployment eliminates the Vercel/serverless SQLite limitation. Revisit only if data exceeds ~10GB or concurrent access becomes an issue (it won't for single user). |
+| Redis / caching layer | No concurrent users. SQLite with WAL mode handles single-user reads/writes efficiently. |
+| CI/CD pipeline | Single developer, single deployment target. `git pull && npm run build && pm2 restart` is the deploy workflow. |
+| Monitoring (Datadog, etc.) | `pm2 monit` and `pm2 logs` are sufficient for a personal tool. |
+
+## Alternatives Considered
+
+| Category | Recommended | Alternative | Why Not |
+|----------|-------------|-------------|---------|
+| Process manager | PM2 | systemd / launchd | PM2 is Node-aware, provides logs/monitoring, easier config |
+| Remote access | Tailscale | Cloudflare Tunnel | Will needs private access, not public. Tailscale is simpler. |
+| Remote access | Tailscale | WireGuard (manual) | Tailscale IS WireGuard with zero-config coordination. Manual WireGuard requires key management, IP allocation, firewall rules. |
+| Build output | Standalone | Default (`next start`) | Standalone is smaller, self-contained, PM2-friendly |
+| Reverse proxy | None | Nginx | Unnecessary layer for single-user Tailscale-only access |
+
+## Installation Summary
+
+### On Mac mini (one-time setup)
 
 ```bash
-# Safety email (nodemailer + Gmail)
-EMAIL_FROM=your.email@gmail.com
-EMAIL_APP_PASSWORD=xxxx xxxx xxxx xxxx
-EMAIL_EMERGENCY_CONTACT=emergency@example.com
+# 1. Install PM2 globally
+npm install -g pm2
+
+# 2. Install Tailscale
+# Download from https://tailscale.com/download/mac or:
+brew install tailscale
+tailscale up  # Authenticate with Tailscale account
+
+# 3. Clone and build
+git clone <repo> ~/outland-os
+cd ~/outland-os
+npm install
+npm rebuild better-sqlite3 sqlite-vec  # Ensure native binaries match platform
+npx prisma migrate deploy              # Apply migrations (production command)
+npm run build                           # Creates .next/standalone/
+
+# 4. Copy static assets to standalone (Next.js requirement)
+cp -r .next/static .next/standalone/.next/static
+cp -r public .next/standalone/public
+
+# 5. Start with PM2
+pm2 start ecosystem.config.js
+pm2 save
+pm2 startup  # Follow printed instructions
+
+# 6. Install PM2 log rotation
+pm2 install pm2-logrotate
 ```
 
----
+### On Will's iPhone
 
-## Version Compatibility
+1. Install Tailscale from App Store
+2. Log in with same Tailscale account
+3. Bookmark `http://mac-mini:3000` (MagicDNS) or `http://100.x.x.x:3000`
+4. PWA "Add to Home Screen" for app-like experience
 
-| Package | Version | Compatible With | Notes |
-|---------|---------|-----------------|-------|
-| `zod` | 4.3.6 | TypeScript 5, Next.js 16, Node.js 20 | Import from `"zod"` (not `"zod/v4"`) |
-| `nodemailer` | 8.0.4 | Node.js 18+, Next.js API routes | Use in API routes only — not client components |
-| `idb` | 8.0.3 | All modern browsers, Next.js client components | Browser-only; guard with `typeof window !== 'undefined'` |
+### Deploy Updates
 
----
+```bash
+cd ~/outland-os
+git pull
+npm install
+npm run build
+cp -r .next/static .next/standalone/.next/static
+cp -r public .next/standalone/public
+pm2 restart outland-os
+```
 
-## Unchanged from Previous Milestone Research
+This could be scripted into a `deploy.sh` for convenience.
 
-These libraries were already researched and selected — no re-evaluation needed:
+## Confidence Assessment
 
-- `@serwist/next` + `serwist` — PWA service worker
-- `leaflet.offline` — offline map tile caching
-- `react-speech-recognition` — voice debrief recording (already built)
-- `ai` + `@ai-sdk/anthropic` — streaming chat (already built)
-- `sqlite-vec` + `better-sqlite3` — RAG vector search (already built)
-- `@anthropic-ai/sdk` — Claude API for all AI generation
-
----
+| Decision | Confidence | Basis |
+|----------|-----------|-------|
+| PM2 for process management | HIGH | Official Next.js self-hosting docs, widespread adoption, verified PM2 6.x active |
+| Tailscale for remote access | HIGH | Perfect use-case fit (private, single-user), free tier sufficient, WireGuard-based |
+| `output: 'standalone'` | HIGH | Next.js official self-hosting recommendation, verified in docs |
+| `serverExternalPackages` for native deps | HIGH | Already partially configured, Next.js 16.2.1 has transitive dep fix |
+| No Nginx needed | MEDIUM | Correct for Tailscale-only access, but may need Nginx if services grow |
+| Build fix (native SQLite) | MEDIUM | Root cause identified (client-side import leakage likely), fix strategy clear but needs debugging to confirm |
+| No HTTPS needed | HIGH | Tailscale provides WireGuard encryption — HTTP over Tailscale is already encrypted |
 
 ## Sources
 
-- [Next.js official PWA guide](https://nextjs.org/docs/app/guides/progressive-web-apps) — confirms Serwist, confirms webpack requirement, confirms manifest.ts pattern (updated 2026-03-31)
-- [Serwist @serwist/next on npm](https://www.npmjs.com/package/@serwist/next) — v9.5.7, published ~March 2026
-- [Zod v4 versioning](https://zod.dev/v4/versioning) — confirms `"zod"` root now exports v4, `"zod/v4"` subpath deprecated
-- [Zod 4.3.6 on npm](https://www.npmjs.com/package/zod) — latest stable, published ~March 2026
-- [InfoQ: Zod v4 stable release](https://www.infoq.com/news/2025/08/zod-v4-available/) — August 2025 stable release confirmation
-- [nodemailer 8.0.4 on npm](https://www.npmjs.com/package/nodemailer) — latest stable, published April 2026
-- [@types/nodemailer 7.0.11](https://www.npmjs.com/package/@types/nodemailer) — TS types, published February 2026
-- [idb 8.0.3 — Jake Archibald, GitHub](https://github.com/jakearchibald/idb) — IndexedDB wrapper, MDN-referenced
-- [Building offline-first PWA with Next.js + IndexedDB (2026)](https://oluwadaprof.medium.com/building-an-offline-first-pwa-notes-app-with-next-js-indexeddb-and-supabase-f861aa3a06f9) — idb usage pattern confirmation
-- [Mailtrap Next.js email guide 2026](https://mailtrap.io/blog/nextjs-send-email/) — nodemailer + Gmail App Password pattern for personal-use apps
-
----
-
-*Stack research for: Outland OS v1.1 Close the Loop (new additions only)*
-*Researched: 2026-04-01*
+- [Next.js Self-Hosting Guide](https://nextjs.org/docs/app/guides/self-hosting)
+- [Next.js output config](https://nextjs.org/docs/app/api-reference/config/next-config-js/output)
+- [Next.js serverExternalPackages](https://nextjs.org/docs/app/api-reference/config/next-config-js/serverExternalPackages)
+- [PM2 Ecosystem File](https://pm2.keymetrics.io/docs/usage/application-declaration/)
+- [PM2 Quick Start](https://pm2.keymetrics.io/docs/usage/quick-start/)
+- [Tailscale Pricing](https://tailscale.com/pricing)
+- [Tailscale vs Cloudflare Tunnel comparison](https://www.lowerhomeserver.vip/blog/optimization/tailscale-vs-cloudflare-tunnel)
+- [Secure Remote Access: Tailscale vs WireGuard vs Cloudflare (2026)](https://www.lowerhomeserver.vip/blog/use-cases/secure-remote-access-comparison)
+- [Next.js + PM2 Discussion](https://github.com/vercel/next.js/discussions/31461)
+- [Deploying Next.js with PM2 (Mar 2026)](https://medium.com/@touhidulislamnl/deploying-a-next-js-app-on-a-vps-with-nginx-pm2-and-https-complete-production-guide-5b2d80c24dd4)
+- [PM2 Guide (Better Stack)](https://betterstack.com/community/guides/scaling-nodejs/pm2-guide/)
