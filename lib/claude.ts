@@ -1,5 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk'
-import { parseClaudeJSON, PackingListResultSchema, MealPlanResultSchema, DepartureChecklistResultSchema, DepartureChecklistResult, FloatPlanEmailSchema, FloatPlanEmail } from '@/lib/parse-claude'
+import { parseClaudeJSON, PackingListResultSchema, MealPlanResultSchema, DepartureChecklistResultSchema, DepartureChecklistResult, FloatPlanEmailSchema, FloatPlanEmail, TripSummaryResultSchema, type TripSummaryResult } from '@/lib/parse-claude'
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -563,4 +563,52 @@ Return valid JSON in this exact format:
   }
 
   return parseResult.data
+}
+
+export async function generateTripSummary(params: {
+  tripName: string
+  startDate: string
+  endDate: string
+  locationName?: string
+  currentLocationRating?: number | null
+  usageItems: Array<{ name: string; category: string; usageStatus: string }>
+}): Promise<TripSummaryResult> {
+  const { tripName, startDate, endDate, locationName, currentLocationRating, usageItems } = params
+
+  const usedItems = usageItems.filter((i) => i.usageStatus === 'used')
+  const didntNeedItems = usageItems.filter((i) => i.usageStatus === "didn't need")
+  const forgotItems = usageItems.filter((i) => i.usageStatus === 'forgot but needed')
+
+  const prompt = `You are a camping trip debrief assistant. Analyze this post-trip gear usage data and generate a concise summary.
+
+TRIP: ${tripName}
+DATES: ${startDate} to ${endDate}
+${locationName ? `LOCATION: ${locationName}${currentLocationRating ? ` (current rating: ${currentLocationRating}/5)` : ''}` : ''}
+
+GEAR USAGE:
+Used (${usedItems.length}): ${usedItems.map((i) => i.name).join(', ') || 'none'}
+Didn't need (${didntNeedItems.length}): ${didntNeedItems.map((i) => i.name).join(', ') || 'none'}
+Forgot but needed (${forgotItems.length}): ${forgotItems.map((i) => i.name).join(', ') || 'none'}
+
+Return JSON with:
+- whatToDrop: array of item names the user didn't need (recommend removing from future trips)
+- whatWasMissing: array of items the user forgot but needed (recommend adding to future trips)
+- locationRating: suggested 1-5 rating for this location based on the trip experience (null if location not specified)
+- summary: 1-2 sentence prose debrief of the trip (what went well, what to improve)
+
+Return ONLY valid JSON, no markdown.`
+
+  const client = new Anthropic()
+  const response = await client.messages.create({
+    model: 'claude-haiku-4-20250514',
+    max_tokens: 500,
+    messages: [{ role: 'user', content: prompt }],
+  })
+
+  const text = response.content[0].type === 'text' ? response.content[0].text : ''
+  const parsed = parseClaudeJSON(text, TripSummaryResultSchema)
+  if (!parsed.success) {
+    throw new Error(parsed.error)
+  }
+  return parsed.data
 }
