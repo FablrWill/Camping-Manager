@@ -20,12 +20,13 @@ You'll spin up 4 Claude Code sessions (one per plan), let them each do their wor
 
 ## Recommended Assignment
 
-| Plan | Best Machine | Why |
-|------|-------------|-----|
-| 12-01 | Laptop | Component changes, you might want to check visuals |
-| 12-02 | Laptop | Small scope, quick work |
-| 12-03 | Mac mini | Test-only work, no UI needed, CPU work |
-| 12-04 | Mac mini | Gemini API calls, read-only, network-heavy |
+| Plan | Best Machine | Model | Effort | Why |
+|------|-------------|-------|--------|-----|
+| 12-01 | Laptop | Sonnet | Normal | Component changes, established patterns |
+| 12-02 | Laptop | Sonnet | Normal | Small scope, quick work |
+| 12-03 | Mac mini | Sonnet | Normal | Test writing from exact code examples |
+| 12-04 | Mac mini | Haiku | Low | Just orchestrates a Gemini CLI call, no real coding |
+| 12-05 | Either | Sonnet | Normal | Runs commands, updates docs, reacts to failures |
 
 ## How To Run Each Session
 
