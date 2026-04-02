@@ -211,10 +211,23 @@ const SpotMap = forwardRef<SpotMapHandle, SpotMapProps>(function SpotMap(
     }).setView([35.87, -81.9], 10);
 
     const tile = darkMode ? TILES.dark : TILES.light;
-    tileLayerRef.current = L.tileLayer(tile.url, {
+    const tileLayer = L.tileLayer(tile.url, {
       attribution: tile.attribution,
       maxZoom: 19,
+      crossOrigin: 'anonymous',
     }).addTo(map);
+
+    tileLayer.on('tileerror', (event: L.TileErrorEvent) => {
+      const tileEl = event.tile as HTMLImageElement;
+      tileEl.src = 'data:image/svg+xml,' + encodeURIComponent(
+        '<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256">' +
+        '<rect fill="%23a8a29e" width="256" height="256"/>' +
+        '<text x="128" y="128" text-anchor="middle" fill="%2378716c" font-size="12" font-family="system-ui">Cached area only</text>' +
+        '</svg>'
+      );
+    });
+
+    tileLayerRef.current = tileLayer;
 
     if (onMapClick) {
       map.on("click", (e: L.LeafletMouseEvent) => {
@@ -244,10 +257,23 @@ const SpotMap = forwardRef<SpotMapHandle, SpotMapProps>(function SpotMap(
       map.removeLayer(tileLayerRef.current);
     }
     const tile = darkMode ? TILES.dark : TILES.light;
-    tileLayerRef.current = L.tileLayer(tile.url, {
+    const newLayer = L.tileLayer(tile.url, {
       attribution: tile.attribution,
       maxZoom: 19,
+      crossOrigin: 'anonymous',
     }).addTo(map);
+
+    newLayer.on('tileerror', (event: L.TileErrorEvent) => {
+      const tileEl = event.tile as HTMLImageElement;
+      tileEl.src = 'data:image/svg+xml,' + encodeURIComponent(
+        '<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256">' +
+        '<rect fill="%23a8a29e" width="256" height="256"/>' +
+        '<text x="128" y="128" text-anchor="middle" fill="%2378716c" font-size="12" font-family="system-ui">Cached area only</text>' +
+        '</svg>'
+      );
+    });
+
+    tileLayerRef.current = newLayer;
   }, [darkMode, ready]);
 
   // Update photo markers (clustered)

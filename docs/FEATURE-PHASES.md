@@ -102,8 +102,8 @@ Every feature mapped to a build phase.
 
 | Feature | Status | Notes |
 |---------|--------|-------|
-| Offline-first / PWA | ❌ Planned | Service worker, cached data, offline maps |
-| "Download for Offline" pre-trip step | ❌ Planned | Grab maps, plans, recipes before departure |
+| Offline-first / PWA | ✅ Done | Phase 8 — installable PWA, service worker with app shell + tile caching |
+| "Download for Offline" pre-trip step | ✅ Done | Phase 8 — "Leaving Now" caches weather, packing, meals, checklist, spots, vehicle to IndexedDB |
 | Gear manuals available offline | ❌ Planned | PDFs cached locally for no-signal use |
 | Deploy to Vercel | ❌ Planned | Switch SQLite → Postgres (one-line Prisma change) |
 | Trip timeline view | ❌ Planned | Chronological view of all camping trips |

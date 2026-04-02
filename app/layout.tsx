@@ -31,6 +31,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         {/* Prevent flash of wrong theme */}
         <script
           dangerouslySetInnerHTML={{

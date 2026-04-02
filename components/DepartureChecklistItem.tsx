@@ -6,17 +6,20 @@ import type { DepartureChecklistItem as ChecklistItem } from '@/lib/parse-claude
 interface DepartureChecklistItemProps {
   item: ChecklistItem
   onCheck: (itemId: string, checked: boolean) => void
+  disabled?: boolean
 }
 
-export default function DepartureChecklistItem({ item, onCheck }: DepartureChecklistItemProps) {
+export default function DepartureChecklistItem({ item, onCheck, disabled }: DepartureChecklistItemProps) {
   return (
     <div
-      className={`flex items-center gap-3 min-h-[44px] px-2 py-1.5 rounded-lg cursor-pointer transition-colors active:bg-stone-100 dark:active:bg-stone-800 ${
+      className={`flex items-center gap-3 min-h-[44px] px-2 py-1.5 rounded-lg transition-colors ${
+        disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer active:bg-stone-100 dark:active:bg-stone-800'
+      } ${
         item.isUnpackedWarning && !item.checked
           ? 'bg-amber-50 dark:bg-amber-950/20'
           : ''
       }`}
-      onClick={() => onCheck(item.id, !item.checked)}
+      onClick={() => !disabled && onCheck(item.id, !item.checked)}
     >
       {/* Checkbox */}
       <div

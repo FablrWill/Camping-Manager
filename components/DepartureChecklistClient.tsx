@@ -5,8 +5,10 @@ import Link from 'next/link'
 import { ArrowLeft, CheckCircle } from 'lucide-react'
 import { Button, ConfirmDialog, EmptyState, PageHeader } from '@/components/ui'
 import DepartureChecklistItem from '@/components/DepartureChecklistItem'
+import LeavingNowButton from '@/components/LeavingNowButton'
 import type { DepartureChecklistResult } from '@/lib/parse-claude'
 import { formatDateRange } from '@/lib/trip-utils'
+import { useOnlineStatus } from '@/lib/use-online-status'
 
 interface DepartureChecklistClientProps {
   tripId: string
@@ -31,6 +33,7 @@ export default function DepartureChecklistClient({
   emergencyContactName: tripEmergencyContactName,
   emergencyContactEmail: tripEmergencyContactEmail,
 }: DepartureChecklistClientProps) {
+  const isOnline = useOnlineStatus()
   const [checklist, setChecklist] = useState<DepartureChecklistResult | null>(null)
   const [checklistId, setChecklistId] = useState<string | null>(null)
   const [generating, setGenerating] = useState(false)
@@ -218,6 +221,14 @@ export default function DepartureChecklistClient({
       {/* Page header */}
       <PageHeader title={tripName} subtitle={dateRange} />
 
+      {/* Leaving Now — cache trip data for offline */}
+      <LeavingNowButton
+        tripId={tripId}
+        tripName={tripName}
+        dateRange={dateRange}
+        emergencyContact={{ name: tripEmergencyContactName, email: tripEmergencyContactEmail }}
+      />
+
       {/* Progress bar */}
       {checklist && totalItems > 0 && (
         <div className="space-y-1">
@@ -256,10 +267,10 @@ export default function DepartureChecklistClient({
         <EmptyState
           emoji="📋"
           title="No checklist yet"
-          description="Generate a departure checklist from your trip's packing list, meals, and power data."
+          description={isOnline ? "Generate a departure checklist from your trip's packing list, meals, and power data." : "Connect to generate a departure checklist."}
           action={{
-            label: 'Generate Checklist',
-            onClick: handleGenerate,
+            label: isOnline ? 'Generate Checklist' : 'Connect to generate',
+            onClick: isOnline ? handleGenerate : () => {},
           }}
         />
       )}
@@ -298,16 +309,21 @@ export default function DepartureChecklistClient({
                     key={item.id}
                     item={item}
                     onCheck={handleCheck}
+                    disabled={!isOnline}
                   />
                 ))}
               </div>
             </div>
           ))}
 
+          {!isOnline && (
+            <p className="text-xs text-stone-400 mt-2 italic">Check-offs sync when you reconnect.</p>
+          )}
+
           {/* Regenerate button */}
           <div className="pt-2">
-            <Button variant="ghost" size="sm" onClick={handleRegenerate}>
-              Regenerate Checklist
+            <Button variant="ghost" size="sm" onClick={handleRegenerate} disabled={!isOnline}>
+              {isOnline ? 'Regenerate Checklist' : 'Connect to generate'}
             </Button>
           </div>
         </div>
@@ -327,10 +343,10 @@ export default function DepartureChecklistClient({
             <Button
               variant="primary"
               onClick={handleSendFloatPlan}
-              disabled={!resolvedContactEmail || sendingFloatPlan}
+              disabled={!resolvedContactEmail || sendingFloatPlan || !isOnline}
               className="w-full"
             >
-              {sendingFloatPlan ? 'Sending...' : 'Send Float Plan'}
+              {!isOnline ? 'Connect to send' : sendingFloatPlan ? 'Sending...' : 'Send Float Plan'}
             </Button>
 
             {!resolvedContactEmail && (

@@ -1,6 +1,6 @@
 # Outland OS — Task Tracker
 
-> **Last updated:** 2026-04-01 (Session 24 — Phase 7 execution complete)
+> **Last updated:** 2026-04-01 (Session 25 — Phase 8 execution complete)
 > **Start here** if you're picking up after a break.
 > **North star:** `docs/USER-JOURNEY.md` — read this before building anything new.
 
@@ -12,16 +12,16 @@ All 5 phases of v1.0 shipped. The app has: executive trip prep, NC camping knowl
 
 ## Milestone v1.1 — Close the Loop
 
-**Status:** Phase 7 complete. Phase 8 next.
+**Status:** Phase 8 complete. Phase 9 next.
 
 | Phase | Status | Summary |
 |-------|--------|---------|
 | 6. Stabilization | ✅ Complete | AI output persistence, CRUD gaps fixed, design system migration, packing list fixes |
 | 7. Day-Of Execution | ✅ Complete | Departure checklist + float plan email, settings page, Nodemailer Gmail integration |
-| 8. PWA and Offline | ○ Not started | Home screen install, "Leaving Now" offline snapshot |
+| 8. PWA and Offline | ✅ Complete | Installable PWA, service worker, offline banner, "Leaving Now" trip caching, passive map tile caching |
 | 9. Learning Loop | ○ Not started | Post-trip gear usage tracking, Claude debrief, voice writeback |
 
-**Next:** `/gsd:plan-phase 8` — plan PWA and offline mode
+**Next:** `/gsd:plan-phase 9` — plan learning loop
 
 ---
 
@@ -98,7 +98,7 @@ All 5 phases of v1.0 shipped. The app has: executive trip prep, NC camping knowl
 
 | Task | Status | Notes |
 |------|--------|-------|
-| Offline-first / PWA | ❌ Planned | Service worker, cached data, offline maps |
+| Offline-first / PWA | ✅ Done | Phase 8 — installable PWA, service worker, offline banner, "Leaving Now" trip caching, passive OSM tile caching |
 | Deploy to Vercel | ❌ Planned | Switch SQLite → Postgres |
 | *...and more in FEATURE-PHASES.md* | | |
 
