@@ -12,7 +12,7 @@ You'll spin up 4 Claude Code sessions (one per plan), let them each do their wor
 
 | Plan | What It Does | Files It Touches | Status | Session | Machine |
 |------|-------------|-----------------|--------|---------|---------|
-| 12-01 | Replace raw buttons with design system, fix lint errors | components/PackingList.tsx, MealPlan.tsx, SettingsClient.tsx, + 5 more | in-progress | session-12-01 | Laptop |
+| 12-01 | Replace raw buttons with design system, fix lint errors | components/PackingList.tsx, MealPlan.tsx, SettingsClient.tsx, + 5 more | done | session-12-01 | Laptop |
 | 12-02 | SW cache for trip routes, pipe tripCoords to LeavingNowButton | public/sw.js, depart/page.tsx, DepartureChecklistClient.tsx | done | tender-sinoussi | Laptop |
 | 12-03 | Implement test stubs, remove low-value test | tests/usage-tracking.test.ts, tests/trip-summary.test.ts | unclaimed | — | — |
 | 12-04 | Run Gemini full-codebase review | .planning/ only (read-only on app code) | unclaimed | — | — |
