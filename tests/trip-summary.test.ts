@@ -1,7 +1,32 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { NextRequest } from 'next/server'
 import { TripSummaryResultSchema } from '@/lib/parse-claude'
+import { POST } from '@/app/api/trips/[id]/feedback/route'
+import { prisma } from '@/lib/db'
+
+vi.mock('@/lib/db', () => ({
+  prisma: {
+    tripFeedback: { findFirst: vi.fn(), create: vi.fn() },
+    trip: { findUnique: vi.fn() },
+  },
+}))
+
+vi.mock('@/lib/claude', () => ({
+  generateTripSummary: vi.fn(),
+}))
+
+const mockFindFirst = vi.mocked(prisma.tripFeedback.findFirst)
+const mockTripFindUnique = vi.mocked(prisma.trip.findUnique)
 
 describe('Trip Summary (LEARN-02)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  afterEach(() => {
+    delete process.env.ANTHROPIC_API_KEY
+  })
+
   describe('TripSummaryResultSchema', () => {
     it('validates valid summary result', () => {
       const input = {
@@ -87,8 +112,42 @@ describe('Trip Summary (LEARN-02)', () => {
   })
 
   describe('POST /api/trips/[id]/feedback', () => {
-    it.todo('returns existing summary if one exists (no duplicate generation)')
-    it.todo('returns 400 if not all packing items have usageStatus')
+    it('returns existing summary if one exists (no duplicate generation)', async () => {
+      process.env.ANTHROPIC_API_KEY = 'test-key'
+      const existingFeedback = { id: 'fb-1', tripId: 'trip-1', summary: '{"summary":"test"}', status: 'generated', createdAt: new Date() }
+      mockFindFirst.mockResolvedValue(existingFeedback as any)
+
+      const req = new NextRequest('http://localhost/api/trips/trip-1/feedback', { method: 'POST' })
+      const res = await POST(req, { params: Promise.resolve({ id: 'trip-1' }) })
+      const json = await res.json()
+
+      expect(res.status).toBe(200)
+      expect(json.cached).toBe(true)
+      expect(json.feedback.id).toBe('fb-1')
+    })
+
+    it('returns 400 if not all packing items have usageStatus', async () => {
+      process.env.ANTHROPIC_API_KEY = 'test-key'
+      mockFindFirst.mockResolvedValue(null)
+      mockTripFindUnique.mockResolvedValue({
+        id: 'trip-1',
+        name: 'Test Trip',
+        startDate: new Date('2026-04-01'),
+        endDate: new Date('2026-04-03'),
+        location: null,
+        packingItems: [
+          { id: 'pi-1', gearId: 'g-1', usageStatus: 'used', gear: { name: 'Tent', category: 'shelter' } },
+          { id: 'pi-2', gearId: 'g-2', usageStatus: null, gear: { name: 'Stove', category: 'cooking' } },
+        ],
+      } as any)
+
+      const req = new NextRequest('http://localhost/api/trips/trip-1/feedback', { method: 'POST' })
+      const res = await POST(req, { params: Promise.resolve({ id: 'trip-1' }) })
+      const json = await res.json()
+
+      expect(res.status).toBe(400)
+      expect(json.error).toContain('Not all packing items have been reviewed')
+    })
   })
 
   describe('auto-generate trigger', () => {
