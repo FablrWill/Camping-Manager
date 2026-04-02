@@ -178,7 +178,7 @@ Plans:
 **Plans**: 4 plans
 Plans:
 - [ ] 10-01-PLAN.md — Test implementations: all 32 existing test stubs replaced with real assertions
-- [ ] 10-02-PLAN.md — New modules: tile-prefetch, offline-write-queue, cache-trip tiles wiring
+- [x] 10-02-PLAN.md — New modules: tile-prefetch, offline-write-queue, cache-trip tiles wiring
 - [ ] 10-03-PLAN.md — Dual-mode components: offline read path for PackingList, MealPlan, DepartureChecklistClient + write queue
 - [ ] 10-04-PLAN.md — Phase 8 documentation: SUMMARY.md and VERIFICATION.md
 
@@ -209,5 +209,5 @@ Phases execute in numeric order: 6 → 7 → 8 → 9
 | 7. Day-Of Execution | v1.1 | 3/3 | Complete   | 2026-04-01 |
 | 8. PWA and Offline | v1.1 | 5/5 | Partial (audit: read path missing) | 2026-04-02 |
 | 9. Learning Loop | v1.1 | 4/4 | Complete | 2026-04-02 |
-| 10. Offline Read Path & PWA Completion | v1.1 | 0/4 | Not started | - |
+| 10. Offline Read Path & PWA Completion | v1.1 | 1/4 | In Progress|  |
 | 11. v1.1 Polish | v1.1 | 0/TBD | Not started | - |

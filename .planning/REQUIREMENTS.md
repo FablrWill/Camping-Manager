@@ -20,8 +20,8 @@ Requirements for v1.1 "Close the Loop." Each maps to roadmap phases.
 
 - [ ] **OFF-01**: User can install the app to their phone's home screen as a PWA
 - [ ] **OFF-02**: User can open the app offline and see the app shell (navigation, cached pages)
-- [ ] **OFF-03**: User can tap "Leaving Now" on a trip and have all trip data cached for offline use (weather snapshot, packing list, meal plan, spot coordinates, emergency info)
-- [ ] **OFF-04**: User can view cached map tiles for trip area while offline (tiles visible at time of "Leaving Now")
+- [x] **OFF-03**: User can tap "Leaving Now" on a trip and have all trip data cached for offline use (weather snapshot, packing list, meal plan, spot coordinates, emergency info)
+- [x] **OFF-04**: User can view cached map tiles for trip area while offline (tiles visible at time of "Leaving Now")
 
 ### Day-Of Execution
 
@@ -67,8 +67,8 @@ Requirements for v1.1 "Close the Loop." Each maps to roadmap phases.
 | STAB-06 | Phase 6 | Complete |
 | OFF-01 | Phase 10 | Pending |
 | OFF-02 | Phase 10 | Pending |
-| OFF-03 | Phase 10 | Pending |
-| OFF-04 | Phase 10 | Pending |
+| OFF-03 | Phase 10 | Complete |
+| OFF-04 | Phase 10 | Complete |
 | EXEC-01 | Phase 7 | Complete |
 | EXEC-02 | Phase 7 | Complete |
 | LEARN-01 | Phase 9 | Complete |
