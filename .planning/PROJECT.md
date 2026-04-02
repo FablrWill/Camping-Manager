@@ -55,6 +55,8 @@ A personal second brain for car camping — an AI-powered knowledge system that 
 
 **Goal:** Stabilize the foundation, add offline capability, and build the learning loop — so the app survives a real camping trip and gets smarter from it.
 
+**Status:** All phases complete. Phase 11 (polish) in progress.
+
 **Target features:**
 - Stabilize: fix critical bugs, add Zod validation, complete CRUD gaps, persist AI-generated data
 - Offline mode: PWA with "Leaving Now" trigger that caches trip data for field use
@@ -64,23 +66,23 @@ A personal second brain for car camping — an AI-powered knowledge system that 
 ### Active
 
 **v1.1 — Stabilize:**
-- [ ] Fix critical bugs (JSON parsing, missing deps, dashboard stat, LocationForm dark mode)
-- [ ] Add Zod validation for all Claude API responses (parseClaudeJSON utility)
-- [ ] Complete CRUD gaps (trip edit/delete UI, vehicle edit, mod edit/delete, photo delete)
-- [ ] Persist packing list and meal plan results to database
-- [ ] Adopt design system UI primitives across existing forms
+- [x] Fix critical bugs (JSON parsing, missing deps, dashboard stat, LocationForm dark mode)
+- [x] Add Zod validation for all Claude API responses (parseClaudeJSON utility)
+- [x] Complete CRUD gaps (trip edit/delete UI, vehicle edit, mod edit/delete, photo delete)
+- [x] Persist packing list and meal plan results to database
+- [x] Adopt design system UI primitives across existing forms
 
 **v1.1 — Offline / Day-Of:**
-- [ ] PWA with service worker for offline trip data
-- [ ] "Leaving Now" trigger (cache weather, packing list, meal plan, map pins, emergency info)
-- [ ] Trip Day Sequencer (time-sequenced departure checklist from packing + meals + power)
-- [ ] Safety email (trip summary to emergency contact on departure)
+- [x] PWA with service worker for offline trip data
+- [x] "Leaving Now" trigger (cache weather, packing list, meal plan, map pins, emergency info)
+- [x] Trip Day Sequencer (time-sequenced departure checklist from packing + meals + power)
+- [x] Safety email (trip summary to emergency contact on departure)
 
 **v1.1 — Learning Loop:**
-- [ ] Gear usage tracking (mark items used/unused post-trip)
-- [ ] Post-trip auto-review (packed but didn't use, forgot but needed)
-- [ ] Voice debrief → automatic system updates (gear notes, location ratings, packing improvements)
-- [ ] Feedback-driven packing list improvements (learn from trip history)
+- [x] Gear usage tracking (mark items used/unused post-trip)
+- [x] Post-trip auto-review (packed but didn't use, forgot but needed)
+- [x] Voice debrief → automatic system updates (gear notes, location ratings, packing improvements)
+- [ ] Feedback-driven packing list improvements (deferred to v2)
 
 **Future (v2.0+):**
 - [ ] Smart campsite / Home Assistant bridge (blocked on hardware)
@@ -141,4 +143,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-02 — Phase 10 complete (offline read path: IndexedDB snapshot wiring, tile prefetch, write queue, 90 tests passing)*
+*Last updated: 2026-04-02 — Phase 11 v1.1 polish (doc consistency pass)*

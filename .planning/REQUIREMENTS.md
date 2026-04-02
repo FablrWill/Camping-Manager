@@ -82,4 +82,4 @@ Requirements for v1.1 "Close the Loop." Each maps to roadmap phases.
 
 ---
 *Requirements defined: 2026-04-01*
-*Last updated: 2026-04-01 — traceability filled after roadmap creation*
+*Last updated: 2026-04-02 — Phase 11 consistency pass*

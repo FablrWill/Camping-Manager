@@ -3,7 +3,7 @@
 ## Milestones
 
 - ✅ **v1.0 Foundation** - Phases 1-5 (shipped 2026-04-01)
-- 🚧 **v1.1 Close the Loop** - Phases 6-9 (in progress)
+- ✅ **v1.1 Close the Loop** - Phases 6-11 (complete)
 
 ## Phases
 
@@ -193,7 +193,7 @@ Plans:
   3. REQUIREMENTS.md, ROADMAP.md, and STATE.md are consistent with actual implementation state
 **Plans**: 2 plans
 Plans:
-- [x] 11-01-PLAN.md — Code fixes: VoiceDebriefButton isPast guard + circular test rewrite
+- [ ] 11-01-PLAN.md — Code fixes: VoiceDebriefButton isPast guard + circular test rewrite
 - [ ] 11-02-PLAN.md — Documentation consistency pass across REQUIREMENTS, ROADMAP, STATE, PROJECT
 
 ## Progress
@@ -213,4 +213,4 @@ Phases execute in numeric order: 6 → 7 → 8 → 9 → 10 → 11
 | 8. PWA and Offline | v1.1 | 5/5 | Complete | 2026-04-02 |
 | 9. Learning Loop | v1.1 | 4/4 | Complete | 2026-04-02 |
 | 10. Offline Read Path & PWA Completion | v1.1 | 4/4 | Complete | 2026-04-02 |
-| 11. v1.1 Polish | v1.1 | 1/2 | In Progress|  |
+| 11. v1.1 Polish | v1.1 | 0/2 | Executing | - |

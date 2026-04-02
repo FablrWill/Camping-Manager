@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Close the Loop
 status: executing
-stopped_at: Completed 11-01-PLAN.md — VoiceDebrief guard + test rewrite
-last_updated: "2026-04-02T06:11:22.283Z"
-last_activity: 2026-04-02
+stopped_at: Completed 11-02-PLAN.md — Documentation consistency pass
+last_updated: "2026-04-02T06:14:58.402Z"
+last_activity: 2026-04-02 -- Phase 11 execution started
 progress:
   total_phases: 11
-  completed_phases: 8
+  completed_phases: 10
   total_plans: 37
-  completed_plans: 32
-  percent: 60
+  completed_plans: 35
+  percent: 95
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-04-01)
 ## Current Position
 
 Phase: 11 (v1.1-polish) — EXECUTING
-Plan: 2 of 2
-Status: Ready to execute
-Last activity: 2026-04-02
+Plan: Executing
+Status: In progress
+Last activity: 2026-04-02 -- Phase 11 execution started
 
-Progress: [██████░░░░] 60%
+Progress: [█████████░] 95%
 
 ## Performance Metrics
 
@@ -62,11 +62,6 @@ Progress: [██████░░░░] 60%
 | Phase 07-day-of-execution P01 | 13 | 2 tasks | 11 files |
 | Phase 07-day-of-execution P02 | 5 | 2 tasks | 8 files |
 | Phase 07-day-of-execution P03 | 252 | 2 tasks | 4 files |
-| Phase 09-learning-loop P02 | 8 | 2 tasks | 5 files |
-| Phase 10 P02 | 15 | 2 tasks | 7 files |
-| Phase 10 P03 | 3 | 2 tasks | 11 files |
-| Phase 10-offline-read-path P04 | 5 | 2 tasks | 2 files |
-| Phase 11 P01 | 68 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -96,17 +91,6 @@ Recent decisions affecting current work:
 - [Phase 07-day-of-execution]: Departure section in TripPrepClient fetches departure checklist independently — not through /api/trips/[id]/prep
 - [Phase 07-day-of-execution]: composeFloatPlanEmail includes checklistStatus parameter — emergency contact sees departure preparation level (X of Y tasks completed)
 - [Phase 07-day-of-execution]: FloatPlanLog uses fire-and-forget .catch() — database log failure never blocks email send confirmation
-- [Phase 09-01]: Tapping active usage status deselects (sets null) — avoids separate clear button
-- [Phase 09-01]: PostTripReview only renders when isPast && isSelected — avoids fetch on collapsed cards
-- [Phase 09-01]: allComplete flag exposed in PostTripReview but not acted on — Plan 02 wires auto-generate trigger
-- [Phase 09-learning-loop]: Summary stored as JSON.stringify in TripFeedback.summary String field, parsed with JSON.parse on read — avoids schema migration for structured data
-- [Phase 10]: Detail tiles (zoom 15-16) generated first, broad tiles fill remaining 1000-tile cap — campsite-level tiles never truncated
-- [Phase 10]: Tile snapshot stored as { count, failed } not URLs — keeps IndexedDB snapshot compact
-- [Phase 10]: WriteQueueSync extracted as child component inside AppShell to allow hooks at component level without making AppShell itself a client component
-- [Phase 10]: SpotsClient merges spots from ALL cached trips (not just first) — deduplicates by location.id before passing to SpotMap
-- [Phase 10]: Phase 8 SUMMARY.md documents both Phase 8 and Phase 10 gap closure in one unified document — retroactive closure per D-12
-- [Phase 11]: VoiceDebriefButton wrapped in isPast guard — entire div block conditional, not just inner component
-- [Phase 11]: gearId test calls real PATCH handler via NextRequest — vi.mock('@/lib/db') avoids DB dependency
 
 ### Pending Todos
 
@@ -126,6 +110,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-02T06:11:22.279Z
-Stopped at: Completed 11-01-PLAN.md — VoiceDebrief guard + test rewrite
+Last session: 2026-04-02T06:14:58.396Z
+Stopped at: Completed 11-02-PLAN.md — Documentation consistency pass
 Resume file: None
