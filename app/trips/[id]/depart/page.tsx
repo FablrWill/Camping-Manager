@@ -20,9 +20,10 @@ export default async function DepartPage({ params }: { params: Promise<{ id: str
 
   if (!trip) notFound()
 
-  const tripCoords = trip.location
-    ? { lat: trip.location.latitude, lon: trip.location.longitude }
-    : undefined
+  const tripCoords =
+    trip.location?.latitude != null && trip.location?.longitude != null
+      ? { lat: trip.location.latitude, lon: trip.location.longitude }
+      : undefined
 
   return (
     <DepartureChecklistClient

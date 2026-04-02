@@ -1,8 +1,21 @@
 # Outland OS — Task Tracker
 
-> **Last updated:** 2026-04-02 (Session 26 — Phase 10 plans revised with cross-AI review feedback)
+> **Last updated:** 2026-04-02 (Phase 12 complete — build fixed, lint/types clean, tests all passing, Gemini review done)
 > **Start here** if you're picking up after a break.
 > **North star:** `docs/USER-JOURNEY.md` — read this before building anything new.
+
+---
+
+## 🏁 Milestone v1.2 — Ship It (In Progress)
+
+| Phase | Status | Summary |
+|-------|--------|---------|
+| 12. Fix Build & Clean House | ✅ Complete | Build fixed (serverExternalPackages), lint/type errors resolved, test stubs implemented (95 tests passing), Gemini cross-AI review completed |
+| 13. Address Review Findings | ○ Not started | Act on actionable Gemini feedback before shipping to production |
+| 14. Production Deployment | ○ Not started | Configure Mac mini with PM2, persistent data, backups, deploy script |
+| 15. Remote Access & Go Live | ○ Not started | Tailscale mesh VPN, HTTPS, PWA verification from phone |
+
+**Next:** `/gsd:execute-phase 13` — address Gemini review findings
 
 ---
 
@@ -22,7 +35,7 @@ All 5 phases of v1.0 shipped. The app has: executive trip prep, NC camping knowl
 | 9. Learning Loop | ○ Not started | Post-trip gear usage tracking, Claude debrief, voice writeback |
 | 10. Offline Read Path | 📋 Planned | 4 plans, 3 waves — dual-mode components, tile prefetch, offline write queue, Phase 8 docs |
 
-**Next:** `/gsd:execute-phase 10` — execute offline read path
+**Status:** v1.1 shipped 2026-04-02. See v1.2 section above for current work.
 
 ---
 

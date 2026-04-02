@@ -45,6 +45,7 @@ describe('Usage Tracking (LEARN-01)', () => {
     })
 
     it('updates PackingItem.usageStatus to "used"', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       mockUpdate.mockResolvedValue({ id: 'item-1', usageStatus: 'used' } as any)
       const req = new NextRequest('http://localhost/api/trips/trip-1/usage', {
         method: 'PATCH',
@@ -60,6 +61,7 @@ describe('Usage Tracking (LEARN-01)', () => {
     })
 
     it('updates PackingItem.usageStatus to "didn\'t need"', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       mockUpdate.mockResolvedValue({ id: 'item-1', usageStatus: "didn't need" } as any)
       const req = new NextRequest('http://localhost/api/trips/trip-1/usage', {
         method: 'PATCH',
@@ -75,6 +77,7 @@ describe('Usage Tracking (LEARN-01)', () => {
     })
 
     it('updates PackingItem.usageStatus to "forgot but needed"', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       mockUpdate.mockResolvedValue({ id: 'item-1', usageStatus: 'forgot but needed' } as any)
       const req = new NextRequest('http://localhost/api/trips/trip-1/usage', {
         method: 'PATCH',
@@ -116,6 +119,7 @@ describe('Usage Tracking (LEARN-01)', () => {
           { gearId: 'gear-1', packed: true, usageStatus: 'used' },
           { gearId: 'gear-2', packed: false, usageStatus: null },
         ],
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any)
       const req = new NextRequest('http://localhost/api/packing-list?tripId=trip-1')
       const res = await GET(req)

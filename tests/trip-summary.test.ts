@@ -115,6 +115,7 @@ describe('Trip Summary (LEARN-02)', () => {
     it('returns existing summary if one exists (no duplicate generation)', async () => {
       process.env.ANTHROPIC_API_KEY = 'test-key'
       const existingFeedback = { id: 'fb-1', tripId: 'trip-1', summary: '{"summary":"test"}', status: 'generated', createdAt: new Date() }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       mockFindFirst.mockResolvedValue(existingFeedback as any)
 
       const req = new NextRequest('http://localhost/api/trips/trip-1/feedback', { method: 'POST' })
@@ -139,6 +140,7 @@ describe('Trip Summary (LEARN-02)', () => {
           { id: 'pi-1', gearId: 'g-1', usageStatus: 'used', gear: { name: 'Tent', category: 'shelter' } },
           { id: 'pi-2', gearId: 'g-2', usageStatus: null, gear: { name: 'Stove', category: 'cooking' } },
         ],
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any)
 
       const req = new NextRequest('http://localhost/api/trips/trip-1/feedback', { method: 'POST' })
