@@ -50,6 +50,18 @@ export async function POST(request: NextRequest) {
       results.push('Location rating updated')
     }
 
+    // 4. Persist to TripFeedback (D-06: append-only, fire-and-forget)
+    prisma.tripFeedback.create({
+      data: {
+        tripId: body.tripId,
+        voiceTranscript: body.voiceTranscript ?? null,
+        insights: JSON.stringify(body.insights),
+        status: 'applied',
+      },
+    }).catch((err) => {
+      console.error('Failed to persist TripFeedback (non-blocking):', err)
+    })
+
     return NextResponse.json({ applied: results })
   } catch (error) {
     console.error('Failed to apply insights:', error)
