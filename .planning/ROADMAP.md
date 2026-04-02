@@ -161,7 +161,7 @@ Plans:
 Plans:
 - [x] 09-00-PLAN.md — Wave 0: Vitest test stubs for all Phase 9 modules (usage tracking, trip summary, voice debrief)
 - [x] 09-01-PLAN.md — Usage tracking: PATCH /api/trips/[id]/usage, post-trip review section UI, usageState in packing list GET
-- [ ] 09-02-PLAN.md — Trip summary: POST /api/trips/[id]/feedback, TripSummaryResultSchema, auto-generate trigger, summary display UI
+- [x] 09-02-PLAN.md — Trip summary: POST /api/trips/[id]/feedback, TripSummaryResultSchema, auto-generate trigger, summary display UI
 - [ ] 09-03-PLAN.md — Voice debrief: wire VoiceRecordModal to TripFeedback persistence, InsightsReviewSheet integration, apply route TripFeedback write-back
 **UI hint**: yes
 
@@ -180,4 +180,4 @@ Phases execute in numeric order: 6 → 7 → 8 → 9
 | 6. Stabilization | v1.1 | 5/5 | Complete | - |
 | 7. Day-Of Execution | v1.1 | 3/3 | Complete   | 2026-04-01 |
 | 8. PWA and Offline | v1.1 | 5/5 | Complete | 2026-04-02 |
-| 9. Learning Loop | v1.1 | 2/4 | Executing | - |
+| 9. Learning Loop | v1.1 | 3/4 | In Progress|  |
