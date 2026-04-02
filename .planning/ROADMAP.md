@@ -157,7 +157,12 @@ Plans:
   1. User can open a completed trip and mark each packed item as "used," "didn't need," or "forgot but needed"
   2. User can request a post-trip summary and receive a Claude-generated 3-bullet debrief: what to drop, what was missing, and an updated location rating — generated from their actual usage data
   3. User can record a voice debrief and have it automatically update gear notes and location ratings — with a review screen to confirm before applying changes
-**Plans**: TBD
+**Plans**: 4 plans
+Plans:
+- [ ] 09-00-PLAN.md — Wave 0: Vitest test stub files for all Phase 9 modules
+- [ ] 09-01-PLAN.md — Usage tracking: PATCH endpoint for usageStatus, packing list GET extension, PostTripReview component in TripCard
+- [ ] 09-02-PLAN.md — Post-trip summary: TripSummaryResultSchema, generateTripSummary (Haiku), feedback API, auto-generate trigger + display in PostTripReview
+- [ ] 09-03-PLAN.md — Voice debrief persistence: TripFeedback storage in apply route, transcription passthrough from VoiceRecordModal to InsightsReviewSheet
 **UI hint**: yes
 
 ## Progress
@@ -175,4 +180,4 @@ Phases execute in numeric order: 6 → 7 → 8 → 9
 | 6. Stabilization | v1.1 | 5/5 | Complete | - |
 | 7. Day-Of Execution | v1.1 | 3/3 | Complete   | 2026-04-01 |
 | 8. PWA and Offline | v1.1 | 0/5 | Planned | - |
-| 9. Learning Loop | v1.1 | 0/TBD | Not started | - |
+| 9. Learning Loop | v1.1 | 0/4 | Planned | - |
