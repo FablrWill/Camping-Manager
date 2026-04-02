@@ -20,6 +20,7 @@ interface DepartureChecklistClientProps {
   emergencyContactName: string | null
   emergencyContactEmail: string | null
   offlineData?: DepartureChecklistResult
+  tripCoords?: { lat: number; lon: number }
 }
 
 interface FloatPlanSentState {
@@ -36,6 +37,7 @@ export default function DepartureChecklistClient({
   emergencyContactName: tripEmergencyContactName,
   emergencyContactEmail: tripEmergencyContactEmail,
   offlineData,
+  tripCoords,
 }: DepartureChecklistClientProps) {
   const isOnline = useOnlineStatus()
   const [offlineChecklist, setOfflineChecklist] = useState<DepartureChecklistResult | null>(null)
@@ -262,6 +264,7 @@ export default function DepartureChecklistClient({
         tripName={tripName}
         dateRange={dateRange}
         emergencyContact={{ name: tripEmergencyContactName, email: tripEmergencyContactEmail }}
+        tripCoords={tripCoords}
       />
 
       {/* Progress bar */}

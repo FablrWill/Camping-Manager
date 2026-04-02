@@ -1,6 +1,6 @@
 const CACHE_NAME = 'outland-shell-v1'
 const TILE_CACHE = 'tile-cache-v1'
-const SHELL_ASSETS = ['/', '/gear', '/trips', '/spots', '/vehicle', '/settings']
+const SHELL_ASSETS = ['/', '/gear', '/trips', '/spots', '/vehicle', '/settings', '/chat']
 
 // Install: cache app shell pages
 self.addEventListener('install', (event) => {
@@ -52,6 +52,20 @@ self.addEventListener('fetch', (event) => {
           return response
         })
         .catch(() => caches.match(event.request))
+    )
+    return
+  }
+
+  // Dynamic trip routes — cache app shell for /trips/*/depart and /trips/*/prep
+  if (event.request.mode === 'navigate' && /\/trips\/[^/]+\/(depart|prep)/.test(url)) {
+    event.respondWith(
+      caches.match(event.request).then((cached) =>
+        cached || fetch(event.request).then((response) => {
+          const clone = response.clone()
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone))
+          return response
+        }).catch(() => caches.match('/trips'))
+      )
     )
     return
   }

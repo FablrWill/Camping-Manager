@@ -14,10 +14,15 @@ export default async function DepartPage({ params }: { params: Promise<{ id: str
       endDate: true,
       emergencyContactName: true,
       emergencyContactEmail: true,
+      location: { select: { latitude: true, longitude: true } },
     },
   })
 
   if (!trip) notFound()
+
+  const tripCoords = trip.location
+    ? { lat: trip.location.latitude, lon: trip.location.longitude }
+    : undefined
 
   return (
     <DepartureChecklistClient
@@ -27,6 +32,7 @@ export default async function DepartPage({ params }: { params: Promise<{ id: str
       endDate={trip.endDate.toISOString()}
       emergencyContactName={trip.emergencyContactName ?? null}
       emergencyContactEmail={trip.emergencyContactEmail ?? null}
+      tripCoords={tripCoords}
     />
   )
 }
