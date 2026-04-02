@@ -170,15 +170,17 @@ export default function TripCard({
               </div>
             )}
 
-            {/* Voice debrief button */}
-            <div className="mt-2 flex items-center" onClick={(e) => e.stopPropagation()}>
-              <VoiceDebriefButton
-                tripId={trip.id}
-                tripName={trip.name}
-                locationId={trip.location?.id ?? null}
-                onOpen={() => onDebrief({ id: trip.id, name: trip.name, locationId: trip.location?.id ?? null })}
-              />
-            </div>
+            {/* Voice debrief button — only render for past trips */}
+            {isPast && (
+              <div className="mt-2 flex items-center" onClick={(e) => e.stopPropagation()}>
+                <VoiceDebriefButton
+                  tripId={trip.id}
+                  tripName={trip.name}
+                  locationId={trip.location?.id ?? null}
+                  onOpen={() => onDebrief({ id: trip.id, name: trip.name, locationId: trip.location?.id ?? null })}
+                />
+              </div>
+            )}
           </div>
 
           {/* Days countdown for upcoming */}
