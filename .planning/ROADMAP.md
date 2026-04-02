@@ -191,12 +191,15 @@ Plans:
   1. VoiceDebriefButton only renders for past trips (isPast guard)
   2. usage-tracking.test.ts gearId validation test is logically sound (not circular)
   3. REQUIREMENTS.md, ROADMAP.md, and STATE.md are consistent with actual implementation state
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 11-01-PLAN.md — Code fixes: VoiceDebriefButton isPast guard + circular test rewrite
+- [ ] 11-02-PLAN.md — Documentation consistency pass across REQUIREMENTS, ROADMAP, STATE, PROJECT
 
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 6 → 7 → 8 → 9
+Phases execute in numeric order: 6 → 7 → 8 → 9 → 10 → 11
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -205,9 +208,9 @@ Phases execute in numeric order: 6 → 7 → 8 → 9
 | 3. Knowledge Base | v1.0 | 4/4 | Complete | 2026-03-31 |
 | 4. Chat Agent | v1.0 | 4/4 | Complete | 2026-03-31 |
 | 5. Intelligence Features | v1.0 | 4/4 | Complete | 2026-04-01 |
-| 6. Stabilization | v1.1 | 5/5 | Complete | - |
-| 7. Day-Of Execution | v1.1 | 3/3 | Complete   | 2026-04-01 |
-| 8. PWA and Offline | v1.1 | 5/5 | Partial (audit: read path missing) | 2026-04-02 |
+| 6. Stabilization | v1.1 | 5/5 | Complete | 2026-04-01 |
+| 7. Day-Of Execution | v1.1 | 3/3 | Complete | 2026-04-01 |
+| 8. PWA and Offline | v1.1 | 5/5 | Complete | 2026-04-02 |
 | 9. Learning Loop | v1.1 | 4/4 | Complete | 2026-04-02 |
-| 10. Offline Read Path & PWA Completion | v1.1 | 4/4 | Complete    | 2026-04-02 |
-| 11. v1.1 Polish | v1.1 | 0/TBD | Not started | - |
+| 10. Offline Read Path & PWA Completion | v1.1 | 4/4 | Complete | 2026-04-02 |
+| 11. v1.1 Polish | v1.1 | 0/2 | Executing | - |
