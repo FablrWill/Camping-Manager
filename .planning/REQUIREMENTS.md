@@ -74,38 +74,38 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| BUILD-01 | — | Pending |
-| BUILD-02 | — | Pending |
-| BUILD-03 | — | Pending |
-| BUILD-04 | — | Pending |
-| BUILD-05 | — | Pending |
-| BUILD-06 | — | Pending |
-| BUILD-07 | — | Pending |
-| BUILD-08 | — | Pending |
-| BUILD-09 | — | Pending |
-| BUILD-10 | — | Pending |
-| REVIEW-01 | — | Pending |
-| REVIEW-02 | — | Pending |
-| REVIEW-03 | — | Pending |
-| DEPLOY-01 | — | Pending |
-| DEPLOY-02 | — | Pending |
-| DEPLOY-03 | — | Pending |
-| DEPLOY-04 | — | Pending |
-| DEPLOY-05 | — | Pending |
-| DEPLOY-06 | — | Pending |
-| DEPLOY-07 | — | Pending |
-| DEPLOY-08 | — | Pending |
-| ACCESS-01 | — | Pending |
-| ACCESS-02 | — | Pending |
-| ACCESS-03 | — | Pending |
-| ACCESS-04 | — | Pending |
-| ACCESS-05 | — | Pending |
+| BUILD-01 | Phase 12 | Pending |
+| BUILD-02 | Phase 12 | Pending |
+| BUILD-03 | Phase 12 | Pending |
+| BUILD-04 | Phase 12 | Pending |
+| BUILD-05 | Phase 12 | Pending |
+| BUILD-06 | Phase 12 | Pending |
+| BUILD-07 | Phase 12 | Pending |
+| BUILD-08 | Phase 12 | Pending |
+| BUILD-09 | Phase 12 | Pending |
+| BUILD-10 | Phase 12 | Pending |
+| REVIEW-01 | Phase 12 | Pending |
+| REVIEW-02 | Phase 12 | Pending |
+| REVIEW-03 | Phase 13 | Pending |
+| DEPLOY-01 | Phase 14 | Pending |
+| DEPLOY-02 | Phase 14 | Pending |
+| DEPLOY-03 | Phase 14 | Pending |
+| DEPLOY-04 | Phase 14 | Pending |
+| DEPLOY-05 | Phase 14 | Pending |
+| DEPLOY-06 | Phase 14 | Pending |
+| DEPLOY-07 | Phase 14 | Pending |
+| DEPLOY-08 | Phase 14 | Pending |
+| ACCESS-01 | Phase 15 | Pending |
+| ACCESS-02 | Phase 15 | Pending |
+| ACCESS-03 | Phase 15 | Pending |
+| ACCESS-04 | Phase 15 | Pending |
+| ACCESS-05 | Phase 15 | Pending |
 
 **Coverage:**
 - v1.2 requirements: 26 total
-- Mapped to phases: 0
-- Unmapped: 26 ⚠️
+- Mapped to phases: 26
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-02*
-*Last updated: 2026-04-02 after initial definition*
+*Last updated: 2026-04-02 after roadmap creation*

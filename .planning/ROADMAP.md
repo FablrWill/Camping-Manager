@@ -4,6 +4,7 @@
 
 - ✅ **v1.0 Foundation** — Phases 1-5 (shipped 2026-04-01) — [archive](milestones/v1.0-ROADMAP.md)
 - ✅ **v1.1 Close the Loop** — Phases 6-11 (shipped 2026-04-02) — [archive](milestones/v1.1-ROADMAP.md)
+- 🚧 **v1.2 Ship It** — Phases 12-15 (in progress)
 
 ## Phases
 
@@ -30,7 +31,82 @@
 
 </details>
 
+### 🚧 v1.2 Ship It (In Progress)
+
+**Milestone Goal:** Cross-AI review, fix all tech debt, get production build working, and deploy to Mac mini so Will can use Outland OS from his phone anywhere.
+
+- [ ] **Phase 12: Fix Build & Clean House** - Fix broken build, resolve tech debt, run Gemini review in parallel
+- [ ] **Phase 13: Address Review Findings** - Act on actionable Gemini feedback before shipping to production
+- [ ] **Phase 14: Production Deployment** - Configure Mac mini with PM2, persistent data, backups, deploy script
+- [ ] **Phase 15: Remote Access & Go Live** - Tailscale mesh VPN, HTTPS, PWA verification from phone
+
+## Phase Details
+
+### Phase 12: Fix Build & Clean House
+**Goal**: The app builds for production, all known tech debt is resolved, and a cross-AI review has identified any blind spots
+**Depends on**: Phase 11 (v1.1 complete)
+**Requirements**: BUILD-01, BUILD-02, BUILD-03, BUILD-04, BUILD-05, BUILD-06, BUILD-07, BUILD-08, BUILD-09, BUILD-10, REVIEW-01, REVIEW-02
+**Success Criteria** (what must be TRUE):
+  1. `npm run build` completes without errors on the project codebase
+  2. No native SQLite dependencies (better-sqlite3, sqlite-vec) appear in client-side bundles
+  3. All design system components are used consistently (no raw `<button>` or invalid variants)
+  4. All test stubs are either implemented or removed (zero `it.todo` remaining)
+  5. Gemini review report exists with findings categorized by severity
+**Plans**: TBD
+
+**Parallelization notes:**
+- BUILD-01/BUILD-02 (fix build) is the critical path -- must succeed first
+- BUILD-03 through BUILD-10 (tech debt) are independent 5-15 min fixes that can run as parallel agents
+- REVIEW-01/REVIEW-02 (Gemini review) can run concurrently with tech debt since it reads existing code, not modified code
+
+### Phase 13: Address Review Findings
+**Goal**: Actionable issues from the Gemini review are fixed or documented as deferred, so the codebase shipping to production is vetted by two AI models
+**Depends on**: Phase 12
+**Requirements**: REVIEW-03
+**Success Criteria** (what must be TRUE):
+  1. Every critical/high finding from the Gemini review is either fixed or has a documented deferral reason
+  2. Medium findings are triaged (fix now vs. defer to v2.0)
+  3. `npm run build` still passes after all changes
+**Plans**: TBD
+
+**Parallelization notes:**
+- Individual findings are likely independent fixes that can run as parallel agents
+- Build verification must run after all fixes are applied
+
+### Phase 14: Production Deployment
+**Goal**: Outland OS runs as a production service on the Mac mini with persistent data, auto-restart, backups, and a one-command deploy workflow
+**Depends on**: Phase 12 (working build)
+**Requirements**: DEPLOY-01, DEPLOY-02, DEPLOY-03, DEPLOY-04, DEPLOY-05, DEPLOY-06, DEPLOY-07, DEPLOY-08
+**Success Criteria** (what must be TRUE):
+  1. The app starts in production mode on the Mac mini and serves pages at `http://localhost:3000`
+  2. SQLite database and photos persist across app restarts and redeploys (data lives in `/data/outland/`)
+  3. PM2 automatically restarts the app after a crash or Mac mini reboot
+  4. A single deploy command (script) pulls latest code, builds, and restarts the service
+  5. Daily SQLite backups run automatically via cron
+**Plans**: TBD
+
+**Parallelization notes:**
+- DEPLOY-01/DEPLOY-02/DEPLOY-03 (standalone config, data paths, DATABASE_URL) are sequential setup
+- DEPLOY-04/DEPLOY-05 (PM2 config, boot persistence) can run together after data paths are set
+- DEPLOY-06 (deploy script) depends on PM2 being configured
+- DEPLOY-07 (backup cron) is independent once data paths exist
+- DEPLOY-08 (SW cache version) is independent
+
+### Phase 15: Remote Access & Go Live
+**Goal**: Will can access Outland OS from his phone anywhere via encrypted private network, with PWA install and offline mode working over the remote connection
+**Depends on**: Phase 14 (app running on Mac mini)
+**Requirements**: ACCESS-01, ACCESS-02, ACCESS-03, ACCESS-04, ACCESS-05
+**Success Criteria** (what must be TRUE):
+  1. Tailscale is running on both Mac mini and Will's iPhone
+  2. The app is reachable via a stable MagicDNS hostname (no IP addresses to remember)
+  3. HTTPS works over Tailscale (required for service worker / PWA functionality)
+  4. The app is installable as a PWA from Will's phone over the Tailscale connection
+**Plans**: TBD
+
 ## Progress
+
+**Execution Order:**
+Phases execute in numeric order: 12 -> 13 -> 14 -> 15
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -45,6 +121,10 @@
 | 9. Learning Loop | v1.1 | 4/4 | Complete | 2026-04-02 |
 | 10. Offline Read Path | v1.1 | 4/4 | Complete | 2026-04-02 |
 | 11. v1.1 Polish | v1.1 | 2/2 | Complete | 2026-04-02 |
+| 12. Fix Build & Clean House | v1.2 | 0/TBD | Not started | - |
+| 13. Address Review Findings | v1.2 | 0/TBD | Not started | - |
+| 14. Production Deployment | v1.2 | 0/TBD | Not started | - |
+| 15. Remote Access & Go Live | v1.2 | 0/TBD | Not started | - |
 
 ---
-*Full phase details: see milestone archives in `.planning/milestones/`*
+*Full phase details for shipped milestones: see archives in `.planning/milestones/`*
