@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Ship It
-status: ready_to_plan
-stopped_at: null
-last_updated: "2026-04-02"
-last_activity: 2026-04-02
+status: planning
+stopped_at: Phase 12 context gathered
+last_updated: "2026-04-02T22:14:26.119Z"
+last_activity: 2026-04-02 — v1.2 roadmap created
 progress:
   total_phases: 4
   completed_phases: 0
@@ -51,6 +51,6 @@ Progress: [░░░░░░░░░░] 0% (v1.2 scope)
 
 ## Session Continuity
 
-Last session: 2026-04-02
-Stopped at: v1.2 roadmap created, ready to plan Phase 12
-Resume file: None
+Last session: 2026-04-02T22:14:26.115Z
+Stopped at: Phase 12 context gathered
+Resume file: .planning/phases/12-fix-build-clean-house/12-CONTEXT.md
