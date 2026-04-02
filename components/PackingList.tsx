@@ -8,6 +8,7 @@ import { Button, ConfirmDialog } from '@/components/ui'
 interface PackingListProps {
   tripId: string
   tripName: string
+  offlineData?: PackingListResult
 }
 
 interface CheckedState {
@@ -26,7 +27,7 @@ function formatRelativeTime(isoString: string | null): string {
   return `${days}d ago`
 }
 
-export default function PackingList({ tripId, tripName }: PackingListProps) {
+export default function PackingList({ tripId, tripName, offlineData }: PackingListProps) {
   const [packingList, setPackingList] = useState<PackingListResult | null>(null)
   const [generatedAt, setGeneratedAt] = useState<string | null>(null)
   const [loadingMounted, setLoadingMounted] = useState(true)  // loading saved on mount
@@ -39,6 +40,12 @@ export default function PackingList({ tripId, tripName }: PackingListProps) {
 
   // Load saved packing list on mount
   useEffect(() => {
+    if (offlineData) {
+      // Render from IndexedDB snapshot — per D-01
+      setPackingList(offlineData)
+      setLoadingMounted(false)
+      return
+    }
     async function loadSaved() {
       try {
         const res = await fetch(`/api/packing-list?tripId=${tripId}`)
@@ -68,7 +75,7 @@ export default function PackingList({ tripId, tripName }: PackingListProps) {
       }
     }
     loadSaved()
-  }, [tripId])
+  }, [tripId, offlineData])
 
   const totalItems = packingList
     ? packingList.categories.reduce((sum, cat) => sum + cat.items.length, 0)
@@ -180,22 +187,24 @@ export default function PackingList({ tripId, tripName }: PackingListProps) {
               No packing list yet
             </p>
           </div>
-          <div className="flex flex-col items-end gap-2">
-            <Button variant="primary" size="sm" onClick={handleGenerate} loading={generating}>
-              Generate Packing List
-            </Button>
-            {error && (
-              <p className="text-xs text-red-600 dark:text-red-400 text-right max-w-[200px]">
-                {error}
-                <button
-                  onClick={handleGenerate}
-                  className="ml-1.5 font-medium text-amber-600 dark:text-amber-400 hover:underline"
-                >
-                  Retry
-                </button>
-              </p>
-            )}
-          </div>
+          {!offlineData && (
+            <div className="flex flex-col items-end gap-2">
+              <Button variant="primary" size="sm" onClick={handleGenerate} loading={generating}>
+                Generate Packing List
+              </Button>
+              {error && (
+                <p className="text-xs text-red-600 dark:text-red-400 text-right max-w-[200px]">
+                  {error}
+                  <button
+                    onClick={handleGenerate}
+                    className="ml-1.5 font-medium text-amber-600 dark:text-amber-400 hover:underline"
+                  >
+                    Retry
+                  </button>
+                </p>
+              )}
+            </div>
+          )}
         </div>
       </div>
     )
@@ -237,15 +246,21 @@ export default function PackingList({ tripId, tripName }: PackingListProps) {
           <h3 className="text-sm font-semibold text-stone-900 dark:text-stone-100">
             🎒 Packing List
           </h3>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => packingList ? setShowRegenerateConfirm(true) : handleGenerate()}
-            loading={generating}
-            icon={!generating ? <RotateCcw size={12} /> : undefined}
-          >
-            Regenerate
-          </Button>
+          {offlineData ? (
+            <span className="text-xs text-stone-400 dark:text-stone-500 italic">
+              (Offline — read only)
+            </span>
+          ) : (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => packingList ? setShowRegenerateConfirm(true) : handleGenerate()}
+              loading={generating}
+              icon={!generating ? <RotateCcw size={12} /> : undefined}
+            >
+              Regenerate
+            </Button>
+          )}
         </div>
 
         {/* Metadata line */}

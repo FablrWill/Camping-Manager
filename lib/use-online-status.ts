@@ -8,13 +8,25 @@ export function useOnlineStatus(): boolean {
   )
 
   useEffect(() => {
-    const goOnline = () => setIsOnline(true)
-    const goOffline = () => setIsOnline(false)
-    window.addEventListener('online', goOnline)
-    window.addEventListener('offline', goOffline)
+    let timeoutId: ReturnType<typeof setTimeout> | null = null
+
+    function handleOnline() {
+      if (timeoutId) clearTimeout(timeoutId)
+      timeoutId = setTimeout(() => setIsOnline(true), 300)
+    }
+
+    function handleOffline() {
+      if (timeoutId) clearTimeout(timeoutId)
+      timeoutId = setTimeout(() => setIsOnline(false), 300)
+    }
+
+    window.addEventListener('online', handleOnline)
+    window.addEventListener('offline', handleOffline)
+
     return () => {
-      window.removeEventListener('online', goOnline)
-      window.removeEventListener('offline', goOffline)
+      if (timeoutId) clearTimeout(timeoutId)
+      window.removeEventListener('online', handleOnline)
+      window.removeEventListener('offline', handleOffline)
     }
   }, [])
 

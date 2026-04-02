@@ -12,6 +12,7 @@ interface WeatherCardProps {
   elevation?: number
   loading?: boolean
   error?: string | null
+  offlineData?: { days?: DayForecast[]; alerts?: WeatherAlert[]; locationName?: string; elevation?: number }
 }
 
 function AlertStrip({ alert }: { alert: WeatherAlert }) {
@@ -114,8 +115,15 @@ export default function WeatherCard({
   elevation,
   loading = false,
   error = null,
+  offlineData,
 }: WeatherCardProps) {
   const [expanded, setExpanded] = useState(false)
+
+  // Use offline snapshot data when present
+  const effectiveDays = offlineData?.days ?? days
+  const effectiveAlerts = offlineData?.alerts ?? alerts
+  const effectiveLocationName = offlineData?.locationName ?? locationName
+  const effectiveElevation = offlineData?.elevation ?? elevation
 
   if (loading) return <LoadingSkeleton />
 
@@ -129,7 +137,7 @@ export default function WeatherCard({
     )
   }
 
-  if (days.length === 0) return null
+  if (effectiveDays.length === 0) return null
 
   return (
     <div className="bg-sky-50 dark:bg-sky-950/30 rounded-xl border border-sky-200 dark:border-sky-800 p-4 space-y-3">
@@ -139,10 +147,15 @@ export default function WeatherCard({
           <h3 className="text-sm font-semibold text-stone-900 dark:text-stone-50 flex items-center gap-1.5">
             🌤 Weather
           </h3>
-          {(locationName || dateRange) && (
+          {(effectiveLocationName || dateRange) && (
             <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
-              {[locationName, dateRange].filter(Boolean).join(' · ')}
-              {elevation != null && ` · ${Math.round(elevation * 3.281)}ft`}
+              {[effectiveLocationName, dateRange].filter(Boolean).join(' · ')}
+              {effectiveElevation != null && ` · ${Math.round(effectiveElevation * 3.281)}ft`}
+            </p>
+          )}
+          {offlineData && (
+            <p className="text-xs text-stone-400 dark:text-stone-500 italic mt-0.5">
+              (Offline snapshot)
             </p>
           )}
         </div>
@@ -159,18 +172,18 @@ export default function WeatherCard({
       <div
         className="grid gap-3"
         style={{
-          gridTemplateColumns: `repeat(${Math.min(days.length, 7)}, minmax(0, 1fr))`,
+          gridTemplateColumns: `repeat(${Math.min(effectiveDays.length, 7)}, minmax(0, 1fr))`,
         }}
       >
-        {days.map((day) => (
+        {effectiveDays.map((day) => (
           <DayBlock key={day.date} day={day} expanded={expanded} />
         ))}
       </div>
 
       {/* Alerts */}
-      {alerts.length > 0 && (
+      {effectiveAlerts.length > 0 && (
         <div className="space-y-2 pt-1">
-          {alerts.map((alert, i) => (
+          {effectiveAlerts.map((alert, i) => (
             <AlertStrip key={i} alert={alert} />
           ))}
         </div>

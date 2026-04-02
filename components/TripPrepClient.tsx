@@ -12,6 +12,8 @@ import { PREP_SECTIONS, PrepState, PrepSection } from '@/lib/prep-sections'
 import { formatDateRange, daysUntil, tripNights } from '@/lib/trip-utils'
 import type { DayForecast, WeatherAlert } from '@/lib/weather'
 import type { DepartureChecklistResult } from '@/lib/parse-claude'
+import { useOnlineStatus } from '@/lib/use-online-status'
+import { getTripSnapshot, type TripSnapshot } from '@/lib/offline-storage'
 
 interface TripPrepClientProps {
   trip: {
@@ -55,10 +57,27 @@ function getDefaultExpanded(sections: PrepSection[], key: string): boolean {
 }
 
 export default function TripPrepClient({ trip }: TripPrepClientProps) {
+  const isOnline = useOnlineStatus()
+  const [offlineSnapshot, setOfflineSnapshot] = useState<TripSnapshot | null>(null)
   const [prepState, setPrepState] = useState<PrepState | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [departureChecklist, setDepartureChecklist] = useState<DepartureChecklistData | null>(null)
+
+  // Load offline snapshot when device goes offline
+  useEffect(() => {
+    if (isOnline) {
+      setOfflineSnapshot(null)
+      return
+    }
+    let cancelled = false
+    async function loadSnapshot() {
+      const snap = await getTripSnapshot(trip.id)
+      if (!cancelled) setOfflineSnapshot(snap ?? null)
+    }
+    loadSnapshot()
+    return () => { cancelled = true }
+  }, [isOnline, trip.id])
 
   async function fetchPrepState() {
     setLoading(true)
@@ -204,12 +223,13 @@ export default function TripPrepClient({ trip }: TripPrepClientProps) {
               >
                 {config.key === 'weather' && (
                   <>
-                    {section?.data && trip.location ? (
+                    {(section?.data && trip.location) || (!isOnline && offlineSnapshot?.weather) ? (
                       <WeatherCard
-                        days={(section.data as WeatherSectionData).days ?? []}
-                        alerts={(section.data as WeatherSectionData).alerts ?? []}
-                        locationName={(section.data as WeatherSectionData).locationName ?? trip.location.name}
-                        elevation={(section.data as WeatherSectionData).elevation}
+                        days={(section?.data as WeatherSectionData)?.days ?? []}
+                        alerts={(section?.data as WeatherSectionData)?.alerts ?? []}
+                        locationName={(section?.data as WeatherSectionData)?.locationName ?? trip.location?.name}
+                        elevation={(section?.data as WeatherSectionData)?.elevation}
+                        offlineData={!isOnline && offlineSnapshot?.weather ? offlineSnapshot.weather as { days?: import('@/lib/weather').DayForecast[]; alerts?: import('@/lib/weather').WeatherAlert[]; locationName?: string; elevation?: number } : undefined}
                       />
                     ) : (
                       <p className="text-sm text-stone-400 dark:text-stone-500 py-2">
@@ -220,11 +240,19 @@ export default function TripPrepClient({ trip }: TripPrepClientProps) {
                 )}
 
                 {config.key === 'packing' && (
-                  <PackingList tripId={trip.id} tripName={trip.name} />
+                  <PackingList
+                    tripId={trip.id}
+                    tripName={trip.name}
+                    offlineData={!isOnline && offlineSnapshot?.packingList ? offlineSnapshot.packingList as import('@/lib/claude').PackingListResult : undefined}
+                  />
                 )}
 
                 {config.key === 'meals' && (
-                  <MealPlan tripId={trip.id} tripName={trip.name} />
+                  <MealPlan
+                    tripId={trip.id}
+                    tripName={trip.name}
+                    offlineData={!isOnline && offlineSnapshot?.mealPlan ? offlineSnapshot.mealPlan as import('@/lib/claude').MealPlanResult : undefined}
+                  />
                 )}
 
                 {config.key === 'power' && (
