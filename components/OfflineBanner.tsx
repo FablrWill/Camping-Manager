@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { WifiOff } from 'lucide-react'
 import { useOnlineStatus } from '@/lib/use-online-status'
 import { getCachedTripIds, getTripSnapshot, getSnapshotAge } from '@/lib/offline-storage'
@@ -42,11 +42,13 @@ export default function OfflineBanner() {
     return () => clearInterval(interval)
   }, [isOnline])
 
-  if (isOnline) return null
+  // Computed outside render body to avoid impure Date.now() call during render
+  const isStale = useMemo(() => {
+    if (!snapshotTimestamp) return false
+    return Date.now() - new Date(snapshotTimestamp).getTime() > 24 * 60 * 60 * 1000
+  }, [snapshotTimestamp])
 
-  const isStale = snapshotTimestamp
-    ? Date.now() - new Date(snapshotTimestamp).getTime() > 24 * 60 * 60 * 1000
-    : false
+  if (isOnline) return null
 
   return (
     <div className={`border-l-3 border-amber-500 px-3 py-2 flex items-center gap-2 text-sm text-stone-200 transition-all duration-200 ${isStale ? 'bg-stone-800 dark:bg-amber-900/10' : 'bg-stone-800 dark:bg-stone-900'}`}>

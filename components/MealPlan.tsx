@@ -158,12 +158,14 @@ export default function MealPlan({ tripId, tripName, offlineData }: MealPlanProp
               {error && (
                 <p className="text-xs text-red-600 dark:text-red-400 text-right max-w-[200px]">
                   {error}
-                  <button
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={handleGenerate}
-                    className="ml-1.5 font-medium text-amber-600 dark:text-amber-400 hover:underline"
+                    className="ml-1.5 !px-1 !py-0 font-medium !text-amber-600 dark:!text-amber-400 hover:!bg-transparent hover:underline"
                   >
                     Retry
-                  </button>
+                  </Button>
                 </p>
               )}
             </div>
@@ -236,12 +238,14 @@ export default function MealPlan({ tripId, tripName, offlineData }: MealPlanProp
         {error && (
           <div className="text-xs text-red-600 dark:text-red-400">
             {error}
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={handleGenerate}
-              className="ml-1.5 font-medium text-amber-600 dark:text-amber-400 hover:underline"
+              className="ml-1.5 !px-1 !py-0 font-medium !text-amber-600 dark:!text-amber-400 hover:!bg-transparent hover:underline"
             >
               Retry
-            </button>
+            </Button>
           </div>
         )}
       </div>
@@ -262,10 +266,11 @@ export default function MealPlan({ tripId, tripName, offlineData }: MealPlanProp
                 const isExpanded = expandedMeal === mealKey
 
                 return (
-                  <button
+                  <Button
                     key={mealType}
+                    variant="ghost"
                     onClick={() => setExpandedMeal(isExpanded ? null : mealKey)}
-                    className="w-full text-left"
+                    className="w-full !p-0 !justify-start !font-normal !rounded-none hover:!bg-transparent text-left"
                   >
                     {/* Collapsed meal row */}
                     <div className="flex items-center justify-between py-2">
@@ -306,7 +311,7 @@ export default function MealPlan({ tripId, tripName, offlineData }: MealPlanProp
                         )}
                       </div>
                     )}
-                  </button>
+                  </Button>
                 )
               })}
             </div>
@@ -328,15 +333,16 @@ export default function MealPlan({ tripId, tripName, offlineData }: MealPlanProp
 
       {/* Prep Timeline */}
       <div className="border-t border-stone-100 dark:border-stone-800">
-        <button
+        <Button
+          variant="ghost"
           onClick={() => setShowPrepTimeline(!showPrepTimeline)}
-          className="w-full p-4 flex items-center justify-between"
+          className="w-full !p-4 !justify-between !rounded-none hover:!bg-stone-50 dark:hover:!bg-stone-800/50"
         >
           <h4 className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider">
             📋 Prep Timeline
           </h4>
           <ChevronDown size={14} className={`text-stone-400 transition-transform ${showPrepTimeline ? 'rotate-180' : ''}`} />
-        </button>
+        </Button>
         {showPrepTimeline && (
           <div className="px-4 pb-4 space-y-1.5">
             {mealPlan.prepTimeline.map((step, i) => (
@@ -351,9 +357,10 @@ export default function MealPlan({ tripId, tripName, offlineData }: MealPlanProp
 
       {/* Shopping List */}
       <div className="border-t border-stone-100 dark:border-stone-800">
-        <button
+        <Button
+          variant="ghost"
           onClick={() => setShowShopping(!showShopping)}
-          className="w-full p-4 flex items-center justify-between"
+          className="w-full !p-4 !justify-between !rounded-none hover:!bg-stone-50 dark:hover:!bg-stone-800/50"
         >
           <div className="flex items-center gap-2">
             <h4 className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider">
@@ -365,16 +372,18 @@ export default function MealPlan({ tripId, tripName, offlineData }: MealPlanProp
           </div>
           <div className="flex items-center gap-2">
             {showShopping && (
-              <button
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={(e) => { e.stopPropagation(); copyShoppingList() }}
-                className="text-xs text-amber-600 dark:text-amber-400 font-medium hover:text-amber-700 dark:hover:text-amber-300 transition-colors"
+                className="text-xs !text-amber-600 dark:!text-amber-400 font-medium hover:!text-amber-700 dark:hover:!text-amber-300 hover:!bg-transparent !px-1 !py-0"
               >
                 Copy list
-              </button>
+              </Button>
             )}
             <ChevronDown size={14} className={`text-stone-400 transition-transform ${showShopping ? 'rotate-180' : ''}`} />
           </div>
-        </button>
+        </Button>
 
         {showShopping && (
           <div className="px-4 pb-4">

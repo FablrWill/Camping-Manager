@@ -50,7 +50,7 @@ export default function LeavingNowButton({
     if (snapshot) {
       setCachedAge(getSnapshotAge(snapshot.cachedAt))
     }
-  }, [tripId, emergencyContact])
+  }, [tripId, emergencyContact, tripCoords])
 
   if (cachedAge) {
     return (

@@ -23,7 +23,13 @@ export function useTheme() {
 }
 
 export default function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>('system')
+  // Initialize from localStorage immediately to avoid flash; SSR-safe via typeof check
+  const [theme, setThemeState] = useState<Theme>(() => {
+    if (typeof window !== 'undefined') {
+      return (localStorage.getItem('cc-theme') as Theme | null) || 'system'
+    }
+    return 'system'
+  })
   const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>('light')
 
   const applyTheme = useCallback((resolved: 'light' | 'dark') => {
@@ -54,17 +60,13 @@ export default function ThemeProvider({ children }: { children: React.ReactNode 
     setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')
   }, [resolvedTheme, setTheme])
 
-  // Initialize from localStorage or system preference
+  // Apply theme on mount and listen for system theme changes
   useEffect(() => {
-    const stored = localStorage.getItem('cc-theme') as Theme | null
-    const initial = stored || 'system'
-    setThemeState(initial)
-
-    if (initial === 'system') {
+    if (theme === 'system') {
       const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
       applyTheme(prefersDark ? 'dark' : 'light')
     } else {
-      applyTheme(initial)
+      applyTheme(theme)
     }
 
     // Listen for system theme changes

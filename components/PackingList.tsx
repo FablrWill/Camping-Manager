@@ -195,12 +195,14 @@ export default function PackingList({ tripId, tripName, offlineData }: PackingLi
               {error && (
                 <p className="text-xs text-red-600 dark:text-red-400 text-right max-w-[200px]">
                   {error}
-                  <button
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={handleGenerate}
-                    className="ml-1.5 font-medium text-amber-600 dark:text-amber-400 hover:underline"
+                    className="ml-1.5 !px-1 !py-0 font-medium !text-amber-600 dark:!text-amber-400 hover:!bg-transparent hover:underline"
                   >
                     Retry
-                  </button>
+                  </Button>
                 </p>
               )}
             </div>
@@ -274,12 +276,14 @@ export default function PackingList({ tripId, tripName, offlineData }: PackingLi
         {error && (
           <div className="text-xs text-red-600 dark:text-red-400 mb-2">
             {error}
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={handleGenerate}
-              className="ml-1.5 font-medium text-amber-600 dark:text-amber-400 hover:underline"
+              className="ml-1.5 !px-1 !py-0 font-medium !text-amber-600 dark:!text-amber-400 hover:!bg-transparent hover:underline"
             >
               Retry
-            </button>
+            </Button>
           </div>
         )}
 
@@ -387,30 +391,34 @@ export default function PackingList({ tripId, tripName, offlineData }: PackingLi
                   autoFocus
                   className="flex-1 px-2 py-1.5 text-sm rounded-lg border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-400 dark:focus:ring-amber-500"
                 />
-                <button
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={() => addCustomItem(cat.name)}
-                  className="text-amber-600 dark:text-amber-400 p-1.5"
-                >
-                  <Check size={16} />
-                </button>
-                <button
+                  className="!text-amber-600 dark:!text-amber-400 !p-1.5"
+                  icon={<Check size={16} />}
+                />
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={() => {
                     setAddingTo(null)
                     setNewItemName('')
                   }}
-                  className="text-stone-400 dark:text-stone-500 p-1.5"
-                >
-                  <X size={16} />
-                </button>
+                  className="!text-stone-400 dark:!text-stone-500 hover:!text-stone-400 !p-1.5"
+                  icon={<X size={16} />}
+                />
               </div>
             ) : (
-              <button
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={() => setAddingTo(cat.name)}
-                className="text-xs text-stone-400 dark:text-stone-500 hover:text-amber-600 dark:hover:text-amber-400 flex items-center gap-1 mt-2 transition-colors"
+                icon={<Plus size={12} />}
+                className="!text-xs !text-stone-400 dark:!text-stone-500 hover:!text-amber-600 dark:hover:!text-amber-400 mt-2"
               >
-                <Plus size={12} />
                 Add item
-              </button>
+              </Button>
             )}
           </div>
         ))}

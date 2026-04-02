@@ -18,8 +18,11 @@ export default function InstallBanner() {
     if (localStorage.getItem('outland_install_dismissed') === 'true') return
 
     const ios = /iPad|iPhone|iPod/.test(navigator.userAgent)
-    setIsIOS(ios)
-    setShowBanner(true)
+    // Batch both state updates outside the synchronous effect body
+    queueMicrotask(() => {
+      setIsIOS(ios)
+      setShowBanner(true)
+    })
   }, [])
 
   useEffect(() => {
