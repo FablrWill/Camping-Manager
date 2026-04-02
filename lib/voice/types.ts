@@ -21,6 +21,7 @@ export interface InsightPayload {
 
 export interface ApplyInsightRequest {
   tripId: string
+  voiceTranscript?: string  // Raw transcription text for TripFeedback storage
   insights: {
     whatWorked: string[]     // text items to append to trip notes
     whatDidnt: string[]      // text items to append to trip notes

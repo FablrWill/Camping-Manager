@@ -4,14 +4,19 @@ import { useState, useEffect } from 'react'
 import { WifiOff } from 'lucide-react'
 import { useOnlineStatus } from '@/lib/use-online-status'
 import { getCachedTripIds, getTripSnapshot, getSnapshotAge } from '@/lib/offline-storage'
+import { getPendingWrites } from '@/lib/offline-write-queue'
 
 export default function OfflineBanner() {
   const isOnline = useOnlineStatus()
   const [snapshotAge, setSnapshotAge] = useState<string | null>(null)
   const [snapshotTimestamp, setSnapshotTimestamp] = useState<string | null>(null)
+  const [pendingCount, setPendingCount] = useState(0)
 
   useEffect(() => {
-    if (isOnline) return
+    if (isOnline) {
+      setPendingCount(0)
+      return
+    }
 
     async function checkSnapshots() {
       const ids = await getCachedTripIds()
@@ -23,7 +28,18 @@ export default function OfflineBanner() {
         }
       }
     }
+
+    async function checkQueue() {
+      const pending = await getPendingWrites()
+      setPendingCount(pending.length)
+    }
+
     checkSnapshots()
+    checkQueue()
+
+    // Re-check queue every 5 seconds while offline (cheap IndexedDB read)
+    const interval = setInterval(checkQueue, 5000)
+    return () => clearInterval(interval)
   }, [isOnline])
 
   if (isOnline) return null
@@ -42,6 +58,9 @@ export default function OfflineBanner() {
         )}
         {snapshotAge && isStale && (
           <span className="text-amber-400"> · snapshot from {snapshotAge} — weather may have changed</span>
+        )}
+        {pendingCount > 0 && (
+          <span className="text-stone-400"> · {pendingCount} check-off{pendingCount !== 1 ? 's' : ''} pending sync</span>
         )}
       </span>
     </div>

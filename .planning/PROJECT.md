@@ -2,11 +2,11 @@
 
 ## What This Is
 
-A personal second brain for car camping — an AI-powered knowledge system that has the camping expertise, local area knowledge, and logistical memory that Will doesn't. Not a commercial product or app for others. It's a personal tool that manages gear, plans trips, tracks spots, and uses Claude as a camping-expert agent. Built as a mobile-first web app for one user (Will Sink, Asheville NC, Santa Fe Hybrid camper).
+A personal second brain for car camping — an AI-powered knowledge system that plans trips, executes day-of logistics, works offline in the field, and learns from every trip. Not a commercial product. It's a personal tool that manages gear, plans trips, tracks spots, and uses Claude as a camping-expert agent. Built as a mobile-first PWA for one user (Will Sink, Asheville NC, Santa Fe Hybrid camper).
 
 ## Core Value
 
-**Personal camping second brain** — a system that knows more about camping logistics, gear, and the local area than Will does. Everything lives in one place, and the AI layer provides the expertise. The value isn't any single feature — it's having a knowledgeable assistant that remembers everything and thinks ahead.
+**Personal camping second brain** — a closed-loop system that plans, executes, and learns from every trip. Everything lives in one place, the AI layer provides the expertise, and each trip makes the system smarter.
 
 ## Context
 
@@ -14,27 +14,36 @@ A personal second brain for car camping — an AI-powered knowledge system that 
 - **Vehicle:** 2025 Hyundai Santa Fe Hybrid (car camping, not overlanding)
 - **Power:** EcoFlow portable power station + solar panels
 - **Upcoming:** Getting a dog soon — will need pet-aware trip planning
-- **Sessions completed:** 20 (foundation through intelligence features, plus project review)
-- **Dev setup:** Local dev, Starlink for remote sessions, Mac mini at home for heavy ops
+- **Sessions completed:** 25+ (foundation → intelligence → stabilization → offline → learning loop → polish)
+- **Dev setup:** MacBook for development, Mac mini at home for production hosting
+- **Production target:** Mac mini (always-on) — Node.js 20 LTS + PM2 + Tailscale, no Docker
+- **Remote access:** Tailscale mesh VPN (private, encrypted, no public exposure)
+- **Codebase:** 149 TS/TSX files, ~18K LOC app code, 190 test files (~38K LOC tests)
 
 ## Tech Stack
 
 - **Framework:** Next.js 16 (App Router) — mobile-first responsive
 - **Language:** TypeScript throughout
 - **Styling:** Tailwind CSS + CSS custom properties design system
-- **Database:** SQLite via Prisma ORM (9 models)
+- **Database:** SQLite via Prisma ORM (13 models including MealPlan, TripFeedback, DepartureChecklist, FloatPlanLog, Settings)
 - **Maps:** Leaflet + OpenStreetMap (free, no API key)
-- **AI:** Claude API (Anthropic SDK) — packing lists, meal plans, future agent features
+- **AI:** Claude API (Anthropic SDK) — packing lists, meal plans, departure checklists, float plans, trip summaries, chat agent
+- **Search:** Hybrid RAG — FTS5 + vec0 via Reciprocal Rank Fusion
 - **Weather:** Open-Meteo (free, no API key)
+- **Email:** Nodemailer + Gmail SMTP for float plan delivery
+- **Offline:** PWA with service worker + IndexedDB (idb-keyval)
+- **Voice:** Browser MediaRecorder + server-side transcription
+- **Testing:** Vitest + React Testing Library
 - **Auth:** None (single user)
-- **Python tools:** Google Takeout extraction + AI enrichment scripts
+- **Hosting:** Mac mini (Node.js 20 LTS, PM2 process manager, no Docker/Nginx)
+- **Remote Access:** Tailscale (WireGuard mesh VPN, MagicDNS, automatic HTTPS)
 
 ## Requirements
 
 ### Validated
 
 - ✓ Project scaffolding (Next.js 16, TS, Tailwind, Prisma, SQLite) — existing
-- ✓ Database schema with 9 models — existing
+- ✓ Database schema with 13 models — existing + v1.1
 - ✓ Mobile layout shell with bottom tab bar, dark mode — existing
 - ✓ Home dashboard with live stats, recent gear, quick actions — existing
 - ✓ Gear inventory CRUD with categories, search, wishlist — existing
@@ -50,49 +59,42 @@ A personal second brain for car camping — an AI-powered knowledge system that 
 - ✓ Weather integration (Open-Meteo, camping alerts) — existing
 - ✓ Claude API packing list generator — existing
 - ✓ Seed data for dev (gear, locations, trips, mods) — existing
-
-## Current Milestone: v1.1 Close the Loop
-
-**Goal:** Stabilize the foundation, add offline capability, and build the learning loop — so the app survives a real camping trip and gets smarter from it.
-
-**Target features:**
-- Stabilize: fix critical bugs, add Zod validation, complete CRUD gaps, persist AI-generated data
-- Offline mode: PWA with "Leaving Now" trigger that caches trip data for field use
-- Learning loop: post-trip debrief that writes back to gear, locations, and packing logic
-- Day-of execution: Trip Day Sequencer, safety email, final weather/road check
+- ✓ AI output validation (Zod parseClaudeJSON utility) — v1.1
+- ✓ AI output persistence (packing list + meal plan survive navigation) — v1.1
+- ✓ Complete CRUD (trip edit/delete, vehicle edit, mod delete, photo delete) — v1.1
+- ✓ Design system adoption across all existing forms — v1.1
+- ✓ PWA installable with offline app shell — v1.1
+- ✓ "Leaving Now" offline data caching (weather, packing, meals, spots, emergency) — v1.1
+- ✓ Offline map tile caching — v1.1
+- ✓ Departure checklist (time-ordered, from actual trip data) — v1.1
+- ✓ Safety float plan email to emergency contact — v1.1
+- ✓ Gear usage tracking (used/didn't need/forgot) — v1.1
+- ✓ Post-trip AI summary (what to drop, what was missing, location rating) — v1.1
+- ✓ Voice debrief with automatic gear/location updates — v1.1
 
 ### Active
 
-**v1.1 — Stabilize:**
-- [ ] Fix critical bugs (JSON parsing, missing deps, dashboard stat, LocationForm dark mode)
-- [ ] Add Zod validation for all Claude API responses (parseClaudeJSON utility)
-- [ ] Complete CRUD gaps (trip edit/delete UI, vehicle edit, mod edit/delete, photo delete)
-- [ ] Persist packing list and meal plan results to database
-- [ ] Adopt design system UI primitives across existing forms
+<!-- v1.2 Ship It — defined 2026-04-02 -->
 
-**v1.1 — Offline / Day-Of:**
-- [ ] PWA with service worker for offline trip data
-- [ ] "Leaving Now" trigger (cache weather, packing list, meal plan, map pins, emergency info)
-- [ ] Trip Day Sequencer (time-sequenced departure checklist from packing + meals + power)
-- [ ] Safety email (trip summary to emergency contact on departure)
+- [ ] Cross-AI review (Gemini full-project audit)
+- [ ] Fix broken npm run build (RAG native deps)
+- [ ] Resolve all v1.1 tech debt items (11 items)
+- [ ] Address actionable Gemini feedback
+- [ ] Production deployment on Mac mini
+- [ ] Remote access via Tailscale or Cloudflare Tunnel
 
-**v1.1 — Learning Loop:**
-- [ ] Gear usage tracking (mark items used/unused post-trip)
-- [ ] Post-trip auto-review (packed but didn't use, forgot but needed)
-- [ ] Voice debrief → automatic system updates (gear notes, location ratings, packing improvements)
-- [ ] Feedback-driven packing list improvements (learn from trip history)
+## Current Milestone: v1.2 Ship It
 
-**Future (v2.0+):**
-- [ ] Smart campsite / Home Assistant bridge (blocked on hardware)
-- [ ] Plan A/B/C fallback chain for trip planning
-- [ ] Photo auto-import from iCloud/Google Photos
-- [ ] Nearby trails & recreation API
-- [ ] Fuel & last stop planner
-- [ ] Permit & reservation awareness
-- [ ] Dog planning (pet-friendly sites, packing, trail rules)
-- [ ] Knowledge base expansion (2500+ chunks)
-- [ ] Deploy to Vercel (database migration when ready)
-- [ ] Live location sharing — shareable public map link (read-only) showing Will's real-time or last-reported GPS position; friends/emergency contacts click link to see location on a map without needing an account
+**Goal:** Cross-AI review, fix all tech debt, get production build working, and deploy to Mac mini so Will can use it from his phone anywhere.
+
+**Target features:**
+- Gemini full-project review (code quality, architecture, UX, blind spots)
+- Fix broken `npm run build` (RAG native deps issue)
+- Resolve all 11 v1.1 tech debt items
+- Address actionable Gemini feedback
+- Production deployment on Mac mini (PM2 or similar)
+- Remote access via Tailscale or Cloudflare Tunnel
+- Mobile-accessible from phone over the network
 
 ### Out of Scope
 
@@ -100,19 +102,52 @@ A personal second brain for car camping — an AI-powered knowledge system that 
 - Native mobile app — PWA is sufficient
 - Real-time collaboration — solo user
 - Commercial deployment — personal project
+- Full region map tile download — 100MB-2GB per region; cache in-viewport tiles only, deep-link Gaia GPS
+- Background check-in timer / dead man's switch — requires persistent server process
+- Two-way offline sync / conflict resolution — single user, local SQLite
+- Reservation / permit API integration — recreation.gov API is brittle; paste confirmation URL
+- Rich text debrief editor — voice is the input modality, not keyboard
+- Real-time offline sync — single-user local-first app; offline snapshot is read-only
+- Docker containerization — single app on owned hardware, native deps are simpler without containers
+- Nginx / reverse proxy — Tailscale provides encrypted access directly, no proxy needed
+- CI/CD pipeline — single developer, deploy via git pull + pm2 restart
+
+## Future (v2.0+)
+
+- [ ] Feedback-driven packing improvement (needs 3+ trips of history data)
+- [ ] Dead man's switch safety check-in (needs persistent server infrastructure)
+- [ ] Dog-aware trip planning (waiting for dog arrival + needs assessment)
+- [ ] Knowledge base expansion (2500+ chunks)
+- [ ] Deploy to Vercel (if Mac mini hosting proves insufficient)
+- [ ] Smart campsite / Home Assistant bridge (blocked on hardware)
+- [ ] Plan A/B/C fallback chain for trip planning
+- [ ] Photo auto-import from iCloud/Google Photos
+- [ ] Nearby trails & recreation API
+- [ ] Fuel & last stop planner
+- [ ] Permit & reservation awareness
+- [ ] Live location sharing — shareable public map link
 
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| SQLite over Postgres | Simplicity for single user, easy local dev | Working well, migrate at deploy |
+| SQLite over Postgres | Simplicity for single user, easy local dev | ✓ Working well, migrate at deploy |
 | Open-Meteo over paid weather API | Free, no API key, sufficient data | ✓ Validated |
 | Claude API for all AI features | Already integrated, Will knows Anthropic ecosystem | ✓ Validated |
 | Leaflet over Google Maps | Free, no API key, open source | ✓ Validated |
-| No auth system | Single user, personal tool | Active — revisit if sharing |
+| No auth system | Single user, personal tool | ✓ Active — revisit if sharing |
 | Mobile-first design | Will primarily uses from phone | ✓ Validated |
-| Closed-loop system (Plan→Execute→Learn→Improve) | v2.0 vision — the app gets smarter from every trip | Active — v1.1 builds the foundation |
-| Tailscale before Vercel | Access from phone without database migration | Active — deploy to Vercel later |
+| Closed-loop system (Plan→Execute→Learn→Improve) | v1.1 vision — the app gets smarter from every trip | ✓ Validated v1.1 |
+| IndexedDB for offline (not SW cache) | Structured data needs queryable storage, not response cache | ✓ Validated v1.1 |
+| Manual sw.js over Serwist | Avoids Webpack/Turbopack conflict with Next.js 16 | ✓ Validated v1.1 |
+| TripFeedback append-only (not @unique) | Multiple debriefs per trip; never mutate GearItem source records | ✓ Validated v1.1 |
+| Zod .safeParse() not .parse() | Return 422 for schema mismatches, not 500 crashes | ✓ Validated v1.1 |
+| Plain text float plan email | HTML rendering varies across email clients; text is universal | ✓ Validated v1.1 |
+| Settings singleton via hardcoded id | Enforces one row, upsert always targets same record | ✓ Validated v1.1 |
+| Mac mini self-hosting over Vercel | Free, SQLite stays local, photos on disk, no cloud costs | — Pending v1.2 |
+| No Docker | Single app, single user, native deps on Apple Silicon, Docker adds complexity with no benefit | — Pending v1.2 |
+| Tailscale over Cloudflare Tunnel | Private mesh VPN, no public exposure, simpler for single-user | — Pending v1.2 |
+| PM2 over systemd/launchd scripts | Auto-restart, log rotation, boot persistence, ecosystem config | — Pending v1.2 |
 
 ## Constraints
 
@@ -141,4 +176,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-01 — Phase 07 complete (Day of Execution: departure checklist + float plan email)*
+*Last updated: 2026-04-02 after v1.2 milestone start*

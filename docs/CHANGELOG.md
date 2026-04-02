@@ -8,6 +8,7 @@ All notable changes to Outland OS are tracked here.
 
 | Session | Date | Summary |
 |---------|------|---------|
+| [26](changelog/session-26.md) | 2026-04-02 | Phase 10 planning revision — incorporated cross-AI review feedback (concurrent tiles, debounce, AppShell sync, typed offlineData) |
 | [25](changelog/session-25.md) | 2026-04-01 | Phase 08 execution complete — installable PWA, offline banner, "Leaving Now" trip caching, passive map tile caching |
 | [24](changelog/session-24.md) | 2026-04-01 | Phase 07 execution complete — departure checklist, float plan email, settings page |
 | [23](changelog/session-23.md) | 2026-04-01 | Phase 07 UI design contract — departure checklist, float plan, settings page |

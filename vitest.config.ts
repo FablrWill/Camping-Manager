@@ -7,6 +7,7 @@ export default defineConfig({
     include: [
       'lib/__tests__/**/*.test.{ts,tsx}',
       'components/__tests__/**/*.test.{ts,tsx}',
+      'tests/**/*.test.{ts,tsx}',
     ],
     setupFiles: [],
     globals: true,

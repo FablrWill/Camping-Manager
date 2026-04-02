@@ -156,6 +156,7 @@ export default function VoiceRecordModal({ tripId, tripName, locationId, onClose
       })
       if (!res.ok) throw new Error('Extraction failed')
       const payload: InsightPayload = await res.json()
+      setRawTranscription(transcription)
       setInsights(payload)
       setState('review')
     } catch {
@@ -172,6 +173,7 @@ export default function VoiceRecordModal({ tripId, tripName, locationId, onClose
         tripId={tripId}
         locationId={locationId}
         onClose={onClose}
+        transcription={rawTranscription ?? undefined}
       />
     )
   }

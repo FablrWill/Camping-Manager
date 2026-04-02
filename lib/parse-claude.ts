@@ -119,3 +119,14 @@ export const FloatPlanEmailSchema = z.object({
 });
 
 export type FloatPlanEmail = z.infer<typeof FloatPlanEmailSchema>;
+
+// --- Trip Summary Schema (Phase 9 - LEARN-02) ---
+
+export const TripSummaryResultSchema = z.object({
+  whatToDrop: z.array(z.string()).default([]),
+  whatWasMissing: z.array(z.string()).default([]),
+  locationRating: z.number().min(1).max(5).nullable(),
+  summary: z.string(),
+});
+
+export type TripSummaryResult = z.infer<typeof TripSummaryResultSchema>;

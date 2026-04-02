@@ -1,277 +1,211 @@
 # Feature Landscape
 
-**Domain:** Personal camping second brain — v1.1 Close the Loop milestone
-**Researched:** 2026-04-01
-**Confidence:** MEDIUM-HIGH
+**Domain:** Self-hosted Next.js PWA production deployment + cross-AI code review
+**Researched:** 2026-04-02
+**Milestone:** v1.2 Ship It
+**Confidence:** HIGH (well-documented patterns, official Next.js docs, established tooling)
 
 ---
 
 ## Scope
 
-This document focuses on the four new feature areas for v1.1. The existing feature set (gear CRUD, trip creation, weather, packing list, meal plan, power budget, RAG, chat agent, voice debrief) is treated as **already built** and is the foundation these features depend on.
+This document covers features for v1.2 "Ship It" -- production deployment on a Mac mini, remote access, and cross-AI code review. The existing feature set (gear, trips, maps, AI packing/meals/checklists, PWA, offline, learning loop, voice debrief) is **already built** across v1.0 and v1.1. The 11 tech debt items from the v1.1 audit are included as prerequisite work.
 
-The four areas:
-1. **PWA / Offline Mode** — survive a real camping trip without cell signal
-2. **Post-Trip Learning Loop** — system improves automatically from trip data
-3. **Day-Of Execution** — departure sequencer, safety email, final checks
-4. **Stabilization** — validate existing code so it holds under real use
+Three areas:
+1. **Production Build & Deploy** -- get `npm run build` working, standalone output, PM2 process management
+2. **Remote Access & HTTPS** -- Tailscale mesh VPN, HTTPS for PWA service worker, phone access from anywhere
+3. **Cross-AI Code Review** -- Gemini full-project audit to catch Claude's blind spots before shipping
 
 ---
 
-## Feature Landscape
+## Table Stakes
 
-### Table Stakes (Users Expect These)
+Features required for a working self-hosted production deployment. Missing any of these means the app is not reliably usable from Will's phone.
 
-Features a camping app must have to feel trustworthy in the field. Missing any of these = the app fails at the moment it matters most.
+| Feature | Why Expected | Complexity | Dependencies | Notes |
+|---------|--------------|------------|--------------|-------|
+| Fix `npm run build` | Nothing else works without a successful build | Medium | RAG native deps (better-sqlite3, sqlite-vec) must be resolved | Pre-existing tech debt from Phase 3; either fix native bindings or conditionally import RAG modules |
+| `output: 'standalone'` in next.config.ts | Official Next.js self-hosting mode; produces minimal deployable .next/standalone with server.js | Low | next.config.ts one-line addition | Must manually copy public/ and .next/static/ into standalone dir |
+| PM2 process manager | Keeps app alive on crash, auto-restart on Mac mini reboot | Low | PM2 global install, ecosystem.config.js | `pm2 startup` + `pm2 save` persists across reboots; single instance only (SQLite constraint) |
+| `HOSTNAME=0.0.0.0` binding | App must be reachable from LAN, not just localhost | Low | Environment variable in PM2 config or .env.production | Default Next.js binds to 127.0.0.1 only |
+| Remote access via Tailscale | Will needs phone access from anywhere, not just home WiFi | Low | Tailscale installed on Mac mini + phone | Mesh VPN: no port forwarding, no exposed ports, 5-15ms added latency, free for personal use |
+| HTTPS for PWA service worker | Service workers require HTTPS; PWA install prompt requires secure context | Medium | Tailscale MagicDNS provides automatic HTTPS certs | Without HTTPS the PWA features built in v1.1 (offline, "Leaving Now") break entirely on remote access |
+| Stable SQLite file path | Database must survive redeploys; standalone output relocates files | Low | Absolute path in DATABASE_URL, outside .next/standalone/ | e.g., `file:/Users/willis/outland-os-data/dev.db` |
+| Stable photo directory | Uploaded photos in public/photos/ must survive redeploys | Low | Symlink or absolute path outside standalone dir | Standalone output does not copy public/ by default; need a persistent photos directory |
+| Environment variable management | API keys and config must be set for production | Low | .env.production file or PM2 env block | ANTHROPIC_API_KEY, DATABASE_URL, GMAIL SMTP creds for float plans, NODE_ENV=production |
+| Resolve 11 tech debt items | Clean baseline before shipping; includes UI bugs, test stubs, doc inconsistencies | Medium | See v1.1-MILESTONE-AUDIT.md | Parallelizable with build fix work |
 
-| Feature | Why Expected | Complexity | Notes |
-|---------|--------------|------------|-------|
-| Offline access to trip data | Cell is unreliable at most campsites; app is useless if it fails offline | HIGH | Service worker + local SQLite already helps; need explicit cache trigger |
-| Installable to home screen (PWA) | Mobile-first app that can't be added to home screen feels like a website, not a tool | LOW | manifest.json + icons + HTTPS required |
-| Offline-readable packing list | The one thing you need on-site when setting up camp | LOW | Static cache of generated list |
-| Offline-readable meal plan | Meal plans accessed without signal during multi-day trips | LOW | Static cache; same pattern as packing list |
-| Saved spots viewable offline | Need to navigate to campsite without signal | HIGH | Map tiles are the hard part; spot data is easy |
-| Basic trip debrief / notes capture | After a trip, every app asks "how was it?" Missing = lost institutional memory | LOW | Can be as simple as a free-text field on trip close |
-| Gear marked used/not-used after a trip | Standard in gear-tracking apps (e.g. Lighterpack); foundation for packing improvement | LOW | Checkbox on packing list after trip |
-| Departure checklist / final walkthrough | RV apps all have this; departure checklists prevent forgotten gear | LOW | Sequenced checklist generated from trip data |
-| API response validation | Production code that crashes on malformed Claude responses is not production-ready | MEDIUM | Zod schema validation on all Claude outputs |
-| CRUD completeness | Trip edit/delete, vehicle edit, mod edit/delete, photo delete — gaps break trust in the tool | LOW-MEDIUM | Missing UI, not missing backend |
+## Differentiators
 
-### Differentiators (Competitive Advantage)
+Features that elevate the deployment from "it runs" to "it runs well." Not blocking launch but significantly improve reliability and developer experience.
 
-Features that make this more than a checklist app. These are what make v1.1 feel intelligent rather than mechanical.
+| Feature | Value Proposition | Complexity | Dependencies | Notes |
+|---------|-------------------|------------|--------------|-------|
+| Cross-AI code review (Gemini audit) | Gemini's 1M-token context reviews the entire codebase at once; different training catches different blind spots than Claude | Medium | Gemini CLI or Google AI Studio; structured review prompt | One-time pre-deploy audit, not ongoing; creates actionable task list |
+| SQLite backup cron job | Protect 25+ sessions of trip data, gear inventory, feedback history from corruption | Low | Simple cron: `sqlite3 dev.db ".backup backup.db"` daily | Litestream is overkill for single-user local; Time Machine helps but DB-specific backup is safer |
+| PM2 exponential backoff restart | Smarter restart on repeated crashes (avoids restart storm that hammers SQLite) | Low | One config line: `exp_backoff_restart_delay: 100` in ecosystem.config.js | Built into PM2, no extra dependencies |
+| PM2 memory limit restart | Auto-restart if memory exceeds threshold; prevents OOM on shared Mac mini | Low | `max_memory_restart: '512M'` in ecosystem.config.js | Mac mini runs other things; prevent this app from consuming all RAM |
+| Deploy script | One-command deploy: pull, build, restart | Low | Shell script on Mac mini | `git pull && npm run build && cp -r public .next/standalone/ && cp -r .next/static .next/standalone/.next/ && pm2 restart outland-os` |
+| Startup env validation | Verify required env vars and DB file exist before app starts | Low | Check in instrumentation.ts or a prestart script | Fail fast with clear error instead of cryptic runtime crash |
+| PM2 log rotation | Prevent disk fill from accumulated logs | Low | `pm2 install pm2-logrotate` | One-time setup, fire and forget |
+| Caddy reverse proxy (optional) | Automatic HTTPS for local network access without Tailscale; clean URL routing | Low-Med | Caddy install + Caddyfile | Only needed if Will wants HTTPS on local WiFi without Tailscale; Tailscale MagicDNS covers remote access |
 
-| Feature | Value Proposition | Complexity | Notes |
-|---------|-------------------|------------|-------|
-| "Leaving Now" one-tap cache trigger | Single button that caches everything needed for the trip: weather snapshot, packing list, meal plan, spots, emergency info. No camping app does this. | MEDIUM | Requires coordinating cache of multiple data types on demand |
-| Trip Day Sequencer | Time-ordered departure checklist derived from packing list + meals + power — not a static template but a dynamic list based on actual trip data | MEDIUM | Claude generates sequence from trip context; persisted as departure checklist |
-| Safety float plan email | Generates a "I'll be at XYZ, back by Sunday at 5pm" email to an emergency contact on departure. HikerAlert, Homebound, and Cairn offer this for hiking; nothing exists for car camping as part of a broader trip tool. | LOW-MEDIUM | Claude composes email from trip data; mailto: link or SendGrid |
-| Automatic gear performance tracking | Post-trip: which items were packed but not used, which were used heavily. System updates gear notes and adjusts future packing weights. No camping app closes this loop. | MEDIUM | Requires gear-to-packing-item linkage + post-trip review UI |
-| Feedback-driven packing list improvement | Packing list generator learns: if "headlamp" has been packed but unused on 3 trips to the same destination in summer, it adjusts the recommendation | HIGH | Requires trip history query + Claude reasoning over feedback corpus |
-| Voice debrief → system writes back | Speak for 2 minutes; the app automatically updates gear notes, location ratings, and packing suggestions. Zero typing. | HIGH | STT (browser Web Speech API or Whisper) → Claude extract → write to DB |
-| Post-trip auto-review summary | After marking gear used/not-used, Claude generates a 3-bullet summary: "Brought but didn't need: X. Forgot and needed: Y. Location rating: 4/5." No manual writing required. | MEDIUM | Claude prompt over trip diff data |
-| Grace period + dead man's switch safety | If Will doesn't check in by return time, a pre-composed email goes to the emergency contact. Homebound does this for hiking; not built into any camping trip planner. | HIGH | Requires scheduled job or background sync; complex on a local server |
+## Anti-Features
 
-### Anti-Features (Commonly Requested, Often Problematic)
+Features to explicitly NOT build for v1.2. Each has a clear reason.
 
 | Anti-Feature | Why Avoid | What to Do Instead |
 |--------------|-----------|-------------------|
-| Full offline map tile download | Map tiles for a region are 100MB–2GB. Bloats storage, slow to cache, complex to manage. | Cache only the tiles that are already in viewport when "Leaving Now" is triggered; deep-link to Gaia GPS for true offline maps |
-| Background sync / dead man's switch check-in timer | Requires a persistent server process or push service. This is a local-dev app; adding a polling background job for safety introduces infra complexity with no clear win. | Implement float plan email (send once on departure) instead of recurring check-in system |
-| Two-way gear sync on return | Automatically marking items unused based on inferred data is error-prone. Confidence in the learning loop depends on explicit user input, not inference. | Require explicit "mark as used/not-used" before the auto-review generates |
-| Full-text rich notes editor for debrief | A rich notes editor (markdown, images, formatting) for trip debrief creates friction. The whole value is zero-friction capture. | Voice debrief → plain text notes; voice is the input modality, not a keyboard |
-| Reservation / permit integration | Recreation.gov and Reserve America APIs have rate limits, auth flows, and break frequently. High maintenance, zero payoff for one user. | Paste permit confirmation URL or note in trip detail field |
-| Real-time offline sync conflict resolution | Offline-first sync conflicts (local edits vs. server edits while offline) are complex. This is a single-user, local-first app — there is no server to conflict with. | Skip conflict resolution entirely; SQLite is local, no sync needed |
+| Docker containerization | Adds learning wall for no benefit on a single Mac mini; SQLite volume mounts are fiddly; Will is learning to code, not DevOps | Run standalone Next.js directly with PM2 |
+| Nginx reverse proxy | Configuration complexity disproportionate to single-app single-user setup; Caddy or Tailscale HTTPS is far simpler | Tailscale MagicDNS for HTTPS (zero config), or Caddy if local network HTTPS needed |
+| CI/CD pipeline (GitHub Actions) | One developer, one server, infrequent deploys; automated pipeline is premature abstraction | Shell script: `git pull && npm run build && pm2 restart` |
+| Cloudflare Tunnel | Requires domain purchase, DNS configuration, routes all traffic through Cloudflare (higher latency); Tailscale is simpler for personal single-user | Tailscale: install on both devices, done; free for 100 devices |
+| Multi-process PM2 cluster mode | SQLite cannot handle concurrent writes from multiple Node.js processes; cluster mode will corrupt the database | Run `instances: 1` always; SQLite is the constraint |
+| Automated Gemini review on every commit | Overkill for solo dev project; API costs for no incremental benefit | Run Gemini audit once before v1.2 ship, create task list, move on |
+| Litestream continuous replication | Designed for multi-server cloud deployments; Mac mini already has Time Machine | Simple cron `sqlite3 .backup` daily is sufficient |
+| Auth / login system | Single user, accessed via Tailscale which authenticates at the network level | Tailscale device auth is the auth layer; no app-level auth needed |
+| Vercel deployment | Adds cloud hosting costs, complicates SQLite (needs migration to Postgres), loses local photo storage | Mac mini self-hosting is free, keeps SQLite local, photos on disk |
+| HTTPS via Let's Encrypt + Certbot | Requires a public domain and port 80/443 open to the internet; unnecessary exposure | Tailscale MagicDNS provides automatic certs within the tailnet |
 
 ---
 
 ## Feature Dependencies
 
 ```
-[PWA installable]
-    └──requires──> manifest.json + icons + HTTPS
+Fix npm run build
+    |
+    v
+output: 'standalone' in next.config.ts
+    |
+    v
+Stable paths (SQLite + photos)  ──>  .env.production
+    |                                      |
+    v                                      v
+PM2 ecosystem.config.js  <────────  Env var config
+    |
+    v
+pm2 startup + pm2 save
+    |
+    ├──> Deploy script (git pull + build + restart)
+    |
+    v
+Tailscale install (Mac mini + phone)
+    |
+    v
+HTTPS via Tailscale MagicDNS
+    |
+    v
+PWA works remotely (service worker + install prompt)
 
-[Offline trip data]
-    └──requires──> Service worker (workbox / @ducanh2912/next-pwa)
-    └──requires──> IndexedDB or Cache API for dynamic data
 
-["Leaving Now" cache trigger]
-    └──requires──> [Offline trip data] (service worker must be installed)
-    └──requires──> [Trip creation] (existing)
-    └──requires──> [Packing list persisted to DB] (stabilization task)
-    └──requires──> [Meal plan persisted to DB] (stabilization task)
-    └──requires──> [Weather integration] (existing)
-
-[Trip Day Sequencer]
-    └──requires──> [Trip creation] (existing)
-    └──requires──> [Packing list] (existing)
-    └──requires──> [Meal plan] (existing)
-    └──requires──> [Power budget] (existing)
-
-[Safety float plan email]
-    └──requires──> [Trip creation] (existing)
-    └──requires──> [Trip Day Sequencer] (provides departure summary)
-
-[Gear usage tracking (mark used/not-used)]
-    └──requires──> [Packing list persisted to DB] (stabilization)
-    └──requires──> [Gear inventory] (existing)
-
-[Post-trip auto-review]
-    └──requires──> [Gear usage tracking]
-    └──requires──> [Claude API] (existing)
-
-[Feedback-driven packing improvement]
-    └──requires──> [Post-trip auto-review] (needs history to learn from)
-    └──requires──> [Gear usage tracking] (needs multiple trips of data)
-    └──enhances──> [AI packing list generator] (existing)
-
-[Voice debrief → system writes back]
-    └──requires──> [Voice debrief] (existing — already built per milestone context)
-    └──requires──> [Gear usage tracking] (to write back gear notes)
-    └──requires──> [Location model] (existing — to write back location ratings)
-
-[API response validation (Zod)]
-    └──required by──> All Claude API consumers (packing list, meal plan, voice debrief)
-    └──required by──> ["Leaving Now" cache trigger] (must not crash when caching)
+Resolve 11 tech debt items  ──>  Cross-AI review (Gemini)  ──>  Address findings  ──>  Ship
+                                       (runs in parallel with deploy setup)
 ```
 
-### Dependency Notes
+**Critical path:** Build fix -> Standalone -> Paths -> PM2 -> Tailscale -> HTTPS -> PWA verified -> Ship
 
-- **Packing list + meal plan persistence is a blocker** for both "Leaving Now" and gear usage tracking. These are stabilization tasks that must land in the same phase as offline work.
-- **Gear usage tracking must come before the learning loop.** Post-trip review and feedback-driven packing improvement depend on at least 1 completed trip with usage data.
-- **Zod validation is a foundation task** — it must precede any feature that caches or reads Claude API responses offline, where malformed data can't be retried.
-- **Voice debrief writing back to the system** is the highest complexity item. It requires the voice debrief (built), a structured extraction prompt, and write paths to gear notes and location ratings. Phase this last.
+**Parallel track:** Tech debt resolution + Gemini audit (independent of deploy infrastructure)
 
 ---
 
-## MVP Definition for v1.1
+## Cross-AI Code Review Workflow
 
-### Launch With (Phase 1 — Stabilization)
+### Why Gemini for the Audit
 
-Minimum needed before any v1.1 feature can be trusted in the field.
+Claude built this entire codebase across 25+ sessions. Claude's systematic assumptions, patterns, and blind spots are baked into every file. A different model (Gemini), trained on different data with different architecture, has **uncorrelated blind spots**. Research shows multi-model review catches 3-5x more issues than single-model review because the intersection of both models' miss rates is substantially smaller than either alone.
 
-- [ ] Zod validation on all Claude API responses (parseClaudeJSON utility) — prerequisite for offline; malformed data cached offline = broken app
-- [ ] Persist packing list and meal plan results to DB — prerequisite for "Leaving Now" and gear usage tracking
-- [ ] Trip edit/delete UI — can't manage trips without edit/delete
-- [ ] Vehicle edit + mod edit/delete — current gap makes vehicle section feel broken
-- [ ] Photo delete — minor but obvious gap
-- [ ] Design system adoption across existing forms — consistency before new surfaces
+Gemini 2.5 Pro's 1M-token context window can ingest the entire Outland OS codebase (~56K LOC across app + tests) in a single pass, enabling whole-project architectural analysis that per-file review tools miss.
 
-### Add in Core v1.1 (Phase 2 — Offline + Day-Of)
+### Workflow Steps
 
-- [ ] PWA manifest.json + icons + add-to-homescreen — table stakes
-- [ ] Service worker via @ducanh2912/next-pwa — offline shell
-- [ ] "Leaving Now" cache trigger — key differentiator; caches weather snapshot, packing list, meal plan, map pins, emergency contact info
-- [ ] Trip Day Sequencer — departure checklist generated from trip data
-- [ ] Safety float plan email — sends trip summary to emergency contact on departure; mailto: link acceptable for v1.1
+**Step 1: Prepare context bundle**
+- Project tree listing
+- CLAUDE.md (project instructions, conventions, architecture)
+- prisma/schema.prisma (data model)
+- Key entry points: app/page.tsx, app/api/ routes, lib/ utilities
+- next.config.ts, package.json
+- A structured review prompt with categories
 
-### Add After Core (Phase 3 — Learning Loop)
+**Step 2: Run Gemini review**
+Feed the bundle to Gemini 2.5 Pro. Review categories:
+- **Code quality:** TypeScript patterns, dead code, inconsistencies
+- **Architecture:** Component boundaries, data flow, coupling
+- **Security:** Env var handling, input validation, API route protection
+- **UX/Accessibility:** Mobile usability, ARIA labels, color contrast
+- **Performance:** Bundle size, unnecessary re-renders, N+1 queries, missing indexes
+- **Testing gaps:** Untested paths, low-value tests, missing edge cases
 
-- [ ] Gear usage tracking (mark items used/not-used on trip close) — foundation for all learning
-- [ ] Post-trip auto-review summary (Claude generates 3-bullet debrief from usage data)
-- [ ] Voice debrief → writes back to gear notes and location ratings
+**Step 3: Triage findings**
+Sort by severity: CRITICAL (blocks ship) / HIGH (should fix) / MEDIUM (nice to fix) / LOW (note for later)
 
-### Future Consideration (v2+)
+**Step 4: Create task list**
+Actionable items added to v1.2 roadmap phases
 
-- [ ] Feedback-driven packing improvement (requires 3+ trips of history data to be meaningful)
-- [ ] Grace period dead man's switch safety check-in (requires background job infra)
-- [ ] Full offline map tile pre-download (high complexity, requires tile caching service)
-- [ ] Dog-aware trip planning (waiting for dog to arrive and needs assessment)
+**Step 5: Claude fixes the issues**
+Claude addresses the findings Gemini identified -- cross-pollination of AI perspectives
 
----
+**Step 6: Optional re-review**
+Run Gemini again on critical fixes if the initial audit found architectural issues
 
-## Feature Prioritization Matrix
+### Gemini Access Options
 
-| Feature | User Value | Implementation Cost | Priority |
-|---------|------------|---------------------|----------|
-| Zod validation + parseClaudeJSON | HIGH (crash prevention) | LOW | P1 |
-| Persist packing list + meal plan to DB | HIGH (blocker for downstream) | LOW | P1 |
-| CRUD gaps (trip edit/delete, vehicle, mod, photo) | HIGH (product completeness) | LOW-MEDIUM | P1 |
-| PWA manifest + icons | HIGH (installability) | LOW | P1 |
-| Service worker (workbox/next-pwa) | HIGH (offline shell) | MEDIUM | P1 |
-| "Leaving Now" cache trigger | HIGH (key differentiator) | MEDIUM | P1 |
-| Trip Day Sequencer | HIGH (ADHD-friendly execution) | MEDIUM | P1 |
-| Safety float plan email | MEDIUM (safety peace of mind) | LOW-MEDIUM | P2 |
-| Gear usage tracking | HIGH (learning loop foundation) | LOW | P2 |
-| Post-trip auto-review | HIGH (zero-friction debrief) | MEDIUM | P2 |
-| Voice debrief → system writes back | HIGH (closes the loop) | HIGH | P2 |
-| Feedback-driven packing improvement | MEDIUM (requires history data) | HIGH | P3 |
-| Dead man's switch check-in | LOW (local dev constraint) | HIGH | P3 |
-| Full offline map tile download | LOW (Gaia GPS fills this) | HIGH | P3 |
+| Method | Context | Cost | Recommendation |
+|--------|---------|------|----------------|
+| Gemini CLI (`gemini` command) | 1M tokens | Free tier available | Best for v1.2 -- scriptable, local |
+| Google AI Studio (web UI) | 1M tokens | Free tier | Good for interactive exploration of findings |
+| Gemini Code Assist (GitHub) | Per-PR | Free for individuals | Not useful here -- we want full-project audit, not PR review |
+
+**Use Gemini CLI or AI Studio.** No API integration needed. This is a one-time audit, not an ongoing workflow.
 
 ---
 
-## Competitor Feature Analysis
+## MVP Recommendation
 
-No direct competitors to "personal AI camping second brain with learning loop." Reference apps analyzed for specific feature patterns:
+### Phase 1: Make It Build
+1. Fix `npm run build` -- resolve RAG native dependency issue (conditionally import or remove unused RAG modules)
+2. Add `output: 'standalone'` to next.config.ts
+3. Resolve 11 tech debt items (parallelize with build fix)
 
-| Feature | Reference App | Their Approach | Our Approach |
-|---------|---------------|----------------|--------------|
-| Offline caching | Gaia GPS | Downloads map tiles per region (~500MB) | Cache in-viewport tiles + static data on "Leaving Now" tap |
-| Departure checklist | RV Checklist app | Static arrival/departure templates | Dynamic sequencer from actual trip packing list + meals |
-| Safety float plan | Homebound / HikerAlert | Check-in timer + push notification to contacts | One-shot email on departure; no persistent check-in (local-dev constraint) |
-| Gear usage feedback | None found | No camping app closes this loop | Post-trip checkbox list + Claude auto-review summary |
-| Learning loop | None found | No camping app does automatic system improvement | Trip history → Claude reasoning → updated packing recommendations |
-| Voice debrief | AudioPen / Debrief.ai | Voice → structured notes, no system writes | Voice → transcription → Claude extracts → writes to gear notes + location |
-| PWA install | Most modern camping apps | Standard manifest + icons | @ducanh2912/next-pwa for Next.js App Router; same pattern |
+### Phase 2: Cross-AI Review
+4. Run Gemini full-project audit
+5. Triage findings into CRITICAL/HIGH/MEDIUM/LOW
+6. Address CRITICAL and HIGH findings
 
----
+### Phase 3: Production Deploy
+7. Create ecosystem.config.js for PM2 (single instance, env vars, memory limit, backoff)
+8. Configure stable SQLite path and photo directory
+9. Create .env.production
+10. Deploy to Mac mini, verify with `pm2 start`
+11. Set up `pm2 startup` + `pm2 save` for reboot persistence
 
-## PWA / Offline Implementation Notes
+### Phase 4: Remote Access
+12. Install Tailscale on Mac mini and phone
+13. Verify HTTPS works via Tailscale MagicDNS
+14. Test PWA install + offline mode over Tailscale from phone
+15. Create deploy script for future updates
+16. Set up SQLite backup cron job
 
-Verified patterns for Next.js 16 (App Router) offline PWA:
-
-**Recommended library:** `@ducanh2912/next-pwa` — actively maintained, App Router support, workbox-backed. Serwist is the emerging alternative but less documented for Next.js 16 specifically.
-
-**Caching strategy by content type:**
-- Static assets (JS, CSS, icons, fonts): **cache-first** — fastest, safe since build hash changes on deploy
-- App shell (HTML): **network-first with fallback** — ensures users get updates but gracefully falls back offline
-- API responses (trip data, gear, spots): **network-first with fallback** — try fresh, serve cached if offline
-- Map tiles (Leaflet/OSM): **cache-first with explicit pre-fetch** — cache whatever is in the viewport on "Leaving Now"; don't pre-download regions
-
-**"Leaving Now" trigger pattern:**
-1. User taps "Leaving Now" on trip detail
-2. App fetches and caches: current trip data, associated packing list, meal plan, spot coordinates + metadata, weather snapshot, emergency contact info
-3. Stores snapshot timestamp so user knows when data was last synced
-4. Service worker intercepts subsequent requests for these resources and serves from cache
-
-**Data that's already offline-first:** SQLite via Prisma is local; all existing data is already on-device. The service worker is needed to cache API route responses (JSON) and static assets for the app shell.
-
-**Complexity callout:** Map tiles are the only genuinely hard problem. OSM tile URLs are per-zoom-per-coordinate; caching a campsite area at zoom 12-16 could require 200-500 tile requests. Acceptable approach for v1.1: cache only currently-visible tiles when "Leaving Now" is triggered, not a full region download.
-
----
-
-## Learning Loop Implementation Notes
-
-The learning loop has three parts with increasing complexity:
-
-**Part 1 — Gear usage tracking (LOW complexity):**
-- Add `usedOnTrip: boolean | null` field to PackingItem model
-- Post-trip UI: show the trip's packing list with checkboxes: "Used" / "Didn't need"
-- This is pure CRUD; no AI required
-
-**Part 2 — Post-trip auto-review (MEDIUM complexity):**
-- After usage tracking is complete, one Claude call
-- Input: items used, items not used, trip duration, destination, weather
-- Output: 3-5 bullet structured summary (what to drop, what was missing, location rating)
-- Store summary in Trip model as `debrief: string`
-
-**Part 3 — Feedback-driven packing improvement (HIGH complexity):**
-- Query last N trips' debrief data before generating a new packing list
-- Inject into packing list prompt: "On previous trips to this region, you consistently didn't use X; on 2 trips you forgot Y"
-- No model fine-tuning needed — context injection into Claude prompt is sufficient for one-user system
-- Requires at least 2-3 completed trips with debrief data to be meaningful; don't build UI for this until data exists
-
----
-
-## Safety Communication Notes
-
-For a single-user personal tool, the safety communication spectrum is:
-
-**Minimum viable (v1.1):** Float plan email on departure. Trip summary (destination, dates, emergency contact, estimated return) composed by Claude and launched via `mailto:` link. User reviews and sends. No server infrastructure required. Effective for 90% of the safety use case.
-
-**Not worth building (v1.1):** Dead man's switch with check-in timers. Requires a persistent background job (cron, server-sent events, or background sync). Local dev architecture doesn't support this reliably. Adds infra complexity for marginal gain when a sent email already covers the use case.
-
-**Future consideration (v2+):** If app deploys to Vercel, a scheduled function could implement a proper check-in system. Park this until deployment decision is made.
+**Defer to v2.0+:** Docker, CI/CD, Cloudflare Tunnel, Litestream, Vercel, cluster mode, auth system, automated Gemini review
 
 ---
 
 ## Sources
 
-- [@ducanh2912/next-pwa docs](https://ducanh-next-pwa.vercel.app/)
-- [Build an offline-ready PWA with Next.js 14 — Ben Mukebo](https://benmukebo.medium.com/build-an-offline-ready-pwa-with-next-js-14-using-ducanh2912-next-pwa-17851765fa6b)
-- [Offline-first PWAs caching strategies — MagicBell](https://www.magicbell.com/blog/offline-first-pwas-service-worker-caching-strategies)
-- [Offline-first frontend apps 2025: IndexedDB and SQLite — LogRocket](https://blog.logrocket.com/offline-first-frontend-apps-2025-indexeddb-sqlite/)
-- [Homebound safety app — trip plans + emergency contacts](https://www.homeboundapp.com/)
-- [HikerAlert / Solowise — safety check-in patterns](https://solowise.app/)
-- [Cairn — cell coverage mapping + live location safety](https://www.cairnme.com/press)
-- [Debrief.ai — voice to structured data](https://debrief-app.vercel.app/)
-- [AI Audio Transcription Guide 2025 — V7 Labs](https://www.v7labs.com/blog/ai-audio-transcription-in-2025-a-practical-guide)
-- [RV Checklist App — departure/arrival checklist patterns](https://rv-checklist.com/features)
-- [Smart camping checklist + GPS integration 2025](https://www.campingchecklist.app/smart-camping-checklist-integration-with-gps/)
-- [Offline camping checklist apps with offline mode 2025](https://www.campingchecklist.app/camping-checklist-apps-with-offline-mode/)
+- [Next.js Self-Hosting Guide](https://nextjs.org/docs/app/guides/self-hosting) -- Official docs on standalone output, env vars, caching (HIGH confidence)
+- [Next.js output: standalone config](https://nextjs.org/docs/app/api-reference/config/next-config-js/output) -- Config reference (HIGH confidence)
+- [PM2 Ecosystem File](https://pm2.keymetrics.io/docs/usage/application-declaration/) -- PM2 config reference (HIGH confidence)
+- [PM2 Restart Strategies](https://pm2.keymetrics.io/docs/usage/restart-strategies/) -- Exponential backoff, memory limits (HIGH confidence)
+- [Tailscale vs Cloudflare Tunnel](https://www.lowerhomeserver.vip/blog/optimization/tailscale-vs-cloudflare-tunnel) -- Remote access comparison (MEDIUM confidence)
+- [Secure Remote Access 2026](https://www.lowerhomeserver.vip/blog/use-cases/secure-remote-access-comparison) -- Tailscale vs WireGuard vs Cloudflare (MEDIUM confidence)
+- [Multi-Model AI Code Review](https://zylos.ai/research/2026-02-17-multi-model-ai-code-review) -- Cross-model review catches 3-5x more issues (MEDIUM confidence)
+- [Gemini CLI Code Analysis Codelab](https://codelabs.developers.google.com/gemini-cli-code-analysis) -- Hands-on Gemini CLI review workflow (HIGH confidence)
+- [Gemini Code Assist Docs](https://developers.google.com/gemini-code-assist/docs/review-repo-code) -- Gemini review capabilities (HIGH confidence)
+- [Cross-Provider AI Review](https://www.mindstudio.ai/blog/openai-codex-plugin-claude-code-cross-provider-review) -- Why different models catch different bugs (MEDIUM confidence)
+- [Self-hosting Next.js with PM2](https://www.headystack.com/self-host-nextjs) -- Community deployment guide (MEDIUM confidence)
+- [Next.js + PM2 production guide (March 2026)](https://medium.com/@touhidulislamnl/deploying-a-next-js-app-on-a-vps-with-nginx-pm2-and-https-complete-production-guide-5b2d80c24dd4) -- Recent deployment walkthrough (MEDIUM confidence)
+- [Litestream SQLite backups](https://medium.com/@cosmicray001/going-production-ready-with-sqlite-how-litestream-makes-it-possible-74f894fc96f0) -- Why simple cron backup is sufficient for single-user (MEDIUM confidence)
 
 ---
 
-*Feature research for: Outland OS v1.1 Close the Loop — PWA/offline, learning loop, day-of execution, stabilization*
-*Researched: 2026-04-01*
+*Feature research for: Outland OS v1.2 Ship It -- production deployment, remote access, cross-AI review*
+*Researched: 2026-04-02*

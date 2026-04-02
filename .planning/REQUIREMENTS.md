@@ -1,85 +1,111 @@
-# Requirements: Outland OS — Milestone v1.1
+# Requirements: Outland OS
 
-**Defined:** 2026-04-01
+**Defined:** 2026-04-02
 **Core Value:** Personal camping second brain — a closed-loop system that plans, executes, and learns from every trip
 
-## v1.1 Requirements
+## v1.2 Requirements
 
-Requirements for v1.1 "Close the Loop." Each maps to roadmap phases.
+Requirements for milestone v1.2 "Ship It". Each maps to roadmap phases.
 
-### Stabilization
+### Build & Tech Debt
 
-- [x] **STAB-01**: User can generate AI outputs (packing list, meal plan) without crashes from malformed Claude responses (Zod parseClaudeJSON utility)
-- [x] **STAB-02**: User can view previously generated packing lists and meal plans after navigating away (persisted to database)
-- [x] **STAB-03**: User can edit and delete trips from the trips page
-- [x] **STAB-04**: User can edit vehicle profile and edit/delete vehicle mods
-- [x] **STAB-05**: User can delete photos from the photo gallery
-- [x] **STAB-06**: All existing forms use the design system UI primitives (Button, Input, Card, Modal) for visual consistency
+- [ ] **BUILD-01**: Production build (`npm run build`) completes without errors
+- [ ] **BUILD-02**: Native SQLite deps (better-sqlite3, sqlite-vec) don't leak into client bundles
+- [ ] **BUILD-03**: Raw `<button>` elements in PackingList/MealPlan replaced with design system Button
+- [ ] **BUILD-04**: `variant="outline"` fix in PostTripReview Retry button
+- [ ] **BUILD-05**: SettingsClient placeholder card replaced with actual content or removed
+- [ ] **BUILD-06**: SW SHELL_ASSETS updated with dynamic trip routes
+- [ ] **BUILD-07**: `tripCoords` piped to LeavingNowButton for tile prefetch
+- [ ] **BUILD-08**: 6 `it.todo` test stubs implemented or removed
+- [ ] **BUILD-09**: Low-value `usageStatus` array test rewritten or removed
+- [ ] **BUILD-10**: ROADMAP.md consistency fixes (header + unchecked boxes)
 
-### PWA / Offline Mode
+### Cross-AI Review
 
-- [ ] **OFF-01**: User can install the app to their phone's home screen as a PWA
-- [ ] **OFF-02**: User can open the app offline and see the app shell (navigation, cached pages)
-- [ ] **OFF-03**: User can tap "Leaving Now" on a trip and have all trip data cached for offline use (weather snapshot, packing list, meal plan, spot coordinates, emergency info)
-- [ ] **OFF-04**: User can view cached map tiles for trip area while offline (tiles visible at time of "Leaving Now")
+- [ ] **REVIEW-01**: Gemini receives full codebase with structured review prompt
+- [ ] **REVIEW-02**: Findings categorized by severity (critical/high/medium/low)
+- [ ] **REVIEW-03**: Actionable findings addressed or documented as deferred
 
-### Day-Of Execution
+### Production Deployment
 
-- [x] **EXEC-01**: User can view a time-ordered departure checklist generated from their trip's packing list, meal plan, and power data
-- [x] **EXEC-02**: User can send a safety float plan email to an emergency contact with trip summary on departure
+- [ ] **DEPLOY-01**: `output: 'standalone'` configured in next.config.ts
+- [ ] **DEPLOY-02**: Persistent data directory (`/data/outland/` for DB + photos)
+- [ ] **DEPLOY-03**: `DATABASE_URL` uses absolute path in production env
+- [ ] **DEPLOY-04**: PM2 ecosystem config with fork mode, log rotation
+- [ ] **DEPLOY-05**: `pm2 startup` persists across Mac mini reboots
+- [ ] **DEPLOY-06**: Deploy script (git pull → npm install → build → pm2 restart)
+- [ ] **DEPLOY-07**: SQLite backup cron (daily .backup to timestamped file)
+- [ ] **DEPLOY-08**: Service worker cache version bumps on deploy
 
-### Learning Loop
+### Remote Access
 
-- [ ] **LEARN-01**: User can mark packed items as "used" or "didn't need" after a trip
-- [ ] **LEARN-02**: User can view a Claude-generated post-trip summary (what to drop, what was missing, location rating) after completing gear usage tracking
-- [ ] **LEARN-03**: User can record a voice debrief that automatically updates gear notes and location ratings
+- [ ] **ACCESS-01**: Tailscale installed and running on Mac mini
+- [ ] **ACCESS-02**: Tailscale installed on Will's iPhone
+- [ ] **ACCESS-03**: MagicDNS provides stable hostname for the app
+- [ ] **ACCESS-04**: HTTPS works via Tailscale (required for PWA service worker)
+- [ ] **ACCESS-05**: App is installable as PWA from phone over Tailscale
 
-## v2 Requirements (Deferred)
+## Future Requirements
 
-- Feedback-driven packing improvement (needs 3+ trips of history data to be meaningful)
-- Dead man's switch safety check-in (needs persistent server infrastructure)
-- Full offline map tile pre-download (deep-link to Gaia GPS instead)
-- Dog-aware trip planning (waiting for dog arrival + needs assessment)
-- Knowledge base expansion (2500+ chunks)
-- Deploy to Vercel (database migration when ready)
-- Smart campsite / Home Assistant bridge (blocked on hardware)
+Deferred to future release. Tracked but not in current roadmap.
+
+### Infrastructure
+
+- **INFRA-01**: Coolify or similar PaaS dashboard for visual management
+- **INFRA-02**: CI/CD pipeline for automated deploy on git push
+- **INFRA-03**: Litestream replication for real-time SQLite backup
 
 ## Out of Scope
 
+Explicitly excluded. Documented to prevent scope creep.
+
 | Feature | Reason |
 |---------|--------|
-| Full region map tile download | 100MB-2GB per region; cache in-viewport tiles only, deep-link Gaia GPS for full offline maps |
-| Background check-in timer / dead man's switch | Requires persistent server process; local dev architecture doesn't support it |
-| Two-way offline sync / conflict resolution | Single user, local SQLite — no sync conflicts possible |
-| Reservation / permit API integration | Recreation.gov API is brittle and high maintenance; paste confirmation URL instead |
-| Rich text debrief editor | Adds friction; voice is the input modality, not keyboard |
-| Real-time offline sync | Single-user local-first app; offline snapshot is read-only in v1.1 |
+| Docker containerization | Single app on owned hardware; native deps simpler without containers |
+| Nginx / reverse proxy | Tailscale provides encrypted access directly |
+| Public internet exposure | Private Tailscale mesh only; no need for public URLs |
+| CI/CD pipeline | Single developer; manual deploy via script is sufficient |
+| Cloudflare Tunnel | Tailscale is simpler and more secure for private single-user access |
+| Cluster mode (PM2) | SQLite requires single process; cluster mode causes locking |
 
 ## Traceability
 
+Which phases cover which requirements. Updated during roadmap creation.
+
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| STAB-01 | Phase 6 | Complete |
-| STAB-02 | Phase 6 | Complete |
-| STAB-03 | Phase 6 | Complete |
-| STAB-04 | Phase 6 | Complete |
-| STAB-05 | Phase 6 | Complete |
-| STAB-06 | Phase 6 | Complete |
-| OFF-01 | Phase 8 | Pending |
-| OFF-02 | Phase 8 | Pending |
-| OFF-03 | Phase 8 | Pending |
-| OFF-04 | Phase 8 | Pending |
-| EXEC-01 | Phase 7 | Complete |
-| EXEC-02 | Phase 7 | Complete |
-| LEARN-01 | Phase 9 | Pending |
-| LEARN-02 | Phase 9 | Pending |
-| LEARN-03 | Phase 9 | Pending |
+| BUILD-01 | Phase 12 | Pending |
+| BUILD-02 | Phase 12 | Pending |
+| BUILD-03 | Phase 12 | Pending |
+| BUILD-04 | Phase 12 | Pending |
+| BUILD-05 | Phase 12 | Pending |
+| BUILD-06 | Phase 12 | Pending |
+| BUILD-07 | Phase 12 | Pending |
+| BUILD-08 | Phase 12 | Pending |
+| BUILD-09 | Phase 12 | Pending |
+| BUILD-10 | Phase 12 | Pending |
+| REVIEW-01 | Phase 12 | Pending |
+| REVIEW-02 | Phase 12 | Pending |
+| REVIEW-03 | Phase 13 | Pending |
+| DEPLOY-01 | Phase 14 | Pending |
+| DEPLOY-02 | Phase 14 | Pending |
+| DEPLOY-03 | Phase 14 | Pending |
+| DEPLOY-04 | Phase 14 | Pending |
+| DEPLOY-05 | Phase 14 | Pending |
+| DEPLOY-06 | Phase 14 | Pending |
+| DEPLOY-07 | Phase 14 | Pending |
+| DEPLOY-08 | Phase 14 | Pending |
+| ACCESS-01 | Phase 15 | Pending |
+| ACCESS-02 | Phase 15 | Pending |
+| ACCESS-03 | Phase 15 | Pending |
+| ACCESS-04 | Phase 15 | Pending |
+| ACCESS-05 | Phase 15 | Pending |
 
 **Coverage:**
-- v1.1 requirements: 15 total
-- Mapped to phases: 15
+- v1.2 requirements: 26 total
+- Mapped to phases: 26
 - Unmapped: 0
 
 ---
-*Requirements defined: 2026-04-01*
-*Last updated: 2026-04-01 — traceability filled after roadmap creation*
+*Requirements defined: 2026-04-02*
+*Last updated: 2026-04-02 after roadmap creation*

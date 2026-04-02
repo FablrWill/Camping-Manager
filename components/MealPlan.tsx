@@ -19,6 +19,7 @@ const STORE_SECTIONS = [
 interface MealPlanProps {
   tripId: string
   tripName: string
+  offlineData?: MealPlanResult
 }
 
 function formatRelativeTime(isoString: string | null): string {
@@ -33,7 +34,7 @@ function formatRelativeTime(isoString: string | null): string {
   return `${days}d ago`
 }
 
-export default function MealPlan({ tripId, tripName }: MealPlanProps) {
+export default function MealPlan({ tripId, tripName, offlineData }: MealPlanProps) {
   const [mealPlan, setMealPlan] = useState<MealPlanResult | null>(null)
   const [generatedAt, setGeneratedAt] = useState<string | null>(null)
   const [loadingMounted, setLoadingMounted] = useState(true)  // loading saved on mount
@@ -47,6 +48,12 @@ export default function MealPlan({ tripId, tripName }: MealPlanProps) {
 
   // Load saved meal plan on mount
   useEffect(() => {
+    if (offlineData) {
+      // Render from IndexedDB snapshot — per D-01
+      setMealPlan(offlineData)
+      setLoadingMounted(false)
+      return
+    }
     async function loadSaved() {
       try {
         const res = await fetch(`/api/meal-plan?tripId=${tripId}`)
@@ -64,7 +71,7 @@ export default function MealPlan({ tripId, tripName }: MealPlanProps) {
       }
     }
     loadSaved()
-  }, [tripId])
+  }, [tripId, offlineData])
 
   const handleGenerate = useCallback(async () => {
     setGenerating(true)
@@ -143,22 +150,24 @@ export default function MealPlan({ tripId, tripName }: MealPlanProps) {
               No meal plan yet
             </p>
           </div>
-          <div className="flex flex-col items-end gap-2">
-            <Button variant="primary" size="sm" onClick={handleGenerate} loading={generating}>
-              Generate Meal Plan
-            </Button>
-            {error && (
-              <p className="text-xs text-red-600 dark:text-red-400 text-right max-w-[200px]">
-                {error}
-                <button
-                  onClick={handleGenerate}
-                  className="ml-1.5 font-medium text-amber-600 dark:text-amber-400 hover:underline"
-                >
-                  Retry
-                </button>
-              </p>
-            )}
-          </div>
+          {!offlineData && (
+            <div className="flex flex-col items-end gap-2">
+              <Button variant="primary" size="sm" onClick={handleGenerate} loading={generating}>
+                Generate Meal Plan
+              </Button>
+              {error && (
+                <p className="text-xs text-red-600 dark:text-red-400 text-right max-w-[200px]">
+                  {error}
+                  <button
+                    onClick={handleGenerate}
+                    className="ml-1.5 font-medium text-amber-600 dark:text-amber-400 hover:underline"
+                  >
+                    Retry
+                  </button>
+                </p>
+              )}
+            </div>
+          )}
         </div>
       </div>
     )
@@ -199,15 +208,21 @@ export default function MealPlan({ tripId, tripName }: MealPlanProps) {
           <h3 className="text-sm font-semibold text-stone-900 dark:text-stone-100">
             🍳 Meal Plan
           </h3>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => mealPlan ? setShowRegenerateConfirm(true) : handleGenerate()}
-            loading={generating}
-            icon={!generating ? <RotateCcw size={12} /> : undefined}
-          >
-            Regenerate
-          </Button>
+          {offlineData ? (
+            <span className="text-xs text-stone-400 dark:text-stone-500 italic">
+              (Offline — read only)
+            </span>
+          ) : (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => mealPlan ? setShowRegenerateConfirm(true) : handleGenerate()}
+              loading={generating}
+              icon={!generating ? <RotateCcw size={12} /> : undefined}
+            >
+              Regenerate
+            </Button>
+          )}
         </div>
 
         {/* Metadata line */}

@@ -9,6 +9,8 @@ import LeavingNowButton from '@/components/LeavingNowButton'
 import type { DepartureChecklistResult } from '@/lib/parse-claude'
 import { formatDateRange } from '@/lib/trip-utils'
 import { useOnlineStatus } from '@/lib/use-online-status'
+import { getTripSnapshot } from '@/lib/offline-storage'
+import { queueCheckOff } from '@/lib/offline-write-queue'
 
 interface DepartureChecklistClientProps {
   tripId: string
@@ -17,6 +19,7 @@ interface DepartureChecklistClientProps {
   endDate: string
   emergencyContactName: string | null
   emergencyContactEmail: string | null
+  offlineData?: DepartureChecklistResult
 }
 
 interface FloatPlanSentState {
@@ -32,8 +35,10 @@ export default function DepartureChecklistClient({
   endDate,
   emergencyContactName: tripEmergencyContactName,
   emergencyContactEmail: tripEmergencyContactEmail,
+  offlineData,
 }: DepartureChecklistClientProps) {
   const isOnline = useOnlineStatus()
+  const [offlineChecklist, setOfflineChecklist] = useState<DepartureChecklistResult | null>(null)
   const [checklist, setChecklist] = useState<DepartureChecklistResult | null>(null)
   const [checklistId, setChecklistId] = useState<string | null>(null)
   const [generating, setGenerating] = useState(false)
@@ -52,8 +57,31 @@ export default function DepartureChecklistClient({
   const [floatPlanError, setFloatPlanError] = useState<string | null>(null)
   const [showFloatPlanConfirm, setShowFloatPlanConfirm] = useState(false)
 
+  // Load offline checklist data when device is offline
+  useEffect(() => {
+    if (isOnline) return
+    if (offlineData) {
+      setOfflineChecklist(offlineData)
+      return
+    }
+    // Fallback: load from IndexedDB directly
+    let cancelled = false
+    async function loadFromSnapshot() {
+      const snap = await getTripSnapshot(tripId)
+      if (!cancelled && snap?.departureChecklist) {
+        setOfflineChecklist(snap.departureChecklist as DepartureChecklistResult)
+      }
+    }
+    loadFromSnapshot()
+    return () => { cancelled = true }
+  }, [isOnline, tripId, offlineData])
+
   // Load saved checklist on mount
   useEffect(() => {
+    if (!isOnline && offlineChecklist) {
+      setChecklist(offlineChecklist)
+      return
+    }
     async function loadSaved() {
       try {
         const res = await fetch(`/api/departure-checklist?tripId=${tripId}`)
@@ -69,7 +97,8 @@ export default function DepartureChecklistClient({
       }
     }
     loadSaved()
-  }, [tripId])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tripId, offlineChecklist])
 
   // Load emergency contact from settings (fallback if not set at trip level)
   useEffect(() => {
@@ -123,7 +152,7 @@ export default function DepartureChecklistClient({
   }, [])
 
   const handleCheck = useCallback(
-    (itemId: string, checked: boolean) => {
+    async (itemId: string, checked: boolean) => {
       if (!checklistId) return
 
       // Optimistic update
@@ -140,14 +169,20 @@ export default function DepartureChecklistClient({
         }
       })
 
-      // Fire-and-forget PATCH
+      if (!isOnline) {
+        // Queue for sync when back online — per D-02. AppShell handles replay.
+        await queueCheckOff(checklistId, itemId, checked)
+        return
+      }
+
+      // Fire-and-forget PATCH (only runs when online)
       fetch(`/api/departure-checklist/${checklistId}/check`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ itemId, checked }),
       }).catch(() => {})
     },
-    [checklistId]
+    [checklistId, isOnline]
   )
 
   const handleSendFloatPlan = useCallback(() => {

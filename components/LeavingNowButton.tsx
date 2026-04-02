@@ -11,6 +11,8 @@ interface LeavingNowButtonProps {
   tripName: string
   dateRange: string
   emergencyContact: { name: string | null; email: string | null }
+  /** Trip destination coordinates for tile prefetch. If undefined, tiles step is skipped gracefully. */
+  tripCoords?: { lat: number; lon: number }
 }
 
 function initialStatuses(): Record<CacheStep, StepStatus> {
@@ -22,6 +24,7 @@ export default function LeavingNowButton({
   tripName,
   dateRange,
   emergencyContact,
+  tripCoords,
 }: LeavingNowButtonProps) {
   const [showOverlay, setShowOverlay] = useState(false)
   const [stepStatuses, setStepStatuses] = useState<Record<CacheStep, StepStatus>>(initialStatuses)
@@ -42,7 +45,7 @@ export default function LeavingNowButton({
     setShowOverlay(true)
     await cacheTripData(tripId, emergencyContact, (step, status) => {
       setStepStatuses((prev) => ({ ...prev, [step]: status }))
-    })
+    }, tripCoords)
     const snapshot = await getTripSnapshot(tripId)
     if (snapshot) {
       setCachedAge(getSnapshotAge(snapshot.cachedAt))
