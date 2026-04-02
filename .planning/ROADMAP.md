@@ -90,7 +90,7 @@ Plans:
 
 </details>
 
-### v1.1 Close the Loop (In Progress)
+### v1.1 Close the Loop (Complete)
 
 **Milestone Goal:** Stabilize the foundation, add offline capability, and build the learning loop — so the app survives a real camping trip and gets smarter from it.
 
@@ -193,8 +193,8 @@ Plans:
   3. REQUIREMENTS.md, ROADMAP.md, and STATE.md are consistent with actual implementation state
 **Plans**: 2 plans
 Plans:
-- [ ] 11-01-PLAN.md — Code fixes: VoiceDebriefButton isPast guard + circular test rewrite
-- [ ] 11-02-PLAN.md — Documentation consistency pass across REQUIREMENTS, ROADMAP, STATE, PROJECT
+- [x] 11-01-PLAN.md — Code fixes: VoiceDebriefButton isPast guard + circular test rewrite
+- [x] 11-02-PLAN.md — Documentation consistency pass across REQUIREMENTS, ROADMAP, STATE, PROJECT
 
 ## Progress
 
