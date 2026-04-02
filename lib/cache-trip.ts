@@ -1,6 +1,15 @@
 import { saveTripSnapshot, type TripSnapshot } from './offline-storage'
+import { getTileUrlsWithDestinationDetail, prefetchTiles } from './tile-prefetch'
 
-export type CacheStep = 'weather' | 'packingList' | 'mealPlan' | 'checklist' | 'emergency' | 'spots' | 'vehicle'
+export type CacheStep =
+  | 'weather'
+  | 'packingList'
+  | 'mealPlan'
+  | 'checklist'
+  | 'emergency'
+  | 'spots'
+  | 'vehicle'
+  | 'tiles'
 export type StepStatus = 'pending' | 'loading' | 'done' | 'error'
 
 export const CACHE_STEP_LABELS: Record<CacheStep, string> = {
@@ -11,6 +20,7 @@ export const CACHE_STEP_LABELS: Record<CacheStep, string> = {
   emergency: 'Emergency info',
   spots: 'Saved spots',
   vehicle: 'Vehicle info',
+  tiles: 'Map tiles',
 }
 
 export const CACHE_STEPS: CacheStep[] = [
@@ -21,12 +31,14 @@ export const CACHE_STEPS: CacheStep[] = [
   'emergency',
   'spots',
   'vehicle',
+  'tiles',
 ]
 
 async function fetchStepData(
   tripId: string,
   step: CacheStep,
-  tripEmergency: { name: string | null; email: string | null }
+  tripEmergency: { name: string | null; email: string | null },
+  tripCoords?: { lat: number; lon: number }
 ): Promise<unknown> {
   switch (step) {
     case 'weather': {
@@ -71,13 +83,22 @@ async function fetchStepData(
       if (!res.ok) throw new Error(`Vehicle: ${res.status}`)
       return res.json()
     }
+    case 'tiles': {
+      // Skip tiles step gracefully when no coordinates are available
+      if (!tripCoords) return null
+      const urls = getTileUrlsWithDestinationDetail(tripCoords.lat, tripCoords.lon)
+      const result = await prefetchTiles(urls)
+      // Store summary (not the URLs themselves) to keep snapshot compact
+      return { count: result.fetched, failed: result.failed }
+    }
   }
 }
 
 export async function cacheTripData(
   tripId: string,
   tripEmergency: { name: string | null; email: string | null },
-  onStepUpdate: (step: CacheStep, status: StepStatus) => void
+  onStepUpdate: (step: CacheStep, status: StepStatus) => void,
+  tripCoords?: { lat: number; lon: number }
 ): Promise<void> {
   const snapshot: Record<string, unknown> = {
     tripId,
@@ -87,7 +108,7 @@ export async function cacheTripData(
   for (const step of CACHE_STEPS) {
     onStepUpdate(step, 'loading')
     try {
-      const data = await fetchStepData(tripId, step, tripEmergency)
+      const data = await fetchStepData(tripId, step, tripEmergency, tripCoords)
       snapshot[step] = data
       onStepUpdate(step, 'done')
     } catch {
