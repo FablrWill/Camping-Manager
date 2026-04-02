@@ -70,7 +70,27 @@ A personal second brain for car camping — an AI-powered knowledge system that 
 
 ### Active
 
-(None yet — define in next milestone via `/gsd:new-milestone`)
+<!-- v1.2 Ship It — defined 2026-04-02 -->
+
+- [ ] Cross-AI review (Gemini full-project audit)
+- [ ] Fix broken npm run build (RAG native deps)
+- [ ] Resolve all v1.1 tech debt items (11 items)
+- [ ] Address actionable Gemini feedback
+- [ ] Production deployment on Mac mini
+- [ ] Remote access via Tailscale or Cloudflare Tunnel
+
+## Current Milestone: v1.2 Ship It
+
+**Goal:** Cross-AI review, fix all tech debt, get production build working, and deploy to Mac mini so Will can use it from his phone anywhere.
+
+**Target features:**
+- Gemini full-project review (code quality, architecture, UX, blind spots)
+- Fix broken `npm run build` (RAG native deps issue)
+- Resolve all 11 v1.1 tech debt items
+- Address actionable Gemini feedback
+- Production deployment on Mac mini (PM2 or similar)
+- Remote access via Tailscale or Cloudflare Tunnel
+- Mobile-accessible from phone over the network
 
 ### Out of Scope
 
@@ -91,7 +111,7 @@ A personal second brain for car camping — an AI-powered knowledge system that 
 - [ ] Dead man's switch safety check-in (needs persistent server infrastructure)
 - [ ] Dog-aware trip planning (waiting for dog arrival + needs assessment)
 - [ ] Knowledge base expansion (2500+ chunks)
-- [ ] Deploy to Vercel (database migration when ready)
+- [ ] Deploy to Vercel (if Mac mini hosting proves insufficient)
 - [ ] Smart campsite / Home Assistant bridge (blocked on hardware)
 - [ ] Plan A/B/C fallback chain for trip planning
 - [ ] Photo auto-import from iCloud/Google Photos
@@ -117,6 +137,7 @@ A personal second brain for car camping — an AI-powered knowledge system that 
 | Zod .safeParse() not .parse() | Return 422 for schema mismatches, not 500 crashes | ✓ Validated v1.1 |
 | Plain text float plan email | HTML rendering varies across email clients; text is universal | ✓ Validated v1.1 |
 | Settings singleton via hardcoded id | Enforces one row, upsert always targets same record | ✓ Validated v1.1 |
+| Mac mini self-hosting over Vercel | Free, SQLite stays local, photos on disk, no cloud costs | — Pending v1.2 |
 
 ## Constraints
 
@@ -145,4 +166,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-02 after v1.1 milestone*
+*Last updated: 2026-04-02 after v1.2 milestone start*
