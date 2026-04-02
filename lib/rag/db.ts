@@ -1,8 +1,9 @@
-import { resolve, dirname, join } from 'path';
-import Database from 'better-sqlite3';
-import * as sqliteVec from 'sqlite-vec';
+import { resolve, join } from 'path';
 
-let vecDb: Database.Database | null = null;
+// better-sqlite3 and sqlite-vec are dynamically imported to avoid native binding
+// resolution failures during Next.js static page data collection at build time.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let vecDb: any = null;
 
 /**
  * Resolve the DATABASE_URL to an absolute path.
@@ -26,8 +27,10 @@ function resolveDbPath(): string {
  * This is a separate connection from Prisma's internal SQLite connection.
  * Both point to the same dev.db file. WAL mode allows concurrent access.
  */
-export function getVecDb(): Database.Database {
+export async function getVecDb() {
   if (!vecDb) {
+    const Database = (await import('better-sqlite3')).default;
+    const sqliteVec = await import('sqlite-vec');
     const dbPath = resolveDbPath();
     vecDb = new Database(dbPath);
     vecDb.pragma('journal_mode = WAL');

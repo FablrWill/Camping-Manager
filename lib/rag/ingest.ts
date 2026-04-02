@@ -207,7 +207,7 @@ export async function ingestChunks(
       });
 
       // Get the SQLite rowid for the just-inserted row
-      const vecDb = getVecDb();
+      const vecDb = await getVecDb();
       const rowIdResult = vecDb
         .prepare('SELECT rowid FROM KnowledgeChunk WHERE id = ?')
         .get(row.id) as { rowid: number };

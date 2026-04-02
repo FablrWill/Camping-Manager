@@ -1,6 +1,8 @@
-import nodemailer from 'nodemailer';
+// nodemailer is dynamically imported to avoid module resolution failures
+// during Next.js static page data collection at build time.
 
-export function createTransporter() {
+async function createTransporter() {
+  const nodemailer = (await import('nodemailer')).default;
   return nodemailer.createTransport({
     host: 'smtp.gmail.com',
     port: 587,
@@ -21,7 +23,7 @@ export async function sendFloatPlan(params: {
   if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
     throw new Error('Gmail credentials not configured. Set GMAIL_USER and GMAIL_APP_PASSWORD in .env');
   }
-  const transporter = createTransporter();
+  const transporter = await createTransporter();
   await transporter.sendMail({
     from: `"Outland OS" <${process.env.GMAIL_USER}>`,
     to: `"${params.toName}" <${params.to}>`,
@@ -34,7 +36,7 @@ export async function sendTestEmail(toEmail: string): Promise<void> {
   if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
     throw new Error('Gmail credentials not configured. Set GMAIL_USER and GMAIL_APP_PASSWORD in .env');
   }
-  const transporter = createTransporter();
+  const transporter = await createTransporter();
   await transporter.sendMail({
     from: `"Outland OS" <${process.env.GMAIL_USER}>`,
     to: toEmail,
