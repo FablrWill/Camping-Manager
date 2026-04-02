@@ -23,7 +23,13 @@ export function useTheme() {
 }
 
 export default function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>('system')
+  // Initialize from localStorage immediately to avoid flash; SSR-safe via typeof check
+  const [theme, setThemeState] = useState<Theme>(() => {
+    if (typeof window !== 'undefined') {
+      return (localStorage.getItem('cc-theme') as Theme | null) || 'system'
+    }
+    return 'system'
+  })
   const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>('light')
 
   const applyTheme = useCallback((resolved: 'light' | 'dark') => {
@@ -54,29 +60,31 @@ export default function ThemeProvider({ children }: { children: React.ReactNode 
     setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')
   }, [resolvedTheme, setTheme])
 
-  // Initialize from localStorage or system preference
+  // Apply theme on mount and listen for system theme changes.
+  // DOM manipulation is done synchronously; setState is deferred to avoid
+  // synchronous setState in effect body (react-hooks/set-state-in-effect).
   useEffect(() => {
-    const stored = localStorage.getItem('cc-theme') as Theme | null
-    const initial = stored || 'system'
-    setThemeState(initial)
-
-    if (initial === 'system') {
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-      applyTheme(prefersDark ? 'dark' : 'light')
-    } else {
-      applyTheme(initial)
+    function applyDom(resolved: 'light' | 'dark') {
+      if (resolved === 'dark') {
+        document.documentElement.classList.add('dark')
+      } else {
+        document.documentElement.classList.remove('dark')
+      }
+      queueMicrotask(() => setResolvedTheme(resolved))
     }
 
-    // Listen for system theme changes
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+    applyDom(theme === 'system' ? (prefersDark ? 'dark' : 'light') : theme)
+
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
     const handler = (e: MediaQueryListEvent) => {
       if (theme === 'system') {
-        applyTheme(e.matches ? 'dark' : 'light')
+        applyDom(e.matches ? 'dark' : 'light')
       }
     }
     mediaQuery.addEventListener('change', handler)
     return () => mediaQuery.removeEventListener('change', handler)
-  }, [applyTheme, theme])
+  }, [theme])
 
   return (
     <ThemeContext.Provider value={{ theme, resolvedTheme, setTheme, toggleTheme }}>

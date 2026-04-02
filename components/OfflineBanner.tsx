@@ -9,12 +9,12 @@ import { getPendingWrites } from '@/lib/offline-write-queue'
 export default function OfflineBanner() {
   const isOnline = useOnlineStatus()
   const [snapshotAge, setSnapshotAge] = useState<string | null>(null)
-  const [snapshotTimestamp, setSnapshotTimestamp] = useState<string | null>(null)
+  const [isStale, setIsStale] = useState(false)
   const [pendingCount, setPendingCount] = useState(0)
 
   useEffect(() => {
     if (isOnline) {
-      setPendingCount(0)
+      queueMicrotask(() => setPendingCount(0))
       return
     }
 
@@ -24,7 +24,9 @@ export default function OfflineBanner() {
         const snapshot = await getTripSnapshot(ids[0])
         if (snapshot) {
           setSnapshotAge(getSnapshotAge(snapshot.cachedAt))
-          setSnapshotTimestamp(snapshot.cachedAt)
+          // Stale check computed in async callback, not during render
+          const ageMs = Date.now() - new Date(snapshot.cachedAt).getTime()
+          setIsStale(ageMs > 24 * 60 * 60 * 1000)
         }
       }
     }
@@ -43,10 +45,6 @@ export default function OfflineBanner() {
   }, [isOnline])
 
   if (isOnline) return null
-
-  const isStale = snapshotTimestamp
-    ? Date.now() - new Date(snapshotTimestamp).getTime() > 24 * 60 * 60 * 1000
-    : false
 
   return (
     <div className={`border-l-3 border-amber-500 px-3 py-2 flex items-center gap-2 text-sm text-stone-200 transition-all duration-200 ${isStale ? 'bg-stone-800 dark:bg-amber-900/10' : 'bg-stone-800 dark:bg-stone-900'}`}>

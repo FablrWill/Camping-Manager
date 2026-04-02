@@ -174,12 +174,6 @@ export default function SettingsClient() {
         </div>
       </Card>
 
-      {/* Future settings placeholder */}
-      <Card>
-        <p className="text-sm text-stone-400 dark:text-stone-500 italic">
-          More settings coming in future phases.
-        </p>
-      </Card>
     </div>
   );
 }

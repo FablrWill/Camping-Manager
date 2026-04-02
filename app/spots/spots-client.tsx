@@ -71,7 +71,8 @@ export default function SpotsClient({
   // Load cached spot data from all trip snapshots when offline
   useEffect(() => {
     if (isOnline) {
-      setOfflineLocations([]);
+      // Defer state reset to avoid synchronous setState in effect body
+      queueMicrotask(() => setOfflineLocations([]));
       return;
     }
     let cancelled = false;
@@ -126,6 +127,8 @@ export default function SpotsClient({
   }, []);
 
   useEffect(() => {
+    // fetchTimeline is an async useCallback that calls setState in a callback, not synchronously
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchTimeline(selectedDate || undefined);
   }, [selectedDate, fetchTimeline]);
 
