@@ -271,7 +271,7 @@ export default function PostTripReview({ tripId }: PostTripReviewProps) {
       {summaryError && !summaryLoading && (
         <div className="mt-4 p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
           <p className="text-sm text-red-600 dark:text-red-400">{summaryError}</p>
-          <Button variant="outline" size="sm" className="mt-2" onClick={generateSummary}>
+          <Button variant="secondary" size="sm" className="mt-2" onClick={generateSummary}>
             Retry
           </Button>
         </div>
