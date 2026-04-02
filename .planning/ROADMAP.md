@@ -52,12 +52,14 @@
   3. All design system components are used consistently (no raw `<button>` or invalid variants)
   4. All test stubs are either implemented or removed (zero `it.todo` remaining)
   5. Gemini review report exists with findings categorized by severity
-**Plans**: TBD
+**Plans:** 5 plans
 
-**Parallelization notes:**
-- BUILD-01/BUILD-02 (fix build) is the critical path -- must succeed first
-- BUILD-03 through BUILD-10 (tech debt) are independent 5-15 min fixes that can run as parallel agents
-- REVIEW-01/REVIEW-02 (Gemini review) can run concurrently with tech debt since it reads existing code, not modified code
+Plans:
+- [ ] 12-01-PLAN.md — Component fixes (BUILD-03/04/05) + lint error fixes
+- [ ] 12-02-PLAN.md — SW runtime cache + tripCoords pipe (BUILD-06/07)
+- [ ] 12-03-PLAN.md — Test stub implementations (BUILD-08/09)
+- [ ] 12-04-PLAN.md — Gemini cross-AI review (REVIEW-01/02)
+- [ ] 12-05-PLAN.md — ROADMAP fix + final D-10 verification gate (BUILD-01/02/04/10)
 
 ### Phase 13: Address Review Findings
 **Goal**: Actionable issues from the Gemini review are fixed or documented as deferred, so the codebase shipping to production is vetted by two AI models
@@ -121,7 +123,7 @@ Phases execute in numeric order: 12 -> 13 -> 14 -> 15
 | 9. Learning Loop | v1.1 | 4/4 | Complete | 2026-04-02 |
 | 10. Offline Read Path | v1.1 | 4/4 | Complete | 2026-04-02 |
 | 11. v1.1 Polish | v1.1 | 2/2 | Complete | 2026-04-02 |
-| 12. Fix Build & Clean House | v1.2 | 0/TBD | Not started | - |
+| 12. Fix Build & Clean House | v1.2 | 0/5 | In progress | - |
 | 13. Address Review Findings | v1.2 | 0/TBD | Not started | - |
 | 14. Production Deployment | v1.2 | 0/TBD | Not started | - |
 | 15. Remote Access & Go Live | v1.2 | 0/TBD | Not started | - |
