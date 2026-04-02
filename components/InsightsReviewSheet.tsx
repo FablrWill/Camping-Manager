@@ -11,6 +11,7 @@ interface InsightsReviewSheetProps {
   tripId: string
   locationId: string | null
   onClose: () => void
+  transcription?: string  // Raw voice transcription for TripFeedback storage
 }
 
 interface GearItem {
@@ -24,7 +25,7 @@ interface LocationData {
   rating: number | null
 }
 
-export default function InsightsReviewSheet({ insights, tripId, locationId, onClose }: InsightsReviewSheetProps) {
+export default function InsightsReviewSheet({ insights, tripId, locationId, onClose, transcription }: InsightsReviewSheetProps) {
   const [checkedWhatWorked, setCheckedWhatWorked] = useState<Set<number>>(
     () => new Set(insights.whatWorked.map((_, i) => i))
   )
@@ -121,6 +122,7 @@ export default function InsightsReviewSheet({ insights, tripId, locationId, onCl
 
     const payload: ApplyInsightRequest = {
       tripId,
+      voiceTranscript: transcription,
       insights: {
         whatWorked: [...checkedWhatWorked].map(i => insights.whatWorked[i].text),
         whatDidnt: [...checkedWhatDidnt].map(i => insights.whatDidnt[i].text),
