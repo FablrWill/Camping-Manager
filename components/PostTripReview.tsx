@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui'
 import type { PackingListResult } from '@/lib/claude'
+import type { TripSummaryResult } from '@/lib/parse-claude'
 
 interface PostTripReviewProps {
   tripId: string
@@ -37,16 +38,37 @@ export default function PostTripReview({ tripId }: PostTripReviewProps) {
   const [usageMap, setUsageMap] = useState<Record<string, UsageStatus>>({})
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [summary, setSummary] = useState<TripSummaryResult | null>(null)
+  const [summaryExists, setSummaryExists] = useState(false)
+  const [summaryLoading, setSummaryLoading] = useState(false)
+  const [summaryError, setSummaryError] = useState<string | null>(null)
+  const generatingRef = useRef(false)
 
   useEffect(() => {
     async function loadData() {
       try {
+        // Load packing list + usage state
         const res = await fetch(`/api/packing-list?tripId=${tripId}`)
         if (!res.ok) throw new Error('Failed to load packing list')
         const data = await res.json()
         setPackingList(data.result)
         if (data.usageState) {
           setUsageMap(data.usageState as Record<string, UsageStatus>)
+        }
+
+        // Load existing summary from feedback API
+        const feedbackRes = await fetch(`/api/trips/${tripId}/feedback`)
+        if (feedbackRes.ok) {
+          const feedbackData = await feedbackRes.json()
+          if (feedbackData.feedback?.summary) {
+            try {
+              const parsed = JSON.parse(feedbackData.feedback.summary) as TripSummaryResult
+              setSummary(parsed)
+              setSummaryExists(true)
+            } catch {
+              // Summary JSON parse failed — treat as no summary
+            }
+          }
         }
       } catch (err) {
         console.error('PostTripReview load error:', err)
@@ -56,6 +78,36 @@ export default function PostTripReview({ tripId }: PostTripReviewProps) {
       }
     }
     loadData()
+  }, [tripId])
+
+  const generateSummary = useCallback(async () => {
+    if (generatingRef.current) return
+    generatingRef.current = true
+    setSummaryLoading(true)
+    setSummaryError(null)
+
+    try {
+      const res = await fetch(`/api/trips/${tripId}/feedback`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      })
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}))
+        throw new Error(errData.error || 'Failed to generate trip summary')
+      }
+      const data = await res.json()
+      if (data.feedback?.summary) {
+        const parsed = JSON.parse(data.feedback.summary) as TripSummaryResult
+        setSummary(parsed)
+        setSummaryExists(true)
+      }
+    } catch (err) {
+      console.error('Failed to generate trip summary:', err)
+      setSummaryError(err instanceof Error ? err.message : 'Failed to generate trip summary')
+    } finally {
+      setSummaryLoading(false)
+      generatingRef.current = false
+    }
   }, [tripId])
 
   const handleStatusTap = useCallback(
@@ -113,6 +165,11 @@ export default function PostTripReview({ tripId }: PostTripReviewProps) {
     (item) => item.gearId && usageMap[item.gearId] !== null && usageMap[item.gearId] !== undefined
   ).length
   const allComplete = totalCount > 0 && completedCount === totalCount
+
+  // Auto-generate when all items reviewed (per D-03)
+  if (allComplete && !summaryExists && !summaryLoading && !generatingRef.current) {
+    generateSummary()
+  }
 
   return (
     <div>
@@ -201,11 +258,73 @@ export default function PostTripReview({ tripId }: PostTripReviewProps) {
         })}
       </div>
 
-      {/* allComplete indicator (consumed by Plan 02) */}
-      {allComplete && (
-        <p className="mt-3 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
-          All items reviewed — trip summary ready to generate.
-        </p>
+      {/* Summary loading indicator */}
+      {summaryLoading && (
+        <div className="mt-4 p-4 bg-stone-50 dark:bg-stone-800/50 rounded-lg text-center">
+          <p className="text-sm text-stone-500 dark:text-stone-400 animate-pulse">
+            Generating trip debrief...
+          </p>
+        </div>
+      )}
+
+      {/* Summary error with retry */}
+      {summaryError && !summaryLoading && (
+        <div className="mt-4 p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+          <p className="text-sm text-red-600 dark:text-red-400">{summaryError}</p>
+          <Button variant="outline" size="sm" className="mt-2" onClick={generateSummary}>
+            Retry
+          </Button>
+        </div>
+      )}
+
+      {/* Trip Debrief summary card */}
+      {summary && !summaryLoading && (
+        <div className="mt-4 p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
+          <h4 className="font-semibold text-stone-900 dark:text-stone-50 mb-2">Trip Debrief</h4>
+          <p className="text-sm text-stone-600 dark:text-stone-300 mb-3">{summary.summary}</p>
+
+          {summary.whatToDrop.length > 0 && (
+            <div className="mb-2">
+              <span className="text-xs font-medium text-stone-500 dark:text-stone-400 uppercase">
+                Drop next time:
+              </span>
+              <div className="flex flex-wrap gap-1 mt-1">
+                {summary.whatToDrop.map((item, i) => (
+                  <span
+                    key={i}
+                    className="text-xs bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 px-2 py-0.5 rounded"
+                  >
+                    {item}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {summary.whatWasMissing.length > 0 && (
+            <div className="mb-2">
+              <span className="text-xs font-medium text-red-500 dark:text-red-400 uppercase">
+                Add next time:
+              </span>
+              <div className="flex flex-wrap gap-1 mt-1">
+                {summary.whatWasMissing.map((item, i) => (
+                  <span
+                    key={i}
+                    className="text-xs bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 px-2 py-0.5 rounded"
+                  >
+                    {item}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {summary.locationRating !== null && (
+            <div className="text-xs text-stone-500 dark:text-stone-400">
+              Suggested location rating: {summary.locationRating}/5
+            </div>
+          )}
+        </div>
       )}
     </div>
   )
