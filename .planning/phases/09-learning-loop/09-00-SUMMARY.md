@@ -112,6 +112,16 @@ The three test files are entirely stubs by design (this is a Wave 0 / Nyquist pl
 - `tests/voice-debrief.test.ts` ready as verify target for Plan 09-03 (voice debrief persistence)
 - vitest discovers all 9 test files (Phase 8 + Phase 9) cleanly
 
+## Self-Check: PASSED
+
+- FOUND: tests/usage-tracking.test.ts
+- FOUND: tests/trip-summary.test.ts
+- FOUND: tests/voice-debrief.test.ts
+- FOUND: vitest.config.ts (includes tests/ pattern)
+- FOUND: .planning/phases/09-learning-loop/09-00-SUMMARY.md
+- FOUND: commit 1d55626 (task commit)
+- FOUND: commit 13a0bab (docs commit)
+
 ---
 *Phase: 09-learning-loop*
 *Completed: 2026-04-02*
