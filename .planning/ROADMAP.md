@@ -90,7 +90,7 @@ Plans:
 
 </details>
 
-### 🚧 v1.1 Close the Loop (In Progress)
+### v1.1 Close the Loop (In Progress)
 
 **Milestone Goal:** Stabilize the foundation, add offline capability, and build the learning loop — so the app survives a real camping trip and gets smarter from it.
 
@@ -142,11 +142,11 @@ Plans:
   5. User sees a clear indicator when the app is offline and knows how old the cached snapshot is
 **Plans**: 5 plans
 Plans:
-- [ ] 08-00-PLAN.md — Wave 0: Vitest install, test stub files for all Phase 8 modules
-- [ ] 08-01-PLAN.md — PWA foundation: manifest, icons, service worker with app shell caching, SW registration
-- [ ] 08-02-PLAN.md — Offline infrastructure: idb-keyval, offline storage, online status hook, offline banner, install banner
-- [ ] 08-03-PLAN.md — "Leaving Now" caching flow: sequential data fetcher, progress overlay, button, departure page integration
-- [ ] 08-04-PLAN.md — Map tile caching + offline UI polish: SpotMap crossOrigin, tile error placeholders, offline checklist states, staleness warning
+- [x] 08-00-PLAN.md — Wave 0: Vitest install, test stub files for all Phase 8 modules
+- [x] 08-01-PLAN.md — PWA foundation: manifest, icons, service worker with app shell caching, SW registration
+- [x] 08-02-PLAN.md — Offline infrastructure: idb-keyval, offline storage, online status hook, offline banner, install banner
+- [x] 08-03-PLAN.md — "Leaving Now" caching flow: sequential data fetcher, progress overlay, button, departure page integration
+- [x] 08-04-PLAN.md — Map tile caching + offline UI polish: SpotMap crossOrigin, tile error placeholders, offline checklist states, staleness warning
 **UI hint**: yes
 
 ### Phase 9: Learning Loop
@@ -166,16 +166,21 @@ Plans:
 **UI hint**: yes
 
 ### Phase 10: Offline Read Path & PWA Completion
-**Goal**: Cached trip data is actually accessible offline — the IndexedDB read path renders trip snapshots, the service worker falls back to cached data for API calls, and map tiles are proactively prefetched before departure
+**Goal**: Cached trip data is actually accessible offline — components read IndexedDB snapshots via client-side detection, map tiles are proactively prefetched before departure, and offline check-offs queue for sync
 **Depends on**: Phase 8
 **Requirements**: OFF-01, OFF-02, OFF-03, OFF-04
 **Gap Closure:** Closes all 4 unsatisfied requirements, 2 integration gaps, and 1 broken E2E flow from v1.1 audit
 **Success Criteria** (what must be TRUE):
   1. User can tap "Leaving Now," go offline, and see their trip data rendered from IndexedDB (packing list, meal plan, weather, spots)
-  2. Service worker intercepts /api/ calls when offline and returns IndexedDB-cached data instead of `{ error: 'Offline' }`
+  2. Components use useOnlineStatus hook to detect offline state and read IndexedDB directly — client-side detection, not SW interception
   3. Map tiles for the trip bounding box are proactively fetched and cached on "Leaving Now" — not just passively cached from prior views
   4. Phase 8 has passing tests (not todo stubs), SUMMARY.md, and VERIFICATION.md
-**Plans**: TBD
+**Plans**: 4 plans
+Plans:
+- [ ] 10-01-PLAN.md — Test implementations: all 32 existing test stubs replaced with real assertions
+- [ ] 10-02-PLAN.md — New modules: tile-prefetch, offline-write-queue, cache-trip tiles wiring
+- [ ] 10-03-PLAN.md — Dual-mode components: offline read path for PackingList, MealPlan, DepartureChecklistClient + write queue
+- [ ] 10-04-PLAN.md — Phase 8 documentation: SUMMARY.md and VERIFICATION.md
 
 ### Phase 11: v1.1 Polish
 **Goal**: Fix tech debt and stale documentation identified by the milestone audit — VoiceDebriefButton guard, circular test, and doc consistency
@@ -204,5 +209,5 @@ Phases execute in numeric order: 6 → 7 → 8 → 9
 | 7. Day-Of Execution | v1.1 | 3/3 | Complete   | 2026-04-01 |
 | 8. PWA and Offline | v1.1 | 5/5 | Partial (audit: read path missing) | 2026-04-02 |
 | 9. Learning Loop | v1.1 | 4/4 | Complete | 2026-04-02 |
-| 10. Offline Read Path & PWA Completion | v1.1 | 0/TBD | Not started | - |
+| 10. Offline Read Path & PWA Completion | v1.1 | 0/4 | Not started | - |
 | 11. v1.1 Polish | v1.1 | 0/TBD | Not started | - |
