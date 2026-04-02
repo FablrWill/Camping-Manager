@@ -15,6 +15,8 @@ import type {
   Layers,
   SpotMapHandle,
 } from "@/components/SpotMap";
+import { useOnlineStatus } from "@/lib/use-online-status";
+import { getTripSnapshot, getCachedTripIds } from "@/lib/offline-storage";
 
 const SpotMap = dynamic(() => import("@/components/SpotMap"), {
   ssr: false,
@@ -35,7 +37,9 @@ export default function SpotsClient({
   photos: initialPhotos,
 }: SpotsClientProps) {
   const mapRef = useRef<SpotMapHandle>(null);
+  const isOnline = useOnlineStatus();
   const [locations, setLocations] = useState(initialLocations);
+  const [offlineLocations, setOfflineLocations] = useState<MapLocation[]>([]);
   const [showUpload, setShowUpload] = useState(false);
   const [photos, setPhotos] = useState(initialPhotos);
   const [darkMode, setDarkMode] = useState(false);
@@ -63,6 +67,39 @@ export default function SpotsClient({
     places: true,
     heatmap: false,
   });
+
+  // Load cached spot data from all trip snapshots when offline
+  useEffect(() => {
+    if (isOnline) {
+      setOfflineLocations([]);
+      return;
+    }
+    let cancelled = false;
+    async function loadCachedSpots() {
+      const tripIds = await getCachedTripIds();
+      if (cancelled || tripIds.length === 0) return;
+      // Merge spots from ALL cached trip snapshots (not just first)
+      const allSpots: MapLocation[] = [];
+      const seenIds = new Set<string>();
+      for (const tid of tripIds) {
+        const snap = await getTripSnapshot(tid);
+        if (cancelled) return;
+        if (snap?.spots) {
+          for (const spot of snap.spots as MapLocation[]) {
+            // Deduplicate by location id
+            const spotId = (spot as { id?: string }).id ?? JSON.stringify({ lat: spot.latitude, lon: spot.longitude });
+            if (!seenIds.has(spotId)) {
+              seenIds.add(spotId);
+              allSpots.push(spot);
+            }
+          }
+        }
+      }
+      if (!cancelled) setOfflineLocations(allSpots);
+    }
+    loadCachedSpots();
+    return () => { cancelled = true; };
+  }, [isOnline]);
 
   const toggleLayer = (key: keyof Layers) => {
     setLayers((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -289,10 +326,15 @@ export default function SpotsClient({
       )}
 
       {/* Map */}
-      <div className="flex-1 min-h-0 rounded-lg overflow-hidden mx-1 my-1">
+      <div className="flex-1 min-h-0 rounded-lg overflow-hidden mx-1 my-1 relative">
+        {!isOnline && offlineLocations.length > 0 && (
+          <div className="absolute top-2 left-2 z-[1000] bg-stone-800/90 text-stone-300 text-xs px-2 py-1 rounded-lg pointer-events-none">
+            (Showing cached spots)
+          </div>
+        )}
         <SpotMap
           ref={mapRef}
-          locations={locations}
+          locations={isOnline ? locations : (offlineLocations.length > 0 ? offlineLocations : locations)}
           photos={filteredPhotos}
           timelinePoints={timelinePoints}
           placeVisits={placeVisits}

@@ -12,6 +12,10 @@ vi.mock('@/lib/offline-storage', () => ({
   getSnapshotAge: vi.fn(() => '2h ago'),
 }))
 
+vi.mock('@/lib/offline-write-queue', () => ({
+  getPendingWrites: vi.fn(() => Promise.resolve([])),
+}))
+
 import { useOnlineStatus } from '@/lib/use-online-status'
 import { getCachedTripIds, getTripSnapshot, getSnapshotAge } from '@/lib/offline-storage'
 
