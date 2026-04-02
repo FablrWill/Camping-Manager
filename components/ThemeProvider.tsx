@@ -60,25 +60,31 @@ export default function ThemeProvider({ children }: { children: React.ReactNode 
     setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')
   }, [resolvedTheme, setTheme])
 
-  // Apply theme on mount and listen for system theme changes
+  // Apply theme on mount and listen for system theme changes.
+  // DOM manipulation is done synchronously; setState is deferred to avoid
+  // synchronous setState in effect body (react-hooks/set-state-in-effect).
   useEffect(() => {
-    if (theme === 'system') {
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-      applyTheme(prefersDark ? 'dark' : 'light')
-    } else {
-      applyTheme(theme)
+    function applyDom(resolved: 'light' | 'dark') {
+      if (resolved === 'dark') {
+        document.documentElement.classList.add('dark')
+      } else {
+        document.documentElement.classList.remove('dark')
+      }
+      queueMicrotask(() => setResolvedTheme(resolved))
     }
 
-    // Listen for system theme changes
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+    applyDom(theme === 'system' ? (prefersDark ? 'dark' : 'light') : theme)
+
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
     const handler = (e: MediaQueryListEvent) => {
       if (theme === 'system') {
-        applyTheme(e.matches ? 'dark' : 'light')
+        applyDom(e.matches ? 'dark' : 'light')
       }
     }
     mediaQuery.addEventListener('change', handler)
     return () => mediaQuery.removeEventListener('change', handler)
-  }, [applyTheme, theme])
+  }, [theme])
 
   return (
     <ThemeContext.Provider value={{ theme, resolvedTheme, setTheme, toggleTheme }}>

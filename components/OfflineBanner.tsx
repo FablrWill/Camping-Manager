@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect } from 'react'
 import { WifiOff } from 'lucide-react'
 import { useOnlineStatus } from '@/lib/use-online-status'
 import { getCachedTripIds, getTripSnapshot, getSnapshotAge } from '@/lib/offline-storage'
@@ -9,12 +9,12 @@ import { getPendingWrites } from '@/lib/offline-write-queue'
 export default function OfflineBanner() {
   const isOnline = useOnlineStatus()
   const [snapshotAge, setSnapshotAge] = useState<string | null>(null)
-  const [snapshotTimestamp, setSnapshotTimestamp] = useState<string | null>(null)
+  const [isStale, setIsStale] = useState(false)
   const [pendingCount, setPendingCount] = useState(0)
 
   useEffect(() => {
     if (isOnline) {
-      setPendingCount(0)
+      queueMicrotask(() => setPendingCount(0))
       return
     }
 
@@ -24,7 +24,9 @@ export default function OfflineBanner() {
         const snapshot = await getTripSnapshot(ids[0])
         if (snapshot) {
           setSnapshotAge(getSnapshotAge(snapshot.cachedAt))
-          setSnapshotTimestamp(snapshot.cachedAt)
+          // Stale check computed in async callback, not during render
+          const ageMs = Date.now() - new Date(snapshot.cachedAt).getTime()
+          setIsStale(ageMs > 24 * 60 * 60 * 1000)
         }
       }
     }
@@ -41,12 +43,6 @@ export default function OfflineBanner() {
     const interval = setInterval(checkQueue, 5000)
     return () => clearInterval(interval)
   }, [isOnline])
-
-  // Computed outside render body to avoid impure Date.now() call during render
-  const isStale = useMemo(() => {
-    if (!snapshotTimestamp) return false
-    return Date.now() - new Date(snapshotTimestamp).getTime() > 24 * 60 * 60 * 1000
-  }, [snapshotTimestamp])
 
   if (isOnline) return null
 

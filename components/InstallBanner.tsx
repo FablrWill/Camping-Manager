@@ -9,21 +9,18 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 export default function InstallBanner() {
-  const [showBanner, setShowBanner] = useState(false)
-  const [isIOS, setIsIOS] = useState(false)
+  // Lazy initializers compute browser-only values at mount — no effect needed
+  const [showBanner, setShowBanner] = useState(() => {
+    if (typeof window === 'undefined') return false
+    if (window.matchMedia('(display-mode: standalone)').matches) return false
+    if (localStorage.getItem('outland_install_dismissed') === 'true') return false
+    return true
+  })
+  const [isIOS, setIsIOS] = useState(() => {
+    if (typeof window === 'undefined') return false
+    return /iPad|iPhone|iPod/.test(navigator.userAgent)
+  })
   const [installPromptEvent, setInstallPromptEvent] = useState<BeforeInstallPromptEvent | null>(null)
-
-  useEffect(() => {
-    if (window.matchMedia('(display-mode: standalone)').matches) return
-    if (localStorage.getItem('outland_install_dismissed') === 'true') return
-
-    const ios = /iPad|iPhone|iPod/.test(navigator.userAgent)
-    // Batch both state updates outside the synchronous effect body
-    queueMicrotask(() => {
-      setIsIOS(ios)
-      setShowBanner(true)
-    })
-  }, [])
 
   useEffect(() => {
     function handleBeforeInstall(e: Event) {
