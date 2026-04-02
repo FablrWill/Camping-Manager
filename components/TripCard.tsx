@@ -17,6 +17,7 @@ import PackingList from '@/components/PackingList'
 import MealPlan from '@/components/MealPlan'
 import PowerBudget from '@/components/PowerBudget'
 import VoiceDebriefButton from './VoiceDebriefButton'
+import PostTripReview from './PostTripReview'
 import { formatDateRange, daysUntil, tripNights } from '@/lib/trip-utils'
 import type { DayForecast, WeatherAlert } from '@/lib/weather'
 
@@ -208,6 +209,16 @@ export default function TripCard({
               loading={weatherLoading ?? false}
               error={weatherError ?? null}
             />
+          </div>
+        )}
+
+        {/* Post-trip review for past trips (Phase 9 - LEARN-01) */}
+        {isPast && isSelected && (
+          <div
+            className="mt-3 border-t border-stone-200 dark:border-stone-700 pt-3"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <PostTripReview tripId={trip.id} />
           </div>
         )}
 

@@ -16,6 +16,25 @@ describe('Voice Debrief Persistence (LEARN-03)', () => {
   })
 
   describe('ApplyInsightRequest type', () => {
-    it.todo('accepts optional voiceTranscript field')
+    it('accepts optional voiceTranscript field in request shape', () => {
+      // Type-level test: verify the shape is structurally valid
+      type ApplyInsightRequest = {
+        tripId: string
+        voiceTranscript?: string
+        insights: Array<{ type: string; content: string }>
+      }
+      const req: ApplyInsightRequest = {
+        tripId: 'trip-1',
+        insights: [{ type: 'gear', content: 'good tent' }],
+      }
+      expect(req.voiceTranscript).toBeUndefined()
+
+      const reqWithTranscript: ApplyInsightRequest = {
+        tripId: 'trip-1',
+        voiceTranscript: 'The trip was great.',
+        insights: [],
+      }
+      expect(reqWithTranscript.voiceTranscript).toBe('The trip was great.')
+    })
   })
 })

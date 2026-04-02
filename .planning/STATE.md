@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Close the Loop
 status: executing
-stopped_at: Completed 09-00-PLAN.md
-last_updated: "2026-04-02T22:43:00.000Z"
+stopped_at: Completed 09-01 — usage tracking API + PostTripReview UI
+last_updated: "2026-04-02T02:39:00.000Z"
 last_activity: 2026-04-02
 progress:
   total_phases: 9
   completed_phases: 7
   total_plans: 31
-  completed_plans: 28
-  percent: 58
+  completed_plans: 29
+  percent: 60
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-04-01)
 ## Current Position
 
 Phase: 9
-Plan: 1 of 4 complete (09-00 done)
-Status: Executing Phase 9
-Last activity: 2026-04-02 - Completed 09-00: Vitest test stubs for learning loop
+Plan: 2 of 4
+Status: executing — 09-01 complete
+Last activity: 2026-04-02 - Completed 09-01 Usage Tracking API + PostTripReview UI
 
-Progress: [██████░░░░] 58%
+Progress: [██████░░░░] 60%
 
 ## Performance Metrics
 
@@ -62,7 +62,6 @@ Progress: [██████░░░░] 58%
 | Phase 07-day-of-execution P01 | 13 | 2 tasks | 11 files |
 | Phase 07-day-of-execution P02 | 5 | 2 tasks | 8 files |
 | Phase 07-day-of-execution P03 | 252 | 2 tasks | 4 files |
-| Phase 09-learning-loop P00 | 8 | 1 task | 4 files |
 
 ## Accumulated Context
 
@@ -92,8 +91,9 @@ Recent decisions affecting current work:
 - [Phase 07-day-of-execution]: Departure section in TripPrepClient fetches departure checklist independently — not through /api/trips/[id]/prep
 - [Phase 07-day-of-execution]: composeFloatPlanEmail includes checklistStatus parameter — emergency contact sees departure preparation level (X of Y tasks completed)
 - [Phase 07-day-of-execution]: FloatPlanLog uses fire-and-forget .catch() — database log failure never blocks email send confirmation
-- [Phase 09-learning-loop]: Phase 9 test stubs placed in tests/ top-level dir — distinct from lib/__tests__ (Phase 8 stubs) to avoid file collision
-- [Phase 09-learning-loop]: vitest.config.ts include array extended to cover tests/**/*.test.{ts,tsx}
+- [Phase 09-01]: Tapping active usage status deselects (sets null) — avoids separate clear button
+- [Phase 09-01]: PostTripReview only renders when isPast && isSelected — avoids fetch on collapsed cards
+- [Phase 09-01]: allComplete flag exposed in PostTripReview but not acted on — Plan 02 wires auto-generate trigger
 
 ### Pending Todos
 
@@ -113,5 +113,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-02T22:43:00.000Z
-Stopped at: Completed 09-00-PLAN.md
+Last session: 2026-04-01T23:19:16.185Z
+Stopped at: Phase 8 context gathered
+Resume file: .planning/phases/08-pwa-and-offline/08-CONTEXT.md
