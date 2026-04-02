@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-04-01)
 Phase: 9
 Plan: Not started
 Status: Phase 8 complete — ready for Phase 9
-Last activity: 2026-04-02
+Last activity: 2026-04-02 - Completed quick task 260401-to0: Fix pre-existing build errors that block npx next build
 
 Progress: [█████░░░░░] 55%
 
@@ -101,6 +101,12 @@ None yet.
 - Serwist/Turbopack: if manual sw.js fails App Router URL pattern validation in spike, fall back to Serwist with --webpack flag
 - Voice debrief extraction schema needs a prompt engineering spike before Phase 9 UI is built
 - iOS 7-day storage clearing: surface snapshot age clearly in the UI (Phase 8)
+
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260401-to0 | Fix pre-existing build errors that block npx next build | 2026-04-02 | f9d03fb | [260401-to0-fix-pre-existing-build-errors-that-block](./quick/260401-to0-fix-pre-existing-build-errors-that-block/) |
 
 ## Session Continuity
 

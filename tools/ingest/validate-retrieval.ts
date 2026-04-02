@@ -55,7 +55,7 @@ function isRelevant(result: SearchResult, expectTopics: string[]): boolean {
  */
 async function runCount(): Promise<void> {
   const prismaCount = await prisma.knowledgeChunk.count();
-  const db = getVecDb();
+  const db = await getVecDb();
   const vecRow = db.prepare('SELECT count(*) as cnt FROM vec_knowledge_chunks').get() as { cnt: number };
 
   console.log(`Prisma KnowledgeChunk count: ${prismaCount}`);

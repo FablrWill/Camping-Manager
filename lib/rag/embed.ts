@@ -1,11 +1,12 @@
-import { VoyageAIClient } from 'voyageai';
+// VoyageAI client — dynamically imported to avoid ESM directory-import bug at build time
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let client: any = null;
 
-let client: VoyageAIClient | null = null;
-
-function getClient(): VoyageAIClient {
+async function getClient() {
   if (!client) {
     const apiKey = process.env.VOYAGE_API_KEY;
     if (!apiKey) throw new Error('VOYAGE_API_KEY environment variable is required');
+    const { VoyageAIClient } = await import('voyageai');
     client = new VoyageAIClient({ apiKey });
   }
   return client;
@@ -18,7 +19,7 @@ function getClient(): VoyageAIClient {
  * Retries on 429 rate limit errors with exponential backoff.
  */
 export async function embedTexts(texts: string[]): Promise<Float32Array[]> {
-  const c = getClient();
+  const c = await getClient();
   const MAX_RETRIES = 5;
 
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
@@ -28,7 +29,8 @@ export async function embedTexts(texts: string[]): Promise<Float32Array[]> {
         model: 'voyage-3-lite',
       });
       // voyageai SDK v0.2.1 returns { data: [{ embedding: number[] }] }
-      return result.data!.map((d) => new Float32Array(d.embedding!));
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return result.data!.map((d: any) => new Float32Array(d.embedding!));
     } catch (err: unknown) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const errAny = err as any;

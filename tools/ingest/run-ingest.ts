@@ -36,7 +36,7 @@ async function main() {
   // Clear existing data if requested
   if (clearFlag) {
     console.log('Clearing existing knowledge chunks...');
-    const vecDb = getVecDb();
+    const vecDb = await getVecDb();
     vecDb.prepare('DELETE FROM vec_knowledge_chunks').run();
     await prisma.knowledgeChunk.deleteMany();
     vecDb.prepare('DELETE FROM knowledge_chunks_fts').run();

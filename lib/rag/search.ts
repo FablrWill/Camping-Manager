@@ -27,8 +27,8 @@ export function escapeFts5Query(query: string): string {
 /**
  * Full-text search using FTS5 index. Returns ranked results by BM25.
  */
-function ftsSearch(query: string, topK: number): RankedResult[] {
-  const db = getVecDb();
+async function ftsSearch(query: string, topK: number): Promise<RankedResult[]> {
+  const db = await getVecDb();
   const escaped = escapeFts5Query(query);
   if (!escaped.trim()) return [];
 
@@ -63,8 +63,8 @@ function ftsSearch(query: string, topK: number): RankedResult[] {
 /**
  * Vector similarity search using vec0 index. Returns ranked results by distance.
  */
-function vecSearch(queryEmbedding: Float32Array, topK: number): RankedResult[] {
-  const db = getVecDb();
+async function vecSearch(queryEmbedding: Float32Array, topK: number): Promise<RankedResult[]> {
+  const db = await getVecDb();
 
   const rows = db
     .prepare(
@@ -157,8 +157,8 @@ export async function hybridSearch(
   const [queryEmb] = await embedTexts([query]);
 
   const [ftsResults, vecResults] = await Promise.all([
-    Promise.resolve(ftsSearch(query, topK * 2)),
-    Promise.resolve(vecSearch(queryEmb, topK * 2)),
+    ftsSearch(query, topK * 2),
+    vecSearch(queryEmb, topK * 2),
   ]);
 
   return mergeRRF(ftsResults, vecResults).slice(0, topK);
@@ -173,7 +173,7 @@ export async function vectorOnlySearch(
   topK: number = 10
 ): Promise<SearchResult[]> {
   const [queryEmb] = await embedTexts([query]);
-  const results = vecSearch(queryEmb, topK);
+  const results = await vecSearch(queryEmb, topK);
 
   return results.map((r) => {
     let metadata: ChunkMetadata;
