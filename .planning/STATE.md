@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Close the Loop
 status: executing
-stopped_at: Phase 8 complete — ready for Phase 9
-last_updated: "2026-04-02T04:15:00.000Z"
+stopped_at: Completed 09-01 — usage tracking API + PostTripReview UI
+last_updated: "2026-04-02T02:39:00.000Z"
 last_activity: 2026-04-02
 progress:
   total_phases: 9
   completed_phases: 7
-  total_plans: 27
-  completed_plans: 27
-  percent: 55
+  total_plans: 31
+  completed_plans: 29
+  percent: 60
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-04-01)
 ## Current Position
 
 Phase: 9
-Plan: Not started
-Status: Phase 8 complete — ready for Phase 9
-Last activity: 2026-04-02 - Completed quick task 260401-to0: Fix pre-existing build errors that block npx next build
+Plan: 2 of 4
+Status: executing — 09-01 complete
+Last activity: 2026-04-02 - Completed 09-01 Usage Tracking API + PostTripReview UI
 
-Progress: [█████░░░░░] 55%
+Progress: [██████░░░░] 60%
 
 ## Performance Metrics
 
@@ -91,6 +91,9 @@ Recent decisions affecting current work:
 - [Phase 07-day-of-execution]: Departure section in TripPrepClient fetches departure checklist independently — not through /api/trips/[id]/prep
 - [Phase 07-day-of-execution]: composeFloatPlanEmail includes checklistStatus parameter — emergency contact sees departure preparation level (X of Y tasks completed)
 - [Phase 07-day-of-execution]: FloatPlanLog uses fire-and-forget .catch() — database log failure never blocks email send confirmation
+- [Phase 09-01]: Tapping active usage status deselects (sets null) — avoids separate clear button
+- [Phase 09-01]: PostTripReview only renders when isPast && isSelected — avoids fetch on collapsed cards
+- [Phase 09-01]: allComplete flag exposed in PostTripReview but not acted on — Plan 02 wires auto-generate trigger
 
 ### Pending Todos
 
