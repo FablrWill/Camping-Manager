@@ -21,6 +21,16 @@ with `topic`, `region`, `category`, `confidence` fields.
 | seasonal-planning-guide.md | Seasonal Camping Planning | statewide | planning |
 | water-and-connectivity.md | Water Access & Connectivity | statewide | infrastructure |
 
+### Area Intel -- Deep Research Reports (Will's personal research)
+
+These files were generated via deep research and uploaded manually. They contain
+operational, on-the-ground intel not captured in the seed corpus.
+
+| File | Topic | Region | Category | Date |
+|------|-------|--------|----------|------|
+| linville-gorge-intel.md | Linville Gorge operational camping intel — sites, coordinates, tactics, water, permits | linville-gorge | area-intel | 2026-04-02 |
+| western-nc-current-conditions.md | Current conditions — burn ban, active fires, road/trail closures | western-nc | conditions | 2026-04-02 |
+
 ### External Sources (D-02)
 
 Ingested external sources from government recreation sites:
@@ -53,7 +63,8 @@ No scheduled background jobs. Single-user tool -- manual is appropriate.
 
 *Updated after each ingest run:*
 - Seed corpus: 7 markdown files
+- Area intel: 2 markdown files (Linville Gorge, WNC conditions)
 - External sources: 1 web page (NPS Blue Ridge Parkway)
-- Total files: 8 sources
+- Total files: 10 sources
 - Embedding model: voyage-3-lite (512 dimensions)
 - Chunk size target: 256-512 tokens
