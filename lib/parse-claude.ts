@@ -198,3 +198,18 @@ export const GearDocumentResultSchema = z.object({
 });
 
 export type GearDocumentResult = z.infer<typeof GearDocumentResultSchema>;
+
+// --- Vehicle Checklist Schemas (Phase 29) ---
+
+const VehicleChecklistItemSchema = z.object({
+  id: z.string(),
+  text: z.string(),
+  checked: z.boolean().default(false),
+});
+
+export const VehicleChecklistResultSchema = z.object({
+  items: z.array(VehicleChecklistItemSchema),
+});
+
+export type VehicleChecklistResult = z.infer<typeof VehicleChecklistResultSchema>;
+export type VehicleChecklistItem = z.infer<typeof VehicleChecklistItemSchema>;
