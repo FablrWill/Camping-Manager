@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Ship It
 status: executing
-stopped_at: Completed 18-02-PLAN.md — Phase 18 Fuel & Last Stop Planner complete
-last_updated: "2026-04-03T05:53:07.516Z"
+stopped_at: Completed 24-01-PLAN.md — Phase 24 Smart Inbox / Universal Intake complete
+last_updated: "2026-04-03T07:52:36.530Z"
 last_activity: 2026-04-03
 progress:
-  total_phases: 4
-  completed_phases: 4
-  total_plans: 14
-  completed_plans: 14
+  total_phases: 22
+  completed_phases: 20
+  total_plans: 65
+  completed_plans: 60
   percent: 40
 ---
 
@@ -67,6 +67,7 @@ Progress: [████░░░░░░] 40%
 | Phase 18-fuel-last-stop-planner P02 | 10 | 1 tasks | 1 files |
 | Phase 20-live-location-sharing P01 | 383 | 2 tasks | 6 files |
 | Phase 20-live-location-sharing P02 | 203 | 4 tasks | 9 files |
+| Phase 24 P01 | 1190 | 3 tasks | 18 files |
 
 ## Accumulated Context
 
@@ -105,6 +106,9 @@ Recent decisions affecting current work:
 - [Phase 20-live-location-sharing]: upsertSharedLocation/deleteSharedLocation accept prismaClient argument — pure helpers testable without real DB
 - [Phase 20-live-location-sharing]: ssr:false dynamic import must live in Client Component, not Server Component — Next.js App Router constraint; extracted to share-page-client.tsx
 - [Phase 20-live-location-sharing]: Bare layout.tsx at /share renders <html> directly — fully bypasses AppShell so family sees clean map-only page with no nav chrome
+- [Phase 24]: triageInput() runs gear+location extractors in parallel for images — picks location when EXIF GPS present
+- [Phase 24]: Accept flow returns suggestion JSON to client; navigates to /gear?intake= or /spots?intake= for pre-fill
+- [Phase 24]: manifest share_target action points to /api/intake — enables iOS/Android Share Sheet integration
 
 ### Pending Todos
 
@@ -118,6 +122,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-03T06:30:00.000Z
-Stopped at: Completed 20-02-PLAN.md — Phase 20 Live Location Sharing complete
+Last session: 2026-04-03T07:52:36.526Z
+Stopped at: Completed 24-01-PLAN.md — Phase 24 Smart Inbox / Universal Intake complete
 Resume file: None

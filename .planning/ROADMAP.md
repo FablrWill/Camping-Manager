@@ -53,7 +53,7 @@
 - [x] **Phase 21: Permit & Reservation** - Store Recreation.gov confirmations with trip, surface reminders (completed 2026-04-03)
 - [ ] **Phase 22: Plan A/B/C Fallback Chain** - Link fallback trips to primary, compare in trip prep
 - [x] **Phase 23: Gear Category Expansion** - Expand from 7 to 15 categories with visual grouping, add tech gear fields (completed 2026-04-03)
-- [ ] **Phase 24: Smart Inbox / Universal Intake** - Single intake endpoint + inbox UI for phone share-to-app workflow
+- [x] **Phase 24: Smart Inbox / Universal Intake** - Single intake endpoint + inbox UI for phone share-to-app workflow (completed 2026-04-03)
 
 ## Phase Details
 
@@ -288,7 +288,7 @@ Phases execute in numeric order: 12 -> 13 -> 14 -> 15
 | 21. Permit & Reservation | v2.0 | 0/TBD | Not started | - |
 | 22. Plan A/B/C Fallback Chain | v2.0 | 0/TBD | Not started | - |
 | 23. Gear Category Expansion | v2.0 | 3/3 | Complete   | 2026-04-03 |
-| 24. Smart Inbox / Intake | v2.0 | 0/TBD | Not started | - |
+| 24. Smart Inbox / Intake | v2.0 | 1/1 | Complete   | 2026-04-03 |
 
 ---
 *Full phase details for shipped milestones: see archives in `.planning/milestones/`*
