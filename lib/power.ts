@@ -7,6 +7,8 @@
  *  live     — in-trip, starts from Will's entered battery %
  */
 
+import { CATEGORIES } from '@/lib/gear-categories'
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export interface PowerDevice {
@@ -137,6 +139,8 @@ const CONSUMER_WATTAGE_TABLE: Array<{
 const CATEGORY_FALLBACK: Record<string, { watts: number; hoursPerDay: number }> = {
   tools: { watts: 15, hoursPerDay: 2 },
   power: { watts: 20, hoursPerDay: 3 },
+  electronics: { watts: 5, hoursPerDay: 4 },
+  lighting: { watts: 10, hoursPerDay: 6 },
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -269,7 +273,8 @@ function classifyDevices(items: GearItem[]): {
       i.id !== battery?.id &&
       i.id !== solar?.id &&
       i.condition !== 'broken' &&
-      !['shelter', 'sleep', 'clothing', 'hygiene', 'cook'].includes(i.category)
+      // Exclude non-electrical categories; electrical categories that can draw power: tools, power, electronics, vehicle, lighting
+      !CATEGORIES.filter((c) => !['tools', 'power', 'electronics', 'vehicle', 'lighting'].includes(c.value)).map((c) => c.value as string).includes(i.category)
   )
 
   return { battery, solar, consumers }

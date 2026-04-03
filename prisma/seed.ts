@@ -210,12 +210,12 @@ async function main() {
 
   await prisma.gearItem.upsert({
     where: { id: "gear-helinox-chair-one" },
-    update: {},
+    update: { category: 'furniture' },
     create: {
       id: "gear-helinox-chair-one",
       name: "Helinox Chair One",
       brand: "Helinox",
-      category: "tools",
+      category: "furniture",
       description:
         "Ultralight camp chair. 2.1 lbs. 320 lb capacity. Packs to 13\" × 5\". Best chair per pound in existence.",
       condition: "new",
@@ -228,12 +228,12 @@ async function main() {
 
   await prisma.gearItem.upsert({
     where: { id: "gear-garmin-inreach-mini2" },
-    update: { wattage: 1, hoursPerDay: 24, hasBattery: true },
+    update: { wattage: 1, hoursPerDay: 24, hasBattery: true, category: 'navigation' },
     create: {
       id: "gear-garmin-inreach-mini2",
       name: "Garmin inReach Mini 2",
       brand: "Garmin",
-      category: "tools",
+      category: "navigation",
       description:
         "Satellite communicator. 2-way messaging, SOS, GPS tracking via Iridium network. Works anywhere on earth.",
       condition: "good",
@@ -456,12 +456,12 @@ async function main() {
 
   await prisma.gearItem.upsert({
     where: { id: "gear-fire-extinguisher" },
-    update: {},
+    update: { category: 'safety' },
     create: {
       id: "gear-fire-extinguisher",
       name: "AmzBoom Fire Extinguisher Spray (2-pack)",
       brand: "AmzBoom",
-      category: "tools",
+      category: "safety",
       description: "2× compact fire extinguisher spray. A/B/C/K rated, eco-friendly formula, prevents reignition. Each includes mounting bracket.",
       condition: "new",
       purchaseUrl: "https://www.amazon.com/dp/B0DH5CM2CC",
@@ -470,12 +470,12 @@ async function main() {
 
   await prisma.gearItem.upsert({
     where: { id: "gear-water-pump" },
-    update: {},
+    update: { category: 'hydration' },
     create: {
       id: "gear-water-pump",
       name: "USB Rechargeable Water Jug Pump",
       brand: "Unknown",
-      category: "tools",
+      category: "hydration",
       description: "USB-rechargeable electric pump for 2–5 gallon water jugs. Automatic pump with 2-switch control.",
       condition: "new",
       purchaseUrl: "https://www.amazon.com/dp/B086WK8JNJ",
@@ -485,12 +485,12 @@ async function main() {
 
   await prisma.gearItem.upsert({
     where: { id: "gear-first-aid" },
-    update: {},
+    update: { category: 'safety' },
     create: {
       id: "gear-first-aid",
       name: "Travel First Aid Kit (300-piece)",
       brand: "1st Aid",
-      category: "tools",
+      category: "safety",
       description: "300-piece compact first aid kit in red hard case. Includes bandages, burn dressing, scissors, and more.",
       condition: "new",
       price: 17.99,
@@ -517,12 +517,12 @@ async function main() {
 
   await prisma.gearItem.upsert({
     where: { id: "gear-camp-table" },
-    update: {},
+    update: { category: 'furniture' },
     create: {
       id: "gear-camp-table",
       name: "VILLEY Folding Camp Table",
       brand: "VILLEY",
-      category: "tools",
+      category: "furniture",
       description: "Ultralight aluminum folding camp table with carry bag. 2.05 lbs, 66 lb capacity, 16\"×13\"×12\" (medium). Green.",
       condition: "new",
       weight: 2.05,
@@ -532,12 +532,12 @@ async function main() {
 
   await prisma.gearItem.upsert({
     where: { id: "gear-fairy-lights" },
-    update: {},
+    update: { category: 'lighting' },
     create: {
       id: "gear-fairy-lights",
       name: "Minetom Twinkle Fairy Lights",
       brand: "Minetom",
-      category: "tools",
+      category: "lighting",
       description: "33ft / 100 LED USB string lights with remote and timer. 8 lighting modes, waterproof. For tent/campsite ambiance.",
       condition: "new",
       purchaseUrl: "https://www.amazon.com/dp/B0CN2DMCKF",
@@ -546,12 +546,12 @@ async function main() {
 
   await prisma.gearItem.upsert({
     where: { id: "gear-wall-sconces" },
-    update: {},
+    update: { category: 'lighting' },
     create: {
       id: "gear-wall-sconces",
       name: "Adetu LED Wall Sconces (2-pack)",
       brand: "Adetu",
-      category: "tools",
+      category: "lighting",
       description: "2× rechargeable cordless LED wall lights. RGB + 3 color temperatures, dimmable, magnetic 360° rotation, USB rechargeable.",
       condition: "new",
       price: 19.99,
@@ -562,12 +562,12 @@ async function main() {
 
   await prisma.gearItem.upsert({
     where: { id: "gear-flood-lights" },
-    update: {},
+    update: { category: 'lighting' },
     create: {
       id: "gear-flood-lights",
       name: "RGBW Bluetooth Flood Lights (2-pack)",
       brand: "Unknown",
-      category: "tools",
+      category: "lighting",
       description: "2× 30W outdoor RGBW smart flood lights. 3000 lumens, Bluetooth controlled, 2700K warm white + 16M colors, IP66 waterproof, music sync.",
       condition: "new",
       purchaseUrl: "https://www.amazon.com/dp/B07W6SHBV5",

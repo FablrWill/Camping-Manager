@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/db';
 import type { Tool } from '@anthropic-ai/sdk/resources/messages';
+import { CATEGORIES } from '@/lib/gear-categories';
 
 export const listGearTool: Tool = {
   name: 'list_gear',
@@ -9,7 +10,7 @@ export const listGearTool: Tool = {
     properties: {
       category: {
         type: 'string',
-        description: 'Filter by category: shelter, sleep, cook, power, clothing, tools, vehicle, hygiene, safety, misc',
+        description: `Filter by category: ${CATEGORIES.map((c) => c.value).join(', ')}`,
       },
       isWishlist: {
         type: 'boolean',

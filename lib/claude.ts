@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { parseClaudeJSON, PackingListResultSchema, MealPlanResultSchema, DepartureChecklistResultSchema, DepartureChecklistResult, FloatPlanEmailSchema, FloatPlanEmail, TripSummaryResultSchema, type TripSummaryResult } from '@/lib/parse-claude'
+import { CATEGORY_EMOJI, CATEGORIES } from '@/lib/gear-categories'
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -20,20 +21,6 @@ export interface PackingListResult {
     items: PackingListItem[]
   }[]
   tips: string[]
-}
-
-const CATEGORY_EMOJIS: Record<string, string> = {
-  shelter: '⛺',
-  sleep: '🛏️',
-  cook: '🍳',
-  power: '🔋',
-  clothing: '🧥',
-  tools: '🔧',
-  vehicle: '🚙',
-  hygiene: '🧴',
-  safety: '🩹',
-  misc: '📦',
-  dog: '🐕',
 }
 
 interface GearItem {
@@ -244,7 +231,7 @@ INSTRUCTIONS:
 3. Skip items marked [BROKEN].
 4. Adjust for weather: if rain is forecast, include rain gear. If cold, prioritize warm layers. If hot/high UV, include sun protection.
 5. Adjust for trip duration: longer trips need more consumables.
-6. Categories: shelter, sleep, cook, power, clothing, tools, vehicle, hygiene, safety, misc, dog.
+6. Categories: ${CATEGORIES.map((c) => c.value).join(', ')}.
 7. Include 2-3 brief, specific tips based on the weather and trip details (e.g., "Charge the EcoFlow fully — limited solar expected with cloud cover Saturday").
 8. If GEAR HISTORY is provided, use it to inform recommendations: deprioritize items marked "didn't need" on 2+ trips, and flag items frequently forgotten as "RECOMMENDED — frequently forgotten".
 
@@ -263,7 +250,7 @@ Respond ONLY with valid JSON matching this exact structure:
 }
 
 Rules for the JSON:
-- "name" is the category key (lowercase): shelter, sleep, cook, power, clothing, tools, vehicle, hygiene, safety, misc, dog
+- "name" is the category key (lowercase): ${CATEGORIES.map((c) => c.value).join(', ')}
 - Only include categories that have items
 - "fromInventory" is true if the item comes from the gear inventory, false if it's a suggested addition
 - "gearId" is only present when fromInventory is true — use the exact id from the [id:xxx] tag
@@ -289,7 +276,7 @@ Rules for the JSON:
   const result: PackingListResult = {
     categories: parsed.categories.map((cat) => ({
       name: cat.name,
-      emoji: cat.emoji || CATEGORY_EMOJIS[cat.name] || '📦',
+      emoji: cat.emoji || CATEGORY_EMOJI[cat.name] || '📦',
       items: cat.items,
     })),
     tips: parsed.tips || [],

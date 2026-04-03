@@ -55,6 +55,16 @@ Requirements for milestone v2.0 "Field Intelligence".
 - [x] **FUEL-02**: New utility `lib/overpass.ts` — wraps Overpass API queries for amenity=fuel, shop=supermarket, shop=hardware; calculates distance from destination; returns structured results
 - [x] **FUEL-03**: "Fuel & Last Stops" card added to `components/TripPrepClient.tsx` — shows after weather card, before packing list; renders 3 categories with name + distance; shows loading state; shows "None found nearby" fallback
 
+### Gear Category Expansion (Phase 23)
+
+- [x] **GEAR-CAT-01**: `lib/gear-categories.ts` is the single source of truth — all category definitions, emojis, groups, and helpers exported from this module
+- [x] **GEAR-CAT-02**: 15 categories in 4 visual groups (Living: shelter/sleep/cook/hydration/clothing; Utility: lighting/tools/safety/furniture; Tech/Power: power/electronics/vehicle; Action: navigation/hiking/dog)
+- [x] **GEAR-CAT-03**: Gear page shows grouped filter chips using the 4 visual groups
+- [x] **GEAR-CAT-04**: GearForm includes 3 new optional fields: modelNumber, connectivity, manualUrl (for tech gear)
+- [x] **GEAR-CAT-05**: Prisma migration adds modelNumber, connectivity, manualUrl to GearItem
+- [x] **GEAR-CAT-06**: Seed data re-categorizes 9 items (fairy lights/wall sconces/flood lights→lighting, camp table/Helinox Chair→furniture, fire extinguisher/first aid kit→safety, Garmin inReach→navigation, water jug pump→hydration)
+- [x] **GEAR-CAT-07**: All local category duplicates removed (GearClient, DashboardClient, claude.ts, power.ts, agent tools) — all import from shared module
+
 ## Future Requirements
 
 Deferred to future release. Tracked but not in current roadmap.
@@ -114,9 +124,18 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ACCESS-04 | Phase 15 | Pending |
 | ACCESS-05 | Phase 15 | Pending |
 
+| GEAR-CAT-01 | Phase 23 | Complete |
+| GEAR-CAT-02 | Phase 23 | Complete |
+| GEAR-CAT-03 | Phase 23 | Complete |
+| GEAR-CAT-04 | Phase 23 | Complete |
+| GEAR-CAT-05 | Phase 23 | Complete |
+| GEAR-CAT-06 | Phase 23 | Complete |
+| GEAR-CAT-07 | Phase 23 | Complete |
+
 **Coverage:**
 - v1.2 requirements: 26 total
-- Mapped to phases: 26
+- v2.0 requirements: 12 total (5 DOG + 7 GEAR-CAT)
+- Mapped to phases: 38
 - Unmapped: 0
 
 ---

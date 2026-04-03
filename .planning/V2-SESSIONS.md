@@ -39,18 +39,22 @@ A self-coordinating work queue for v2.0 features. Each Claude Code session claim
 | ID  | Feature                       | Phase | Status    | Model          | Depends On |
 |-----|-------------------------------|-------|-----------|----------------|------------|
 | S01 | Photo auto-import             | 16    | ⬜ Ready  | Sonnet, normal | —          |
-| S02 | Feedback-driven packing       | 17    | ⬜ Ready  | Sonnet, normal | —          |
-| S03 | Fuel & last stop planner      | 18    | 🔄 In Progress 2026-04-02 | Sonnet, normal | —          |
-| S04 | Dog-aware trip planning       | 19    | ⬜ Ready  | Sonnet, normal | —          |
+| S02 | Feedback-driven packing       | 17    | 🔄 In Progress 2026-04-02 | Sonnet, normal | —          |
+| S03 | Fuel & last stop planner      | 18    | ⬜ Ready  | Sonnet, normal | —          |
+| S04 | Dog-aware trip planning       | 19    | 🔄 In Progress 2026-04-02 | Sonnet, normal | —          |
 | S05 | Live location sharing         | 20    | ⬜ Ready  | Sonnet, normal | —          |
 | S06 | Permit & reservation          | 21    | ⬜ Ready  | Sonnet, normal | S03, S05   |
 | S07 | Plan A/B/C fallback chain     | 22    | ⬜ Ready  | Sonnet, normal | S04, S06   |
+| S08 | Gear category expansion       | 23    | ✅ Done 2026-04-03 | Sonnet, normal | —          |
+| S09 | Smart inbox / intake          | 24    | ⬜ Ready  | Sonnet, normal | S08        |
 
 **Why this order matters (conflict groups):**
 
 - S01–S05 have no file conflicts with each other and can be done in any order
 - S06 touches `TripPrepClient.tsx` (same as S03) and `SpotMap.tsx` (same as S05) — must wait for both
 - S07 touches `lib/claude.ts` + Trip model (same as S04) and `TripPrepClient.tsx` (same as S06) — must wait for both
+- S08 touches `lib/claude.ts` (same as S02, S04, S07) and `GearClient.tsx` — should ideally run before S02
+- S09 depends on S08 (needs 15 categories); touches `BottomNav.tsx` and `schema.prisma` — mostly new files, low conflict
 
 ---
 
@@ -280,6 +284,112 @@ Will is bringing his dog on this trip. Add a "Dog" section to the packing list w
 
 ---
 
+### S08 — Gear Category Expansion (Phase 23)
+
+**What to build:** Expand gear from 7 to 15 categories with visual grouping. Add 3 new schema fields for tech gear. Re-categorize existing items. Centralize category definitions in a shared module.
+
+**User story:** Will has HA sensors, solar panels, a dog crate, camp furniture, and safety gear — none of which fit cleanly into the current 7 categories. He opens the gear page and sees 15 categories organized into 4 visual groups. Adding an ESP32 board, he picks "electronics" and fills in model number and connectivity type.
+
+**15 categories (4 visual groups):**
+- **Living:** shelter (⛺), sleep (🛏️), cook (🍳), hydration (💧), clothing (🧥)
+- **Utility:** lighting (💡), tools (🔧), safety (🛟), furniture (🪑)
+- **Tech/Power:** power (🔋), electronics (📡), vehicle (🚙)
+- **Action:** navigation (🧭), hiking (🥾), dog (🐕)
+
+**Key files:**
+- `lib/gear-categories.ts` — NEW: single source of truth for all categories, groups, emojis, helpers
+- `components/GearClient.tsx` — replace local CATEGORIES with import, add grouped filter chips
+- `components/GearForm.tsx` — add modelNumber, connectivity, manualUrl fields
+- `components/DashboardClient.tsx` — replace local CATEGORY_EMOJI with import
+- `lib/claude.ts` — replace local CATEGORY_EMOJIS, update packing prompt
+- `lib/power.ts` — update exclusion list + CATEGORY_FALLBACK
+- `lib/agent/tools/gear.ts` + `listGear.ts` — update category description strings
+- `prisma/schema.prisma` — add modelNumber, connectivity, manualUrl to GearItem
+- `prisma/seed.ts` — re-categorize 9 items (fairy lights→lighting, chair→furniture, etc.)
+- `app/api/gear/route.ts` + `[id]/route.ts` — handle 3 new fields
+
+**Re-categorizations for existing seed data:**
+- fairy lights, wall sconces, flood lights → `lighting`
+- camp table, Helinox Chair → `furniture`
+- fire extinguisher, first aid kit → `safety`
+- Garmin inReach → `navigation`
+- water jug pump → `hydration`
+
+**Acceptance criteria:**
+- 15 categories render as grouped filter chips in gear page
+- Existing items display in correct new categories after seed
+- GearForm has tech detail fields (modelNumber, connectivity, manualUrl)
+- Packing list generation references all 15 categories
+- Power budget correctly excludes non-powered categories
+- All category references use the shared `lib/gear-categories.ts` module (no local duplicates)
+- `npm run build` passes
+
+**Constraints:**
+- Category field is already a free `String` in Prisma — no enum migration needed for categories
+- The 3 new fields (modelNumber, connectivity, manualUrl) DO require a migration
+- Out of scope: changing gear card visual design beyond adding category group headers
+
+---
+
+### S09 — Smart Inbox / Universal Intake (Phase 24)
+
+**Depends on:** S08 (needs 15 categories for proper triage routing)
+
+**What to build:** Single intake endpoint + inbox UI. Share anything from phone (screenshot, URL, text) → AI triages → user reviews in inbox → accept creates real entity.
+
+**User story:** Will finds a cool headlamp on Amazon. He shares the link from his phone to Outland OS. The app scrapes the page, identifies it as gear, and creates an inbox card: "Black Diamond Spot 400 — Headlamp, $35, 🔋 power category". Will taps Accept, the GearForm opens pre-filled, he saves it to his gear inventory.
+
+**Content types:**
+1. Screenshot of gear → Claude Vision extracts product info → gear draft
+2. Amazon/product URL → scrape page → wishlist item draft
+3. Camping article URL → existing RAG pipeline → knowledge base
+4. Photo of campsite → EXIF + Claude Vision → location draft
+5. Plain text tip/note → classify → knowledge or tip
+
+**Key files (all new unless noted):**
+- `prisma/schema.prisma` — add InboxItem model (id, sourceType, rawContent, status, triageType, suggestion, summary, confidence, imagePath, createdAt, processedAt)
+- `lib/intake/triage.ts` — core routing: detect input type → call extractor → return TriageResult
+- `lib/intake/extractors/gear-from-url.ts` — Cheerio scrape product pages
+- `lib/intake/extractors/gear-from-image.ts` — Claude Vision → gear fields
+- `lib/intake/extractors/location-from-image.ts` — EXIF + Claude Vision
+- `lib/intake/extractors/classify-text.ts` — Claude Haiku text classification
+- `lib/parse-claude.ts` — add Zod schemas for triage/extraction (MODIFY existing)
+- `app/api/intake/route.ts` — single POST endpoint (FormData: text, url, file)
+- `app/api/inbox/route.ts` — GET list with filters
+- `app/api/inbox/[id]/route.ts` — GET, PUT, DELETE
+- `app/api/inbox/[id]/accept/route.ts` — POST: create entity from suggestion
+- `app/api/inbox/[id]/reject/route.ts` — POST: mark rejected
+- `app/inbox/page.tsx` — server component
+- `components/InboxClient.tsx` — card-based inbox UI with accept/edit/reject
+- `components/BottomNav.tsx` — add 6th nav item "Inbox" (MODIFY existing)
+- `components/TopHeader.tsx` — add page title (MODIFY existing)
+- `app/manifest.ts` — add share_target for PWA (MODIFY existing)
+
+**Architecture:**
+- Inline processing (no background jobs) — 2-5s acceptable for single user
+- InboxItem stores raw input + extracted suggestion separately (JSON field)
+- Accept flow pre-fills existing GearForm/LocationForm rather than new review UI
+- Knowledge/tip types pipe through existing RAG ingest pipeline
+- Use existing `lib/parse-claude.ts` `parseClaudeJSON()` pattern with Zod schemas for structured AI responses
+
+**Acceptance criteria:**
+- POST /api/intake with text, URL, and image each return triaged InboxItem
+- Inbox page shows pending items as triage cards with source type, summary, and confidence
+- Accept on gear opens pre-filled GearForm, creates GearItem on save
+- Accept on knowledge pipes through RAG, appears in agent search
+- Reject removes item from inbox view
+- BottomNav shows Inbox with pending count badge
+- PWA share target sends shared content to intake endpoint
+- `npm run build` passes
+
+**Constraints:**
+- Out of scope: async processing queue — all inline
+- Out of scope: batch intake (one item at a time via share sheet)
+- Out of scope: auto-accept — Will always reviews before accepting
+- Cheerio already available via RAG pipeline dependencies
+
+---
+
 ## Starter Prompts
 
 Copy-paste one of these to begin each session. All use **claude-sonnet-4-6**, normal effort (no special flags needed).
@@ -331,6 +441,20 @@ Pull origin main, then claim S06 in .planning/V2-SESSIONS.md (mark it 🔄 In Pr
 **S07 — Plan A/B/C fallback chain** *(start only after S04 and S06 are both ✅ Done)*
 ```
 Pull origin main, then claim S07 in .planning/V2-SESSIONS.md (mark it 🔄 In Progress, commit + push the claim). Then run /gsd:plan-phase 22 to plan the Plan A/B/C fallback feature — the full spec is in V2-SESSIONS.md under S07. After planning is approved, run /gsd:execute-phase 22. When done, mark S07 ✅ Done in V2-SESSIONS.md, commit, and push.
+```
+
+---
+
+**S08 — Gear category expansion**
+```
+Pull origin main, then claim S08 in .planning/V2-SESSIONS.md (mark it 🔄 In Progress, commit + push the claim). Then run /gsd:plan-phase 23 to plan the gear category expansion — the full spec is in V2-SESSIONS.md under S08. After planning is approved, run /gsd:execute-phase 23. When done, mark S08 ✅ Done in V2-SESSIONS.md, commit, and push.
+```
+
+---
+
+**S09 — Smart inbox / intake** *(start only after S08 is ✅ Done)*
+```
+Pull origin main, then claim S09 in .planning/V2-SESSIONS.md (mark it 🔄 In Progress, commit + push the claim). Then run /gsd:plan-phase 24 to plan the smart inbox / intake feature — the full spec is in V2-SESSIONS.md under S09. After planning is approved, run /gsd:execute-phase 24. When done, mark S09 ✅ Done in V2-SESSIONS.md, commit, and push.
 ```
 
 ---

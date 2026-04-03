@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react'
 import GearForm from './GearForm'
 import ChatContextButton from '@/components/ChatContextButton'
+import { CATEGORY_GROUPS, CATEGORIES, getCategoryEmoji, getCategoryLabel } from '@/lib/gear-categories'
 
 interface GearItem {
   id: string
@@ -21,19 +22,12 @@ interface GearItem {
   wattage: number | null
   hoursPerDay: number | null
   hasBattery: boolean
+  modelNumber: string | null
+  connectivity: string | null
+  manualUrl: string | null
   createdAt: string
   updatedAt: string
 }
-
-const CATEGORIES = [
-  { value: 'shelter', label: 'Shelter', emoji: '⛺' },
-  { value: 'sleep', label: 'Sleep', emoji: '🛏️' },
-  { value: 'cook', label: 'Cook', emoji: '🍳' },
-  { value: 'power', label: 'Power', emoji: '🔋' },
-  { value: 'clothing', label: 'Clothing', emoji: '🧥' },
-  { value: 'tools', label: 'Tools', emoji: '🔧' },
-  { value: 'vehicle', label: 'Vehicle', emoji: '🚙' },
-] as const
 
 const CONDITIONS = [
   { value: 'new', label: 'New' },
@@ -42,14 +36,6 @@ const CONDITIONS = [
   { value: 'worn', label: 'Worn' },
   { value: 'broken', label: 'Broken' },
 ] as const
-
-function getCategoryEmoji(category: string): string {
-  return CATEGORIES.find((c) => c.value === category)?.emoji ?? '📦'
-}
-
-function getCategoryLabel(category: string): string {
-  return CATEGORIES.find((c) => c.value === category)?.label ?? category
-}
 
 function getConditionColor(condition: string | null): string {
   switch (condition) {
@@ -217,11 +203,11 @@ export default function GearClient({ initialItems }: { initialItems: GearItem[] 
         className="w-full px-3 py-2 mb-4 rounded-lg border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-400 dark:focus:ring-amber-500"
       />
 
-      {/* Category filter chips */}
-      <div className="flex gap-2 mb-6 overflow-x-auto hide-scrollbar pb-1 -mx-4 px-4">
+      {/* Category filter chips — grouped */}
+      <div className="mb-6">
         <button
           onClick={() => setActiveCategory(null)}
-          className={`shrink-0 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+          className={`mb-2 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
             !activeCategory
               ? 'bg-stone-800 text-white dark:bg-stone-200 dark:text-stone-900'
               : 'bg-stone-200 text-stone-600 hover:bg-stone-300 dark:bg-stone-700 dark:text-stone-400 dark:hover:bg-stone-600'
@@ -229,27 +215,34 @@ export default function GearClient({ initialItems }: { initialItems: GearItem[] 
         >
           All
         </button>
-        {CATEGORIES.map((cat) => {
-          const count = items.filter(
-            (i) => i.category === cat.value && i.isWishlist === showWishlist
-          ).length
-          if (count === 0) return null
-          return (
-            <button
-              key={cat.value}
-              onClick={() =>
-                setActiveCategory(activeCategory === cat.value ? null : cat.value)
-              }
-              className={`shrink-0 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                activeCategory === cat.value
-                  ? 'bg-stone-800 text-white dark:bg-stone-200 dark:text-stone-900'
-                  : 'bg-stone-200 text-stone-600 hover:bg-stone-300 dark:bg-stone-700 dark:text-stone-400 dark:hover:bg-stone-600'
-              }`}
-            >
-              {cat.emoji} {cat.label} ({count})
-            </button>
-          )
-        })}
+        {CATEGORY_GROUPS.map((group) => (
+          <div key={group.name} className="mb-2">
+            <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wide">
+              {group.name}
+            </div>
+            <div className="flex flex-wrap gap-1">
+              {group.categories.map((cat) => {
+                const count = items.filter(
+                  (i) => i.category === cat.value && i.isWishlist === showWishlist
+                ).length
+                if (count === 0) return null
+                return (
+                  <button
+                    key={cat.value}
+                    onClick={() => setActiveCategory(activeCategory === cat.value ? null : cat.value)}
+                    className={`px-2 py-1 rounded-full text-xs font-medium transition-colors ${
+                      activeCategory === cat.value
+                        ? 'bg-blue-500 text-white'
+                        : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    {cat.emoji} {cat.label} ({count})
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* Gear list grouped by category */}
@@ -363,7 +356,6 @@ export default function GearClient({ initialItems }: { initialItems: GearItem[] 
       {showForm && (
         <GearForm
           item={editingItem}
-          categories={CATEGORIES}
           conditions={CONDITIONS}
           onSave={handleSave}
           onDelete={editingItem ? () => setDeletingItem(editingItem) : undefined}

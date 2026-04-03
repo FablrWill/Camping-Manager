@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/db';
 import type { Tool } from '@anthropic-ai/sdk/resources/messages';
+import { CATEGORIES } from '@/lib/gear-categories';
 
 export const gearTool: Tool = {
   name: 'query_gear',
@@ -7,7 +8,7 @@ export const gearTool: Tool = {
   input_schema: {
     type: 'object',
     properties: {
-      category: { type: 'string', description: 'Filter by category: shelter, sleep, cook, power, clothing, tools, vehicle, hygiene, safety, misc' },
+      category: { type: 'string', description: `Filter by category: ${CATEGORIES.map((c) => c.value).join(', ')}` },
       isWishlist: { type: 'boolean', description: 'If true, return wishlist items only. If false, return owned items only. Omit for all items.' },
       condition: { type: 'string', description: 'Filter by condition: new, good, fair, worn, broken' },
     },

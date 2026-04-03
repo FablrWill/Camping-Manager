@@ -56,6 +56,9 @@ export async function PUT(
         wattage: safeParseFloat(body.wattage),
         hoursPerDay: safeParseFloat(body.hoursPerDay),
         hasBattery: body.hasBattery ?? false,
+        modelNumber: body.modelNumber || null,
+        connectivity: body.connectivity || null,
+        manualUrl: body.manualUrl || null,
       },
     })
 

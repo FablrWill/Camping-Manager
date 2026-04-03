@@ -11,7 +11,7 @@ model GearItem {
   id          String   @id @default(cuid())
   name        String
   brand       String?
-  category    String   // shelter, sleep, cook, power, clothing, tools, vehicle
+  category    String   // see lib/gear-categories.ts for full list
   description String?
   condition   String?  // new, good, fair, worn, broken
   weight      Float?   // in pounds
@@ -24,6 +24,9 @@ model GearItem {
   wattage     Float?   // power draw in watts (consumers) or peak output (solar panel)
   hoursPerDay Float?   // default daily usage hours; falls back to lookup table if null
   hasBattery  Boolean  @default(false) // has internal rechargeable battery — reminder to charge before trips
+  modelNumber   String?  // e.g. "ESP32-WROOM-32"
+  connectivity  String?  // e.g. "WiFi, Bluetooth"
+  manualUrl     String?  // URL to product manual
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
