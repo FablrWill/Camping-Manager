@@ -63,7 +63,7 @@
 **Wave 1 — Parallel (no dependencies):**
 - [ ] **Phase 25: Gear Docs & Manual Finder** - GearDocument model, Claude-powered manual search, PDF download + offline caching
 - [ ] **Phase 26: Trip Day Sequencer** - Time-ordered departure checklist pulling from packing/meals/power/route
-- [ ] **Phase 27: Safety Float Plan** - SMS/email trip summary to emergency contact before departure
+- [ ] **Phase 27: Safety Float Plan** - Replace Claude-composed email with plain-text template, strip gear list
 
 **Wave 2 — Depends on Wave 1:**
 - [ ] **Phase 28: Weather-Aware Clothing** - Rain/cold/UV-driven clothing suggestions in packing lists, clothing subcategories
@@ -383,16 +383,19 @@ Plans:
 - Wave 1 — fully parallel with Phases 25 and 27
 
 ### Phase 27: Safety Float Plan
-**Goal**: Send a trip summary (dates, location, vehicle, expected return) to an emergency contact before departure
+**Goal**: Replace Claude-composed float plan email with a deterministic plain-text template, strip gear list and checklist status, keep email-only delivery
 **Depends on**: None
-**Requirements**: TBD
+**Requirements**: FLOAT-TEMPLATE-01, FLOAT-TEMPLATE-02, FLOAT-TEMPLATE-03
 **Success Criteria** (what must be TRUE):
-  1. User can set an emergency contact (name, phone/email) in settings
-  2. "Send Float Plan" button on trip prep generates a summary message
-  3. Message includes: destination, dates, vehicle, expected return, any notes
-  4. Sends via SMS (iMessage on Mac) or email
+  1. Float plan email uses plain-text template (no Claude API call, no AI token cost)
+  2. Email contains only: destination, dates, vehicle, expected return, notes, map link
+  3. Gear list, checklist status, and weather notes removed from email body
+  4. Dead code (composeFloatPlanEmail, FloatPlanEmailSchema) removed from codebase
   5. `npm run build` passes
-**Plans**: 0/TBD
+**Plans**: 1 plan
+
+Plans:
+- [ ] 27-01-PLAN.md — Replace Claude call with plain-text template + remove dead code
 
 **Parallelization notes:**
 - Wave 1 — fully parallel with Phases 25 and 26
@@ -510,7 +513,7 @@ Plans:
 | 24. Smart Inbox / Intake | v2.0 | 3/3 | Complete   | 2026-04-03 |
 | 25. Gear Docs & Manual Finder | v3.0 | 0/TBD | Not started | - |
 | 26. Trip Day Sequencer | v3.0 | 0/TBD | Not started | - |
-| 27. Safety Float Plan | v3.0 | 0/TBD | Not started | - |
+| 27. Safety Float Plan | v3.0 | 0/1 | Planning | - |
 | 28. Weather-Aware Clothing | v3.0 | 0/TBD | Not started | - |
 | 29. Vehicle Pre-Trip Checklist | v3.0 | 0/TBD | Not started | - |
 | 30. Gear Product Research | v3.0 | 0/TBD | Not started | - |
