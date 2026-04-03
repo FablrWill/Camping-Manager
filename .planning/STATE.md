@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.2
-milestone_name: Ship It
-status: executing
-stopped_at: Phase 15 planned — 2 plans ready
-last_updated: "2026-04-03T03:21:20.908Z"
+milestone: v2.0
+milestone_name: Personal Second Brain
+status: verifying
+stopped_at: Completed 17-02-PLAN.md
+last_updated: "2026-04-03T05:06:20.790Z"
 last_activity: 2026-04-03
 progress:
-  total_phases: 4
-  completed_phases: 3
-  total_plans: 11
-  completed_plans: 11
+  total_phases: 6
+  completed_phases: 5
+  total_plans: 16
+  completed_plans: 16
   percent: 40
 ---
 
@@ -21,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-01)
 
 **Core value:** Personal camping second brain — a closed-loop system that plans, executes, and learns from every trip
-**Current focus:** Phase 15 — remote-access-go-live
+**Current focus:** Phase 17 — feedback-driven-packing
 
 ## Current Position
 
-Phase: 15
+Phase: 17
 Plan: Not started
-Status: Executing Phase 15
+Status: Phase complete — ready for verification
 Last activity: 2026-04-03
 
 Progress: [████░░░░░░] 40%
@@ -64,6 +64,8 @@ Progress: [████░░░░░░] 40%
 | Phase 07-day-of-execution P03 | 252 | 2 tasks | 4 files |
 | Phase 13-address-review-findings P03 | 225 | 2 tasks | 11 files |
 | Phase 13 P04 | 300 | 1 tasks | 1 files |
+| Phase 17-feedback-driven-packing P01 | 240 | 2 tasks | 2 files |
+| Phase 17-feedback-driven-packing P02 | 118 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -96,6 +98,10 @@ Recent decisions affecting current work:
 - [Phase 13-address-review-findings]: safeParseFloat/safeParseInt return null not NaN — correct for Prisma nullable fields
 - [Phase 13-address-review-findings]: vehicle/[id] PUT now explicitly maps fields — removes unsafe pass-through of raw request body to Prisma
 - [Phase 13]: All 74 Gemini findings accounted for — 27 fixed, 8 already handled, 10 deferred MEDIUM, 31 deferred LOW
+- [Phase 17-feedback-driven-packing]: buildFeedbackSection() returns empty string for undefined/empty input — prompt is unchanged when no history exists (PACK-03 graceful degradation)
+- [Phase 17-feedback-driven-packing]: filterSignificantFeedback() threshold: didntNeedCount >= 2 OR forgotCount >= 1 — single-trip signals excluded to avoid noise
+- [Phase 17-feedback-driven-packing]: aggregateGearFeedback uses immutable spread pattern — consistent with project coding standards
+- [Phase 17-feedback-driven-packing]: Feedback query in packing-list POST is non-blocking (try/catch) — same pattern as weather fetch; id: { not: tripId } excludes current trip
 
 ### Pending Todos
 
@@ -109,6 +115,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-03T02:47:44.066Z
-Stopped at: Phase 15 planned — 2 plans ready
-Resume file: .planning/phases/15-remote-access-go-live/15-01-PLAN.md
+Last session: 2026-04-03T04:18:15.442Z
+Stopped at: Completed 17-02-PLAN.md
+Resume file: None
