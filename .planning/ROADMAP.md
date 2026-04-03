@@ -5,6 +5,7 @@
 - ✅ **v1.0 Foundation** — Phases 1-5 (shipped 2026-04-01) — [archive](milestones/v1.0-ROADMAP.md)
 - ✅ **v1.1 Close the Loop** — Phases 6-11 (shipped 2026-04-02) — [archive](milestones/v1.1-ROADMAP.md)
 - 🚧 **v1.2 Ship It** — Phases 12-15 (in progress)
+- ⬜ **v2.0 Personal Second Brain** — Phases 16-24 (queued) — [session queue](V2-SESSIONS.md)
 
 ## Phases
 
@@ -141,6 +142,15 @@ Phases execute in numeric order: 12 -> 13 -> 14 -> 15
 | 13. Address Review Findings | v1.2 | 4/4 | Complete    | 2026-04-03 |
 | 14. Production Deployment | v1.2 | 0/TBD | Not started | - |
 | 15. Remote Access & Go Live | v1.2 | 0/2 | Complete    | 2026-04-03 |
+| 16. Photo Auto-Import | v2.0 | 0/TBD | Queued | - |
+| 17. Feedback-Driven Packing | v2.0 | 0/TBD | Queued | - |
+| 18. Fuel & Last Stop Planner | v2.0 | 0/TBD | Queued | - |
+| 19. Dog-Aware Trip Planning | v2.0 | 0/TBD | Queued | - |
+| 20. Live Location Sharing | v2.0 | 0/TBD | Queued | - |
+| 21. Permit & Reservation | v2.0 | 0/TBD | Queued | - |
+| 22. Plan A/B/C Fallback Chain | v2.0 | 0/TBD | Queued | - |
+| 23. Gear Category Expansion | v2.0 | 0/TBD | Queued | - |
+| 24. Smart Inbox / Intake | v2.0 | 0/TBD | Queued | - |
 
 ---
 *Full phase details for shipped milestones: see archives in `.planning/milestones/`*
