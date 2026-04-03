@@ -1,17 +1,17 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.2
-milestone_name: Ship It
+milestone: v2.0
+milestone_name: Field Intelligence
 status: executing
-stopped_at: Phase 15 planned — 2 plans ready
-last_updated: "2026-04-03T03:21:20.908Z"
-last_activity: 2026-04-03
+stopped_at: S03 Phase 18 planning — Fuel & Last Stop Planner
+last_updated: "2026-04-02T00:00:00.000Z"
+last_activity: 2026-04-02
 progress:
-  total_phases: 4
-  completed_phases: 3
-  total_plans: 11
-  completed_plans: 11
-  percent: 40
+  total_phases: 7
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-01)
 
 **Core value:** Personal camping second brain — a closed-loop system that plans, executes, and learns from every trip
-**Current focus:** Phase 15 — remote-access-go-live
+**Current focus:** Phase 18 — fuel-last-stop-planner (v2.0 start)
 
 ## Current Position
 
-Phase: 15
+Phase: 18
 Plan: Not started
-Status: Executing Phase 15
-Last activity: 2026-04-03
+Status: Planning Phase 18
+Last activity: 2026-04-02
 
 Progress: [████░░░░░░] 40%
 

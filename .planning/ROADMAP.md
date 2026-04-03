@@ -119,6 +119,31 @@ Plans:
 - Plan 15-01 is Wave 1 — Mac mini setup must complete first
 - Plan 15-02 is Wave 2 — requires Mac mini serving HTTPS before iPhone can verify
 
+### 🚧 v2.0 Field Intelligence (In Progress)
+
+**Milestone Goal:** Add smart field features: fuel & last-stop planning, feedback-driven packing, dog-aware trips, live location sharing, permit tracking, and Plan A/B/C fallback chains.
+
+- [ ] **Phase 16: Photo Auto-Import** - Bulk import photos from camera roll with EXIF GPS extraction
+- [ ] **Phase 17: Feedback-Driven Packing** - Use trip debrief history to inform Claude packing list
+- [ ] **Phase 18: Fuel & Last Stop Planner** - Show last gas/grocery/hardware stop before campsite via Overpass API
+- [ ] **Phase 19: Dog-Aware Trip Planning** - Add dog toggle to trips; Claude adds dog gear section to packing list
+- [ ] **Phase 20: Live Location Sharing** - Shareable public URL showing Will's last known GPS location
+- [ ] **Phase 21: Permit & Reservation** - Store Recreation.gov confirmation URL + notes on trip
+- [ ] **Phase 22: Plan A/B/C Fallback Chain** - Link fallback trips to a primary trip; compare in trip prep
+
+### Phase 18: Fuel & Last Stop Planner
+**Goal**: Will sees the last gas station, grocery store, and hardware/outdoor store before his campsite, pre-populated from OpenStreetMap Overpass API, so he knows what to stock up on before going off-grid
+**Depends on**: Phase 15 (app live on Mac mini)
+**Requirements**: FUEL-01, FUEL-02, FUEL-03
+**Success Criteria** (what must be TRUE):
+  1. A "Fuel & Last Stops" card appears in the Trip Prep section for any trip with destination coordinates
+  2. Card shows up to 2 results each for: fuel, grocery (supermarket), and hardware stops within 50km
+  3. Each result shows name + approximate distance in miles from destination
+  4. If no results found within 50km, card shows "None found nearby — plan ahead"
+  5. Loading state shown while fetching from Overpass API
+  6. No new npm dependencies added (fetch + JSON only)
+**Plans**: TBD
+
 ## Progress
 
 **Execution Order:**
