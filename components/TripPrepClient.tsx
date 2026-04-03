@@ -26,7 +26,22 @@ interface TripPrepClientProps {
     vehicle: { id: string; name: string } | null
     permitUrl: string | null
     permitNotes: string | null
+    fallbackFor: string | null
+    fallbackOrder: number | null
   }
+}
+
+interface AlternativeTrip {
+  id: string
+  name: string
+  startDate: string
+  endDate: string
+  fallbackOrder: number | null
+  location: { id: string; name: string; latitude: number | null; longitude: number | null } | null
+}
+
+interface AlternativeWeather {
+  days: DayForecast[]
 }
 
 interface WeatherSectionData {
@@ -74,6 +89,9 @@ export default function TripPrepClient({ trip }: TripPrepClientProps) {
   const [permitSaving, setPermitSaving] = useState(false)
   const [permitError, setPermitError] = useState<string | null>(null)
   const [permitSaved, setPermitSaved] = useState(false)
+  const [alternatives, setAlternatives] = useState<AlternativeTrip[]>([])
+  const [alternativesLoading, setAlternativesLoading] = useState(false)
+  const [alternativeWeather, setAlternativeWeather] = useState<Record<string, AlternativeWeather>>({})
 
   // Load offline snapshot when device goes offline
   useEffect(() => {
@@ -172,6 +190,30 @@ export default function TripPrepClient({ trip }: TripPrepClientProps) {
         setLastStopsLoading(false)
       })
   }, [trip.id, trip.location?.latitude, trip.location?.longitude])
+
+  // Fetch alternatives for this trip (Phase 22)
+  useEffect(() => {
+    setAlternativesLoading(true)
+    fetch(`/api/trips/${trip.id}/alternatives`)
+      .then(r => r.ok ? r.json() : Promise.reject())
+      .then((data: AlternativeTrip[]) => {
+        setAlternatives(data)
+        setAlternativesLoading(false)
+        // Fetch weather for each alternative with coordinates
+        data.forEach(alt => {
+          if (!alt.location?.latitude || !alt.location?.longitude) return
+          fetch(`/api/weather?lat=${alt.location.latitude}&lon=${alt.location.longitude}`)
+            .then(r => r.ok ? r.json() : null)
+            .then(weather => {
+              if (weather) {
+                setAlternativeWeather(prev => ({ ...prev, [alt.id]: weather }))
+              }
+            })
+            .catch(() => {}) // silently skip weather errors for alternatives
+        })
+      })
+      .catch(() => setAlternativesLoading(false))
+  }, [trip.id])
 
   const nights = tripNights(trip.startDate, trip.endDate)
   const countdown = getCountdown(trip.startDate, trip.endDate)
@@ -457,6 +499,83 @@ export default function TripPrepClient({ trip }: TripPrepClientProps) {
                       {permitSaving ? 'Saving…' : permitSaved ? 'Saved ✓' : 'Save'}
                     </button>
                   </div>
+                </div>
+              )}
+              {/* Fallback Plans card — after Permits (Phase 22) */}
+              {config.key === 'weather' && (
+                <div className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-700 p-4">
+                  <h3 className="text-sm font-semibold text-stone-900 dark:text-stone-50 mb-3">Fallback Plans</h3>
+
+                  {alternativesLoading && (
+                    <div className="space-y-2">
+                      <div className="h-4 w-32 animate-pulse bg-stone-200 dark:bg-stone-700 rounded" />
+                      <div className="h-4 w-48 animate-pulse bg-stone-200 dark:bg-stone-700 rounded" />
+                    </div>
+                  )}
+
+                  {!alternativesLoading && alternatives.length === 0 && (
+                    <p className="text-sm text-stone-400 dark:text-stone-500">
+                      No fallback plans yet.{' '}
+                      <Link
+                        href="/trips"
+                        className="text-amber-600 dark:text-amber-400 hover:underline"
+                      >
+                        Add a Plan B
+                      </Link>
+                    </p>
+                  )}
+
+                  {!alternativesLoading && alternatives.length > 0 && (
+                    <div className="space-y-3">
+                      {alternatives.map(alt => {
+                        const weather = alternativeWeather[alt.id]
+                        return (
+                          <div key={alt.id} className="border border-stone-100 dark:border-stone-800 rounded-lg p-3">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="text-xs font-medium text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/30 rounded-full px-1.5 py-0.5">
+                                Plan {alt.fallbackOrder === 3 ? 'C' : 'B'}
+                              </span>
+                              <span className="text-sm font-semibold text-stone-900 dark:text-stone-50 truncate">
+                                {alt.name}
+                              </span>
+                            </div>
+                            {alt.location ? (
+                              <p className="text-xs text-stone-500 dark:text-stone-400 mb-1">
+                                📍 {alt.location.name}
+                              </p>
+                            ) : (
+                              <p className="text-xs text-stone-400 dark:text-stone-500 italic mb-1">
+                                No location set
+                              </p>
+                            )}
+                            {weather && weather.days.length > 0 && (
+                              <div className="flex gap-2 mt-2 overflow-x-auto">
+                                {weather.days.slice(0, 3).map(day => (
+                                  <div key={day.date} className="text-center min-w-[4rem] shrink-0">
+                                    <p className="text-[10px] text-stone-400 dark:text-stone-500">
+                                      {new Date(day.date).toLocaleDateString('en-US', { weekday: 'short' })}
+                                    </p>
+                                    <p className="text-xs font-medium text-stone-700 dark:text-stone-300">
+                                      {Math.round(day.highF)}° / {Math.round(day.lowF)}°
+                                    </p>
+                                    <p className="text-[10px] text-stone-500 dark:text-stone-400">
+                                      {day.precipProbability}% rain
+                                    </p>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                            <Link
+                              href={`/trips/${alt.id}/prep`}
+                              className="mt-2 inline-block text-xs text-amber-600 dark:text-amber-400 hover:underline"
+                            >
+                              View prep →
+                            </Link>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
                 </div>
               )}
               </Fragment>

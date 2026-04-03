@@ -26,6 +26,8 @@ export default async function TripPrepPage({ params }: { params: Promise<{ id: s
         vehicle: trip.vehicle,
         permitUrl: trip.permitUrl ?? null,
         permitNotes: trip.permitNotes ?? null,
+        fallbackFor: trip.fallbackFor ?? null,
+        fallbackOrder: trip.fallbackOrder ?? null,
       }}
     />
   )

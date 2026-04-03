@@ -8,7 +8,7 @@ export async function GET() {
       include: {
         location: { select: { id: true, name: true, latitude: true, longitude: true } },
         vehicle: { select: { id: true, name: true } },
-        _count: { select: { packingItems: true, photos: true } },
+        _count: { select: { packingItems: true, photos: true, alternatives: true } },
       },
       orderBy: { startDate: "desc" },
     });
@@ -46,11 +46,13 @@ export async function POST(req: Request) {
         notes: data.notes || null,
         weatherNotes: data.weatherNotes || null,
         bringingDog: data.bringingDog === true,
+        fallbackFor: data.fallbackFor || null,
+        fallbackOrder: data.fallbackOrder ? Number(data.fallbackOrder) : null,
       },
       include: {
         location: { select: { id: true, name: true, latitude: true, longitude: true } },
         vehicle: { select: { id: true, name: true } },
-        _count: { select: { packingItems: true, photos: true } },
+        _count: { select: { packingItems: true, photos: true, alternatives: true } },
       },
     });
     return NextResponse.json(trip, { status: 201 });

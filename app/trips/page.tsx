@@ -7,7 +7,7 @@ export default async function TripsPage() {
       include: {
         location: { select: { id: true, name: true, latitude: true, longitude: true } },
         vehicle: { select: { id: true, name: true } },
-        _count: { select: { packingItems: true, photos: true } },
+        _count: { select: { packingItems: true, photos: true, alternatives: true } },
       },
       orderBy: { startDate: "desc" },
     }),
