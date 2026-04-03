@@ -47,7 +47,7 @@
 
 - [ ] **Phase 16: Photo Auto-Import** - Bulk import photos from camera roll with EXIF GPS extraction
 - [ ] **Phase 17: Feedback-Driven Packing** - Packing lists personalized by post-trip gear feedback history
-- [ ] **Phase 18: Fuel & Last Stop Planner** - Pre-trip fuel/grocery/hardware stop cards via Overpass API
+- [x] **Phase 18: Fuel & Last Stop Planner** - Pre-trip fuel/grocery/hardware stop cards via Overpass API (completed 2026-04-03)
 - [x] **Phase 19: Dog-Aware Trip Planning** - Dog toggle on trips, dog gear packing section, dog-friendly notes (completed 2026-04-03)
 - [x] **Phase 20: Live Location Sharing** - Shareable public URL showing Will's last known GPS location (completed 2026-04-03)
 - [ ] **Phase 21: Permit & Reservation** - Store Recreation.gov confirmations with trip, surface reminders
