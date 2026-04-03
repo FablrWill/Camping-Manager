@@ -111,15 +111,6 @@ export type DepartureChecklistResult = z.infer<typeof DepartureChecklistResultSc
 export type DepartureChecklistItem = z.infer<typeof DepartureChecklistItemSchema>;
 export type DepartureChecklistSlot = z.infer<typeof DepartureChecklistSlotSchema>;
 
-// --- Float Plan Email Schema ---
-
-export const FloatPlanEmailSchema = z.object({
-  subject: z.string(),
-  body: z.string(),
-});
-
-export type FloatPlanEmail = z.infer<typeof FloatPlanEmailSchema>;
-
 // --- Trip Summary Schema (Phase 9 - LEARN-02) ---
 
 export const TripSummaryResultSchema = z.object({
