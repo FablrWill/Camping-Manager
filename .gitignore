@@ -47,3 +47,4 @@ DropBox/*
 archive/
 dev.db-shm
 dev.db-wal
+.claude/worktrees/
