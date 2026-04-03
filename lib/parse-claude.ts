@@ -96,6 +96,7 @@ const DepartureChecklistItemSchema = z.object({
   text: z.string(),
   checked: z.boolean().default(false),
   isUnpackedWarning: z.boolean().default(false),
+  suggestedTime: z.string().nullable().optional(),
 });
 
 const DepartureChecklistSlotSchema = z.object({
