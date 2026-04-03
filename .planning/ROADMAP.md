@@ -516,17 +516,31 @@ Plans:
 | 30. Gear Product Research | v3.0 | 0/TBD | Not started | - |
 | 31. Dark Sky & Astro Info | v3.0 | 0/TBD | Not started | - |
 | 32. Deal Monitoring | v3.0 | 0/TBD | Not started | - |
-| 33. Conversational Trip Planner | v3.0 | 0/TBD | Not started | - |
+| 33. Conversational Trip Planner | v3.0 | 0/3 | Planning | - |
 
 ### Phase 33: Conversational Trip Planner
 
 **Goal:** Replace the static "Create Trip" form with a multi-turn Claude agent chat that asks dynamic questions, calls gear/weather/web tools, and creates the trip when ready. Chat is the primary creation path; existing edit form stays for post-creation edits. "Add manually" escape hatch preserved.
-**Requirements**: TBD
+**Requirements**: TRIP-CHAT-01, TRIP-CHAT-02, TRIP-CHAT-03, TRIP-CHAT-04, TRIP-CHAT-05, TRIP-CHAT-06, TRIP-CHAT-07, TRIP-CHAT-08, TRIP-CHAT-09
 **Depends on:** Phase 24
-**Plans:** 0 plans
+**Success Criteria** (what must be TRUE):
+  1. "Plan Trip" button opens a full-screen chat sheet with a conversational agent
+  2. Agent asks dynamic questions and uses tools (gear, weather, locations, web search)
+  3. Agent presents a summary card with "Create Trip" button when enough info is collected
+  4. Confirming creates the trip and navigates to /trips/[id]/prep
+  5. "Add manually" escape hatch opens the old static form
+  6. Trip-creation conversations are persisted to the database
+  7. `npm run build` passes
+**Plans:** 3 plans
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 33 to break down)
+- [ ] 33-01-PLAN.md — Trip planner API route + system prompt + web search tool + tool registry
+- [ ] 33-02-PLAN.md — ChatClient + ChatBubble modifications (apiEndpoint, fullHeight, trip_summary card)
+- [ ] 33-03-PLAN.md — TripPlannerSheet component + TripsClient integration
+
+**Parallelization notes:**
+- Plans 33-01 and 33-02 are Wave 1 — parallel, no file overlap
+- Plan 33-03 is Wave 2 — depends on both 33-01 (API route) and 33-02 (ChatClient props)
 
 ---
 *Full phase details for shipped milestones: see archives in `.planning/milestones/`*
