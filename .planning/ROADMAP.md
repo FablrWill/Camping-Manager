@@ -4,8 +4,9 @@
 
 - ✅ **v1.0 Foundation** — Phases 1-5 (shipped 2026-04-01) — [archive](milestones/v1.0-ROADMAP.md)
 - ✅ **v1.1 Close the Loop** — Phases 6-11 (shipped 2026-04-02) — [archive](milestones/v1.1-ROADMAP.md)
-- 🚧 **v1.2 Ship It** — Phases 12-15 (in progress)
-- 🚧 **v2.0 Smarter & Sharper** — Phases 16-22 (in progress)
+- ✅ **v1.2 Ship It** — Phases 12-15 (shipped 2026-04-03)
+- ✅ **v2.0 Smarter & Sharper** — Phases 16-24 (shipped 2026-04-03)
+- 🚧 **v3.0 Gear Intelligence + Day-Of** — Phases 25-32 (in progress)
 
 ## Phases
 
@@ -32,21 +33,21 @@
 
 </details>
 
-### 🚧 v1.2 Ship It (In Progress)
+### ✅ v1.2 Ship It (Shipped 2026-04-03)
 
 **Milestone Goal:** Cross-AI review, fix all tech debt, get production build working, and deploy to Mac mini so Will can use Outland OS from his phone anywhere.
 
-- [ ] **Phase 12: Fix Build & Clean House** - Fix broken build, resolve tech debt, run Gemini review in parallel
+- [x] **Phase 12: Fix Build & Clean House** - Fix broken build, resolve tech debt, run Gemini review in parallel (completed 2026-04-02)
 - [x] **Phase 13: Address Review Findings** - Act on actionable Gemini feedback before shipping to production (completed 2026-04-03)
-- [ ] **Phase 14: Production Deployment** - Configure Mac mini with PM2, persistent data, backups, deploy script
+- [x] **Phase 14: Production Deployment** - Configure Mac mini with PM2, persistent data, backups, deploy script (completed 2026-04-03)
 - [x] **Phase 15: Remote Access & Go Live** - Tailscale mesh VPN, HTTPS, PWA verification from phone (completed 2026-04-03)
 
-### 🚧 v2.0 Smarter & Sharper (In Progress)
+### ✅ v2.0 Smarter & Sharper (Shipped 2026-04-03)
 
 **Milestone Goal:** Deepen the AI utility of Outland OS — smarter packing from trip history, dog-aware planning, live location sharing, fuel/permit prep, and fallback trip chains.
 
-- [ ] **Phase 16: Photo Auto-Import** - Bulk import photos from camera roll with EXIF GPS extraction
-- [ ] **Phase 17: Feedback-Driven Packing** - Packing lists personalized by post-trip gear feedback history
+- [x] **Phase 16: Photo Auto-Import** - Bulk import photos from camera roll with EXIF GPS extraction (completed 2026-04-03)
+- [x] **Phase 17: Feedback-Driven Packing** - Packing lists personalized by post-trip gear feedback history (completed 2026-04-03)
 - [x] **Phase 18: Fuel & Last Stop Planner** - Pre-trip fuel/grocery/hardware stop cards via Overpass API (completed 2026-04-03)
 - [x] **Phase 19: Dog-Aware Trip Planning** - Dog toggle on trips, dog gear packing section, dog-friendly notes (completed 2026-04-03)
 - [x] **Phase 20: Live Location Sharing** - Shareable public URL showing Will's last known GPS location (completed 2026-04-03)
@@ -54,6 +55,26 @@
 - [x] **Phase 22: Plan A/B/C Fallback Chain** - Link fallback trips to primary, compare in trip prep (completed 2026-04-03)
 - [x] **Phase 23: Gear Category Expansion** - Expand from 7 to 15 categories with visual grouping, add tech gear fields (completed 2026-04-03)
 - [x] **Phase 24: Smart Inbox / Universal Intake** - Single intake endpoint + inbox UI for phone share-to-app workflow (completed 2026-04-03)
+
+### 🚧 v3.0 Gear Intelligence + Day-Of (In Progress)
+
+**Milestone Goal:** Make gear smarter (docs, research, deals, weather-aware clothing) and nail the departure morning experience (sequenced checklist, vehicle prep, safety contact).
+
+**Wave 1 — Parallel (no dependencies):**
+- [ ] **Phase 25: Gear Docs & Manual Finder** - GearDocument model, Claude-powered manual search, PDF download + offline caching
+- [ ] **Phase 26: Trip Day Sequencer** - Time-ordered departure checklist pulling from packing/meals/power/route
+- [ ] **Phase 27: Safety Float Plan** - SMS/email trip summary to emergency contact before departure
+
+**Wave 2 — Depends on Wave 1:**
+- [ ] **Phase 28: Weather-Aware Clothing** - Rain/cold/UV-driven clothing suggestions in packing lists, clothing subcategories
+- [ ] **Phase 29: Vehicle Pre-Trip Checklist** - Tire pressure, oil, coolant, terrain-aware checks paired with Day Sequencer
+
+**Wave 3 — Depends on Wave 2:**
+- [ ] **Phase 30: Gear Product Research** - AI-powered "Research" button, best-in-class comparison, upgrade recommendations
+- [ ] **Phase 31: Dark Sky & Astro Info** - Bortle class, moon phase, sunrise/sunset per location and trip dates
+
+**Wave 4 — Depends on Wave 3:**
+- [ ] **Phase 32: Deal Monitoring** - Target price on wishlist items, on-demand price check via Claude, deal alerts
 
 ## Phase Details
 
@@ -330,10 +351,136 @@ Plans:
 - Plan 22-01 is Wave 1 — schema and API must exist before UI can consume
 - Plans 22-02 and 22-03 are Wave 2 — parallel, no file overlap
 
+### Phase 25: Gear Docs & Manual Finder
+**Goal**: Every gear item can have attached documents (manuals, warranties, support links) that Claude finds automatically and are cached for offline access
+**Depends on**: Phase 23 (expanded categories with modelNumber field)
+**Requirements**: TBD
+**Success Criteria** (what must be TRUE):
+  1. GearDocument model exists with type (manual_pdf, support_link, warranty, product_page), url, localPath, title
+  2. "Find Manual" button on gear detail calls Claude to search for manufacturer support page + PDF
+  3. PDFs download to local storage and display inline
+  4. Documents tab on gear detail shows all attached docs
+  5. Downloaded PDFs cached in service worker for offline access
+  6. `npm run build` passes
+**Plans**: 0/TBD
+
+**Parallelization notes:**
+- Wave 1 — fully parallel with Phases 26 and 27
+
+### Phase 26: Trip Day Sequencer
+**Goal**: Time-ordered departure checklist for the morning of a trip, pulling tasks from packing list, meal plan, power budget, and route — the ADHD-friendly "just follow the list" screen
+**Depends on**: None (uses existing trip prep data)
+**Requirements**: TBD
+**Success Criteria** (what must be TRUE):
+  1. Trip prep has a "Departure Day" section with time-sequenced tasks
+  2. Tasks are generated from existing trip data (packing status, meal prep steps, power charge needs, drive time)
+  3. Each task has a suggested time and can be checked off
+  4. Sequence adapts to departure time (set by user on trip)
+  5. `npm run build` passes
+**Plans**: 0/TBD
+
+**Parallelization notes:**
+- Wave 1 — fully parallel with Phases 25 and 27
+
+### Phase 27: Safety Float Plan
+**Goal**: Send a trip summary (dates, location, vehicle, expected return) to an emergency contact before departure
+**Depends on**: None
+**Requirements**: TBD
+**Success Criteria** (what must be TRUE):
+  1. User can set an emergency contact (name, phone/email) in settings
+  2. "Send Float Plan" button on trip prep generates a summary message
+  3. Message includes: destination, dates, vehicle, expected return, any notes
+  4. Sends via SMS (iMessage on Mac) or email
+  5. `npm run build` passes
+**Plans**: 0/TBD
+
+**Parallelization notes:**
+- Wave 1 — fully parallel with Phases 25 and 26
+
+### Phase 28: Weather-Aware Clothing
+**Goal**: Packing lists include weather-driven clothing suggestions — rain gear for rain, cold layers for low temps, UV protection for high UV
+**Depends on**: Phase 23 (clothing category exists)
+**Requirements**: TBD
+**Success Criteria** (what must be TRUE):
+  1. Claude packing prompt includes specific clothing guidance based on weather forecast
+  2. Rain gear suggested when forecast shows precipitation
+  3. Cold layers suggested for temps below threshold
+  4. UV protection suggested for high UV index days
+  5. Clothing suggestions reference actual owned gear when available
+  6. `npm run build` passes
+**Plans**: 0/TBD
+
+**Parallelization notes:**
+- Wave 2 — can run parallel with Phase 29
+
+### Phase 29: Vehicle Pre-Trip Checklist
+**Goal**: Terrain-aware vehicle checklist (tires, oil, coolant, cargo) that surfaces in trip prep alongside the Day Sequencer
+**Depends on**: Phase 26 (integrates with departure sequence)
+**Requirements**: TBD
+**Success Criteria** (what must be TRUE):
+  1. Trip prep has a "Vehicle Check" card with checklist items
+  2. Checklist items adapt to trip type (highway vs dirt road vs off-road)
+  3. Items can be checked off and state persists
+  4. Integrates with vehicle profile (shows relevant specs)
+  5. `npm run build` passes
+**Plans**: 0/TBD
+
+**Parallelization notes:**
+- Wave 2 — can run parallel with Phase 28
+
+### Phase 30: Gear Product Research
+**Goal**: AI-powered "Research" button on gear items that finds best-in-class alternatives, compares to current item, and surfaces upgrade recommendations
+**Depends on**: Phase 25 (GearDocument model for storing research)
+**Requirements**: TBD
+**Success Criteria** (what must be TRUE):
+  1. "Research" button on gear detail triggers Claude research
+  2. Results show top alternatives with pros/cons vs current item
+  3. Research results stored and dated (staleness tracking >90 days)
+  4. Dashboard or gear page surfaces top upgrade opportunities
+  5. `npm run build` passes
+**Plans**: 0/TBD
+
+**Parallelization notes:**
+- Wave 3 — can run parallel with Phase 31
+
+### Phase 31: Dark Sky & Astro Info
+**Goal**: Show Bortle class, moon phase, sunrise/sunset for trip locations and dates — useful for stargazing trips and photography
+**Depends on**: None (independent, but lower priority)
+**Requirements**: TBD
+**Success Criteria** (what must be TRUE):
+  1. Trip prep shows sunrise/sunset times for trip dates
+  2. Moon phase displayed for each night of the trip
+  3. Bortle class (light pollution) shown for trip location
+  4. Data sourced from free APIs (no API key required)
+  5. `npm run build` passes
+**Plans**: 0/TBD
+
+**Parallelization notes:**
+- Wave 3 — can run parallel with Phase 30
+
+### Phase 32: Deal Monitoring
+**Goal**: Set target prices on wishlist gear items, check prices on demand via Claude, surface deals
+**Depends on**: Phase 30 (research model for storing price data)
+**Requirements**: TBD
+**Success Criteria** (what must be TRUE):
+  1. Wishlist gear items have optional targetPrice field
+  2. "Check Price" button triggers Claude to search current prices
+  3. Results show current price vs target price
+  4. Dashboard surfaces items currently below target price
+  5. `npm run build` passes
+**Plans**: 0/TBD
+
+**Parallelization notes:**
+- Wave 4 — depends on Phase 30 research infrastructure
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 12 -> 13 -> 14 -> 15
+- v1.0-v2.0: Phases 1-24 (complete)
+- v3.0 Wave 1: Phases 25, 26, 27 (parallel)
+- v3.0 Wave 2: Phases 28, 29 (parallel)
+- v3.0 Wave 3: Phases 30, 31 (parallel)
+- v3.0 Wave 4: Phase 32
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -350,17 +497,25 @@ Phases execute in numeric order: 12 -> 13 -> 14 -> 15
 | 11. v1.1 Polish | v1.1 | 2/2 | Complete | 2026-04-02 |
 | 12. Fix Build & Clean House | v1.2 | 5/5 | Complete | 2026-04-02 |
 | 13. Address Review Findings | v1.2 | 4/4 | Complete    | 2026-04-03 |
-| 14. Production Deployment | v1.2 | 0/TBD | Not started | - |
-| 15. Remote Access & Go Live | v1.2 | 0/2 | Complete    | 2026-04-03 |
-| 16. Photo Auto-Import | v2.0 | 0/TBD | Not started | - |
-| 17. Feedback-Driven Packing | v2.0 | 0/TBD | Not started | - |
-| 18. Fuel & Last Stop Planner | v2.0 | 0/TBD | Not started | - |
+| 14. Production Deployment | v1.2 | 3/3 | Complete | 2026-04-03 |
+| 15. Remote Access & Go Live | v1.2 | 2/2 | Complete    | 2026-04-03 |
+| 16. Photo Auto-Import | v2.0 | 1/1 | Complete | 2026-04-03 |
+| 17. Feedback-Driven Packing | v2.0 | 2/2 | Complete | 2026-04-03 |
+| 18. Fuel & Last Stop Planner | v2.0 | 2/2 | Complete | 2026-04-03 |
 | 19. Dog-Aware Trip Planning | v2.0 | 2/2 | Complete | 2026-04-03 |
 | 20. Live Location Sharing | v2.0 | 2/2 | Complete | 2026-04-03 |
-| 21. Permit & Reservation | v2.0 | 0/TBD | Not started | - |
-| 22. Plan A/B/C Fallback Chain | v2.0 | 1/3 | Complete    | 2026-04-03 |
+| 21. Permit & Reservation | v2.0 | 1/1 | Complete | 2026-04-03 |
+| 22. Plan A/B/C Fallback Chain | v2.0 | 3/3 | Complete    | 2026-04-03 |
 | 23. Gear Category Expansion | v2.0 | 3/3 | Complete   | 2026-04-03 |
 | 24. Smart Inbox / Intake | v2.0 | 3/3 | Complete   | 2026-04-03 |
+| 25. Gear Docs & Manual Finder | v3.0 | 0/TBD | Not started | - |
+| 26. Trip Day Sequencer | v3.0 | 0/TBD | Not started | - |
+| 27. Safety Float Plan | v3.0 | 0/TBD | Not started | - |
+| 28. Weather-Aware Clothing | v3.0 | 0/TBD | Not started | - |
+| 29. Vehicle Pre-Trip Checklist | v3.0 | 0/TBD | Not started | - |
+| 30. Gear Product Research | v3.0 | 0/TBD | Not started | - |
+| 31. Dark Sky & Astro Info | v3.0 | 0/TBD | Not started | - |
+| 32. Deal Monitoring | v3.0 | 0/TBD | Not started | - |
 
 ---
 *Full phase details for shipped milestones: see archives in `.planning/milestones/`*
