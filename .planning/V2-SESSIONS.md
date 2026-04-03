@@ -48,6 +48,8 @@ A self-coordinating work queue for v2.0 features. Each Claude Code session claim
 | S08 | Gear category expansion       | 23    | ✅ Done 2026-04-03 | Sonnet, normal | —          |
 | S09 | Smart inbox / intake          | 24    | ✅ Done 2026-04-03 | Sonnet, normal | S08        |
 | S10 | Home Assistant integration    | 25    | ⬜ Ready  | Sonnet, normal | S09        |
+| S11 | Meal planning core            | 26    | ⬜ Ready  | Sonnet, normal | S07, S10   |
+| S12 | Meal planning: shopping, prep & feedback | 27 | ⬜ Ready | Sonnet, normal | S11 |
 
 **Why this order matters (conflict groups):**
 
@@ -57,6 +59,8 @@ A self-coordinating work queue for v2.0 features. Each Claude Code session claim
 - S08 touches `lib/claude.ts` (same as S02, S04, S07) and `GearClient.tsx` — should ideally run before S02
 - S09 depends on S08 (needs 15 categories); touches `BottomNav.tsx` and `schema.prisma` — mostly new files, low conflict
 - S10 depends on S09 (schema settled, nav stable); touches `SettingsClient.tsx`, `DashboardClient.tsx`, `schema.prisma` — new files dominate, low conflict with prior sessions
+- S11 touches `schema.prisma` (same as S10), `lib/claude.ts` (same as S07), `TripsClient.tsx` (same as S07), `TripPrepClient.tsx` (same as S07) — must wait for both S07 and S10
+- S12 touches same files as S11 plus `DashboardClient.tsx` — must wait for S11
 
 ---
 
@@ -460,7 +464,119 @@ Headers: Authorization: Bearer {token}
 
 ---
 
-## Starter Prompts
+### S11 — Meal Planning Core (Phase 26)
+
+**Depends on:** S07 (Trip model + claude.ts + TripPrepClient.tsx settled), S10 (schema.prisma settled)
+
+**What to build:** A meal planning system linked to trips. Given a trip, Claude generates a full meal plan — every meal slot for every day — based on trip duration, headcount, destination/weather, dog status, and Will's preference history. The meal plan lives inside the trip but has its own dedicated view.
+
+**User story:** Will creates a 3-day trip. He opens the Meal Plan tab and taps "Generate Meal Plan". Claude produces 9 meals (3 breakfasts, 3 lunches, 3 dinners) with recipes, ingredient lists, and brief cook notes tailored to car camping. He can regenerate individual meals he doesn't like, or regenerate the whole plan.
+
+**New data models:**
+- `MealPlan` — id, tripId (unique: one plan per trip), generatedAt, notes
+- `Meal` — id, mealPlanId, day (1-based int), slot (breakfast/lunch/dinner/snack), name, description, ingredients (JSON array of `{item, quantity, unit}`), cookInstructions, prepNotes, estimatedMinutes
+
+**Key files:**
+- `prisma/schema.prisma` — add MealPlan + Meal models
+- `prisma/migrations/` — migration for new models
+- `app/api/trips/[id]/meal-plan/route.ts` — GET (fetch plan + meals), DELETE (clear plan)
+- `app/api/trips/[id]/meal-plan/generate/route.ts` — POST: call Claude, persist MealPlan + Meals, return full plan
+- `app/api/trips/[id]/meal-plan/meals/[mealId]/route.ts` — PATCH (regenerate single meal), DELETE
+- `lib/claude.ts` — add `generateMealPlan()` and `regenerateMeal()` functions
+- `components/MealPlanClient.tsx` — NEW: full meal plan view. Days as collapsible sections, meal cards with recipe details. "Generate" / "Regenerate" buttons.
+- `components/TripPrepClient.tsx` — add Meal Plan tab/section that renders MealPlanClient (MODIFY)
+- `components/TripsClient.tsx` — add meal plan status indicator on trip cards (MODIFY)
+
+**Claude prompt context for generation:**
+- Trip: name, start/end dates, destination name + coordinates
+- Duration in days + number of campers (default 1 until headcount field added)
+- Weather forecast if available (pulls from existing weather API)
+- Dog: whether bringingDog is true
+- Gear context: cooking gear available (from gear inventory — filter by category "cook")
+- Will's preference history: summary of past MealFeedback records (added in S12; graceful no-op if none yet)
+- Constraints to inject: "Car camping — full cooler available. Will has a vacuum sealer and sous vide at home for pre-trip prep. Prefer one-pot or simple multi-component meals. Minimize dishes."
+
+**Acceptance criteria:**
+- Meal plan generates for any trip with a start/end date
+- Plan covers every day × every slot (breakfast, lunch, dinner) — snack optional
+- Individual meals can be regenerated without replacing the whole plan
+- Meal plan section visible in trip prep with day-by-day layout
+- Trip card shows meal plan status ("Meal plan ready" / "No meal plan")
+- If no trip weather data, Claude still generates (just without weather context)
+- `npm run build` passes
+
+**Constraints:**
+- Out of scope: shopping list, prep guide, feedback UI (all in S12)
+- Out of scope: headcount field on Trip model — assume 1 camper for now; add in a later session
+- Out of scope: dietary restrictions / preferences field — Will's preferences come through feedback history only in this version
+- One meal plan per trip (unique constraint) — regenerating replaces the existing plan
+
+---
+
+### S12 — Meal Planning: Shopping List, Prep Guide & Feedback (Phase 27)
+
+**Depends on:** S11 (MealPlan + Meal models in place)
+
+**What to build:** Three additions to the meal planning system built in S11: (1) a shopping list auto-generated from all meal ingredients, with checkboxes to tick off while shopping; (2) a prep guide showing what to do at home vs at camp; (3) a feedback UI to rate recipes and the overall plan, with that history feeding future generations.
+
+**User story — shopping:** Will's meal plan is set. He taps "Shopping List" and sees all ingredients aggregated and grouped by category (produce, proteins, dry goods, dairy, other). He's at the store, checking items off as he goes. Items he already has (marked in gear) are pre-checked or de-emphasized.
+
+**User story — prep:** Will taps "Prep Guide". He sees a two-section view: "Before you leave" (vacuum-seal the chicken, make the trail mix, freeze the water jug) and "At camp" (per-meal cook steps). Each step is actionable and in order.
+
+**User story — feedback:** Trip is over. Will opens the meal plan and taps the ★ icon on each meal: thumbs up on the chili, thumbs down on the scrambled eggs with a note "too much cleanup for camp". Next time he generates a plan, Claude knows to avoid egg dishes that require cleanup and to include chili-style one-pots.
+
+**New data models:**
+- `ShoppingListItem` — id, mealPlanId, item, quantity, unit, category (produce/protein/dairy/dry/other), checked (bool), notes
+- `MealFeedback` — id, mealId (nullable), mealPlanId, rating (liked/disliked/neutral), notes, createdAt. When mealId is null, it's a whole-plan rating.
+
+**Key files:**
+- `prisma/schema.prisma` — add ShoppingListItem + MealFeedback models
+- `prisma/migrations/` — migration for new models
+- `app/api/trips/[id]/meal-plan/shopping-list/route.ts` — GET (fetch list), POST (generate/regenerate from meal ingredients), PATCH bulk (update checked states)
+- `app/api/trips/[id]/meal-plan/shopping-list/[itemId]/route.ts` — PATCH (toggle checked), DELETE
+- `app/api/trips/[id]/meal-plan/feedback/route.ts` — POST (save feedback for meal or whole plan), GET (fetch all feedback for plan)
+- `lib/claude.ts` — update `generateMealPlan()` to accept + inject feedback history summary; add `generateShoppingList()` that aggregates + categorizes ingredients; add `generatePrepGuide()` that produces before/at-camp steps
+- `components/ShoppingListClient.tsx` — NEW: grouped ingredient list with checkboxes, category headers, check-all-in-category shortcut
+- `components/PrepGuideClient.tsx` — NEW: two-column or tabbed view (Before You Leave / At Camp) with ordered steps
+- `components/MealFeedbackButton.tsx` — NEW: small inline rating component (👍/👎 + optional note textarea). Used on each meal card and once for whole plan.
+- `components/MealPlanClient.tsx` — add tabs: Plan / Shopping / Prep. Add feedback buttons to each meal card. (MODIFY from S11)
+- `components/DashboardClient.tsx` — add meal plan dashboard card: shows active/upcoming trip meal plan status. "Camping in 5 days — shopping list not done" style nudge. (MODIFY)
+
+**Shopping list generation approach:**
+- Aggregate all `Meal.ingredients` JSON arrays across the plan
+- Merge duplicates (e.g., two meals need olive oil → combine quantities)
+- Categorize using Claude (one call to classify items into produce/protein/dairy/dry/other)
+- Persist as `ShoppingListItem` rows so checked state survives page reloads
+
+**Feedback injection into future generations:**
+- On plan generation, query last 10 `MealFeedback` records (any trip)
+- Summarize: "Previously liked: [names]. Previously disliked: [names] — reason: [notes]. Avoid: [patterns from dislike notes]."
+- Inject summary into `generateMealPlan()` prompt as a "Will's meal history" block
+
+**Prep guide approach:**
+- Claude call with all meals + ingredients → returns structured JSON: `{ beforeLeave: [{step, meals}], atCamp: [{day, mealSlot, steps}] }`
+- Leverages Will's vacuum sealer / sous vide context (already in S11 prompt constraints)
+- Persisted in a `prepGuide JSON` field on MealPlan (add via migration)
+
+**Acceptance criteria:**
+- Shopping list generates from any complete meal plan
+- Items grouped by category with section headers
+- Checkboxes persist across page reloads
+- Prep guide shows before/at-camp steps clearly
+- Feedback buttons on each meal card + whole-plan rating at bottom of plan view
+- Feedback stored and summarized in future generation prompts
+- Dashboard card shows meal plan completeness for upcoming trips
+- `npm run build` passes
+
+**Constraints:**
+- Out of scope: syncing shopping list to a third-party app (Instacart, AnyList, etc.)
+- Out of scope: "I already have this" pre-checking from gear inventory — too complex for now; just let Will manually check
+- Out of scope: sharing the shopping list — copy-to-clipboard is enough for now
+- Feedback influences future generations via prompt injection only — no ML, no embedding search
+
+---
+
+
 
 Copy-paste one of these to begin each session. All use **claude-sonnet-4-6**, normal effort (no special flags needed).
 
@@ -532,6 +648,20 @@ Pull origin main, then claim S09 in .planning/V2-SESSIONS.md (mark it 🔄 In Pr
 **S10 — Home Assistant integration** *(start only after S09 is ✅ Done AND HA hardware is set up at camp)*
 ```
 Pull origin main, then claim S10 in .planning/V2-SESSIONS.md (mark it 🔄 In Progress, commit + push the claim). Then run /gsd:plan-phase 25 to plan the Home Assistant integration — the full spec is in V2-SESSIONS.md under S10. After planning is approved, run /gsd:execute-phase 25. When done, mark S10 ✅ Done in V2-SESSIONS.md, commit, and push.
+```
+
+---
+
+**S11 — Meal planning core** *(start only after S07 and S10 are both ✅ Done)*
+```
+Pull origin main, then claim S11 in .planning/V2-SESSIONS.md (mark it 🔄 In Progress, commit + push the claim). Then run /gsd:plan-phase 26 to plan the meal planning core feature — the full spec is in V2-SESSIONS.md under S11. After planning is approved, run /gsd:execute-phase 26. When done, mark S11 ✅ Done in V2-SESSIONS.md, commit, and push.
+```
+
+---
+
+**S12 — Meal planning: shopping, prep & feedback** *(start only after S11 is ✅ Done)*
+```
+Pull origin main, then claim S12 in .planning/V2-SESSIONS.md (mark it 🔄 In Progress, commit + push the claim). Then run /gsd:plan-phase 27 to plan the meal shopping/prep/feedback feature — the full spec is in V2-SESSIONS.md under S12. After planning is approved, run /gsd:execute-phase 27. When done, mark S12 ✅ Done in V2-SESSIONS.md, commit, and push.
 ```
 
 ---
