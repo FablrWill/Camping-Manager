@@ -76,6 +76,20 @@ export default function DepartureChecklistItem({ item, onCheck, disabled }: Depa
           </span>
         )}
       </div>
+
+      {/* Time badge — per D-09, UI-SPEC */}
+      {item.suggestedTime && (
+        <span
+          className={`text-xs tabular-nums shrink-0 ml-auto ${
+            item.checked
+              ? 'line-through text-stone-400 dark:text-stone-600'
+              : 'text-stone-400 dark:text-stone-500'
+          }`}
+          style={{ maxWidth: '80px' }}
+        >
+          {item.suggestedTime}
+        </span>
+      )}
     </div>
   )
 }
