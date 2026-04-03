@@ -354,7 +354,7 @@ Plans:
 ### Phase 25: Gear Docs & Manual Finder
 **Goal**: Every gear item can have attached documents (manuals, warranties, support links) that Claude finds automatically and are cached for offline access
 **Depends on**: Phase 23 (expanded categories with modelNumber field)
-**Requirements**: TBD
+**Requirements**: GEARDOC-01, GEARDOC-02, GEARDOC-03, GEARDOC-04, GEARDOC-05, GEARDOC-06
 **Success Criteria** (what must be TRUE):
   1. GearDocument model exists with type (manual_pdf, support_link, warranty, product_page), url, localPath, title
   2. "Find Manual" button on gear detail calls Claude to search for manufacturer support page + PDF
@@ -362,10 +362,16 @@ Plans:
   4. Documents tab on gear detail shows all attached docs
   5. Downloaded PDFs cached in service worker for offline access
   6. `npm run build` passes
-**Plans**: 0/TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 25-01-PLAN.md — GearDocument schema + migration + drop manualUrl + Zod schema
+- [ ] 25-02-PLAN.md — Document CRUD API routes + Claude Find Manual + PDF download
+- [ ] 25-03-PLAN.md — GearDocumentsTab UI + wire into GearClient detail modal
 
 **Parallelization notes:**
-- Wave 1 — fully parallel with Phases 26 and 27
+- Plan 25-01 is Wave 1 — schema and migration must complete first
+- Plans 25-02 and 25-03 are Wave 2 — parallel, no file overlap
 
 ### Phase 26: Trip Day Sequencer
 **Goal**: Time-ordered departure checklist for the morning of a trip, pulling tasks from packing list, meal plan, power budget, and route — the ADHD-friendly "just follow the list" screen
@@ -508,7 +514,7 @@ Plans:
 | 22. Plan A/B/C Fallback Chain | v2.0 | 3/3 | Complete    | 2026-04-03 |
 | 23. Gear Category Expansion | v2.0 | 3/3 | Complete   | 2026-04-03 |
 | 24. Smart Inbox / Intake | v2.0 | 3/3 | Complete   | 2026-04-03 |
-| 25. Gear Docs & Manual Finder | v3.0 | 0/TBD | Not started | - |
+| 25. Gear Docs & Manual Finder | v3.0 | 0/3 | Planned | - |
 | 26. Trip Day Sequencer | v3.0 | 0/TBD | Not started | - |
 | 27. Safety Float Plan | v3.0 | 0/TBD | Not started | - |
 | 28. Weather-Aware Clothing | v3.0 | 0/TBD | Not started | - |
