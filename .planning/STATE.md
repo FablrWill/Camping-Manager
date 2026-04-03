@@ -21,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-01)
 
 **Core value:** Personal camping second brain — a closed-loop system that plans, executes, and learns from every trip
-**Current focus:** Phase 33 — conversational-trip-planner
+**Current focus:** Phase 29 complete — next up: Phase 30 (Gear Product Research), Phase 31 (Astro), S11 (Meal Planning)
 
 ## Current Position
 
-Phase: 33
-Plan: Not started
-Status: Ready to execute
+Phase: 29
+Plan: All plans complete
+Status: Verified (human UAT deferred)
 Last activity: 2026-04-03
 
 Progress: [████░░░░░░] 40%

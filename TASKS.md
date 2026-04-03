@@ -1,6 +1,6 @@
 # Outland OS — Task Tracker
 
-> **Last updated:** 2026-04-03 (v2.0 complete; v3.0 in progress — Phases 25-29 shipped, Phase 29 partially done)
+> **Last updated:** 2026-04-03 (v2.0 complete; v3.0 Waves 1-2 done — Phases 25-29 + 33 complete; next: 30, 31, S11)
 > **Start here** if you're picking up after a break.
 > **North star:** `docs/USER-JOURNEY.md` — read this before building anything new.
 
@@ -154,7 +154,7 @@ All 5 phases of v1.0 shipped. The app has: executive trip prep, NC camping knowl
 |-------|----------|-------|
 | Dashboard trips stat hardcoded to 0 | Low | `DashboardClient.tsx:163` — needs `tripCount` from server props |
 | Packing item checkbox uses `update` not `upsert` | Medium | `api/packing-list/items/route.ts:16` — will 404 if PackingItem rows don't exist yet. Should upsert on `(tripId, gearId)` |
-| No per-trip update/delete route | Medium | `app/api/trips/[id]/route.ts` doesn't exist — can't edit or delete a trip |
+| ~~No per-trip update/delete route~~ | ~~Medium~~ | ✅ Fixed in Phase 22 — `app/api/trips/[id]/route.ts` has full GET/PUT/PATCH/DELETE |
 | Missing `placeholder.jpg` in public/ | Low | `api/import/photos/route.ts:87` references `/photos/placeholder.jpg` — broken images for imported photos without files |
 | Prep power section uses heuristic, not computed budget | Low | Prep API power status doesn't call `calculatePowerBudget` — can misrepresent readiness |
 
