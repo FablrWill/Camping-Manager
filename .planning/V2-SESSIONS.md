@@ -44,7 +44,7 @@ A self-coordinating work queue for v2.0 features. Each Claude Code session claim
 | S04 | Dog-aware trip planning       | 19    | ✅ Done 2026-04-03 | Sonnet, normal | —          |
 | S05 | Live location sharing         | 20    | ✅ Done 2026-04-03 | Sonnet, normal | —          |
 | S06 | Permit & reservation          | 21    | ✅ Done 2026-04-03 | Sonnet, normal | S03, S05   |
-| S07 | Plan A/B/C fallback chain     | 22    | ⬜ Ready  | Sonnet, normal | S04, S06   |
+| S07 | Plan A/B/C fallback chain     | 22    | 🔄 In Progress 2026-04-03 | Sonnet, normal | S04, S06   |
 | S08 | Gear category expansion       | 23    | ✅ Done 2026-04-03 | Sonnet, normal | —          |
 | S09 | Smart inbox / intake          | 24    | ✅ Done 2026-04-03 | Sonnet, normal | S08        |
 
