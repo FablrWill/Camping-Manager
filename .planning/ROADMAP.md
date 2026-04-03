@@ -91,7 +91,11 @@ Plans:
   3. PM2 automatically restarts the app after a crash or Mac mini reboot
   4. A single deploy command (script) pulls latest code, builds, and restarts the service
   5. Daily SQLite backups run automatically via cron
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 18-01-PLAN.md — Overpass utility + API route with tests (FUEL-01, FUEL-02)
+- [ ] 18-02-PLAN.md — TripPrepClient card injection + visual verification (FUEL-03)
 
 **Parallelization notes:**
 - DEPLOY-01/DEPLOY-02/DEPLOY-03 (standalone config, data paths, DATABASE_URL) are sequential setup
@@ -142,7 +146,11 @@ Plans:
   4. If no results found within 50km, card shows "None found nearby — plan ahead"
   5. Loading state shown while fetching from Overpass API
   6. No new npm dependencies added (fetch + JSON only)
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 18-01-PLAN.md — Overpass utility + API route with tests (FUEL-01, FUEL-02)
+- [ ] 18-02-PLAN.md — TripPrepClient card injection + visual verification (FUEL-03)
 
 ## Progress
 
