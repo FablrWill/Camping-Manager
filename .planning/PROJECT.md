@@ -103,7 +103,7 @@ None — v1.2 Ship It complete as of 2026-04-03.
 
 ## Current State
 
-Phase 27 complete (2026-04-03) — Float plan email refactored to deterministic plain-text template. No Claude API call, no gear list, no checklist status. Dead code (composeFloatPlanEmail, FloatPlanEmailSchema, FloatPlanEmail) removed from claude.ts and parse-claude.ts. Phase 25 also complete: GearDocument model with Claude-powered manual finder, PDF download + local caching, GearDocumentsTab UI wired into gear edit modal.
+Phase 29 complete (2026-04-03) — Vehicle Pre-Trip Checklist: Claude-generated checklist in trip prep, check-off persistence via PATCH route + prisma.$transaction, VehicleChecklistCard wired as 6th PREP_SECTIONS entry. Human UAT pending (29-HUMAN-UAT.md). Phase 27 also complete: float plan email refactored to plain-text template.
 
 ## Current Milestone: ✅ v1.2 Ship It — COMPLETE (2026-04-03)
 
@@ -192,4 +192,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-03 after Phase 27 complete — Plain-text float plan template (no Claude call, dead code removed)*
+*Last updated: 2026-04-03 after Phase 29 complete — Vehicle Pre-Trip Checklist feature shipped*

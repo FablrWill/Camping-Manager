@@ -16,19 +16,13 @@ vi.mock('@/lib/claude', () => ({
 
 import { prisma } from '@/lib/db'
 import { generateVehicleChecklist } from '@/lib/claude'
+import { POST } from '@/app/api/vehicle-checklist/route'
+import { PATCH } from '@/app/api/vehicle-checklist/[tripId]/check/route'
 import { NextRequest } from 'next/server'
 
-function makePostRequest(body: object): NextRequest {
-  return new NextRequest('http://localhost/api/vehicle-checklist', {
-    method: 'POST',
-    body: JSON.stringify(body),
-    headers: { 'Content-Type': 'application/json' },
-  })
-}
-
-function makePatchRequest(tripId: string, body: object): NextRequest {
-  return new NextRequest(`http://localhost/api/vehicle-checklist/${tripId}/check`, {
-    method: 'PATCH',
+function makeRequest(url: string, method: string, body: object): NextRequest {
+  return new NextRequest(url, {
+    method,
     body: JSON.stringify(body),
     headers: { 'Content-Type': 'application/json' },
   })
@@ -66,99 +60,85 @@ const mockTripNoVehicle = {
   vehicleId: null,
 }
 
+const mockTripWithChecklist = {
+  ...mockTripWithVehicle,
+  vehicleChecklistResult: JSON.stringify(mockChecklistResult),
+  vehicleChecklistGeneratedAt: new Date('2026-05-01T10:00:00.000Z'),
+}
+
 beforeEach(() => {
   vi.resetAllMocks()
   process.env.ANTHROPIC_API_KEY = 'test-key'
+
   vi.mocked(generateVehicleChecklist).mockResolvedValue(mockChecklistResult)
-  vi.mocked(prisma.trip.update).mockResolvedValue({
-    ...mockTripWithVehicle,
-    vehicleChecklistResult: JSON.stringify(mockChecklistResult),
-    vehicleChecklistGeneratedAt: new Date(),
-  } as never)
+  vi.mocked(prisma.trip.update).mockResolvedValue({} as never)
 })
 
 describe('POST /api/vehicle-checklist', () => {
-  it('Test 1: calls generateVehicleChecklist with vehicle specs and trip context when vehicle is assigned', async () => {
+  it('Test 1: calls generateVehicleChecklist with vehicle specs and trip context', async () => {
     vi.mocked(prisma.trip.findUnique).mockResolvedValue(mockTripWithVehicle as never)
 
-    // Route file does not exist yet (Plan 02 will create it) — RED state
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { POST } = require('@/app/api/vehicle-checklist/route')
-    const req = makePostRequest({ tripId: 'trip-1' })
+    const req = makeRequest('http://localhost/api/vehicle-checklist', 'POST', { tripId: 'trip-1' })
     const res = await POST(req)
-
     expect(res.status).toBe(200)
-    expect(generateVehicleChecklist).toHaveBeenCalledOnce()
 
+    expect(generateVehicleChecklist).toHaveBeenCalledOnce()
     const callArgs = vi.mocked(generateVehicleChecklist).mock.calls[0][0]
-    // Vehicle specs
-    expect(callArgs).toMatchObject(
-      expect.objectContaining({
-        year: 2022,
-        make: 'Hyundai',
-        model: 'Santa Fe Hybrid',
-        drivetrain: 'AWD',
-        groundClearance: 8.0,
-      })
-    )
-    // Trip context
-    expect(callArgs).toMatchObject(
-      expect.objectContaining({
-        destinationName: 'Linville Gorge',
-        roadCondition: 'dirt',
-        clearanceNeeded: 'high',
-      })
-    )
+    expect(callArgs.vehicleYear).toBe(2022)
+    expect(callArgs.vehicleMake).toBe('Hyundai')
+    expect(callArgs.vehicleModel).toBe('Santa Fe Hybrid')
+    expect(callArgs.drivetrain).toBe('AWD')
+    expect(callArgs.groundClearance).toBe(8.0)
+    expect(callArgs.destinationName).toBe('Linville Gorge')
+    expect(callArgs.roadCondition).toBe('dirt')
+    expect(callArgs.clearanceNeeded).toBe('high')
+    expect(callArgs.tripDays).toBeGreaterThanOrEqual(1)
   })
 
   it('Test 2: returns 400 when trip has no vehicle assigned', async () => {
     vi.mocked(prisma.trip.findUnique).mockResolvedValue(mockTripNoVehicle as never)
 
-    // Route file does not exist yet (Plan 02 will create it) — RED state
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { POST } = require('@/app/api/vehicle-checklist/route')
-    const req = makePostRequest({ tripId: 'trip-2' })
+    const req = makeRequest('http://localhost/api/vehicle-checklist', 'POST', { tripId: 'trip-2' })
     const res = await POST(req)
-
     expect(res.status).toBe(400)
+
     const body = await res.json()
-    expect(body.error).toMatch(/no vehicle/i)
+    expect(body.error).toBe('No vehicle assigned to this trip')
+    expect(generateVehicleChecklist).not.toHaveBeenCalled()
   })
 })
 
 describe('PATCH /api/vehicle-checklist/[tripId]/check', () => {
-  it('Test 3: updates checked state for an existing item and returns success', async () => {
-    const tripWithChecklist = {
-      ...mockTripWithVehicle,
-      vehicleChecklistResult: JSON.stringify(mockChecklistResult),
-    }
-    vi.mocked(prisma.trip.findUnique).mockResolvedValue(tripWithChecklist as never)
-    vi.mocked(prisma.$transaction).mockImplementation(async (fn) => fn(prisma))
+  it('Test 3: toggles item checked state and returns success', async () => {
+    vi.mocked(prisma.$transaction).mockImplementation(async (fn) => {
+      vi.mocked(prisma.trip.findUnique).mockResolvedValue(mockTripWithChecklist as never)
+      return fn(prisma)
+    })
 
-    // Route file does not exist yet (Plan 02 will create it) — RED state
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { PATCH } = require('@/app/api/vehicle-checklist/[tripId]/check/route')
-    const req = makePatchRequest('trip-1', { itemId: 'vc-0', checked: true })
+    const req = makeRequest(
+      'http://localhost/api/vehicle-checklist/trip-1/check',
+      'PATCH',
+      { itemId: 'vc-0', checked: true }
+    )
     const res = await PATCH(req, { params: Promise.resolve({ tripId: 'trip-1' }) })
-
     expect(res.status).toBe(200)
+
     const body = await res.json()
     expect(body.success).toBe(true)
   })
 
   it('Test 4: returns 400 when itemId does not exist in checklist', async () => {
-    const tripWithChecklist = {
-      ...mockTripWithVehicle,
-      vehicleChecklistResult: JSON.stringify(mockChecklistResult),
-    }
-    vi.mocked(prisma.trip.findUnique).mockResolvedValue(tripWithChecklist as never)
+    vi.mocked(prisma.$transaction).mockImplementation(async (fn) => {
+      vi.mocked(prisma.trip.findUnique).mockResolvedValue(mockTripWithChecklist as never)
+      return fn(prisma)
+    })
 
-    // Route file does not exist yet (Plan 02 will create it) — RED state
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { PATCH } = require('@/app/api/vehicle-checklist/[tripId]/check/route')
-    const req = makePatchRequest('trip-1', { itemId: 'vc-999', checked: true })
+    const req = makeRequest(
+      'http://localhost/api/vehicle-checklist/trip-1/check',
+      'PATCH',
+      { itemId: 'vc-999', checked: true }
+    )
     const res = await PATCH(req, { params: Promise.resolve({ tripId: 'trip-1' }) })
-
     expect(res.status).toBe(400)
   })
 })
