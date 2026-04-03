@@ -24,7 +24,6 @@ interface GearItem {
   hasBattery: boolean
   modelNumber: string | null
   connectivity: string | null
-  manualUrl: string | null
   createdAt: string
   updatedAt: string
 }

@@ -23,7 +23,6 @@ interface GearItem {
   hasBattery: boolean
   modelNumber: string | null
   connectivity: string | null
-  manualUrl: string | null
 }
 
 interface ConditionOption {
@@ -72,7 +71,6 @@ export default function GearForm({
       hasBattery: form.get('hasBattery') === 'on',
       modelNumber: form.get('modelNumber') as string || null,
       connectivity: form.get('connectivity') as string || null,
-      manualUrl: form.get('manualUrl') as string || null,
     }
 
     try {
@@ -342,19 +340,6 @@ export default function GearForm({
                 />
               </div>
 
-              <div>
-                <label htmlFor="gear-manualUrl" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Manual URL
-                </label>
-                <input
-                  id="gear-manualUrl"
-                  name="manualUrl"
-                  type="url"
-                  defaultValue={item?.manualUrl ?? ''}
-                  placeholder="https://..."
-                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-400 dark:focus:ring-amber-500"
-                />
-              </div>
             </div>
           </div>
 
