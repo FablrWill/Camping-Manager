@@ -4,8 +4,8 @@
 
 - ✅ **v1.0 Foundation** — Phases 1-5 (shipped 2026-04-01) — [archive](milestones/v1.0-ROADMAP.md)
 - ✅ **v1.1 Close the Loop** — Phases 6-11 (shipped 2026-04-02) — [archive](milestones/v1.1-ROADMAP.md)
-- ✅ **v1.2 Ship It** — Phases 12-15 (shipped 2026-04-03)
-- 🚧 **v2.0 Personal Second Brain** — Phases 16-22 (in progress)
+- 🚧 **v1.2 Ship It** — Phases 12-15 (in progress)
+- 🚧 **v2.0 Smarter & Sharper** — Phases 16-22 (in progress)
 
 ## Phases
 
@@ -32,7 +32,7 @@
 
 </details>
 
-### ✅ v1.2 Ship It (Shipped 2026-04-03)
+### 🚧 v1.2 Ship It (In Progress)
 
 **Milestone Goal:** Cross-AI review, fix all tech debt, get production build working, and deploy to Mac mini so Will can use Outland OS from his phone anywhere.
 
@@ -40,6 +40,18 @@
 - [x] **Phase 13: Address Review Findings** - Act on actionable Gemini feedback before shipping to production (completed 2026-04-03)
 - [ ] **Phase 14: Production Deployment** - Configure Mac mini with PM2, persistent data, backups, deploy script
 - [x] **Phase 15: Remote Access & Go Live** - Tailscale mesh VPN, HTTPS, PWA verification from phone (completed 2026-04-03)
+
+### 🚧 v2.0 Smarter & Sharper (In Progress)
+
+**Milestone Goal:** Deepen the AI utility of Outland OS — smarter packing from trip history, dog-aware planning, live location sharing, fuel/permit prep, and fallback trip chains.
+
+- [ ] **Phase 16: Photo Auto-Import** - Bulk import photos from camera roll with EXIF GPS extraction
+- [ ] **Phase 17: Feedback-Driven Packing** - Packing lists personalized by post-trip gear feedback history
+- [ ] **Phase 18: Fuel & Last Stop Planner** - Pre-trip fuel/grocery/hardware stop cards via Overpass API
+- [x] **Phase 19: Dog-Aware Trip Planning** - Dog toggle on trips, dog gear packing section, dog-friendly notes (completed 2026-04-03)
+- [ ] **Phase 20: Live Location Sharing** - Shareable public URL showing Will's last known GPS location
+- [ ] **Phase 21: Permit & Reservation** - Store Recreation.gov confirmations with trip, surface reminders
+- [ ] **Phase 22: Plan A/B/C Fallback Chain** - Link fallback trips to primary, compare in trip prep
 
 ## Phase Details
 
@@ -120,50 +132,94 @@ Plans:
 - Plan 15-01 is Wave 1 — Mac mini setup must complete first
 - Plan 15-02 is Wave 2 — requires Mac mini serving HTTPS before iPhone can verify
 
-### 🚧 v2.0 Personal Second Brain (In Progress)
-
-**Milestone Goal:** Turn Outland OS into a true camping second brain — AI that remembers, learns from past trips, and plans smarter over time. Each phase adds a self-contained v2.0 capability.
-
-- [ ] **Phase 16: Photo Auto-Import** - Bulk import from device camera roll; EXIF GPS extraction; progress tracking
-- [x] **Phase 17: Feedback-Driven Packing** - Use post-trip gear feedback history to improve future packing list AI recommendations (completed 2026-04-03)
-- [ ] **Phase 18: Fuel & Last Stop Planner** - Pre-trip last gas/grocery/hardware finder via OpenStreetMap Overpass API
-- [ ] **Phase 19: Dog-Aware Trip Planning** - Dog toggle on trips; dog gear section in packing list; dog-friendly notes
-- [ ] **Phase 20: Live Location Sharing** - Shareable public URL showing Will's last known location on a Leaflet map
-- [ ] **Phase 21: Permit & Reservation Awareness** - Store Recreation.gov confirmation URL + notes on trips; permit card in trip prep
-- [ ] **Phase 22: Plan A/B/C Fallback Chain** - Link trips as fallback alternatives; fallback card in trip prep with weather compare
-
-## Feature Specs
-
-### Phase 16: Photo Auto-Import (Phase 16)
-**Goal**: Will can select multiple photos at once and bulk-import them — EXIF GPS is extracted automatically and photos appear on the Spots map
-**Depends on**: Phase 15 (production app running)
-**Requirements**: PHOTO-01, PHOTO-02, PHOTO-03, PHOTO-04
+### Phase 16: Photo Auto-Import
+**Goal**: Will can select multiple photos at once and bulk-import them with EXIF GPS extraction, so trip photos appear on the map without one-at-a-time uploading
+**Depends on**: Phase 15
+**Requirements**: PHOTO-BULK-01, PHOTO-BULK-02, PHOTO-BULK-03, PHOTO-BULK-04, PHOTO-BULK-05
 **Success Criteria** (what must be TRUE):
   1. User can select multiple files via `<input type=file multiple>` in the Photos section
-  2. Each file is processed through the existing EXIF + sharp compress pipeline
-  3. Progress feedback shown during import (e.g., "Importing 12 of 50...")
-  4. Individual file failures don't abort the batch — errors collected and reported at end
+  2. Each file is processed through EXIF extraction + sharp compression pipeline
+  3. Progress indicator shows "Importing N of M..." during batch
+  4. Individual file failures don't abort the batch — errors collected and shown at end
   5. Imported photos with GPS EXIF appear as pins on the Spots map
+**Plans**: TBD
 
 ### Phase 17: Feedback-Driven Packing
-**Goal**: Packing list generation uses gear feedback from past trips — items marked "didn't need" are deprioritized, forgotten items are flagged
-**Depends on**: Phase 15 (production app running)
-**Requirements**: PACK-01, PACK-02, PACK-03, PACK-04
+**Goal**: Packing lists are personalized by post-trip gear feedback history, so Claude accounts for items Will consistently skips or forgets
+**Depends on**: Phase 15
+**Requirements**: PACK-FEEDBACK-01, PACK-FEEDBACK-02, PACK-FEEDBACK-03
 **Success Criteria** (what must be TRUE):
-  1. `generatePackingList()` in `lib/claude.ts` accepts and injects gear feedback history into the Claude prompt
-  2. Feedback is aggregated from last 3-5 `TripFeedback` records (existing model, no schema change)
-  3. When no trip history exists, packing list generates identically to current behavior
-  4. When history exists, Claude prompt includes a gear feedback summary (visible in server logs)
-  5. Packing list output contains at least one feedback-informed note when history is available
+  1. If no trip history, packing list generates identically to current behavior
+  2. If history exists, Claude prompt includes gear feedback summary (verifiable in logs)
+  3. Packing list output includes at least one feedback-informed note when history available
+**Plans**: TBD
+
+### Phase 18: Fuel & Last Stop Planner
+**Goal**: Trip prep shows the last gas station, grocery, and hardware store before the campsite, so Will can stock up before services run out
+**Depends on**: Phase 15
+**Requirements**: FUEL-01, FUEL-02, FUEL-03, FUEL-04, FUEL-05
+**Success Criteria** (what must be TRUE):
+  1. Trip prep section has "Fuel & Last Stops" card with 3 categories: Fuel, Grocery, Hardware/Outdoor
+  2. Each entry shows name + approximate distance from destination in miles
+  3. Loading state shown while fetching Overpass API results
+  4. If no results within 50km, shows "None found nearby — plan ahead"
+  5. Uses trip's existing `latitude`/`longitude` fields — no new data entry required
+**Plans**: TBD
+
+### Phase 19: Dog-Aware Trip Planning
+**Goal**: Trips can be marked "bringing dog" and the packing list automatically includes a Dog section with essential gear and dog-friendly destination notes
+**Depends on**: Phase 15
+**Requirements**: DOG-01, DOG-02, DOG-03, DOG-04, DOG-05
+**Success Criteria** (what must be TRUE):
+  1. Trip create/edit form has "Bringing dog?" boolean toggle (defaults false)
+  2. When `bringingDog = true`, generated packing list includes a "Dog" section with: food + collapsible bowl, water bowl, leash + backup leash, poop bags (2x), dog first aid (tweezers, wound spray)
+  3. Trip card shows 🐕 indicator when `bringingDog` is true
+  4. When `bringingDog = false`, no dog items appear in packing list (no regression)
+  5. Trip edit supports toggling `bringingDog` on existing trips
 **Plans:** 2/2 plans complete
 
 Plans:
-- [x] 17-01-PLAN.md — GearFeedbackSummary interface + buildFeedbackSection() + tests (PACK-01, PACK-03, PACK-04)
-- [x] 17-02-PLAN.md — API route feedback aggregation query + wiring (PACK-02)
+- [x] 19-01-PLAN.md — Schema migration + API routes + packing list prompt conditioning (completed 2026-04-03)
+- [x] 19-02-PLAN.md — Trip form dog toggle + TripCard indicator
 
 **Parallelization notes:**
-- Plan 17-01 is Wave 1 — pure function additions to lib/claude.ts
-- Plan 17-02 is Wave 2 — depends on Plan 01 exports for API route wiring
+- Plan 19-01 is Wave 1 — schema and backend must exist before UI can consume
+- Plan 19-02 is Wave 2 — depends on schema field and API changes from 19-01
+
+### Phase 20: Live Location Sharing
+**Goal**: Will can generate a shareable URL that shows his last known GPS location on a public map page, so family can track him during remote trips
+**Depends on**: Phase 15
+**Requirements**: SHARE-01, SHARE-02, SHARE-03, SHARE-04, SHARE-05
+**Success Criteria** (what must be TRUE):
+  1. "Share Location" button generates a URL with a random slug
+  2. Shared URL page renders Leaflet map, pin at last location, label, and "Last updated: X ago"
+  3. Page works without auth (public route, no login required)
+  4. Will can update his location (replaces previous — only most recent stored)
+  5. Will can "stop sharing" (deletes the SharedLocation record)
+**Plans**: TBD
+
+### Phase 21: Permit & Reservation
+**Goal**: Will can store Recreation.gov confirmation URLs and notes with a trip, surfacing booking details in trip prep
+**Depends on**: Phase 18, Phase 20
+**Requirements**: PERMIT-01, PERMIT-02, PERMIT-03, PERMIT-04
+**Success Criteria** (what must be TRUE):
+  1. Trip edit form has permitUrl and permitNotes fields
+  2. Trip prep shows "Permits & Reservations" card with permit info + "View Booking" link
+  3. Trip card shows 📋 indicator when permitUrl is set
+  4. No Recreation.gov API — manual paste only
+**Plans**: TBD
+
+### Phase 22: Plan A/B/C Fallback Chain
+**Goal**: Will can link fallback trips to a primary trip and compare them side-by-side in trip prep, so he can pick the right destination on the day based on weather
+**Depends on**: Phase 19, Phase 21
+**Requirements**: FALLBACK-01, FALLBACK-02, FALLBACK-03, FALLBACK-04, FALLBACK-05
+**Success Criteria** (what must be TRUE):
+  1. Trip can be created as a Plan B or Plan C for any existing trip (`fallbackFor` + `fallbackOrder`)
+  2. Trip prep shows "Fallback Plans" card listing alternatives with destination + weather comparison
+  3. Trip card shows count of alternatives when fallbacks exist
+  4. Fallbacks are first-class trips (own gear, checklists, packing lists)
+  5. Deleting primary trip sets `fallbackFor = null` on alternatives (no cascade delete)
+**Plans**: TBD
 
 ## Progress
 
@@ -187,15 +243,6 @@ Phases execute in numeric order: 12 -> 13 -> 14 -> 15
 | 13. Address Review Findings | v1.2 | 4/4 | Complete    | 2026-04-03 |
 | 14. Production Deployment | v1.2 | 0/TBD | Not started | - |
 | 15. Remote Access & Go Live | v1.2 | 0/2 | Complete    | 2026-04-03 |
-| 16. Photo Auto-Import | v2.0 | 0/TBD | Queued | - |
-| 17. Feedback-Driven Packing | v2.0 | 0/TBD | Queued | - |
-| 18. Fuel & Last Stop Planner | v2.0 | 0/TBD | Queued | - |
-| 19. Dog-Aware Trip Planning | v2.0 | 0/TBD | Queued | - |
-| 20. Live Location Sharing | v2.0 | 0/TBD | Queued | - |
-| 21. Permit & Reservation | v2.0 | 0/TBD | Queued | - |
-| 22. Plan A/B/C Fallback Chain | v2.0 | 0/TBD | Queued | - |
-| 23. Gear Category Expansion | v2.0 | 0/TBD | Queued | - |
-| 24. Smart Inbox / Intake | v2.0 | 0/TBD | Queued | - |
 
 ---
 *Full phase details for shipped milestones: see archives in `.planning/milestones/`*

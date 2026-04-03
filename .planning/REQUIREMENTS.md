@@ -47,52 +47,15 @@ Requirements for milestone v1.2 "Ship It". Each maps to roadmap phases.
 
 ## v2.0 Requirements
 
-Requirements for milestone v2.0 "Personal Second Brain". Each maps to v2.0 roadmap phases.
-
-### Photo Auto-Import (Phase 16)
-
-- [ ] **PHOTO-01**: Bulk file upload endpoint (`POST /api/photos/bulk-import`) accepts multipart array of files
-- [ ] **PHOTO-02**: Each file processed through existing EXIF extraction + sharp compression pipeline
-- [ ] **PHOTO-03**: Progress feedback shown during import; individual failures don't abort batch
-- [ ] **PHOTO-04**: Imported photos with GPS data appear as pins on Spots map
-
-### Feedback-Driven Packing (Phase 17)
-
-- [x] **PACK-01**: `generatePackingList()` in `lib/claude.ts` accepts feedback context parameter
-- [x] **PACK-02**: `/api/packing-list` queries last 3-5 `TripFeedback` records and aggregates per-item status
-- [x] **PACK-03**: Graceful degradation — no trip history produces identical output to current behavior
-- [x] **PACK-04**: Claude prompt includes gear feedback summary; output contains feedback-informed notes when history exists
-
-### Fuel & Last Stop Planner (Phase 18)
-
-- [ ] **FUEL-01**: New `lib/overpass.ts` utility queries Overpass API for fuel/grocery/hardware POIs
-- [ ] **FUEL-02**: New endpoint `GET /api/trips/[id]/last-stops` returns closest 1-2 of each POI type
-- [ ] **FUEL-03**: "Fuel & Last Stops" card in TripPrepClient shows name + distance; handles no-results case
+Requirements for milestone v2.0 "Smarter & Sharper". Each maps to roadmap phases 16-22.
 
 ### Dog-Aware Trip Planning (Phase 19)
 
-- [ ] **DOG-01**: `bringingDog Boolean @default(false)` field on `Trip` model with migration
-- [ ] **DOG-02**: Trip create/edit form has "Bringing dog?" toggle
-- [ ] **DOG-03**: When `bringingDog` is true, packing list prompt includes dog gear section
-- [ ] **DOG-04**: Trip card shows 🐕 indicator when `bringingDog` is true
-
-### Live Location Sharing (Phase 20)
-
-- [ ] **LOC-01**: `SharedLocation` model with slug, lat, lon, label, updatedAt
-- [ ] **LOC-02**: Public route `/share/[slug]` renders Leaflet map with last-known pin + timestamp
-- [ ] **LOC-03**: Will can update location and copy shareable URL from within the app
-
-### Permit & Reservation (Phase 21)
-
-- [ ] **PERMIT-01**: `permitUrl` and `permitNotes` fields on `Trip` model with migration
-- [ ] **PERMIT-02**: "Permits & Reservations" card in TripPrepClient
-- [ ] **PERMIT-03**: Trip card shows 📋 indicator when `permitUrl` is set
-
-### Plan A/B/C Fallback Chain (Phase 22)
-
-- [ ] **ALT-01**: `fallbackFor` and `fallbackOrder` self-relation fields on `Trip` model with migration
-- [ ] **ALT-02**: "Add Plan B" flow in TripsClient; alternatives listed in TripPrepClient
-- [ ] **ALT-03**: Trip card shows badge when alternatives exist; deleting primary sets `fallbackFor = null`
+- [x] **DOG-01**: Trip create/edit form has "Bringing dog?" boolean toggle (defaults false) — UI in 19-02
+- [x] **DOG-02**: When `bringingDog = true`, packing list includes a "Dog" section with: food + collapsible bowl, water bowl, leash + backup leash, poop bags (2x), dog first aid (tweezers, wound spray)
+- [x] **DOG-03**: Trip card shows 🐕 indicator when `bringingDog` is true — UI in 19-02
+- [x] **DOG-04**: When `bringingDog = false`, no dog items appear in packing list (no regression to existing behavior)
+- [x] **DOG-05**: Trip edit supports toggling `bringingDog` on existing trips (PUT endpoint accepts + persists)
 
 ## Future Requirements
 
@@ -149,6 +112,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ACCESS-03 | Phase 15 | Pending |
 | ACCESS-04 | Phase 15 | Pending |
 | ACCESS-05 | Phase 15 | Pending |
+| DOG-01 | Phase 19 Plan 02 | Pending (UI in 19-02) |
+| DOG-02 | Phase 19 Plan 01 | Complete |
+| DOG-03 | Phase 19 Plan 02 | Pending (UI in 19-02) |
+| DOG-04 | Phase 19 Plan 01 | Complete |
+| DOG-05 | Phase 19 Plan 01 | Complete |
 
 **Coverage:**
 - v1.2 requirements: 26 total

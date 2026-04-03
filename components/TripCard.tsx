@@ -33,6 +33,7 @@ interface TripData {
   _count: { packingItems: number; photos: number }
   createdAt: string
   updatedAt: string
+  bringingDog: boolean
 }
 
 interface WeatherData {
@@ -89,6 +90,11 @@ export default function TripCard({
               <h3 className="font-semibold text-stone-900 dark:text-stone-50 text-base truncate">
                 {trip.name}
               </h3>
+              {trip.bringingDog && (
+                <span title="Bringing dog" aria-label="Bringing dog" className="text-base leading-none shrink-0">
+                  🐕
+                </span>
+              )}
               {/* Edit/delete buttons */}
               <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
                 <Button

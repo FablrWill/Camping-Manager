@@ -33,6 +33,7 @@ const CATEGORY_EMOJIS: Record<string, string> = {
   hygiene: '🧴',
   safety: '🩹',
   misc: '📦',
+  dog: '🐕',
 }
 
 interface GearItem {
@@ -181,6 +182,7 @@ export async function generatePackingList(params: {
     alerts: WeatherAlert[]
   }
   feedbackContext?: GearFeedbackSummary[]
+  bringingDog?: boolean
 }): Promise<PackingListResult> {
   const {
     tripName,
@@ -194,6 +196,7 @@ export async function generatePackingList(params: {
     gearInventory,
     weather,
     feedbackContext,
+    bringingDog,
   } = params
 
   const gearByCategory: Record<string, GearItem[]> = {}
@@ -215,6 +218,10 @@ export async function generatePackingList(params: {
   const weatherSection = buildWeatherSection(weather)
   const feedbackSection = buildFeedbackSection(feedbackContext)
 
+  const dogSection = bringingDog
+    ? `\nDOG CONTEXT:\nWill is bringing his dog on this trip. Add a "Dog" section to the packing list with essential dog gear: food + collapsible bowl, water bowl, leash + backup leash, poop bags (2x expected amount), dog-specific first aid supplies (tweezers for ticks, wound spray). Note any dog-friendly considerations for the destination.\n`
+    : ''
+
   const prompt = `You are a car camping trip packing assistant. Generate a smart, categorized packing list for this trip.
 
 TRIP DETAILS:
@@ -225,7 +232,7 @@ ${vehicleName ? `- Vehicle: ${vehicleName}` : ''}
 ${tripNotes ? `- Notes: ${tripNotes}` : ''}
 
 ${weatherSection}
-
+${dogSection}
 GEAR INVENTORY (items the user owns):
 ${gearSection || 'No gear in inventory yet.'}
 
@@ -237,7 +244,7 @@ INSTRUCTIONS:
 3. Skip items marked [BROKEN].
 4. Adjust for weather: if rain is forecast, include rain gear. If cold, prioritize warm layers. If hot/high UV, include sun protection.
 5. Adjust for trip duration: longer trips need more consumables.
-6. Categories: shelter, sleep, cook, power, clothing, tools, vehicle, hygiene, safety, misc.
+6. Categories: shelter, sleep, cook, power, clothing, tools, vehicle, hygiene, safety, misc, dog.
 7. Include 2-3 brief, specific tips based on the weather and trip details (e.g., "Charge the EcoFlow fully — limited solar expected with cloud cover Saturday").
 8. If GEAR HISTORY is provided, use it to inform recommendations: deprioritize items marked "didn't need" on 2+ trips, and flag items frequently forgotten as "RECOMMENDED — frequently forgotten".
 
@@ -256,7 +263,7 @@ Respond ONLY with valid JSON matching this exact structure:
 }
 
 Rules for the JSON:
-- "name" is the category key (lowercase): shelter, sleep, cook, power, clothing, tools, vehicle, hygiene, safety, misc
+- "name" is the category key (lowercase): shelter, sleep, cook, power, clothing, tools, vehicle, hygiene, safety, misc, dog
 - Only include categories that have items
 - "fromInventory" is true if the item comes from the gear inventory, false if it's a suggested addition
 - "gearId" is only present when fromInventory is true — use the exact id from the [id:xxx] tag
