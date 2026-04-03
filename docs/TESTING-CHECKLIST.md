@@ -95,6 +95,19 @@
 - [ ] Caching progress overlay shows download progress
 - [ ] Float plan email sends correctly (Settings → Gmail)
 
+#### Trip Day Sequencer (Phase 26)
+
+- [ ] Departure time row appears below page header, above Leaving Now button
+- [ ] No time set → amber "Not set — times will be relative" text + datetime-local input visible
+- [ ] Pick a date/time → saves to DB and shows formatted time (e.g., "Fri Apr 18 at 7:00 AM") with pencil icon
+- [ ] Pencil icon → input re-appears for editing; blur with empty value → clears back to "Not set"
+- [ ] Setting departure time does NOT trigger checklist regeneration (check Network tab — no POST to `/api/departure-checklist`)
+- [ ] Generate/Regenerate Checklist with departure time set → each item shows right-aligned time badge (e.g., "9:00 PM Thu", "6:30 AM")
+- [ ] Generate without departure time set → time badges show relative labels (e.g., "Night Before", "Morning Of") or are absent
+- [ ] Checking a checklist item → both item text AND time badge show line-through
+- [ ] Trip near a location with fuel stops → checklist includes a reminder task for the nearest stop
+- [ ] Departure time input disabled (greyed out) when offline
+
 ---
 
 ## Chat (`/chat`)
@@ -197,4 +210,4 @@ Quick set — run these first before the full list above.
 
 ---
 
-*Last updated: 2026-04-03 (Phase 18 — Fuel & Last Stops)*
+*Last updated: 2026-04-03 (Phase 26 — Trip Day Sequencer)*

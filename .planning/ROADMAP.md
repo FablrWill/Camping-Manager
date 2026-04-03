@@ -62,7 +62,7 @@
 
 **Wave 1 — Parallel (no dependencies):**
 - [ ] **Phase 25: Gear Docs & Manual Finder** - GearDocument model, Claude-powered manual search, PDF download + offline caching
-- [ ] **Phase 26: Trip Day Sequencer** - Time-ordered departure checklist pulling from packing/meals/power/route
+- [x] **Phase 26: Trip Day Sequencer** - Time-ordered departure checklist pulling from packing/meals/power/route (completed 2026-04-03)
 - [x] **Phase 27: Safety Float Plan** - Replace Claude-composed email with plain-text template, strip gear list (completed 2026-04-03)
 
 **Wave 2 — Depends on Wave 1:**
@@ -377,7 +377,12 @@ Plans:
   3. Each task has a suggested time and can be checked off
   4. Sequence adapts to departure time (set by user on trip)
   5. `npm run build` passes
-**Plans**: 0/TBD
+**Plans**: 3/3 — completed 2026-04-03
+
+Plans:
+- [x] 26-P01-PLAN.md — Schema migration + PATCH endpoint + Zod type
+- [x] 26-P02-PLAN.md — Claude prompt upgrade with departureTime + fuel stop params
+- [x] 26-P03-PLAN.md — UI layer: departureTime row + suggestedTime badges
 
 **Parallelization notes:**
 - Wave 1 — fully parallel with Phases 25 and 27
@@ -512,7 +517,7 @@ Plans:
 | 23. Gear Category Expansion | v2.0 | 3/3 | Complete   | 2026-04-03 |
 | 24. Smart Inbox / Intake | v2.0 | 3/3 | Complete   | 2026-04-03 |
 | 25. Gear Docs & Manual Finder | v3.0 | 0/TBD | Not started | - |
-| 26. Trip Day Sequencer | v3.0 | 0/TBD | Not started | - |
+| 26. Trip Day Sequencer | v3.0 | 3/3 | Complete   | 2026-04-03 |
 | 27. Safety Float Plan | v3.0 | 1/1 | Complete    | 2026-04-03 |
 | 28. Weather-Aware Clothing | v3.0 | 0/TBD | Not started | - |
 | 29. Vehicle Pre-Trip Checklist | v3.0 | 0/TBD | Not started | - |
