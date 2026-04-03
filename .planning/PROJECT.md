@@ -74,27 +74,21 @@ A personal second brain for car camping — an AI-powered knowledge system that 
 
 ### Active
 
-<!-- v1.2 Ship It — defined 2026-04-02 -->
+None — v1.2 Ship It complete as of 2026-04-03.
 
-- [ ] Cross-AI review (Gemini full-project audit)
-- [ ] Fix broken npm run build (RAG native deps)
-- [ ] Resolve all v1.1 tech debt items (11 items)
-- [ ] Address actionable Gemini feedback
-- [ ] Production deployment on Mac mini
-- [ ] Remote access via Tailscale or Cloudflare Tunnel
+### Validated in v1.2 Ship It (Phases 12–15)
 
-## Current Milestone: v1.2 Ship It
+- ✓ Cross-AI review (Gemini full-project audit) — Phase 12
+- ✓ Fixed broken npm run build (RAG native deps) — Phase 12
+- ✓ Resolved all v1.1 tech debt items — Phase 12
+- ✓ Addressed actionable Gemini feedback — Phase 13
+- ✓ Production deployment on Mac mini (PM2 + launchd, `/data/outland/`) — Phase 14
+- ✓ Remote access via Tailscale (`lisa-mini.tailfd6d06.ts.net`) — Phase 15
+- ✓ PWA installed on iPhone, works offline over Tailscale — Phase 15
 
-**Goal:** Cross-AI review, fix all tech debt, get production build working, and deploy to Mac mini so Will can use it from his phone anywhere.
+## Current Milestone: ✅ v1.2 Ship It — COMPLETE (2026-04-03)
 
-**Target features:**
-- Gemini full-project review (code quality, architecture, UX, blind spots)
-- Fix broken `npm run build` (RAG native deps issue)
-- Resolve all 11 v1.1 tech debt items
-- Address actionable Gemini feedback
-- Production deployment on Mac mini (PM2 or similar)
-- Remote access via Tailscale or Cloudflare Tunnel
-- Mobile-accessible from phone over the network
+**Shipped:** Outland OS is live on the Mac mini, accessible from Will's iPhone anywhere via Tailscale HTTPS, installable as a PWA, and verified working offline.
 
 ### Out of Scope
 
