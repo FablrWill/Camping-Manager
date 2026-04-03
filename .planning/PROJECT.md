@@ -108,7 +108,7 @@ None — v1.2 Ship It complete as of 2026-04-03.
 
 ## Future (v2.0+)
 
-- [ ] Feedback-driven packing improvement (needs 3+ trips of history data)
+- [x] Feedback-driven packing improvement — Validated in Phase 17 (infrastructure complete; improves automatically as trip history accumulates)
 - [ ] Dead man's switch safety check-in (needs persistent server infrastructure)
 - [ ] Dog-aware trip planning (waiting for dog arrival + needs assessment)
 - [ ] Knowledge base expansion (2500+ chunks)
@@ -173,4 +173,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-03 after Phase 13 complete — security hardening (path traversal, XSS, JSON.parse, input validation)*
+*Last updated: 2026-04-03 after Phase 17 complete — feedback-driven packing (PackingItem.usageStatus aggregation wired into Claude prompt)*
