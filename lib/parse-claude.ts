@@ -161,3 +161,35 @@ export type InsightPayload = z.infer<typeof InsightPayloadSchema>;
 export const MemoryArraySchema = z.array(
   z.object({ key: z.string(), value: z.string() })
 );
+
+// --- Intake Triage Schemas (Phase 24) ---
+
+export const GearDraftSchema = z.object({
+  name: z.string(),
+  brand: z.string().nullable().optional(),
+  category: z.string().default('tools'),
+  description: z.string().nullable().optional(),
+  price: z.number().nullable().optional(),
+  purchaseUrl: z.string().nullable().optional(),
+  notes: z.string().nullable().optional(),
+  isWishlist: z.boolean().default(true),
+});
+export type GearDraft = z.infer<typeof GearDraftSchema>;
+
+export const LocationDraftSchema = z.object({
+  name: z.string(),
+  description: z.string().nullable().optional(),
+  latitude: z.number().nullable().optional(),
+  longitude: z.number().nullable().optional(),
+  type: z.string().nullable().optional(),
+  notes: z.string().nullable().optional(),
+});
+export type LocationDraft = z.infer<typeof LocationDraftSchema>;
+
+export const TextClassificationSchema = z.object({
+  triageType: z.enum(['gear', 'location', 'knowledge', 'tip', 'unknown']),
+  summary: z.string(),
+  confidence: z.enum(['high', 'medium', 'low']),
+  extractedData: z.record(z.string(), z.unknown()).optional(),
+});
+export type TextClassification = z.infer<typeof TextClassificationSchema>;

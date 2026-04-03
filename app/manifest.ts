@@ -1,6 +1,18 @@
 import type { MetadataRoute } from 'next'
 
-export default function manifest(): MetadataRoute.Manifest {
+export default function manifest(): MetadataRoute.Manifest & {
+  share_target?: {
+    action: string
+    method: string
+    enctype: string
+    params: {
+      title?: string
+      text?: string
+      url?: string
+      files?: Array<{ name: string; accept: string[] }>
+    }
+  }
+} {
   return {
     name: 'Outland OS',
     short_name: 'Outland',
@@ -23,5 +35,16 @@ export default function manifest(): MetadataRoute.Manifest {
         purpose: 'maskable',
       },
     ],
+    share_target: {
+      action: '/api/intake',
+      method: 'POST',
+      enctype: 'multipart/form-data',
+      params: {
+        title: 'text',
+        text: 'text',
+        url: 'url',
+        files: [{ name: 'file', accept: ['image/*'] }],
+      },
+    },
   }
 }

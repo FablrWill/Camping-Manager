@@ -193,6 +193,8 @@ model Trip {
   emergencyContactName   String?   // per-trip override for emergency contact name (Phase 7)
   emergencyContactEmail  String?   // per-trip override for emergency contact email (Phase 7)
   bringingDog            Boolean   @default(false)  // Phase 19: dog-aware trip planning
+  permitUrl              String?   // Phase 21: Recreation.gov or other booking confirmation URL
+  permitNotes            String?   // Phase 21: site number, check-in time, special instructions
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -338,4 +340,21 @@ model SharedLocation {
   label     String?
   updatedAt DateTime @updatedAt
   createdAt DateTime @default(now())
+}
+
+model InboxItem {
+  id           String    @id @default(cuid())
+  sourceType   String    // "text" | "url" | "image"
+  rawContent   String    // original input: text content, URL, or image path
+  status       String    @default("pending")  // "pending" | "accepted" | "rejected"
+  triageType   String?   // "gear" | "location" | "knowledge" | "tip" | "unknown"
+  suggestion   String?   // JSON blob of extracted suggestion (GearDraft, LocationDraft, etc.)
+  summary      String?   // human-readable one-liner of what was found
+  confidence   String?   // "high" | "medium" | "low"
+  imagePath    String?   // stored image path if sourceType=image
+  createdAt    DateTime  @default(now())
+  processedAt  DateTime?
+
+  @@index([status])
+  @@index([createdAt])
 }

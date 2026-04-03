@@ -47,13 +47,13 @@
 
 - [ ] **Phase 16: Photo Auto-Import** - Bulk import photos from camera roll with EXIF GPS extraction
 - [ ] **Phase 17: Feedback-Driven Packing** - Packing lists personalized by post-trip gear feedback history
-- [ ] **Phase 18: Fuel & Last Stop Planner** - Pre-trip fuel/grocery/hardware stop cards via Overpass API
+- [x] **Phase 18: Fuel & Last Stop Planner** - Pre-trip fuel/grocery/hardware stop cards via Overpass API (completed 2026-04-03)
 - [x] **Phase 19: Dog-Aware Trip Planning** - Dog toggle on trips, dog gear packing section, dog-friendly notes (completed 2026-04-03)
 - [x] **Phase 20: Live Location Sharing** - Shareable public URL showing Will's last known GPS location (completed 2026-04-03)
-- [ ] **Phase 21: Permit & Reservation** - Store Recreation.gov confirmations with trip, surface reminders
+- [x] **Phase 21: Permit & Reservation** - Store Recreation.gov confirmations with trip, surface reminders (completed 2026-04-03)
 - [ ] **Phase 22: Plan A/B/C Fallback Chain** - Link fallback trips to primary, compare in trip prep
 - [x] **Phase 23: Gear Category Expansion** - Expand from 7 to 15 categories with visual grouping, add tech gear fields (completed 2026-04-03)
-- [ ] **Phase 24: Smart Inbox / Universal Intake** - Single intake endpoint + inbox UI for phone share-to-app workflow
+- [x] **Phase 24: Smart Inbox / Universal Intake** - Single intake endpoint + inbox UI for phone share-to-app workflow (completed 2026-04-03)
 
 ## Phase Details
 
@@ -106,17 +106,7 @@ Plans:
   3. PM2 automatically restarts the app after a crash or Mac mini reboot
   4. A single deploy command (script) pulls latest code, builds, and restarts the service
   5. Daily SQLite backups run automatically via cron
-**Plans**: 3 plans
-
-Plans:
-- [ ] 24-01-PLAN.md — Schema migration + Zod schemas + triage engine + extractors
-- [ ] 24-02-PLAN.md — Intake POST endpoint + inbox CRUD + accept/reject routes
-- [ ] 24-03-PLAN.md — InboxClient UI + BottomNav + TopHeader + PWA manifest + build verify
-
-**Parallelization notes:**
-- Plan 24-01 is Wave 1 — schema and triage engine must exist before API routes
-- Plan 24-02 is Wave 2 — depends on plan 01 for triage function and Prisma model
-- Plan 24-03 is Wave 3 — depends on plan 02 for API endpoints
+**Plans**: TBD
 
 **Parallelization notes:**
 - DEPLOY-01/DEPLOY-02/DEPLOY-03 (standalone config, data paths, DATABASE_URL) are sequential setup
@@ -154,17 +144,7 @@ Plans:
   3. Progress indicator shows "Importing N of M..." during batch
   4. Individual file failures don't abort the batch — errors collected and shown at end
   5. Imported photos with GPS EXIF appear as pins on the Spots map
-**Plans**: 3 plans
-
-Plans:
-- [ ] 24-01-PLAN.md — Schema migration + Zod schemas + triage engine + extractors
-- [ ] 24-02-PLAN.md — Intake POST endpoint + inbox CRUD + accept/reject routes
-- [ ] 24-03-PLAN.md — InboxClient UI + BottomNav + TopHeader + PWA manifest + build verify
-
-**Parallelization notes:**
-- Plan 24-01 is Wave 1 — schema and triage engine must exist before API routes
-- Plan 24-02 is Wave 2 — depends on plan 01 for triage function and Prisma model
-- Plan 24-03 is Wave 3 — depends on plan 02 for API endpoints
+**Plans**: TBD
 
 ### Phase 17: Feedback-Driven Packing
 **Goal**: Packing lists are personalized by post-trip gear feedback history, so Claude accounts for items Will consistently skips or forgets
@@ -174,17 +154,7 @@ Plans:
   1. If no trip history, packing list generates identically to current behavior
   2. If history exists, Claude prompt includes gear feedback summary (verifiable in logs)
   3. Packing list output includes at least one feedback-informed note when history available
-**Plans**: 3 plans
-
-Plans:
-- [ ] 24-01-PLAN.md — Schema migration + Zod schemas + triage engine + extractors
-- [ ] 24-02-PLAN.md — Intake POST endpoint + inbox CRUD + accept/reject routes
-- [ ] 24-03-PLAN.md — InboxClient UI + BottomNav + TopHeader + PWA manifest + build verify
-
-**Parallelization notes:**
-- Plan 24-01 is Wave 1 — schema and triage engine must exist before API routes
-- Plan 24-02 is Wave 2 — depends on plan 01 for triage function and Prisma model
-- Plan 24-03 is Wave 3 — depends on plan 02 for API endpoints
+**Plans**: TBD
 
 ### Phase 18: Fuel & Last Stop Planner
 **Goal**: Trip prep shows the last gas station, grocery, and hardware store before the campsite, so Will can stock up before services run out
@@ -196,17 +166,7 @@ Plans:
   3. Loading state shown while fetching Overpass API results
   4. If no results within 50km, shows "None found nearby — plan ahead"
   5. Uses trip's existing `latitude`/`longitude` fields — no new data entry required
-**Plans**: 3 plans
-
-Plans:
-- [ ] 24-01-PLAN.md — Schema migration + Zod schemas + triage engine + extractors
-- [ ] 24-02-PLAN.md — Intake POST endpoint + inbox CRUD + accept/reject routes
-- [ ] 24-03-PLAN.md — InboxClient UI + BottomNav + TopHeader + PWA manifest + build verify
-
-**Parallelization notes:**
-- Plan 24-01 is Wave 1 — schema and triage engine must exist before API routes
-- Plan 24-02 is Wave 2 — depends on plan 01 for triage function and Prisma model
-- Plan 24-03 is Wave 3 — depends on plan 02 for API endpoints
+**Plans**: TBD
 
 ### Phase 19: Dog-Aware Trip Planning
 **Goal**: Trips can be marked "bringing dog" and the packing list automatically includes a Dog section with essential gear and dog-friendly destination notes
@@ -238,17 +198,7 @@ Plans:
   3. Page works without auth (public route, no login required)
   4. Will can update his location (replaces previous — only most recent stored)
   5. Will can "stop sharing" (deletes the SharedLocation record)
-**Plans**: 3 plans
-
-Plans:
-- [ ] 24-01-PLAN.md — Schema migration + Zod schemas + triage engine + extractors
-- [ ] 24-02-PLAN.md — Intake POST endpoint + inbox CRUD + accept/reject routes
-- [ ] 24-03-PLAN.md — InboxClient UI + BottomNav + TopHeader + PWA manifest + build verify
-
-**Parallelization notes:**
-- Plan 24-01 is Wave 1 — schema and triage engine must exist before API routes
-- Plan 24-02 is Wave 2 — depends on plan 01 for triage function and Prisma model
-- Plan 24-03 is Wave 3 — depends on plan 02 for API endpoints
+**Plans**: TBD
 
 ### Phase 21: Permit & Reservation
 **Goal**: Will can store Recreation.gov confirmation URLs and notes with a trip, surfacing booking details in trip prep
@@ -259,17 +209,7 @@ Plans:
   2. Trip prep shows "Permits & Reservations" card with permit info + "View Booking" link
   3. Trip card shows 📋 indicator when permitUrl is set
   4. No Recreation.gov API — manual paste only
-**Plans**: 3 plans
-
-Plans:
-- [ ] 24-01-PLAN.md — Schema migration + Zod schemas + triage engine + extractors
-- [ ] 24-02-PLAN.md — Intake POST endpoint + inbox CRUD + accept/reject routes
-- [ ] 24-03-PLAN.md — InboxClient UI + BottomNav + TopHeader + PWA manifest + build verify
-
-**Parallelization notes:**
-- Plan 24-01 is Wave 1 — schema and triage engine must exist before API routes
-- Plan 24-02 is Wave 2 — depends on plan 01 for triage function and Prisma model
-- Plan 24-03 is Wave 3 — depends on plan 02 for API endpoints
+**Plans**: TBD
 
 ### Phase 22: Plan A/B/C Fallback Chain
 **Goal**: Will can link fallback trips to a primary trip and compare them side-by-side in trip prep, so he can pick the right destination on the day based on weather
@@ -281,17 +221,7 @@ Plans:
   3. Trip card shows count of alternatives when fallbacks exist
   4. Fallbacks are first-class trips (own gear, checklists, packing lists)
   5. Deleting primary trip sets `fallbackFor = null` on alternatives (no cascade delete)
-**Plans**: 3 plans
-
-Plans:
-- [ ] 24-01-PLAN.md — Schema migration + Zod schemas + triage engine + extractors
-- [ ] 24-02-PLAN.md — Intake POST endpoint + inbox CRUD + accept/reject routes
-- [ ] 24-03-PLAN.md — InboxClient UI + BottomNav + TopHeader + PWA manifest + build verify
-
-**Parallelization notes:**
-- Plan 24-01 is Wave 1 — schema and triage engine must exist before API routes
-- Plan 24-02 is Wave 2 — depends on plan 01 for triage function and Prisma model
-- Plan 24-03 is Wave 3 — depends on plan 02 for API endpoints
+**Plans**: TBD
 
 ### Phase 23: Gear Category Expansion
 **Goal**: Expand gear from 7 to 15 categories with visual grouping, add 3 new schema fields for tech gear, and centralize all category definitions in a shared module
@@ -326,17 +256,7 @@ Plans:
   3. Inbox page shows pending items with accept/edit/reject actions
   4. Accept creates real entity (gear item, location, etc.) from AI suggestion
   5. `npm run build` passes
-**Plans**: 3 plans
-
-Plans:
-- [ ] 24-01-PLAN.md — Schema migration + Zod schemas + triage engine + extractors
-- [ ] 24-02-PLAN.md — Intake POST endpoint + inbox CRUD + accept/reject routes
-- [ ] 24-03-PLAN.md — InboxClient UI + BottomNav + TopHeader + PWA manifest + build verify
-
-**Parallelization notes:**
-- Plan 24-01 is Wave 1 — schema and triage engine must exist before API routes
-- Plan 24-02 is Wave 2 — depends on plan 01 for triage function and Prisma model
-- Plan 24-03 is Wave 3 — depends on plan 02 for API endpoints
+**Plans**: TBD
 
 ## Progress
 
@@ -368,7 +288,7 @@ Phases execute in numeric order: 12 -> 13 -> 14 -> 15
 | 21. Permit & Reservation | v2.0 | 0/TBD | Not started | - |
 | 22. Plan A/B/C Fallback Chain | v2.0 | 0/TBD | Not started | - |
 | 23. Gear Category Expansion | v2.0 | 3/3 | Complete   | 2026-04-03 |
-| 24. Smart Inbox / Intake | v2.0 | 0/3 | Not started | - |
+| 24. Smart Inbox / Intake | v2.0 | 1/1 | Complete   | 2026-04-03 |
 
 ---
 *Full phase details for shipped milestones: see archives in `.planning/milestones/`*

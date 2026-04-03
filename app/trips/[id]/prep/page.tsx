@@ -24,6 +24,8 @@ export default async function TripPrepPage({ params }: { params: Promise<{ id: s
         endDate: trip.endDate.toISOString(),
         location: trip.location,
         vehicle: trip.vehicle,
+        permitUrl: trip.permitUrl ?? null,
+        permitNotes: trip.permitNotes ?? null,
       }}
     />
   )
