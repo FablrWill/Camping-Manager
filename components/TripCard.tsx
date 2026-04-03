@@ -33,6 +33,7 @@ interface TripData {
   _count: { packingItems: number; photos: number }
   createdAt: string
   updatedAt: string
+  bringingDog: boolean
 }
 
 interface WeatherData {

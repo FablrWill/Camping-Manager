@@ -20,6 +20,7 @@ interface TripData {
   _count: { packingItems: number; photos: number }
   createdAt: string
   updatedAt: string
+  bringingDog: boolean
 }
 
 interface WeatherData {
@@ -65,6 +66,7 @@ export default function TripsClient({ initialTrips, locations, vehicles }: Trips
   const [editLocationId, setEditLocationId] = useState('')
   const [editVehicleId, setEditVehicleId] = useState('')
   const [editNotes, setEditNotes] = useState('')
+  const [editBringingDog, setEditBringingDog] = useState(false)
 
   function openEdit(trip: TripData) {
     setEditingTrip(trip)
@@ -74,6 +76,7 @@ export default function TripsClient({ initialTrips, locations, vehicles }: Trips
     setEditLocationId(trip.location?.id ?? '')
     setEditVehicleId(trip.vehicle?.id ?? '')
     setEditNotes(trip.notes ?? '')
+    setEditBringingDog(trip.bringingDog ?? false)
     setError(null)
   }
 
@@ -93,6 +96,7 @@ export default function TripsClient({ initialTrips, locations, vehicles }: Trips
           locationId: editLocationId || null,
           vehicleId: editVehicleId || null,
           notes: editNotes || null,
+          bringingDog: editBringingDog,
         }),
       })
       if (!res.ok) throw new Error('Failed to save')
@@ -174,6 +178,7 @@ export default function TripsClient({ initialTrips, locations, vehicles }: Trips
       locationId: (form.get('locationId') as string) || null,
       vehicleId: (form.get('vehicleId') as string) || null,
       notes: (form.get('notes') as string) || null,
+      bringingDog: form.get('bringingDog') === 'on',
     }
 
     setFormError(null)
@@ -272,6 +277,14 @@ export default function TripsClient({ initialTrips, locations, vehicles }: Trips
               ]}
             />
           )}
+          <label className="flex items-center gap-2 text-sm text-stone-700 dark:text-stone-300 cursor-pointer">
+            <input
+              type="checkbox"
+              name="bringingDog"
+              className="rounded border-stone-300 dark:border-stone-600"
+            />
+            Bringing dog?
+          </label>
           <Textarea
             label="Notes"
             name="notes"
@@ -441,6 +454,15 @@ export default function TripsClient({ initialTrips, locations, vehicles }: Trips
               ]}
             />
           )}
+          <label className="flex items-center gap-2 text-sm text-stone-700 dark:text-stone-300 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={editBringingDog}
+              onChange={(e) => setEditBringingDog(e.target.checked)}
+              className="rounded border-stone-300 dark:border-stone-600"
+            />
+            Bringing dog?
+          </label>
           <Textarea
             label="Notes"
             rows={3}
