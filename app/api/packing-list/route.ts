@@ -133,6 +133,7 @@ export async function POST(request: NextRequest) {
         tripNotes: trip.notes ?? undefined,
         gearInventory,
         weather,
+        bringingDog: trip.bringingDog ?? false,
       })
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to generate packing list'

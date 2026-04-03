@@ -50,6 +50,7 @@ export async function PUT(req: NextRequest, { params }: Params) {
         vehicleId: data.vehicleId ?? null,
         notes: data.notes ?? null,
         weatherNotes: data.weatherNotes ?? null,
+        bringingDog: data.bringingDog === true,
       },
       include: {
         location: { select: { id: true, name: true, latitude: true, longitude: true } },
