@@ -97,7 +97,7 @@ describe('upsertSharedLocation (LOCATION-SHARE-04)', () => {
       },
     }
 
-    const result = await upsertSharedLocation(mockPrisma as Parameters<typeof upsertSharedLocation>[0], {
+    const result = await upsertSharedLocation(mockPrisma as unknown as Parameters<typeof upsertSharedLocation>[0], {
       lat: 35.59,
       lon: -82.55,
       label: null,
@@ -138,7 +138,7 @@ describe('upsertSharedLocation (LOCATION-SHARE-04)', () => {
       },
     }
 
-    const result = await upsertSharedLocation(mockPrisma as Parameters<typeof upsertSharedLocation>[0], {
+    const result = await upsertSharedLocation(mockPrisma as unknown as Parameters<typeof upsertSharedLocation>[0], {
       lat: 35.59,
       lon: -82.55,
       label: null,
@@ -181,7 +181,7 @@ describe('deleteSharedLocation (LOCATION-SHARE-05)', () => {
       },
     }
 
-    const result = await deleteSharedLocation(mockPrisma as Parameters<typeof deleteSharedLocation>[0])
+    const result = await deleteSharedLocation(mockPrisma as unknown as Parameters<typeof deleteSharedLocation>[0])
 
     expect(mockFindFirst).toHaveBeenCalledOnce()
     expect(mockDelete).toHaveBeenCalledOnce()
