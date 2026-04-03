@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Ship It
 status: executing
-stopped_at: Completed 22-01-PLAN.md — Fallback chain schema + API routes
-last_updated: "2026-04-03T16:01:53.239Z"
+stopped_at: Completed 22-03-PLAN.md — Fallback Plans card in TripPrepClient
+last_updated: "2026-04-03T16:19:07.507Z"
 last_activity: 2026-04-03
 progress:
   total_phases: 23
   completed_phases: 20
   total_plans: 70
-  completed_plans: 63
+  completed_plans: 64
   percent: 40
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-01)
 ## Current Position
 
 Phase: 22 (plan-fallback-chain) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 Status: Ready to execute
 Last activity: 2026-04-03
 
@@ -68,6 +68,7 @@ Progress: [████░░░░░░] 40%
 | Phase 20-live-location-sharing P01 | 383 | 2 tasks | 6 files |
 | Phase 20-live-location-sharing P02 | 203 | 4 tasks | 9 files |
 | Phase 22-plan-fallback-chain P01 | 3 | 2 tasks | 5 files |
+| Phase 22 P03 | 17 | 1 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -108,6 +109,7 @@ Recent decisions affecting current work:
 - [Phase 20-live-location-sharing]: Bare layout.tsx at /share renders <html> directly — fully bypasses AppShell so family sees clean map-only page with no nav chrome
 - [Phase 22-plan-fallback-chain]: Manual migration SQL used for fallback_chain — FTS virtual tables triggered non-interactive Prisma warning; ALTER TABLE pattern applied directly
 - [Phase 22-plan-fallback-chain]: FallbackChain self-relation uses onDelete:NoAction + manual updateMany pre-delete — SQLite/Prisma does not reliably enforce onDelete:SetNull on self-relations
+- [Phase 22]: Use correct DayForecast field names: highF/lowF/precipProbability — not plan alias tempHigh/tempLow/precipChance
 
 ### Pending Todos
 
@@ -121,6 +123,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-03T16:01:53.234Z
-Stopped at: Completed 22-01-PLAN.md — Fallback chain schema + API routes
+Last session: 2026-04-03T16:19:07.503Z
+Stopped at: Completed 22-03-PLAN.md — Fallback Plans card in TripPrepClient
 Resume file: None

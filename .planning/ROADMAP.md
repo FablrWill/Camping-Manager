@@ -111,7 +111,7 @@ Plans:
 Plans:
 - [x] 22-01-PLAN.md — Schema migration + API routes (fallback fields, self-relation, alternatives endpoint)
 - [ ] 22-02-PLAN.md — TripCard badges + TripsClient Add Plan B flow
-- [ ] 22-03-PLAN.md — TripPrepClient Fallback Plans card with weather comparison
+- [x] 22-03-PLAN.md — TripPrepClient Fallback Plans card with weather comparison
 
 **Parallelization notes:**
 - Plan 22-01 is Wave 1 — schema and API must exist before UI can consume
@@ -156,7 +156,7 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 22-01-PLAN.md — Schema migration + API routes (fallback fields, self-relation, alternatives endpoint)
+- [x] 22-01-PLAN.md — Schema migration + API routes (fallback fields, self-relation, alternatives endpoint)
 - [ ] 22-02-PLAN.md — TripCard badges + TripsClient Add Plan B flow
 - [ ] 22-03-PLAN.md — TripPrepClient Fallback Plans card with weather comparison
 
@@ -358,7 +358,7 @@ Phases execute in numeric order: 12 -> 13 -> 14 -> 15
 | 19. Dog-Aware Trip Planning | v2.0 | 2/2 | Complete | 2026-04-03 |
 | 20. Live Location Sharing | v2.0 | 2/2 | Complete | 2026-04-03 |
 | 21. Permit & Reservation | v2.0 | 0/TBD | Not started | - |
-| 22. Plan A/B/C Fallback Chain | v2.0 | 1/3 | In Progress|  |
+| 22. Plan A/B/C Fallback Chain | v2.0 | 2/3 | In Progress|  |
 | 23. Gear Category Expansion | v2.0 | 3/3 | Complete   | 2026-04-03 |
 | 24. Smart Inbox / Intake | v2.0 | 3/3 | Complete   | 2026-04-03 |
 
