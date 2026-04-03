@@ -90,3 +90,11 @@ None — no external service configuration required.
 ---
 *Phase: 33-conversational-trip-planner*
 *Completed: 2026-04-03*
+
+## Self-Check: PASSED
+
+- FOUND: lib/__tests__/trip-planner-tools.test.ts
+- FOUND: lib/__tests__/chat-bubble-extraction.test.ts
+- FOUND: .planning/phases/33-conversational-trip-planner/33-00-SUMMARY.md
+- FOUND commit: ac996c5 (test stubs)
+- FOUND commit: 692c35e (metadata)
