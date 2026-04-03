@@ -1,5 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk'
-import { parseClaudeJSON, PackingListResultSchema, MealPlanResultSchema, DepartureChecklistResultSchema, DepartureChecklistResult, FloatPlanEmailSchema, FloatPlanEmail, TripSummaryResultSchema, type TripSummaryResult } from '@/lib/parse-claude'
+import { parseClaudeJSON, PackingListResultSchema, MealPlanResultSchema, DepartureChecklistResultSchema, DepartureChecklistResult, FloatPlanEmailSchema, FloatPlanEmail, TripSummaryResultSchema, type TripSummaryResult, GearDocumentResultSchema, type GearDocumentResult } from '@/lib/parse-claude'
 import { CATEGORY_EMOJI, CATEGORIES } from '@/lib/gear-categories'
 
 const anthropic = new Anthropic({
@@ -671,4 +671,52 @@ Return ONLY valid JSON, no markdown.`
     throw new Error(parsed.error)
   }
   return parsed.data
+}
+
+export async function findGearManual(params: {
+  name: string;
+  brand: string | null;
+  modelNumber: string | null;
+  category: string;
+}): Promise<GearDocumentResult> {
+  const { name, brand, modelNumber, category } = params;
+  const prompt = `You are a product manual research assistant.
+Given gear details, return the most likely manufacturer support page URL and PDF manual URL.
+
+GEAR:
+- Name: ${name}
+- Brand: ${brand || 'Unknown'}
+- Model Number: ${modelNumber || 'Unknown'}
+- Category: ${category}
+
+INSTRUCTIONS:
+1. Generate the most likely URL for the manufacturer's support/product page for this exact model.
+2. If the brand typically hosts PDF manuals (e.g. MSR, GSI, Black Diamond, Garmin, Goal Zero), generate the likely PDF URL.
+3. For each URL, provide a confidence level: "high" (you know this brand's URL pattern well) or "low" (guessing).
+4. Generate a descriptive title for each document (e.g. "MSR Hubba Hubba NX Owner's Manual").
+5. Only include URLs you believe are real. If you cannot determine a likely URL, return an empty documents array.
+
+Respond ONLY with valid JSON (no markdown code blocks):
+{
+  "documents": [
+    {
+      "type": "support_link" | "manual_pdf" | "product_page",
+      "url": "https://...",
+      "title": "Brand Model Document Title",
+      "confidence": "high" | "low"
+    }
+  ]
+}`;
+
+  const message = await anthropic.messages.create({
+    model: 'claude-sonnet-4-20250514',
+    max_tokens: 1500,
+    messages: [{ role: 'user', content: prompt }],
+  });
+  const text = message.content[0].type === 'text' ? message.content[0].text : '';
+  const parseResult = parseClaudeJSON(text, GearDocumentResultSchema);
+  if (!parseResult.success) {
+    throw new Error(parseResult.error);
+  }
+  return parseResult.data;
 }
