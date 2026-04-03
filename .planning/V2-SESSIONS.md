@@ -47,9 +47,9 @@ A self-coordinating work queue for v2.0 features. Each Claude Code session claim
 | S07 | Plan A/B/C fallback chain     | 22    | ✅ Done 2026-04-03 | Sonnet, normal | S04, S06   |
 | S08 | Gear category expansion       | 23    | ✅ Done 2026-04-03 | Sonnet, normal | —          |
 | S09 | Smart inbox / intake          | 24    | ✅ Done 2026-04-03 | Sonnet, normal | S08        |
-| S10 | Home Assistant integration    | 25    | ⬜ Ready  | Sonnet, normal | S09        |
-| S11 | Meal planning core            | 26    | ⬜ Ready  | Sonnet, normal | S07, S10   |
-| S12 | Meal planning: shopping, prep & feedback | 27 | ⬜ Ready | Sonnet, normal | S11 |
+| S10 | Home Assistant integration    | 33    | 🔄 In Progress 2026-04-03 | Sonnet, normal | S09        |
+| S11 | Meal planning core            | 34    | ⬜ Ready  | Sonnet, normal | S07, S10   |
+| S12 | Meal planning: shopping, prep & feedback | 35 | ⬜ Ready | Sonnet, normal | S11 |
 
 **Why this order matters (conflict groups):**
 
@@ -396,7 +396,7 @@ Will is bringing his dog on this trip. Add a "Dog" section to the packing list w
 
 ---
 
-### S10 — Home Assistant Integration (Phase 25)
+### S10 — Home Assistant Integration (Phase 33)
 
 **Depends on:** S09 (schema stable, nav settled). Also requires: HA server running at camp with a long-lived access token ready.
 
@@ -464,7 +464,7 @@ Headers: Authorization: Bearer {token}
 
 ---
 
-### S11 — Meal Planning Core (Phase 26)
+### S11 — Meal Planning Core (Phase 34)
 
 **Depends on:** S07 (Trip model + claude.ts + TripPrepClient.tsx settled), S10 (schema.prisma settled)
 
@@ -513,7 +513,7 @@ Headers: Authorization: Bearer {token}
 
 ---
 
-### S12 — Meal Planning: Shopping List, Prep Guide & Feedback (Phase 27)
+### S12 — Meal Planning: Shopping List, Prep Guide & Feedback (Phase 35)
 
 **Depends on:** S11 (MealPlan + Meal models in place)
 

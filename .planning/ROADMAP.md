@@ -480,6 +480,57 @@ Plans:
 **Parallelization notes:**
 - Wave 4 — depends on Phase 30 research infrastructure
 
+### Phase 33: Home Assistant Integration
+**Goal**: Connect Outland OS to a campsite Home Assistant instance so Will can see live sensor data (battery, propane, weather, vehicle, dog GPS) on the dashboard and trip prep pages
+**Depends on**: Phase 24 (schema stable, nav settled)
+**Requirements**: TBD
+**Success Criteria** (what must be TRUE):
+  1. Settings page has HA config section with URL, token (write-only), and "Test Connection" button
+  2. Test Connection calls HA REST API and shows success ("Connected — N entities found") or error
+  3. Entity picker lets Will select up to 10 entities to display
+  4. Dashboard shows "Campsite" card with selected entity values when HA is reachable
+  5. If HA unreachable, card shows "Offline — last updated X ago" with stale values
+  6. Token is never returned from GET /api/ha/config
+  7. Trip prep shows HA power/propane/weather snapshot when configured
+  8. `npm run build` passes
+**Plans**: 0/TBD
+
+**Parallelization notes:**
+- Wave 5 — independent of Phases 25–32; depends on Phase 24 schema
+
+### Phase 34: Meal Planning Core
+**Goal**: AI-generated meal plans linked to trips — every meal slot for every day, based on trip duration, weather, dog status, and available cooking gear
+**Depends on**: Phase 22 (Trip model + claude.ts + TripPrepClient settled), Phase 33 (schema settled)
+**Requirements**: TBD
+**Success Criteria** (what must be TRUE):
+  1. Meal plan generates for any trip with a start/end date
+  2. Plan covers every day × every slot (breakfast, lunch, dinner)
+  3. Individual meals can be regenerated without replacing the whole plan
+  4. Meal plan section visible in trip prep with day-by-day layout
+  5. Trip card shows meal plan status ("Meal plan ready" / "No meal plan")
+  6. `npm run build` passes
+**Plans**: 0/TBD
+
+**Parallelization notes:**
+- Wave 6 — depends on Phase 22 (Trip model) and Phase 33 (schema)
+
+### Phase 35: Meal Planning: Shopping List, Prep Guide & Feedback
+**Goal**: Extend meal planning with a consolidated shopping list, pre-trip prep guide, and post-trip feedback loop that improves future meal plans
+**Depends on**: Phase 34 (MealPlan + Meal models in place)
+**Requirements**: TBD
+**Success Criteria** (what must be TRUE):
+  1. "Shopping List" tab shows consolidated ingredient list across all meals, grouped by category
+  2. Quantities are summed across recipes (e.g., 3 meals needing olive oil → 1 combined entry)
+  3. Pre-trip prep guide lists everything that can be made at home before the trip
+  4. Post-trip meal feedback lets Will rate each meal (loved / ok / skip) with a note
+  5. Feedback is surfaced to Claude on the next meal plan generation
+  6. Dashboard shows meal feedback prompt after a trip ends
+  7. `npm run build` passes
+**Plans**: 0/TBD
+
+**Parallelization notes:**
+- Wave 7 — depends on Phase 34 meal plan core
+
 ## Progress
 
 **Execution Order:**
@@ -488,6 +539,9 @@ Plans:
 - v3.0 Wave 2: Phases 28, 29 (parallel)
 - v3.0 Wave 3: Phases 30, 31 (parallel)
 - v3.0 Wave 4: Phase 32
+- v3.0 Wave 5: Phase 33 (HA Integration — independent)
+- v3.0 Wave 6: Phase 34 (Meal Planning Core — depends on 22, 33)
+- v3.0 Wave 7: Phase 35 (Meal Planning: Shopping/Prep/Feedback — depends on 34)
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -524,6 +578,9 @@ Plans:
 | 31. Dark Sky & Astro Info | v3.0 | 0/TBD | Not started | - |
 | 32. Deal Monitoring | v3.0 | 0/TBD | Not started | - |
 | 33. Conversational Trip Planner | v3.0 | 4/4 | Complete    | 2026-04-03 |
+| 34. Home Assistant Integration | v3.0 | 0/TBD | Not started | - |
+| 35. Meal Planning Core | v3.0 | 0/TBD | Not started | - |
+| 36. Meal Planning: Shopping/Prep/Feedback | v3.0 | 0/TBD | Not started | - |
 
 ### Phase 33: Conversational Trip Planner
 
