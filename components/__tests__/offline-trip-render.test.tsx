@@ -52,6 +52,10 @@ const mockTrip = {
   endDate: '2025-08-05',
   location: null,
   vehicle: null,
+  permitUrl: null,
+  permitNotes: null,
+  fallbackFor: null,
+  fallbackOrder: null,
 }
 
 const mockSnapshot = {
