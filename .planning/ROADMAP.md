@@ -155,10 +155,10 @@ Plans:
   3. When no trip history exists, packing list generates identically to current behavior
   4. When history exists, Claude prompt includes a gear feedback summary (visible in server logs)
   5. Packing list output contains at least one feedback-informed note when history is available
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 
 Plans:
-- [ ] 17-01-PLAN.md — GearFeedbackSummary interface + buildFeedbackSection() + tests (PACK-01, PACK-03, PACK-04)
+- [x] 17-01-PLAN.md — GearFeedbackSummary interface + buildFeedbackSection() + tests (PACK-01, PACK-03, PACK-04)
 - [ ] 17-02-PLAN.md — API route feedback aggregation query + wiring (PACK-02)
 
 **Parallelization notes:**
