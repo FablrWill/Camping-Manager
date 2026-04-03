@@ -33,13 +33,17 @@ key-files:
     - app/share/[slug]/share-page-client.tsx
     - components/ShareMap.tsx
     - components/ShareLocationButton.tsx
+    - docs/cloudflare-tunnel.yml.example
   modified:
     - app/spots/spots-client.tsx
+    - .env.example
+    - docs/MAC-MINI-SETUP.md
 
 key-decisions:
   - "ssr:false dynamic import moved to share-page-client.tsx (Client Component) — Next.js App Router forbids ssr:false in Server Components"
   - "SharePageClient renders full layout (map + info bar) — Server Component only fetches data and passes props"
   - "ShareLocationButton loads current share status on mount via GET /api/share/location — pre-populates form for editing"
+  - "Cloudflare Tunnel config exposes only /share/* and /api/share/location/* — main app stays Tailscale-only"
 
 patterns-established:
   - "Pattern: Extract dynamic(ssr:false) to a Client Component wrapper — required in Next.js 16 App Router"
@@ -51,21 +55,21 @@ requirements-completed:
   - LOCATION-SHARE-04
   - LOCATION-SHARE-05
 
-duration: 203s
+duration: 203s (auto tasks) + checkpoint verification
 completed: "2026-04-03"
 ---
 
 # Phase 20 Plan 02: Share UI — Summary
 
-**Public /share/[slug] page with bare Leaflet map (no AppShell), ShareLocationButton modal with start/update/stop controls wired into Spots page toolbar.**
+**Public /share/[slug] page with bare Leaflet map (no AppShell), ShareLocationButton modal with start/update/stop controls wired into Spots page toolbar. Cloudflare Tunnel config template created for family access.**
 
 ## Performance
 
-- **Duration:** ~3.5 min (203s)
+- **Duration:** ~3.5 min (203s for auto tasks)
 - **Started:** 2026-04-03T05:52:53Z
-- **Completed:** 2026-04-03T05:56:16Z
-- **Tasks:** 2 of 2 auto tasks completed (2 checkpoint tasks pending user action)
-- **Files modified:** 6
+- **Completed:** 2026-04-03
+- **Tasks:** 2 auto tasks + 1 human-verify (passed) + 1 human-action (instructions delivered)
+- **Files modified:** 9
 
 ## Accomplishments
 
@@ -74,11 +78,17 @@ completed: "2026-04-03"
 - Server Component page fetches SharedLocation from DB directly, returns notFound() for unknown slugs
 - ShareLocationButton: full state machine (idle/loading/active/error), copy-to-clipboard, no alert()
 - ShareLocationButton rendered in Spots page controls bar alongside existing photo/date controls
+- Human-verify checkpoint passed — all curl tests and visual checks confirmed working on localhost
+- Cloudflare Tunnel config template created at docs/cloudflare-tunnel.yml.example
+- .env.example updated with NEXT_PUBLIC_BASE_URL
+- MAC-MINI-SETUP.md updated with Cloudflare Tunnel section
 
 ## Task Commits
 
 1. **Task 1: Public share page — bare layout + Server Component + ShareMap** - `afc59e5` (feat)
 2. **Task 2: ShareLocationButton component + wire into Spots page** - `fcfd90b` (feat)
+3. **Task 3: Human-verify checkpoint** - Passed by user ("verified")
+4. **Task 4: Cloudflare Tunnel instructions** - Config template committed, manual setup steps provided
 
 ## Files Created/Modified
 
@@ -88,12 +98,16 @@ completed: "2026-04-03"
 - `components/ShareMap.tsx` — Minimal Leaflet map, icon fix, escHtml, single marker with popup
 - `components/ShareLocationButton.tsx` — GET on mount, POST/DELETE wired to API, modal with all three states
 - `app/spots/spots-client.tsx` — Import and render `<ShareLocationButton />` in controls bar
+- `docs/cloudflare-tunnel.yml.example` — Template config for Cloudflare Tunnel (fill in tunnel ID and domain)
+- `.env.example` — Added NEXT_PUBLIC_BASE_URL with comments
+- `docs/MAC-MINI-SETUP.md` — Added Cloudflare Tunnel section with step-by-step commands
 
 ## Decisions Made
 
 - `ssr:false` in `dynamic()` cannot appear in a Server Component in Next.js 16 App Router — moved to `share-page-client.tsx`
 - Server Component passes pre-computed `updatedAtLabel` string (from `timeAgo()`) to avoid serializing Date objects across the server/client boundary
 - ShareLocationButton pre-populates lat/lon/label from GET /api/share/location on mount so form shows current values when editing
+- Tunnel config routes only /share/* and /api/share/location/* publicly — everything else returns 404
 
 ## Deviations from Plan
 
@@ -116,28 +130,48 @@ completed: "2026-04-03"
 
 The `/trips` page has a pre-existing Prisma prerender failure in the worktree (`P2022: column main.Trip.emergencyContactName does not exist`) — same out-of-scope issue documented in Plan 01 Summary. Does not affect TypeScript compilation or our changes.
 
-## User Setup Required
+## User Setup Required (Task 4 — Cloudflare Tunnel)
 
-**Cloudflare Tunnel setup is required for family/public access.** Task 4 (checkpoint:human-action) covers the full setup steps. Summary of what's needed:
+**Status:** Instructions delivered. Manual steps remaining on Mac mini.
 
-1. `brew install cloudflared` on Mac mini
-2. `cloudflared tunnel login` → select your domain
-3. `cloudflared tunnel create outland-share`
-4. Create `~/.cloudflared/config.yml` routing /share/* and /api/share/* to localhost:3000
-5. `cloudflared tunnel route dns outland-share share.yourdomain.com`
-6. Set `NEXT_PUBLIC_BASE_URL=https://share.yourdomain.com` in `.env`
-7. `sudo cloudflared service install` to run on reboot
+The config template is at `docs/cloudflare-tunnel.yml.example`. Steps needed on the Mac mini:
 
-See Task 4 in the PLAN.md for exact commands.
+```bash
+# 1. Install cloudflared
+brew install cloudflared
+
+# 2. Authenticate (opens browser)
+cloudflared tunnel login
+
+# 3. Create tunnel
+cloudflared tunnel create outland-share
+
+# 4. Copy and fill in the config template
+cp docs/cloudflare-tunnel.yml.example ~/.cloudflared/config.yml
+# Edit: fill in TUNNEL-ID, your Mac mini username, your domain
+
+# 5. Add DNS record
+cloudflared tunnel route dns outland-share share.yourdomain.com
+
+# 6. Add to .env and redeploy
+echo 'NEXT_PUBLIC_BASE_URL=https://share.yourdomain.com' >> .env
+./deploy.sh
+
+# 7. Install as service
+sudo cloudflared service install
+sudo launchctl start com.cloudflare.cloudflared
+```
+
+Full instructions in `docs/MAC-MINI-SETUP.md` → "Cloudflare Tunnel" section.
 
 ## Known Stubs
 
-None — all components are fully wired. ShareLocationButton reads from and writes to live API endpoints. The share URL uses `process.env.NEXT_PUBLIC_BASE_URL` which defaults to empty string (relative URL) until Cloudflare Tunnel is configured — this is intentional and documented in user_setup.
+None — all components are fully wired. ShareLocationButton reads from and writes to live API endpoints. The share URL uses `process.env.NEXT_PUBLIC_BASE_URL` which defaults to empty string (relative URL) until Cloudflare Tunnel is configured — this is intentional and documented above.
 
 ## Next Phase Readiness
 
-- Phase 20 code complete — all 5 LOCATION-SHARE requirements implemented
-- Cloudflare Tunnel setup (Task 4) is the final step to make share URLs publicly accessible
+- Phase 20 code complete — all 5 LOCATION-SHARE requirements implemented and verified
+- Cloudflare Tunnel setup is the final operational step (user action required on Mac mini)
 - After tunnel is live, Will can share his location with family from the Spots page toolbar
 
 ---

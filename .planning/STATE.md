@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Ship It
 status: verifying
-stopped_at: "Completed 20-02-PLAN.md (checkpoint:human-verify pending)"
-last_updated: "2026-04-03T05:17:17.370Z"
+stopped_at: Completed 20-02-PLAN.md — Phase 20 complete, Cloudflare Tunnel instructions delivered
+last_updated: "2026-04-03T05:21:25.593Z"
 last_activity: 2026-04-03
 progress:
   total_phases: 4
@@ -66,6 +66,7 @@ Progress: [████░░░░░░] 40%
 | Phase 13 P04 | 300 | 1 tasks | 1 files |
 | Phase 20-live-location-sharing P01 | 383 | 2 tasks | 6 files |
 | Phase 20-live-location-sharing P02 | 203 | 2 tasks | 6 files |
+| Phase 20-live-location-sharing P02 | 203 | 4 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -101,6 +102,7 @@ Recent decisions affecting current work:
 - [Phase 20-live-location-sharing]: SharedLocation uses singleton pattern (findFirst + create/update) — same approach as Settings model; one shared location at a time
 - [Phase 20-live-location-sharing]: upsertSharedLocation/deleteSharedLocation accept prismaClient argument — pure helpers testable without real DB
 - [Phase 20-live-location-sharing]: ssr:false dynamic import must live in Client Component — extracted to share-page-client.tsx; Server Components cannot use ssr:false in Next.js 16 App Router
+- [Phase 20-live-location-sharing]: Cloudflare Tunnel config routes only /share/* and /api/share/location/* publicly — main app stays Tailscale-only
 
 ### Pending Todos
 
@@ -114,6 +116,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-03T05:17:17.366Z
-Stopped at: Completed 20-02-PLAN.md (checkpoint:human-verify pending)
+Last session: 2026-04-03T05:21:25.590Z
+Stopped at: Completed 20-02-PLAN.md — Phase 20 complete, Cloudflare Tunnel instructions delivered
 Resume file: None
