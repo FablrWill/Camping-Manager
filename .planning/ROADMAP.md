@@ -258,7 +258,7 @@ Phases execute in numeric order: 12 -> 13 -> 14 -> 15, then v2.0: 16-20 (paralle
 | 17. Feedback-Driven Packing | v2.0 | 0/TBD | Not started | - |
 | 18. Fuel & Last Stop Planner | v2.0 | 0/TBD | Not started | - |
 | 19. Dog-Aware Trip Planning | v2.0 | 0/TBD | Not started | - |
-| 20. Live Location Sharing | v2.0 | 2/2 | Complete   | 2026-04-03 |
+| 20. Live Location Sharing | v2.0 | 2/2 | Complete    | 2026-04-03 |
 | 21. Permit & Reservation | v2.0 | 0/TBD | Not started | - |
 | 22. Plan A/B/C Fallback Chain | v2.0 | 0/TBD | Not started | - |
 
