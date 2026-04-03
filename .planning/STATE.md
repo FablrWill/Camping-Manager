@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Gear Intelligence + Day-Of
 status: executing
-stopped_at: Completed 33-03-PLAN.md
-last_updated: "2026-04-03T20:11:18.637Z"
+stopped_at: Completed 29-01-PLAN.md
+last_updated: "2026-04-03T20:27:27.406Z"
 last_activity: 2026-04-03
 progress:
   total_phases: 22
-  completed_phases: 16
-  total_plans: 44
-  completed_plans: 43
+  completed_phases: 17
+  total_plans: 45
+  completed_plans: 44
   percent: 40
 ---
 
@@ -71,6 +71,7 @@ Progress: [████░░░░░░] 40%
 | Phase 33-conversational-trip-planner P00 | 5 | 1 tasks | 2 files |
 | Phase 33-conversational-trip-planner P01 | 4 | 2 tasks | 5 files |
 | Phase 33-conversational-trip-planner P03 | 20 | 2 tasks | 2 files |
+| Phase 29 P01 | 214 | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -115,6 +116,9 @@ Recent decisions affecting current work:
 - [Phase 33-conversational-trip-planner]: agent presents trip_summary JSON card and waits for confirm — client handles trip creation (avoids Pitfall 3)
 - [Phase 33-conversational-trip-planner]: TripPlannerSheet uses initialMessages to seed agent greeting client-side — no API call needed for first message
 - [Phase 33-conversational-trip-planner]: Human UAT checkpoint approved with testing deferred to 33-HUMAN-UAT.md
+- [Phase 29]: VehicleChecklistItem has id, text, checked only — no isUnpackedWarning or suggestedTime (simpler than DepartureChecklist)
+- [Phase 29]: Route tests use require() inside test bodies so vite does not fail at compile time when source files do not exist yet
+- [Phase 29]: Migration created manually and applied via prisma migrate deploy due to non-interactive agent environment
 
 ### Pending Todos
 
@@ -132,6 +136,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-03T20:07:37.850Z
-Stopped at: Completed 33-03-PLAN.md
+Last session: 2026-04-03T20:27:18.540Z
+Stopped at: Completed 29-01-PLAN.md
 Resume file: None

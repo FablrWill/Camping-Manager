@@ -67,7 +67,7 @@
 
 **Wave 2 — Depends on Wave 1:**
 - [ ] **Phase 28: Weather-Aware Clothing** - Rain/cold/UV-driven clothing suggestions in packing lists, clothing subcategories
-- [ ] **Phase 29: Vehicle Pre-Trip Checklist** - Tire pressure, oil, coolant, terrain-aware checks paired with Day Sequencer
+- [x] **Phase 29: Vehicle Pre-Trip Checklist** - Tire pressure, oil, coolant, terrain-aware checks paired with Day Sequencer (completed 2026-04-03)
 
 **Wave 3 — Depends on Wave 2:**
 - [ ] **Phase 30: Gear Product Research** - AI-powered "Research" button, best-in-class comparison, upgrade recommendations
@@ -512,7 +512,7 @@ Plans:
 | 26. Trip Day Sequencer | v3.0 | 0/TBD | Not started | - |
 | 27. Safety Float Plan | v3.0 | 0/TBD | Not started | - |
 | 28. Weather-Aware Clothing | v3.0 | 0/TBD | Not started | - |
-| 29. Vehicle Pre-Trip Checklist | v3.0 | 0/TBD | Not started | - |
+| 29. Vehicle Pre-Trip Checklist | v3.0 | 1/1 | Complete   | 2026-04-03 |
 | 30. Gear Product Research | v3.0 | 0/TBD | Not started | - |
 | 31. Dark Sky & Astro Info | v3.0 | 0/TBD | Not started | - |
 | 32. Deal Monitoring | v3.0 | 0/TBD | Not started | - |
@@ -531,7 +531,7 @@ Plans:
   5. "Add manually" escape hatch opens the old static form
   6. Trip-creation conversations are persisted to the database
   7. `npm run build` passes
-**Plans:** 4/4 plans complete
+**Plans:** 1/1 plans complete
 
 Plans:
 - [x] 33-00-PLAN.md — Wave 0 test stubs (trip planner tools + ChatBubble extraction)
