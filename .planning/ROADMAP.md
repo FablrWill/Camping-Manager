@@ -191,11 +191,15 @@ Plans:
   3. Shared page shows Leaflet map with a pin at last location, label, and "Last updated: X ago"
   4. Will can update his location (new lat/lon replaces old)
   5. Will can stop sharing (deletes the SharedLocation record)
-**Plans**: TBD
+**Plans:** 2 plans
+
+Plans:
+- [ ] 20-01-PLAN.md — SharedLocation schema migration + API routes (backend only)
+- [ ] 20-02-PLAN.md — Public share page + ShareLocationButton + Cloudflare Tunnel setup
 
 **Parallelization notes:**
-- `SharedLocation` schema + API routes can be built before the public `/share/[slug]` page
-- Public page and `ShareLocationButton` component are independent
+- Plan 20-01 is Wave 1 — backend must exist before UI
+- Plan 20-02 is Wave 2 — depends on 20-01
 
 ### Phase 21: Permit & Reservation Awareness
 **Goal**: Will can attach a Recreation.gov confirmation URL and permit notes to any trip; the trip card shows a permit indicator and trip prep surfaces the booking details
@@ -254,7 +258,7 @@ Phases execute in numeric order: 12 -> 13 -> 14 -> 15, then v2.0: 16-20 (paralle
 | 17. Feedback-Driven Packing | v2.0 | 0/TBD | Not started | - |
 | 18. Fuel & Last Stop Planner | v2.0 | 0/TBD | Not started | - |
 | 19. Dog-Aware Trip Planning | v2.0 | 0/TBD | Not started | - |
-| 20. Live Location Sharing | v2.0 | 0/TBD | Not started | - |
+| 20. Live Location Sharing | v2.0 | 0/2 | Not started | - |
 | 21. Permit & Reservation | v2.0 | 0/TBD | Not started | - |
 | 22. Plan A/B/C Fallback Chain | v2.0 | 0/TBD | Not started | - |
 
