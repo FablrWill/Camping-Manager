@@ -51,7 +51,7 @@
 - [x] **Phase 19: Dog-Aware Trip Planning** - Dog toggle on trips, dog gear packing section, dog-friendly notes (completed 2026-04-03)
 - [x] **Phase 20: Live Location Sharing** - Shareable public URL showing Will's last known GPS location (completed 2026-04-03)
 - [x] **Phase 21: Permit & Reservation** - Store Recreation.gov confirmations with trip, surface reminders (completed 2026-04-03)
-- [ ] **Phase 22: Plan A/B/C Fallback Chain** - Link fallback trips to primary, compare in trip prep
+- [x] **Phase 22: Plan A/B/C Fallback Chain** - Link fallback trips to primary, compare in trip prep (completed 2026-04-03)
 - [x] **Phase 23: Gear Category Expansion** - Expand from 7 to 15 categories with visual grouping, add tech gear fields (completed 2026-04-03)
 - [x] **Phase 24: Smart Inbox / Universal Intake** - Single intake endpoint + inbox UI for phone share-to-app workflow (completed 2026-04-03)
 
@@ -358,7 +358,7 @@ Phases execute in numeric order: 12 -> 13 -> 14 -> 15
 | 19. Dog-Aware Trip Planning | v2.0 | 2/2 | Complete | 2026-04-03 |
 | 20. Live Location Sharing | v2.0 | 2/2 | Complete | 2026-04-03 |
 | 21. Permit & Reservation | v2.0 | 0/TBD | Not started | - |
-| 22. Plan A/B/C Fallback Chain | v2.0 | 1/3 | In Progress|  |
+| 22. Plan A/B/C Fallback Chain | v2.0 | 1/3 | Complete    | 2026-04-03 |
 | 23. Gear Category Expansion | v2.0 | 3/3 | Complete   | 2026-04-03 |
 | 24. Smart Inbox / Intake | v2.0 | 3/3 | Complete   | 2026-04-03 |
 
