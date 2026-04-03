@@ -94,8 +94,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 18-01-PLAN.md — Overpass utility + API route with tests (FUEL-01, FUEL-02)
-- [ ] 18-02-PLAN.md — TripPrepClient card injection + visual verification (FUEL-03)
+- [x] 18-01-PLAN.md — Overpass utility + API route with tests (FUEL-01, FUEL-02)
+- [x] 18-02-PLAN.md — TripPrepClient card injection + visual verification (FUEL-03)
 
 **Parallelization notes:**
 - DEPLOY-01/DEPLOY-02/DEPLOY-03 (standalone config, data paths, DATABASE_URL) are sequential setup
@@ -129,7 +129,7 @@ Plans:
 
 - [ ] **Phase 16: Photo Auto-Import** - Bulk import photos from camera roll with EXIF GPS extraction
 - [ ] **Phase 17: Feedback-Driven Packing** - Use trip debrief history to inform Claude packing list
-- [ ] **Phase 18: Fuel & Last Stop Planner** - Show last gas/grocery/hardware stop before campsite via Overpass API
+- [x] **Phase 18: Fuel & Last Stop Planner** - Show last gas/grocery/hardware stop before campsite via Overpass API (completed 2026-04-03)
 - [ ] **Phase 19: Dog-Aware Trip Planning** - Add dog toggle to trips; Claude adds dog gear section to packing list
 - [ ] **Phase 20: Live Location Sharing** - Shareable public URL showing Will's last known GPS location
 - [ ] **Phase 21: Permit & Reservation** - Store Recreation.gov confirmation URL + notes on trip

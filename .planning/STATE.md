@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Ship It
 status: executing
-stopped_at: Phase 15 planned — 2 plans ready
-last_updated: "2026-04-03T05:20:23.191Z"
-last_activity: 2026-04-03 -- Phase 18 execution started
+stopped_at: Completed 18-02-PLAN.md — Phase 18 Fuel & Last Stop Planner complete
+last_updated: "2026-04-03T05:43:26.657Z"
+last_activity: 2026-04-03
 progress:
-  total_phases: 5
+  total_phases: 4
   completed_phases: 4
-  total_plans: 16
+  total_plans: 14
   completed_plans: 14
   percent: 40
 ---
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-04-01)
 ## Current Position
 
 Phase: 18 (fuel-last-stop-planner) — EXECUTING
-Plan: 1 of 2
-Status: Executing Phase 18
-Last activity: 2026-04-03 -- Phase 18 execution started
+Plan: 2 of 2
+Status: Ready to execute
+Last activity: 2026-04-03
 
 Progress: [████░░░░░░] 40%
 
@@ -64,6 +64,7 @@ Progress: [████░░░░░░] 40%
 | Phase 07-day-of-execution P03 | 252 | 2 tasks | 4 files |
 | Phase 13-address-review-findings P03 | 225 | 2 tasks | 11 files |
 | Phase 13 P04 | 300 | 1 tasks | 1 files |
+| Phase 18-fuel-last-stop-planner P02 | 10 | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -96,6 +97,8 @@ Recent decisions affecting current work:
 - [Phase 13-address-review-findings]: safeParseFloat/safeParseInt return null not NaN — correct for Prisma nullable fields
 - [Phase 13-address-review-findings]: vehicle/[id] PUT now explicitly maps fields — removes unsafe pass-through of raw request body to Prisma
 - [Phase 13]: All 74 Gemini findings accounted for — 27 fixed, 8 already handled, 10 deferred MEDIUM, 31 deferred LOW
+- [Phase 18-fuel-last-stop-planner]: Card fetches independently via useEffect, not through /api/trips/[id]/prep — isolates Overpass latency (D-10)
+- [Phase 18-fuel-last-stop-planner]: Fuel card NOT added to PREP_SECTIONS — renders outside sections map to avoid injecting external API calls into static prep loop
 
 ### Pending Todos
 
@@ -109,6 +112,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-03T02:47:44.066Z
-Stopped at: Phase 15 planned — 2 plans ready
-Resume file: .planning/phases/15-remote-access-go-live/15-01-PLAN.md
+Last session: 2026-04-03T05:43:26.653Z
+Stopped at: Completed 18-02-PLAN.md — Phase 18 Fuel & Last Stop Planner complete
+Resume file: None

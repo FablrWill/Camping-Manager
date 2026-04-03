@@ -53,7 +53,7 @@ Requirements for milestone v2.0 "Field Intelligence".
 
 - [ ] **FUEL-01**: New API endpoint `app/api/trips/[id]/last-stops/route.ts` — queries Overpass API for fuel, supermarket, hardware stops within 50km of trip destination coordinates; returns sorted-by-distance results
 - [ ] **FUEL-02**: New utility `lib/overpass.ts` — wraps Overpass API queries for amenity=fuel, shop=supermarket, shop=hardware; calculates distance from destination; returns structured results
-- [ ] **FUEL-03**: "Fuel & Last Stops" card added to `components/TripPrepClient.tsx` — shows after weather card, before packing list; renders 3 categories with name + distance; shows loading state; shows "None found nearby" fallback
+- [x] **FUEL-03**: "Fuel & Last Stops" card added to `components/TripPrepClient.tsx` — shows after weather card, before packing list; renders 3 categories with name + distance; shows loading state; shows "None found nearby" fallback
 
 ## Future Requirements
 
@@ -99,7 +99,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | REVIEW-03 | Phase 13 | Complete |
 | FUEL-01 | Phase 18 | Pending |
 | FUEL-02 | Phase 18 | Pending |
-| FUEL-03 | Phase 18 | Pending |
+| FUEL-03 | Phase 18 | Complete |
 | DEPLOY-01 | Phase 14 | Pending |
 | DEPLOY-02 | Phase 14 | Pending |
 | DEPLOY-03 | Phase 14 | Pending |
