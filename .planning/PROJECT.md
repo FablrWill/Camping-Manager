@@ -142,6 +142,9 @@ A personal second brain for car camping — an AI-powered knowledge system that 
 | Manual sw.js over Serwist | Avoids Webpack/Turbopack conflict with Next.js 16 | ✓ Validated v1.1 |
 | TripFeedback append-only (not @unique) | Multiple debriefs per trip; never mutate GearItem source records | ✓ Validated v1.1 |
 | Zod .safeParse() not .parse() | Return 422 for schema mismatches, not 500 crashes | ✓ Validated v1.1 |
+| safeJsonParse for DB-stored JSON | Never throw on corrupt DB content — return null, not 500 | ✓ Validated Phase 13 |
+| escHtml() for Leaflet popups | DB-sourced strings in innerHTML must be escaped — XSS risk | ✓ Validated Phase 13 |
+| Path guard before fs ops | Resolve + startsWith check prevents path traversal on imagePath | ✓ Validated Phase 13 |
 | Plain text float plan email | HTML rendering varies across email clients; text is universal | ✓ Validated v1.1 |
 | Settings singleton via hardcoded id | Enforces one row, upsert always targets same record | ✓ Validated v1.1 |
 | Mac mini self-hosting over Vercel | Free, SQLite stays local, photos on disk, no cloud costs | — Pending v1.2 |
@@ -176,4 +179,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-02 after v1.2 milestone start*
+*Last updated: 2026-04-03 after Phase 13 complete — security hardening (path traversal, XSS, JSON.parse, input validation)*
