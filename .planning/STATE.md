@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Gear Intelligence + Day-Of
 status: executing
-stopped_at: "Completed 25-01-PLAN.md — GearDocument foundation: schema, migration, Zod schema, getDocsDir, Wave 0 tests"
-last_updated: "2026-04-03T17:44:20.625Z"
+stopped_at: Completed 25-02-PLAN.md — gear document API routes + PDF download
+last_updated: "2026-04-03T17:48:41.640Z"
 last_activity: 2026-04-03
 progress:
   total_phases: 21
   completed_phases: 12
   total_plans: 36
-  completed_plans: 33
+  completed_plans: 34
   percent: 40
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-01)
 ## Current Position
 
 Phase: 25 (gear-docs-manual-finder) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 Status: Ready to execute
 Last activity: 2026-04-03
 
@@ -69,6 +69,7 @@ Progress: [████░░░░░░] 40%
 | Phase 20-live-location-sharing P02 | 203 | 4 tasks | 9 files |
 | Phase 22-plan-fallback-chain P02 | 15 | 2 tasks | 3 files |
 | Phase 25-gear-docs-manual-finder P01 | 15 | 3 tasks | 8 files |
+| Phase 25-gear-docs-manual-finder P02 | 8 | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -109,6 +110,8 @@ Recent decisions affecting current work:
 - [Phase 20-live-location-sharing]: Bare layout.tsx at /share renders <html> directly — fully bypasses AppShell so family sees clean map-only page with no nav chrome
 - [Phase 22-plan-fallback-chain]: Add Plan B/C button placed in TripsClient (not TripCard) to keep TripCard interface minimal
 - [Phase 25-gear-docs-manual-finder]: GearDocument model uses gearItemId FK with cascade delete; existing manualUrl values migrated to support_link rows in single migration
+- [Phase 25-gear-docs-manual-finder]: findGearManual does not auto-save — returns results for UI confirmation
+- [Phase 25-gear-docs-manual-finder]: PDF download validates content-type (422 for non-PDF) — prevents saving HTML error pages
 
 ### Pending Todos
 
@@ -122,6 +125,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-03T17:44:20.621Z
-Stopped at: Completed 25-01-PLAN.md — GearDocument foundation: schema, migration, Zod schema, getDocsDir, Wave 0 tests
+Last session: 2026-04-03T17:48:41.636Z
+Stopped at: Completed 25-02-PLAN.md — gear document API routes + PDF download
 Resume file: None
