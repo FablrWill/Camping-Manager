@@ -51,9 +51,9 @@ Requirements for milestone v2.0 "Smarter & Sharper". Each maps to roadmap phases
 
 ### Dog-Aware Trip Planning (Phase 19)
 
-- [ ] **DOG-01**: Trip create/edit form has "Bringing dog?" boolean toggle (defaults false) — UI in 19-02
+- [x] **DOG-01**: Trip create/edit form has "Bringing dog?" boolean toggle (defaults false) — UI in 19-02
 - [x] **DOG-02**: When `bringingDog = true`, packing list includes a "Dog" section with: food + collapsible bowl, water bowl, leash + backup leash, poop bags (2x), dog first aid (tweezers, wound spray)
-- [ ] **DOG-03**: Trip card shows 🐕 indicator when `bringingDog` is true — UI in 19-02
+- [x] **DOG-03**: Trip card shows 🐕 indicator when `bringingDog` is true — UI in 19-02
 - [x] **DOG-04**: When `bringingDog = false`, no dog items appear in packing list (no regression to existing behavior)
 - [x] **DOG-05**: Trip edit supports toggling `bringingDog` on existing trips (PUT endpoint accepts + persists)
 

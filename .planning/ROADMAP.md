@@ -48,7 +48,7 @@
 - [ ] **Phase 16: Photo Auto-Import** - Bulk import photos from camera roll with EXIF GPS extraction
 - [ ] **Phase 17: Feedback-Driven Packing** - Packing lists personalized by post-trip gear feedback history
 - [ ] **Phase 18: Fuel & Last Stop Planner** - Pre-trip fuel/grocery/hardware stop cards via Overpass API
-- [ ] **Phase 19: Dog-Aware Trip Planning** - Dog toggle on trips, dog gear packing section, dog-friendly notes
+- [x] **Phase 19: Dog-Aware Trip Planning** - Dog toggle on trips, dog gear packing section, dog-friendly notes (completed 2026-04-03)
 - [ ] **Phase 20: Live Location Sharing** - Shareable public URL showing Will's last known GPS location
 - [ ] **Phase 21: Permit & Reservation** - Store Recreation.gov confirmations with trip, surface reminders
 - [ ] **Phase 22: Plan A/B/C Fallback Chain** - Link fallback trips to primary, compare in trip prep
@@ -176,11 +176,11 @@ Plans:
   3. Trip card shows 🐕 indicator when `bringingDog` is true
   4. When `bringingDog = false`, no dog items appear in packing list (no regression)
   5. Trip edit supports toggling `bringingDog` on existing trips
-**Plans:** 2 plans
+**Plans:** 2/2 plans complete
 
 Plans:
 - [x] 19-01-PLAN.md — Schema migration + API routes + packing list prompt conditioning (completed 2026-04-03)
-- [ ] 19-02-PLAN.md — Trip form dog toggle + TripCard indicator
+- [x] 19-02-PLAN.md — Trip form dog toggle + TripCard indicator
 
 **Parallelization notes:**
 - Plan 19-01 is Wave 1 — schema and backend must exist before UI can consume
