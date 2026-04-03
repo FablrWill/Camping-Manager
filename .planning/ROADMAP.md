@@ -516,7 +516,7 @@ Plans:
 | 30. Gear Product Research | v3.0 | 0/TBD | Not started | - |
 | 31. Dark Sky & Astro Info | v3.0 | 0/TBD | Not started | - |
 | 32. Deal Monitoring | v3.0 | 0/TBD | Not started | - |
-| 33. Conversational Trip Planner | v3.0 | 2/4 | In Progress|  |
+| 33. Conversational Trip Planner | v3.0 | 4/4 | Complete   | 2026-04-03 |
 
 ### Phase 33: Conversational Trip Planner
 
@@ -531,13 +531,13 @@ Plans:
   5. "Add manually" escape hatch opens the old static form
   6. Trip-creation conversations are persisted to the database
   7. `npm run build` passes
-**Plans:** 2/4 plans executed
+**Plans:** 4/4 plans complete
 
 Plans:
 - [x] 33-00-PLAN.md — Wave 0 test stubs (trip planner tools + ChatBubble extraction)
 - [x] 33-01-PLAN.md — Trip planner API route + system prompt + web search tool + tool registry
-- [ ] 33-02-PLAN.md — ChatClient + ChatBubble modifications (apiEndpoint, fullHeight, trip_summary card)
-- [ ] 33-03-PLAN.md — TripPlannerSheet component + TripsClient integration
+- [x] 33-02-PLAN.md — ChatClient + ChatBubble modifications (apiEndpoint, fullHeight, trip_summary card)
+- [x] 33-03-PLAN.md — TripPlannerSheet component + TripsClient integration
 
 **Parallelization notes:**
 - Plan 33-00 is Wave 0 — test stubs, no dependencies
