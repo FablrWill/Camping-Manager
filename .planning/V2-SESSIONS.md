@@ -47,8 +47,8 @@ A self-coordinating work queue for v2.0 features. Each Claude Code session claim
 | S07 | Plan A/B/C fallback chain     | 22    | ✅ Done 2026-04-03 | Sonnet, normal | S04, S06   |
 | S08 | Gear category expansion       | 23    | ✅ Done 2026-04-03 | Sonnet, normal | —          |
 | S09 | Smart inbox / intake          | 24    | ✅ Done 2026-04-03 | Sonnet, normal | S08        |
-| S10 | Home Assistant integration    | 33    | 🔄 In Progress 2026-04-03 | Sonnet, normal | S09        |
-| S11 | Meal planning core            | 34    | ⬜ Ready  | Sonnet, normal | S07, S10   |
+| S10 | Home Assistant integration    | 33    | ⏸ Blocked (hardware ~mid-Apr) | Sonnet, normal | S09        |
+| S11 | Meal planning core            | 34    | ⬜ Ready  | Sonnet, normal | S07        |
 | S12 | Meal planning: shopping, prep & feedback | 35 | ⬜ Ready | Sonnet, normal | S11 |
 
 **Why this order matters (conflict groups):**
@@ -59,7 +59,7 @@ A self-coordinating work queue for v2.0 features. Each Claude Code session claim
 - S08 touches `lib/claude.ts` (same as S02, S04, S07) and `GearClient.tsx` — should ideally run before S02
 - S09 depends on S08 (needs 15 categories); touches `BottomNav.tsx` and `schema.prisma` — mostly new files, low conflict
 - S10 depends on S09 (schema settled, nav stable); touches `SettingsClient.tsx`, `DashboardClient.tsx`, `schema.prisma` — new files dominate, low conflict with prior sessions
-- S11 touches `schema.prisma` (same as S10), `lib/claude.ts` (same as S07), `TripsClient.tsx` (same as S07), `TripPrepClient.tsx` (same as S07) — must wait for both S07 and S10
+- S11 touches `schema.prisma`, `lib/claude.ts` (same as S07), `TripsClient.tsx` (same as S07), `TripPrepClient.tsx` (same as S07) — S10 dependency removed (meal planning doesn't need HA; was a merge-conflict precaution only, no longer relevant with sequential execution)
 - S12 touches same files as S11 plus `DashboardClient.tsx` — must wait for S11
 
 ---
