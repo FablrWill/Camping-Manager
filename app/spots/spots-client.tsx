@@ -15,6 +15,7 @@ import type {
   Layers,
   SpotMapHandle,
 } from "@/components/SpotMap";
+import ShareLocationButton from "@/components/ShareLocationButton";
 import { useOnlineStatus } from "@/lib/use-online-status";
 import { getTripSnapshot, getCachedTripIds } from "@/lib/offline-storage";
 
@@ -298,6 +299,7 @@ export default function SpotsClient({
               All time
             </button>
           )}
+          <ShareLocationButton />
           <button
             onClick={() => setShowUpload(!showUpload)}
             className="px-3 py-1.5 bg-amber-600 text-white text-sm font-medium rounded-lg hover:bg-amber-700 transition-colors"
