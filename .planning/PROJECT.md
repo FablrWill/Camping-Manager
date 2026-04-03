@@ -95,7 +95,7 @@ None — v1.2 Ship It complete as of 2026-04-03.
 
 ## Current State
 
-Phase 16 complete (2026-04-03) — bulk photo import shipped with progress counter and per-file error isolation.
+Phase 22 complete (2026-04-03) — Plan A/B/C fallback chain shipped: DB schema, API routes, TripCard badges, TripsClient create flow, and trip prep Fallback Plans card with weather comparison.
 
 ## Current Milestone: ✅ v1.2 Ship It — COMPLETE (2026-04-03)
 
@@ -125,7 +125,7 @@ Phase 16 complete (2026-04-03) — bulk photo import shipped with progress count
 - [ ] Knowledge base expansion (2500+ chunks)
 - [ ] Deploy to Vercel (if Mac mini hosting proves insufficient)
 - [ ] Smart campsite / Home Assistant bridge (blocked on hardware)
-- [ ] Plan A/B/C fallback chain for trip planning
+- [x] Plan A/B/C fallback chain for trip planning — Validated in Phase 22
 - [ ] Photo auto-import from iCloud/Google Photos
 - [ ] Nearby trails & recreation API
 - [ ] Fuel & last stop planner
@@ -184,4 +184,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-03 after Phase 20 complete — live location sharing (shareable public URL, ShareMap, Cloudflare Tunnel config)*
+*Last updated: 2026-04-03 after Phase 22 complete — Plan A/B/C fallback chain*
