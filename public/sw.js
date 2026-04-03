@@ -1,5 +1,5 @@
-const CACHE_NAME = 'outland-shell-v1'
-const TILE_CACHE = 'tile-cache-v1'
+const CACHE_NAME = 'outland-shell-v20260402224014'
+const TILE_CACHE = 'tile-cache-v20260402224014'
 const SHELL_ASSETS = ['/', '/gear', '/trips', '/spots', '/vehicle', '/settings', '/chat']
 
 // Install: cache app shell pages
