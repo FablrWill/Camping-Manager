@@ -45,6 +45,16 @@ Requirements for milestone v1.2 "Ship It". Each maps to roadmap phases.
 - [ ] **ACCESS-04**: HTTPS works via Tailscale (required for PWA service worker)
 - [ ] **ACCESS-05**: App is installable as PWA from phone over Tailscale
 
+## v2.0 Requirements
+
+### Photo Bulk Import (Phase 16)
+
+- **PHOTO-01**: User can select multiple photo files at once via browser file picker (`<input type=file multiple>`)
+- **PHOTO-02**: Each file is processed through the existing EXIF extraction + sharp compression pipeline
+- **PHOTO-03**: Import shows per-file progress ("Importing 12 of 50...")
+- **PHOTO-04**: Individual file failures do not abort the batch — errors collected and reported at end
+- **PHOTO-05**: Imported photos with GPS EXIF data appear as pins on the Spots map
+
 ## Future Requirements
 
 Deferred to future release. Tracked but not in current roadmap.
@@ -100,10 +110,16 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ACCESS-03 | Phase 15 | Pending |
 | ACCESS-04 | Phase 15 | Pending |
 | ACCESS-05 | Phase 15 | Pending |
+| PHOTO-01 | Phase 16 | Pending |
+| PHOTO-02 | Phase 16 | Pending |
+| PHOTO-03 | Phase 16 | Pending |
+| PHOTO-04 | Phase 16 | Pending |
+| PHOTO-05 | Phase 16 | Pending |
 
 **Coverage:**
 - v1.2 requirements: 26 total
-- Mapped to phases: 26
+- v2.0 requirements: 5 total
+- Mapped to phases: 31
 - Unmapped: 0
 
 ---
