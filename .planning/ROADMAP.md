@@ -168,7 +168,7 @@ Phases execute in numeric order: 12 -> 13 -> 14 -> 15 -> 16+
 | 13. Address Review Findings | v1.2 | 4/4 | Complete    | 2026-04-03 |
 | 14. Production Deployment | v1.2 | 0/TBD | Not started | - |
 | 15. Remote Access & Go Live | v1.2 | 0/2 | Complete    | 2026-04-03 |
-| 16. Photo Bulk Import | v2.0 | 1/1 | Complete   | 2026-04-03 |
+| 16. Photo Bulk Import | v2.0 | 1/1 | Complete    | 2026-04-03 |
 
 ---
 *Full phase details for shipped milestones: see archives in `.planning/milestones/`*
