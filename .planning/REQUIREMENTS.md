@@ -63,9 +63,7 @@ Explicitly excluded. Documented to prevent scope creep.
 |---------|--------|
 | Docker containerization | Single app on owned hardware; native deps simpler without containers |
 | Nginx / reverse proxy | Tailscale provides encrypted access directly |
-| Public internet exposure | Private Tailscale mesh only; no need for public URLs |
 | CI/CD pipeline | Single developer; manual deploy via script is sufficient |
-| Cloudflare Tunnel | Tailscale is simpler and more secure for private single-user access |
 | Cluster mode (PM2) | SQLite requires single process; cluster mode causes locking |
 
 ## Traceability
