@@ -53,12 +53,14 @@ Exceptions: Touch target minimum 44px for the expand/collapse chevron button (in
 
 | Role | Size | Weight | Line Height |
 |------|------|--------|-------------|
-| Body | 14px (`text-sm`) | 400 (regular) | 1.5 |
-| Label | 12px (`text-xs`) | 500 (medium) | 1.4 |
-| Heading | 14px (`text-sm`) | 600 (semibold) | 1.2 |
+| Body / unstyled text | 14px (`text-sm`) or 12px (`text-xs`) | default (browser) | 1.5 |
+| Label | 12px (`text-xs`) | 500 (medium, `font-medium`) | 1.4 |
+| Heading / emphasis | 14px (`text-sm`) | 600 (semibold, `font-semibold`) | 1.2 |
 | Moon emoji | 24px (`text-2xl`) | — (emoji) | none (`leading-none`) |
 
-**Source:** Inferred from `WeatherCard.tsx` (`text-xs`, `text-sm`, `text-2xl` emoji, `font-semibold`, `font-medium`) — exact pattern reused.
+**Declared weights: 2 — medium (500) and semibold (600).** Regular-weight text uses the browser default and is not declared as a design token. This exactly matches the two explicit weight classes (`font-medium`, `font-semibold`) present in `WeatherCard.tsx`.
+
+**Source:** `WeatherCard.tsx` lines 39 (`font-medium`), 48 (`font-semibold`) — exact pattern reused for AstroCard.
 
 ---
 
