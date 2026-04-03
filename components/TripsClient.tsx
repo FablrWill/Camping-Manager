@@ -17,12 +17,14 @@ interface TripData {
   weatherNotes: string | null
   location: { id: string; name: string; latitude: number | null; longitude: number | null } | null
   vehicle: { id: string; name: string } | null
-  _count: { packingItems: number; photos: number }
+  _count: { packingItems: number; photos: number; alternatives: number }
   createdAt: string
   updatedAt: string
   bringingDog: boolean
   permitUrl: string | null
   permitNotes: string | null
+  fallbackFor: string | null
+  fallbackOrder: number | null
 }
 
 interface WeatherData {
@@ -72,6 +74,11 @@ export default function TripsClient({ initialTrips, locations, vehicles }: Trips
   const [editPermitUrl, setEditPermitUrl] = useState('')
   const [editPermitNotes, setEditPermitNotes] = useState('')
 
+  // Fallback form state
+  const [fallbackForTripId, setFallbackForTripId] = useState<string | null>(null)
+  const [fallbackForTripName, setFallbackForTripName] = useState<string | null>(null)
+  const [fallbackOrder, setFallbackOrder] = useState<number | null>(null)
+
   function openEdit(trip: TripData) {
     setEditingTrip(trip)
     setEditName(trip.name)
@@ -84,6 +91,16 @@ export default function TripsClient({ initialTrips, locations, vehicles }: Trips
     setEditPermitUrl(trip.permitUrl ?? '')
     setEditPermitNotes(trip.permitNotes ?? '')
     setError(null)
+  }
+
+  function openAddFallback(trip: TripData) {
+    // Calculate next fallback order (2 = Plan B, 3 = Plan C)
+    const nextOrder = (trip._count.alternatives || 0) + 2
+    if (nextOrder > 3) return // Max 2 fallbacks (soft limit)
+    setFallbackForTripId(trip.id)
+    setFallbackForTripName(trip.name)
+    setFallbackOrder(nextOrder)
+    setShowForm(true)
   }
 
   async function handleEditSave(e: React.FormEvent) {
@@ -187,6 +204,8 @@ export default function TripsClient({ initialTrips, locations, vehicles }: Trips
       vehicleId: (form.get('vehicleId') as string) || null,
       notes: (form.get('notes') as string) || null,
       bringingDog: form.get('bringingDog') === 'on',
+      fallbackFor: fallbackForTripId,
+      fallbackOrder: fallbackOrder,
     }
 
     setFormError(null)
@@ -208,7 +227,18 @@ export default function TripsClient({ initialTrips, locations, vehicles }: Trips
         },
         ...prev,
       ])
+      // Optimistically increment the primary trip's alternatives count
+      if (fallbackForTripId) {
+        setTrips(prev => prev.map(t =>
+          t.id === fallbackForTripId
+            ? { ...t, _count: { ...t._count, alternatives: t._count.alternatives + 1 } }
+            : t
+        ))
+      }
       setShowForm(false)
+      setFallbackForTripId(null)
+      setFallbackForTripName(null)
+      setFallbackOrder(null)
     } catch {
       setFormError('Failed to create trip. Please try again.')
     } finally {
@@ -245,6 +275,13 @@ export default function TripsClient({ initialTrips, locations, vehicles }: Trips
           onSubmit={handleCreate}
           className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-700 p-4 space-y-3"
         >
+          {fallbackForTripName && (
+            <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3">
+              <p className="text-sm text-amber-700 dark:text-amber-300">
+                Creating as <span className="font-semibold">Plan {fallbackOrder === 3 ? 'C' : 'B'}</span> for {fallbackForTripName}
+              </p>
+            </div>
+          )}
           <Input
             label="Trip Name *"
             name="name"
@@ -309,7 +346,7 @@ export default function TripsClient({ initialTrips, locations, vehicles }: Trips
               type="button"
               variant="secondary"
               className="flex-1"
-              onClick={() => { setShowForm(false); setFormError(null) }}
+              onClick={() => { setShowForm(false); setFormError(null); setFallbackForTripId(null); setFallbackForTripName(null); setFallbackOrder(null) }}
             >
               Cancel
             </Button>
@@ -351,18 +388,28 @@ export default function TripsClient({ initialTrips, locations, vehicles }: Trips
               </h2>
               <div className="space-y-3">
                 {upcoming.map((trip) => (
-                  <TripCard
-                    key={trip.id}
-                    trip={trip}
-                    isSelected={selectedTripId === trip.id}
-                    onSelect={setSelectedTripId}
-                    onEdit={openEdit}
-                    onDelete={setConfirmDelete}
-                    weather={weatherByTrip[trip.id]}
-                    weatherLoading={weatherLoading[trip.id]}
-                    weatherError={weatherErrors[trip.id]}
-                    onDebrief={setDebriefTrip}
-                  />
+                  <div key={trip.id}>
+                    <TripCard
+                      trip={trip}
+                      isSelected={selectedTripId === trip.id}
+                      onSelect={setSelectedTripId}
+                      onEdit={openEdit}
+                      onDelete={setConfirmDelete}
+                      weather={weatherByTrip[trip.id]}
+                      weatherLoading={weatherLoading[trip.id]}
+                      weatherError={weatherErrors[trip.id]}
+                      onDebrief={setDebriefTrip}
+                    />
+                    {/* Add Plan B/C button — only for upcoming primary trips without max fallbacks */}
+                    {!trip.fallbackFor && trip._count.alternatives < 2 && new Date(trip.startDate) > new Date() && (
+                      <button
+                        onClick={() => openAddFallback(trip)}
+                        className="w-full text-xs text-stone-400 dark:text-stone-500 hover:text-amber-600 dark:hover:text-amber-400 py-1 transition-colors"
+                      >
+                        + Add Plan {trip._count.alternatives === 0 ? 'B' : 'C'}
+                      </button>
+                    )}
+                  </div>
                 ))}
               </div>
             </section>
