@@ -195,6 +195,7 @@ model Trip {
   bringingDog            Boolean   @default(false)  // Phase 19: dog-aware trip planning
   permitUrl              String?   // Phase 21: Recreation.gov or other booking confirmation URL
   permitNotes            String?   // Phase 21: site number, check-in time, special instructions
+  departureTime          DateTime? // Phase 26: departure time anchor for day sequencer
   fallbackFor   String?   // Phase 22: ID of the primary trip this is a fallback for
   fallbackOrder Int?      // Phase 22: 2 = Plan B, 3 = Plan C
   createdAt   DateTime @default(now())

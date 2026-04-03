@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { generateDepartureChecklist } from '@/lib/claude'
+import { fetchLastStops } from '@/lib/overpass'
 import { safeJsonParse } from '@/lib/safe-json'
 
 export async function GET(request: NextRequest) {
@@ -76,6 +77,30 @@ export async function POST(request: NextRequest) {
         ? `Current battery: ${trip.currentBatteryPct}%`
         : null
 
+    // Fetch last-stop names for Claude prompt (non-blocking — silent catch)
+    let lastStopNames: string[] = []
+    if (trip.location?.latitude != null && trip.location?.longitude != null) {
+      try {
+        const stops = await fetchLastStops(trip.location.latitude, trip.location.longitude)
+        const allStops = [...stops.fuel, ...stops.grocery, ...stops.outdoor]
+        lastStopNames = allStops.slice(0, 3).map((s) => s.name)
+      } catch {
+        // Non-blocking — checklist generates without fuel stops if Overpass fails
+      }
+    }
+
+    // Format departureTime as human-readable string for Claude prompt
+    const departureTimeFormatted = trip.departureTime
+      ? trip.departureTime.toLocaleDateString('en-US', {
+          weekday: 'long',
+          month: 'long',
+          day: 'numeric',
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: true,
+        })
+      : null
+
     let result
     try {
       result = await generateDepartureChecklist({
@@ -89,6 +114,8 @@ export async function POST(request: NextRequest) {
         vehicleMods,
         weatherNotes: trip.weatherNotes ?? null,
         tripNotes: trip.notes ?? null,
+        departureTime: departureTimeFormatted,
+        lastStopNames,
       })
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to generate checklist'

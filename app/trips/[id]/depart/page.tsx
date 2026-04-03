@@ -14,6 +14,7 @@ export default async function DepartPage({ params }: { params: Promise<{ id: str
       endDate: true,
       emergencyContactName: true,
       emergencyContactEmail: true,
+      departureTime: true,
       location: { select: { latitude: true, longitude: true } },
     },
   })
@@ -33,6 +34,7 @@ export default async function DepartPage({ params }: { params: Promise<{ id: str
       endDate={trip.endDate.toISOString()}
       emergencyContactName={trip.emergencyContactName ?? null}
       emergencyContactEmail={trip.emergencyContactEmail ?? null}
+      departureTime={trip.departureTime?.toISOString() ?? null}
       tripCoords={tripCoords}
     />
   )

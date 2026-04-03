@@ -47,6 +47,7 @@ A self-coordinating work queue for v2.0 features. Each Claude Code session claim
 | S07 | Plan A/B/C fallback chain     | 22    | 🔄 In Progress 2026-04-03 | Sonnet, normal | S04, S06   |
 | S08 | Gear category expansion       | 23    | ✅ Done 2026-04-03 | Sonnet, normal | —          |
 | S09 | Smart inbox / intake          | 24    | ✅ Done 2026-04-03 | Sonnet, normal | S08        |
+| S10 | Home Assistant integration    | 25    | ⬜ Ready  | Sonnet, normal | S09        |
 
 **Why this order matters (conflict groups):**
 
@@ -55,6 +56,7 @@ A self-coordinating work queue for v2.0 features. Each Claude Code session claim
 - S07 touches `lib/claude.ts` + Trip model (same as S04) and `TripPrepClient.tsx` (same as S06) — must wait for both
 - S08 touches `lib/claude.ts` (same as S02, S04, S07) and `GearClient.tsx` — should ideally run before S02
 - S09 depends on S08 (needs 15 categories); touches `BottomNav.tsx` and `schema.prisma` — mostly new files, low conflict
+- S10 depends on S09 (schema settled, nav stable); touches `SettingsClient.tsx`, `DashboardClient.tsx`, `schema.prisma` — new files dominate, low conflict with prior sessions
 
 ---
 
@@ -390,6 +392,74 @@ Will is bringing his dog on this trip. Add a "Dog" section to the packing list w
 
 ---
 
+### S10 — Home Assistant Integration (Phase 25)
+
+**Depends on:** S09 (schema stable, nav settled). Also requires: HA server running at camp with a long-lived access token ready.
+
+**What to build:** Connect Outland OS to a Home Assistant instance running at the campsite. Will can configure the HA URL + token in Settings, pick which entities to surface, and see live sensor data on the dashboard and trip prep pages. The integration reads data from HA (it does not write back).
+
+**User story:** Will arrives at camp, opens the app. The dashboard shows a "Campsite" section: battery bank at 87%, propane at 62%, outside temp 58°F, Santa Fe fuel level 3/4, dog GPS last seen at tent. He taps a card and sees the full entity history for the day.
+
+**Sensor categories to surface (from prior research):**
+- **Power:** Victron SmartShunt — battery SOC %, voltage, amps (BLE → HA)
+- **Propane:** Mopeka Pro Check — tank level % (BLE → HA)
+- **Weather:** Ecowitt WS90 — temp, humidity, wind, rain (WiFi → HA)
+- **Vehicle:** WiCAN Pro OBD-II — fuel level, engine temp, 12V voltage (WiFi → HA)
+- **Dog:** Tractive DOG 6 — GPS location, battery, activity (cloud → HA)
+- **Environment:** ESP32/ESPHome sensors — soil moisture, presence, custom (WiFi → HA)
+
+**Key files:**
+- `prisma/schema.prisma` — add `HaConfig` model (id, url, token, enabled, createdAt) and `HaEntity` model (id, entityId, friendlyName, unit, group, displayOrder, enabled)
+- `prisma/migrations/` — migration for new models
+- `app/api/ha/config/route.ts` — GET/POST HA config (URL + token); never returns token in GET response
+- `app/api/ha/test/route.ts` — POST: ping HA REST API to verify connectivity, return entity count
+- `app/api/ha/entities/route.ts` — GET: fetch all HA states via `GET /api/states`; POST: save selected entity list
+- `app/api/ha/states/route.ts` — GET: return current state values for saved entities (proxies to HA REST API)
+- `lib/ha.ts` — HA REST API client: `getStates()`, `getState(entityId)`, `testConnection(url, token)`
+- `components/SettingsClient.tsx` — add "Home Assistant" section: URL input, token input (write-only), Test Connection button, entity picker (MODIFY existing)
+- `components/HaCampsiteCard.tsx` — new dashboard card showing live HA sensor groups with last-updated timestamps
+- `components/DashboardClient.tsx` — add `HaCampsiteCard` when HA is configured and reachable (MODIFY existing)
+- `components/TripPrepClient.tsx` — add HA sensor snapshot to trip prep (power, propane, weather at destination) (MODIFY existing)
+
+**HA REST API pattern (no npm package needed — plain fetch):**
+```
+GET {haUrl}/api/states          → array of all entity states
+GET {haUrl}/api/states/{entity} → single entity state
+Headers: Authorization: Bearer {token}
+```
+
+**Entity picker UX:**
+- Settings page fetches all HA states after successful test
+- Groups them by domain (sensor, binary_sensor, device_tracker, etc.)
+- Will checks which to show in the app (max ~10 for clean UI)
+- Selections saved as `HaEntity` rows
+
+**Acceptance criteria:**
+- Settings has HA config section with URL, token (masked), and "Test Connection" button
+- Test Connection calls HA and shows success ("Connected — 47 entities found") or error
+- Entity picker lets Will select up to 10 entities to display
+- Dashboard shows "Campsite" card with selected entity values when HA is reachable
+- If HA unreachable (offline, no internet), card shows "Offline — last updated X ago" with stale values
+- Token is never returned from GET /api/ha/config — write-only after save
+- Trip prep shows HA power/propane/weather snapshot when configured
+- No WebSocket in this session — polling only (refresh on page load)
+- `npm run build` passes
+
+**Constraints:**
+- HA server is on Tailscale — URL will be a Tailscale hostname; app must work when both devices are on Tailscale
+- Out of scope: WebSocket real-time updates (polling is enough for v1; add in a follow-up)
+- Out of scope: writing state back to HA (controlling lights, switches, etc.) — read-only
+- Out of scope: HA authentication flow / OAuth — long-lived access tokens only
+- Out of scope: Nabu Casa / cloud relay — local/Tailscale URL only
+- Token stored in DB (same as other secrets in this single-user app); note in code that production use should use env vars
+
+**Pre-session checklist (human):**
+- [ ] HA server running and reachable via Tailscale
+- [ ] Long-lived access token generated in HA (Profile → Security → Long-Lived Access Tokens)
+- [ ] At least one sensor visible in HA (even just a phone companion app sensor is fine for testing)
+
+---
+
 ## Starter Prompts
 
 Copy-paste one of these to begin each session. All use **claude-sonnet-4-6**, normal effort (no special flags needed).
@@ -455,6 +525,13 @@ Pull origin main, then claim S08 in .planning/V2-SESSIONS.md (mark it 🔄 In Pr
 **S09 — Smart inbox / intake** *(start only after S08 is ✅ Done)*
 ```
 Pull origin main, then claim S09 in .planning/V2-SESSIONS.md (mark it 🔄 In Progress, commit + push the claim). Then run /gsd:plan-phase 24 to plan the smart inbox / intake feature — the full spec is in V2-SESSIONS.md under S09. After planning is approved, run /gsd:execute-phase 24. When done, mark S09 ✅ Done in V2-SESSIONS.md, commit, and push.
+```
+
+---
+
+**S10 — Home Assistant integration** *(start only after S09 is ✅ Done AND HA hardware is set up at camp)*
+```
+Pull origin main, then claim S10 in .planning/V2-SESSIONS.md (mark it 🔄 In Progress, commit + push the claim). Then run /gsd:plan-phase 25 to plan the Home Assistant integration — the full spec is in V2-SESSIONS.md under S10. After planning is approved, run /gsd:execute-phase 25. When done, mark S10 ✅ Done in V2-SESSIONS.md, commit, and push.
 ```
 
 ---

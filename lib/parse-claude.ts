@@ -96,6 +96,7 @@ const DepartureChecklistItemSchema = z.object({
   text: z.string(),
   checked: z.boolean().default(false),
   isUnpackedWarning: z.boolean().default(false),
+  suggestedTime: z.string().nullable().optional(),
 });
 
 const DepartureChecklistSlotSchema = z.object({
@@ -110,15 +111,6 @@ export const DepartureChecklistResultSchema = z.object({
 export type DepartureChecklistResult = z.infer<typeof DepartureChecklistResultSchema>;
 export type DepartureChecklistItem = z.infer<typeof DepartureChecklistItemSchema>;
 export type DepartureChecklistSlot = z.infer<typeof DepartureChecklistSlotSchema>;
-
-// --- Float Plan Email Schema ---
-
-export const FloatPlanEmailSchema = z.object({
-  subject: z.string(),
-  body: z.string(),
-});
-
-export type FloatPlanEmail = z.infer<typeof FloatPlanEmailSchema>;
 
 // --- Trip Summary Schema (Phase 9 - LEARN-02) ---
 
