@@ -14,7 +14,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
         vehicle: { select: { id: true, name: true } },
         packingItems: { include: { gear: true } },
         photos: true,
-        _count: { select: { packingItems: true, photos: true } },
+        _count: { select: { packingItems: true, photos: true, alternatives: true } },
       },
     })
     if (!trip) return NextResponse.json({ error: 'Trip not found' }, { status: 404 })
@@ -53,11 +53,13 @@ export async function PUT(req: NextRequest, { params }: Params) {
         bringingDog: data.bringingDog === true,
         permitUrl: data.permitUrl ?? null,
         permitNotes: data.permitNotes ?? null,
+        fallbackFor: data.fallbackFor ?? null,
+        fallbackOrder: data.fallbackOrder !== undefined ? Number(data.fallbackOrder) : null,
       },
       include: {
         location: { select: { id: true, name: true, latitude: true, longitude: true } },
         vehicle: { select: { id: true, name: true } },
-        _count: { select: { packingItems: true, photos: true } },
+        _count: { select: { packingItems: true, photos: true, alternatives: true } },
       },
     })
     return NextResponse.json(trip)
@@ -73,6 +75,11 @@ export async function PUT(req: NextRequest, { params }: Params) {
 export async function DELETE(_req: NextRequest, { params }: Params) {
   try {
     const { id } = await params
+    // Clear fallbackFor on any trips pointing to this one (FALLBACK-05)
+    await prisma.trip.updateMany({
+      where: { fallbackFor: id },
+      data: { fallbackFor: null, fallbackOrder: null },
+    })
     await prisma.trip.delete({ where: { id } })
     return new NextResponse(null, { status: 204 })
   } catch (error) {

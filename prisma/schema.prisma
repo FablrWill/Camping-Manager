@@ -195,6 +195,8 @@ model Trip {
   bringingDog            Boolean   @default(false)  // Phase 19: dog-aware trip planning
   permitUrl              String?   // Phase 21: Recreation.gov or other booking confirmation URL
   permitNotes            String?   // Phase 21: site number, check-in time, special instructions
+  fallbackFor   String?   // Phase 22: ID of the primary trip this is a fallback for
+  fallbackOrder Int?      // Phase 22: 2 = Plan B, 3 = Plan C
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -206,6 +208,9 @@ model Trip {
   tripFeedbacks      TripFeedback[]
   departureChecklist DepartureChecklist?
   floatPlanLogs      FloatPlanLog[]
+  // Fallback chain self-relation (Phase 22)
+  primaryTrip  Trip?   @relation("FallbackChain", fields: [fallbackFor], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  alternatives Trip[]  @relation("FallbackChain")
 }
 
 model PackingItem {
