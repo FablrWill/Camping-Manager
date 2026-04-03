@@ -45,6 +45,18 @@ Requirements for milestone v1.2 "Ship It". Each maps to roadmap phases.
 - [ ] **ACCESS-04**: HTTPS works via Tailscale (required for PWA service worker)
 - [ ] **ACCESS-05**: App is installable as PWA from phone over Tailscale
 
+## v2.0 Requirements
+
+Requirements for milestone v2.0 "Smarter & Sharper". Each maps to roadmap phases 16-22.
+
+### Dog-Aware Trip Planning (Phase 19)
+
+- [ ] **DOG-01**: Trip create/edit form has "Bringing dog?" boolean toggle (defaults false)
+- [ ] **DOG-02**: When `bringingDog = true`, packing list includes a "Dog" section with: food + collapsible bowl, water bowl, leash + backup leash, poop bags (2x), dog first aid (tweezers, wound spray)
+- [ ] **DOG-03**: Trip card shows 🐕 indicator when `bringingDog` is true
+- [ ] **DOG-04**: When `bringingDog = false`, no dog items appear in packing list (no regression to existing behavior)
+- [ ] **DOG-05**: Trip edit supports toggling `bringingDog` on existing trips (PATCH endpoint + form)
+
 ## Future Requirements
 
 Deferred to future release. Tracked but not in current roadmap.
@@ -100,6 +112,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ACCESS-03 | Phase 15 | Pending |
 | ACCESS-04 | Phase 15 | Pending |
 | ACCESS-05 | Phase 15 | Pending |
+| DOG-01 | Phase 19 | Pending |
+| DOG-02 | Phase 19 | Pending |
+| DOG-03 | Phase 19 | Pending |
+| DOG-04 | Phase 19 | Pending |
+| DOG-05 | Phase 19 | Pending |
 
 **Coverage:**
 - v1.2 requirements: 26 total
