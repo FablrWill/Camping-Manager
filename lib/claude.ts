@@ -1,5 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk'
-import { parseClaudeJSON, PackingListResultSchema, MealPlanResultSchema, DepartureChecklistResultSchema, DepartureChecklistResult, TripSummaryResultSchema, type TripSummaryResult, GearDocumentResultSchema, type GearDocumentResult } from '@/lib/parse-claude'
+import { parseClaudeJSON, PackingListResultSchema, MealPlanResultSchema, DepartureChecklistResultSchema, DepartureChecklistResult, TripSummaryResultSchema, type TripSummaryResult, GearDocumentResultSchema, type GearDocumentResult, VehicleChecklistResultSchema, type VehicleChecklistResult } from '@/lib/parse-claude'
 import { CATEGORY_EMOJI, CATEGORIES } from '@/lib/gear-categories'
 
 const anthropic = new Anthropic({
@@ -646,4 +646,68 @@ Respond ONLY with valid JSON (no markdown code blocks):
     throw new Error(parseResult.error);
   }
   return parseResult.data;
+}
+
+export async function generateVehicleChecklist(params: {
+  vehicleYear: number | null
+  vehicleMake: string | null
+  vehicleModel: string | null
+  drivetrain: string | null
+  groundClearance: number | null
+  tripDays: number
+  destinationName: string | null
+  roadCondition: string | null
+  clearanceNeeded: string | null
+}): Promise<VehicleChecklistResult> {
+  const {
+    vehicleYear,
+    vehicleMake,
+    vehicleModel,
+    drivetrain,
+    groundClearance,
+    tripDays,
+    destinationName,
+    roadCondition,
+    clearanceNeeded,
+  } = params
+
+  const prompt = `You are a vehicle pre-trip inspection assistant for car camping.
+Generate a practical, action-oriented pre-trip checklist specific to this vehicle and trip.
+
+VEHICLE:
+- Year/Make/Model: ${vehicleYear ?? 'Unknown'} ${vehicleMake ?? ''} ${vehicleModel ?? ''}
+- Drivetrain: ${drivetrain ?? 'Unknown'}
+- Ground Clearance: ${groundClearance != null ? `${groundClearance}"` : 'Unknown'}
+
+TRIP CONTEXT:
+- Duration: ${tripDays} day${tripDays !== 1 ? 's' : ''}
+${destinationName ? `- Destination: ${destinationName}` : ''}
+${roadCondition ? `- Road Condition: ${roadCondition}` : ''}
+${clearanceNeeded ? `- Clearance Needed: ${clearanceNeeded}` : ''}
+
+INSTRUCTIONS:
+1. Generate 8-15 practical checklist items for this specific vehicle.
+2. Each item should be action-oriented (verb-first: "Check", "Verify", "Inflate", "Top off").
+3. Cover: tires, fluids (oil, coolant, washer fluid), lights, battery, emergency kit, cargo security.
+4. If road condition indicates dirt/off-road, include items for that (skid plate check, recovery gear, etc.).
+5. Generate a unique ID for each item using format "vc-{index}" (0-based).
+6. All items start with checked: false.
+
+Respond ONLY with valid JSON (no markdown):
+{"items": [{"id": "vc-0", "text": "Check tire pressure (front/rear)", "checked": false}]}`
+
+  const message = await anthropic.messages.create({
+    model: 'claude-sonnet-4-20250514',
+    max_tokens: 1024,
+    messages: [{ role: 'user', content: prompt }],
+  })
+
+  const text = message.content[0].type === 'text' ? message.content[0].text : ''
+
+  const parseResult = parseClaudeJSON(text, VehicleChecklistResultSchema)
+  if (!parseResult.success) {
+    throw new Error(parseResult.error)
+  }
+
+  return parseResult.data
 }
