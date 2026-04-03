@@ -52,14 +52,16 @@ Exceptions:
 
 All values sourced from existing component inspection (`TripPrepSection.tsx`, `DepartureChecklistClient.tsx`, `Button.tsx`).
 
+Exactly 2 weights are used throughout this phase: 400 (regular) and 600 (semibold).
+
 | Role | Size | Weight | Line Height |
 |------|------|--------|-------------|
 | Body | 14px (`text-sm`) | 400 (regular) | 1.5 |
-| Label | 12px (`text-xs`) | 500 (medium) | 1.4 |
-| Heading | 18px (`text-lg`) | 700 (bold) | 1.2 |
+| Label | 12px (`text-xs`) | 400 (regular) | 1.4 |
+| Heading | 18px (`text-lg`) | 600 (semibold) | 1.2 |
 | Section title | 14px (`text-sm`) | 600 (semibold) | 1.3 |
 
-Source: `TripPrepSection.tsx` uses `text-sm font-semibold` for section titles, `text-lg font-bold` for slot headings in `DepartureChecklistClient.tsx` line 434.
+Notes on consolidation: Label text uses weight 400 (not 500 medium — dropped). Heading text uses weight 600 (not 700 bold — dropped). Source: `TripPrepSection.tsx` uses `text-sm font-semibold` for section titles; heading weight aligned to semibold to stay within the 2-weight limit.
 
 ---
 
@@ -85,6 +87,10 @@ Source: `app/globals.css` — Camp Commander design tokens (stone/amber palette 
 - Focus rings on interactive inputs (`--color-border-focus: amber-400`)
 
 Accent is NOT used on: section titles, body text, checklist item text, card backgrounds, or status badges (status badges use emerald/amber/stone per PrepStatus type).
+
+**Focal points by state:**
+- Empty state focal point: amber "Generate Vehicle Checklist" button — the sole interactive element, amber color draws the eye immediately.
+- Loaded state focal point: amber progress bar + bold item count label ("X of Y items done") in amber-600 — positioned above the item list, visually dominant against the stone card background.
 
 ---
 
@@ -121,7 +127,7 @@ New component to create:
 ### Progress Bar
 - Shows when checklist result is loaded and `items.length > 0`
 - Amber fill bar on stone-200/stone-700 track: `bg-amber-600 dark:bg-amber-500 rounded-full h-2`
-- Label above bar: `"{checkedCount} of {totalCount} items done"` — 14px text-sm font-bold amber-600 dark:amber-400
+- Label above bar: `"{checkedCount} of {totalCount} items done"` — 14px text-sm font-semibold (weight 600) amber-600 dark:amber-400
 - Percentage on the right: `text-sm text-stone-400 dark:text-stone-500`
 - Bar animates width on check-off: `transition-all duration-300`
 
