@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { InsightPayload } from './types'
+import { parseClaudeJSON, InsightPayloadSchema } from '@/lib/parse-claude'
 
 const EXTRACTION_SYSTEM_PROMPT = `You are extracting structured insights from a camping trip debrief recording transcript.
 Return ONLY valid JSON matching this exact schema — no prose, no markdown fences, no explanation:
@@ -27,5 +28,9 @@ export async function extractInsights(transcription: string): Promise<InsightPay
   })
 
   const text = response.content[0].type === 'text' ? response.content[0].text : ''
-  return JSON.parse(text) as InsightPayload
+  const result = parseClaudeJSON(text, InsightPayloadSchema)
+  if (!result.success) {
+    throw new Error(`Voice insight extraction failed: ${result.error}`)
+  }
+  return result.data as InsightPayload
 }
