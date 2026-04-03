@@ -30,12 +30,14 @@ interface TripData {
   weatherNotes: string | null
   location: { id: string; name: string; latitude: number | null; longitude: number | null } | null
   vehicle: { id: string; name: string } | null
-  _count: { packingItems: number; photos: number }
+  _count: { packingItems: number; photos: number; alternatives: number }
   createdAt: string
   updatedAt: string
   bringingDog: boolean
   permitUrl: string | null
   permitNotes: string | null
+  fallbackFor: string | null
+  fallbackOrder: number | null
 }
 
 interface WeatherData {
@@ -92,6 +94,11 @@ export default function TripCard({
               <h3 className="font-semibold text-stone-900 dark:text-stone-50 text-base truncate">
                 {trip.name}
               </h3>
+              {trip.fallbackFor && (
+                <span className="text-xs font-medium text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/30 rounded-full px-1.5 py-0.5 shrink-0">
+                  Plan {trip.fallbackOrder === 3 ? 'C' : 'B'}
+                </span>
+              )}
               {trip.bringingDog && (
                 <span title="Bringing dog" aria-label="Bringing dog" className="text-base leading-none shrink-0">
                   🐕
@@ -100,6 +107,15 @@ export default function TripCard({
               {trip.permitUrl && (
                 <span title="Booking confirmed" aria-label="Booking confirmed" className="text-base leading-none shrink-0">
                   📋
+                </span>
+              )}
+              {trip._count.alternatives > 0 && (
+                <span
+                  title={`${trip._count.alternatives} fallback plan${trip._count.alternatives !== 1 ? 's' : ''}`}
+                  aria-label={`${trip._count.alternatives} fallback plans`}
+                  className="text-xs font-medium text-stone-500 dark:text-stone-400 bg-stone-100 dark:bg-stone-800 rounded-full px-1.5 py-0.5 shrink-0"
+                >
+                  +{trip._count.alternatives}B
                 </span>
               )}
               {/* Edit/delete buttons */}
