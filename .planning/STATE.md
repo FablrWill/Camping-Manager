@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Ship It
-status: executing
-stopped_at: Phase 15 planned — 2 plans ready
-last_updated: "2026-04-03T03:21:20.908Z"
+status: verifying
+stopped_at: Completed 16-photo-bulk-import-01-PLAN.md
+last_updated: "2026-04-03T04:18:17.683Z"
 last_activity: 2026-04-03
 progress:
-  total_phases: 4
-  completed_phases: 3
-  total_plans: 11
-  completed_plans: 11
+  total_phases: 5
+  completed_phases: 5
+  total_plans: 15
+  completed_plans: 15
   percent: 40
 ---
 
@@ -21,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-01)
 
 **Core value:** Personal camping second brain — a closed-loop system that plans, executes, and learns from every trip
-**Current focus:** Phase 15 — remote-access-go-live
+**Current focus:** Phase 16 — photo-bulk-import
 
 ## Current Position
 
-Phase: 15
-Plan: Not started
-Status: Executing Phase 15
+Phase: 16 (photo-bulk-import) — EXECUTING
+Plan: 1 of 1
+Status: Phase complete — ready for verification
 Last activity: 2026-04-03
 
 Progress: [████░░░░░░] 40%
@@ -64,6 +64,7 @@ Progress: [████░░░░░░] 40%
 | Phase 07-day-of-execution P03 | 252 | 2 tasks | 4 files |
 | Phase 13-address-review-findings P03 | 225 | 2 tasks | 11 files |
 | Phase 13 P04 | 300 | 1 tasks | 1 files |
+| Phase 16-photo-bulk-import P01 | 7 | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -96,6 +97,9 @@ Recent decisions affecting current work:
 - [Phase 13-address-review-findings]: safeParseFloat/safeParseInt return null not NaN — correct for Prisma nullable fields
 - [Phase 13-address-review-findings]: vehicle/[id] PUT now explicitly maps fields — removes unsafe pass-through of raw request body to Prisma
 - [Phase 13]: All 74 Gemini findings accounted for — 27 fixed, 8 already handled, 10 deferred MEDIUM, 31 deferred LOW
+- [Phase 16-photo-bulk-import]: Single-file-per-request bulk import: client loop + per-file endpoint; simpler server logic, natural error isolation
+- [Phase 16-photo-bulk-import]: HTTP 200 on per-file error: batch must continue; non-2xx breaks fetch JSON parsing in loop
+- [Phase 16-photo-bulk-import]: @vitest-environment node required for route handler tests with FormData: jsdom hangs on Request.formData()
 
 ### Pending Todos
 
@@ -109,6 +113,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-03T02:47:44.066Z
-Stopped at: Phase 15 planned — 2 plans ready
-Resume file: .planning/phases/15-remote-access-go-live/15-01-PLAN.md
+Last session: 2026-04-03T04:18:17.679Z
+Stopped at: Completed 16-photo-bulk-import-01-PLAN.md
+Resume file: None

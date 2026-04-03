@@ -110,11 +110,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ACCESS-03 | Phase 15 | Pending |
 | ACCESS-04 | Phase 15 | Pending |
 | ACCESS-05 | Phase 15 | Pending |
-| PHOTO-01 | Phase 16 | Pending |
-| PHOTO-02 | Phase 16 | Pending |
-| PHOTO-03 | Phase 16 | Pending |
-| PHOTO-04 | Phase 16 | Pending |
-| PHOTO-05 | Phase 16 | Pending |
+| PHOTO-01 | Phase 16 | Complete |
+| PHOTO-02 | Phase 16 | Complete |
+| PHOTO-03 | Phase 16 | Complete |
+| PHOTO-04 | Phase 16 | Complete |
+| PHOTO-05 | Phase 16 | Complete |
 
 **Coverage:**
 - v1.2 requirements: 26 total

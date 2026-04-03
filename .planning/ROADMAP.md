@@ -35,7 +35,7 @@
 
 **Milestone Goal:** Expand Outland OS with key v2.0 features: photo bulk import, feedback-driven packing, fuel/last-stop planning, dog-aware trips, live location sharing, permit tracking, and Plan A/B/C fallback chains.
 
-- [ ] **Phase 16: Photo Bulk Import** - Bulk photo import with EXIF GPS extraction and map pins
+- [x] **Phase 16: Photo Bulk Import** - Bulk photo import with EXIF GPS extraction and map pins (completed 2026-04-03)
 - [ ] **Phase 17: Feedback-Driven Packing** - Use past trip debrief data to personalize packing lists
 - [ ] **Phase 18: Fuel & Last Stop Planner** - Show nearest gas/grocery/hardware before destination
 - [ ] **Phase 19: Dog-Aware Trip Planning** - Add dog support to packing lists and trip form
@@ -144,7 +144,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 16-01-PLAN.md — Bulk import endpoint + PhotoUpload progress UI
+- [x] 16-01-PLAN.md — Bulk import endpoint + PhotoUpload progress UI
 
 ## Progress
 
@@ -168,7 +168,7 @@ Phases execute in numeric order: 12 -> 13 -> 14 -> 15 -> 16+
 | 13. Address Review Findings | v1.2 | 4/4 | Complete    | 2026-04-03 |
 | 14. Production Deployment | v1.2 | 0/TBD | Not started | - |
 | 15. Remote Access & Go Live | v1.2 | 0/2 | Complete    | 2026-04-03 |
-| 16. Photo Bulk Import | v2.0 | 0/1 | Not started | - |
+| 16. Photo Bulk Import | v2.0 | 1/1 | Complete   | 2026-04-03 |
 
 ---
 *Full phase details for shipped milestones: see archives in `.planning/milestones/`*
