@@ -12,8 +12,8 @@ cd "$APP_DIR"
 echo "==> Pulling latest code..."
 git pull --ff-only
 
-echo "==> Installing production dependencies..."
-npm ci --omit=dev
+echo "==> Installing dependencies (devDeps needed for build)..."
+npm install
 
 echo "==> Ensuring data directories exist..."
 mkdir -p "$DATA_DIR"/{photos,backups,logs}
