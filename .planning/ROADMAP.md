@@ -61,7 +61,7 @@
 **Milestone Goal:** Make gear smarter (docs, research, deals, weather-aware clothing) and nail the departure morning experience (sequenced checklist, vehicle prep, safety contact).
 
 **Wave 1 — Parallel (no dependencies):**
-- [ ] **Phase 25: Gear Docs & Manual Finder** - GearDocument model, Claude-powered manual search, PDF download + offline caching
+- [x] **Phase 25: Gear Docs & Manual Finder** - GearDocument model, Claude-powered manual search, PDF download + offline caching (completed 2026-04-03)
 - [ ] **Phase 26: Trip Day Sequencer** - Time-ordered departure checklist pulling from packing/meals/power/route
 - [ ] **Phase 27: Safety Float Plan** - SMS/email trip summary to emergency contact before departure
 
@@ -367,7 +367,7 @@ Plans:
 Plans:
 - [x] 25-01-PLAN.md — GearDocument schema + migration + drop manualUrl + Zod schema
 - [x] 25-02-PLAN.md — Document CRUD API routes + Claude Find Manual + PDF download
-- [ ] 25-03-PLAN.md — GearDocumentsTab UI + wire into GearClient detail modal
+- [x] 25-03-PLAN.md — GearDocumentsTab UI + wire into GearClient detail modal
 
 **Parallelization notes:**
 - Plan 25-01 is Wave 1 — schema and migration must complete first
@@ -514,7 +514,7 @@ Plans:
 | 22. Plan A/B/C Fallback Chain | v2.0 | 3/3 | Complete    | 2026-04-03 |
 | 23. Gear Category Expansion | v2.0 | 3/3 | Complete   | 2026-04-03 |
 | 24. Smart Inbox / Intake | v2.0 | 3/3 | Complete   | 2026-04-03 |
-| 25. Gear Docs & Manual Finder | v3.0 | 2/3 | In Progress|  |
+| 25. Gear Docs & Manual Finder | v3.0 | 3/3 | Complete   | 2026-04-03 |
 | 26. Trip Day Sequencer | v3.0 | 0/TBD | Not started | - |
 | 27. Safety Float Plan | v3.0 | 0/TBD | Not started | - |
 | 28. Weather-Aware Clothing | v3.0 | 0/TBD | Not started | - |

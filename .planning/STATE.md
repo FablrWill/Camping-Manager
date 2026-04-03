@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Gear Intelligence + Day-Of
-status: executing
-stopped_at: Completed 25-02-PLAN.md — gear document API routes + PDF download
-last_updated: "2026-04-03T17:48:41.640Z"
+status: verifying
+stopped_at: Completed 25-03-PLAN.md — GearDocumentsTab UI + gear detail modal wiring
+last_updated: "2026-04-03T18:04:35.898Z"
 last_activity: 2026-04-03
 progress:
   total_phases: 21
-  completed_phases: 12
+  completed_phases: 13
   total_plans: 36
-  completed_plans: 34
+  completed_plans: 35
   percent: 40
 ---
 
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-04-01)
 
 Phase: 25 (gear-docs-manual-finder) — EXECUTING
 Plan: 3 of 3
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-04-03
 
 Progress: [████░░░░░░] 40%
@@ -70,6 +70,7 @@ Progress: [████░░░░░░] 40%
 | Phase 22-plan-fallback-chain P02 | 15 | 2 tasks | 3 files |
 | Phase 25-gear-docs-manual-finder P01 | 15 | 3 tasks | 8 files |
 | Phase 25-gear-docs-manual-finder P02 | 8 | 2 tasks | 5 files |
+| Phase 25 P03 | 13 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -112,6 +113,8 @@ Recent decisions affecting current work:
 - [Phase 25-gear-docs-manual-finder]: GearDocument model uses gearItemId FK with cascade delete; existing manualUrl values migrated to support_link rows in single migration
 - [Phase 25-gear-docs-manual-finder]: findGearManual does not auto-save — returns results for UI confirmation
 - [Phase 25-gear-docs-manual-finder]: PDF download validates content-type (422 for non-PDF) — prevents saving HTML error pages
+- [Phase 25]: GearDocumentsTab rendered via GearForm extraContent slot — GearForm is fixed modal overlay, Documents must be injected inside
+- [Phase 25]: /docs/ URLs covered by existing SW cache-first fallthrough — no SW changes needed for PDF caching
 
 ### Pending Todos
 
@@ -125,6 +128,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-03T17:48:41.636Z
-Stopped at: Completed 25-02-PLAN.md — gear document API routes + PDF download
+Last session: 2026-04-03T18:04:35.894Z
+Stopped at: Completed 25-03-PLAN.md — GearDocumentsTab UI + gear detail modal wiring
 Resume file: None
