@@ -1,17 +1,17 @@
 ---
 gsd_state_version: 1.0
-milestone: v2.0
-milestone_name: Smarter & Sharper
+milestone: v1.2
+milestone_name: Ship It
 status: executing
-stopped_at: Phase 19 Plan 01 complete — bringingDog schema + prompt wired
-last_updated: "2026-04-03T04:17:14Z"
-last_activity: 2026-04-03
+stopped_at: Phase 15 planned — 2 plans ready
+last_updated: "2026-04-03T04:11:54.304Z"
+last_activity: 2026-04-03 -- Phase 19 execution started
 progress:
-  total_phases: 7
-  completed_phases: 0
-  total_plans: 2
-  completed_plans: 1
-  percent: 7
+  total_phases: 11
+  completed_phases: 4
+  total_plans: 16
+  completed_plans: 14
+  percent: 40
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-01)
 
 **Core value:** Personal camping second brain — a closed-loop system that plans, executes, and learns from every trip
-**Current focus:** Phase 15 — remote-access-go-live
+**Current focus:** Phase 19 — dog-aware-trip-planning
 
 ## Current Position
 
-Phase: 19
-Plan: 02
-Status: Executing Phase 19 — dog-aware trip planning
-Last activity: 2026-04-03
+Phase: 19 (dog-aware-trip-planning) — EXECUTING
+Plan: 1 of 2
+Status: Executing Phase 19
+Last activity: 2026-04-03 -- Phase 19 execution started
 
-Progress: [█░░░░░░░░░] 7%
+Progress: [████░░░░░░] 40%
 
 ## Performance Metrics
 
@@ -55,7 +55,6 @@ Progress: [█░░░░░░░░░] 7%
 - Trend: Stable
 
 *Updated after each plan completion*
-| Phase 19-dog-aware-trip-planning P01 | 5 | 3 tasks | 6 files |
 | Phase 06-stabilization P01 | 527 | 2 tasks | 5 files |
 | Phase 06-stabilization P03 | 7 | 2 tasks | 5 files |
 | Phase 06-stabilization P04 | 3 | 2 tasks | 2 files |
@@ -97,9 +96,6 @@ Recent decisions affecting current work:
 - [Phase 13-address-review-findings]: safeParseFloat/safeParseInt return null not NaN — correct for Prisma nullable fields
 - [Phase 13-address-review-findings]: vehicle/[id] PUT now explicitly maps fields — removes unsafe pass-through of raw request body to Prisma
 - [Phase 13]: All 74 Gemini findings accounted for — 27 fixed, 8 already handled, 10 deferred MEDIUM, 31 deferred LOW
-- [Phase 19-01]: bringingDog uses === true coercion — prevents truthy strings from persisting to DB
-- [Phase 19-01]: dogSection is empty string when bringingDog=false — zero dog content reaches Claude prompt (DOG-04 regression guard)
-- [Phase 19-01]: Direct SQLite ALTER TABLE for drift-affected dev.db — FTS triggers blocked prisma migrate dev and db push
 
 ### Pending Todos
 
@@ -113,6 +109,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-03T04:17:14Z
-Stopped at: Completed Phase 19 Plan 01 — ready for 19-02
-Resume file: .planning/phases/19-dog-aware-trip-planning/19-02-PLAN.md
+Last session: 2026-04-03T02:47:44.066Z
+Stopped at: Phase 15 planned — 2 plans ready
+Resume file: .planning/phases/15-remote-access-go-live/15-01-PLAN.md
