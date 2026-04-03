@@ -179,7 +179,7 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 19-01-PLAN.md — Schema migration + API routes + packing list prompt conditioning
+- [x] 19-01-PLAN.md — Schema migration + API routes + packing list prompt conditioning (completed 2026-04-03)
 - [ ] 19-02-PLAN.md — Trip form dog toggle + TripCard indicator
 
 **Parallelization notes:**
