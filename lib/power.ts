@@ -274,7 +274,7 @@ function classifyDevices(items: GearItem[]): {
       i.id !== solar?.id &&
       i.condition !== 'broken' &&
       // Exclude non-electrical categories; electrical categories that can draw power: tools, power, electronics, vehicle, lighting
-      !CATEGORIES.filter((c) => !['tools', 'power', 'electronics', 'vehicle', 'lighting'].includes(c.value)).map((c) => c.value).includes(i.category)
+      !CATEGORIES.filter((c) => !['tools', 'power', 'electronics', 'vehicle', 'lighting'].includes(c.value)).map((c) => c.value as string).includes(i.category)
   )
 
   return { battery, solar, consumers }
