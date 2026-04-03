@@ -6,6 +6,10 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 })
 
+const RAIN_THRESHOLD_PERCENT = 40
+const COLD_THRESHOLD_F = 50
+const UV_THRESHOLD_INDEX = 6
+
 export interface PackingListItem {
   name: string
   category?: string
@@ -142,16 +146,55 @@ export interface MealPlanResult {
   tips: string[]
 }
 
-function buildWeatherSection(weather?: { days: WeatherDay[]; alerts: WeatherAlert[] }): string {
+export function buildWeatherSection(weather?: { days: WeatherDay[]; alerts: WeatherAlert[] }): string {
   if (!weather) return 'WEATHER: Not available — plan for variable conditions.'
   return `WEATHER FORECAST:
 ${weather.days
   .map(
     (d) =>
-      `${d.dayLabel} ${d.date}: ${d.weatherLabel}, High ${d.highF}°F / Low ${d.lowF}°F, ${d.precipProbability}% rain, Wind ${d.windMaxMph} mph`
+      `${d.dayLabel} ${d.date}: ${d.weatherLabel}, High ${d.highF}°F / Low ${d.lowF}°F, ${d.precipProbability}% rain, Wind ${d.windMaxMph} mph, UV ${d.uvIndexMax}`
   )
   .join('\n')}
 ${weather.alerts.length > 0 ? `\nALERTS:\n${weather.alerts.map((a) => `- [${a.severity.toUpperCase()}] ${a.message}`).join('\n')}` : ''}`
+}
+
+export function buildClothingGuidance(
+  weather: { days: WeatherDay[]; alerts: WeatherAlert[] } | undefined,
+  clothingItems: GearItem[]
+): string {
+  if (!weather || weather.days.length === 0) return ''
+
+  const needsRainGear = weather.days.some((d) => d.precipProbability >= RAIN_THRESHOLD_PERCENT)
+  const needsColdLayers = weather.days.some((d) => d.lowF <= COLD_THRESHOLD_F)
+  const needsUVProtection = weather.days.some((d) => d.uvIndexMax >= UV_THRESHOLD_INDEX)
+
+  if (!needsRainGear && !needsColdLayers && !needsUVProtection) return ''
+
+  const spotlight =
+    clothingItems.length > 0
+      ? `Clothing in inventory: ${clothingItems
+          .map((i) => `${i.name}${i.brand ? ` (${i.brand})` : ''} [id:${i.id}]`)
+          .join(', ')}.`
+      : ''
+
+  const directives: string[] = []
+
+  if (needsRainGear) {
+    const line = `- Rain Gear: Rain is forecast. Include waterproof layers and rain gear.`
+    directives.push(spotlight ? `${line} ${spotlight} Prioritize these in the Rain Gear section.` : line)
+  }
+
+  if (needsColdLayers) {
+    const line = `- Layers: Cold overnight temps expected. Include warm base and mid layers.`
+    directives.push(spotlight ? `${line} ${spotlight} Prioritize these in the Layers section.` : line)
+  }
+
+  if (needsUVProtection) {
+    const line = `- Sun Protection: High UV index forecast. Include sun hat, sunscreen, and UV-protective clothing.`
+    directives.push(spotlight ? `${line} ${spotlight} Prioritize these in the Sun Protection section.` : line)
+  }
+
+  return `CLOTHING GUIDANCE:\n${directives.join('\n')}`
 }
 
 export async function generatePackingList(params: {
@@ -204,6 +247,8 @@ export async function generatePackingList(params: {
 
   const weatherSection = buildWeatherSection(weather)
   const feedbackSection = buildFeedbackSection(feedbackContext)
+  const clothingItems = gearInventory.filter((g) => g.category === 'clothing')
+  const clothingGuidance = buildClothingGuidance(weather, clothingItems)
 
   const dogSection = bringingDog
     ? `\nDOG CONTEXT:\nWill is bringing his dog on this trip. Add a "Dog" section to the packing list with essential dog gear: food + collapsible bowl, water bowl, leash + backup leash, poop bags (2x expected amount), dog-specific first aid supplies (tweezers for ticks, wound spray). Note any dog-friendly considerations for the destination.\n`
@@ -219,7 +264,7 @@ ${vehicleName ? `- Vehicle: ${vehicleName}` : ''}
 ${tripNotes ? `- Notes: ${tripNotes}` : ''}
 
 ${weatherSection}
-${dogSection}
+${clothingGuidance ? `\n${clothingGuidance}\n` : ''}${dogSection}
 GEAR INVENTORY (items the user owns):
 ${gearSection || 'No gear in inventory yet.'}
 
@@ -229,7 +274,7 @@ INSTRUCTIONS:
 1. Build the packing list primarily from the user's gear inventory. Reference items by their [id:xxx] tag.
 2. Add essential items NOT in the inventory (like food cooler, firewood, water, toiletries, etc.) — mark these as not from inventory.
 3. Skip items marked [BROKEN].
-4. Adjust for weather: if rain is forecast, include rain gear. If cold, prioritize warm layers. If hot/high UV, include sun protection.
+4. Follow the CLOTHING GUIDANCE block above for specific weather-driven clothing directives. Organize clothing items into the sub-sections specified (Rain Gear, Layers, Sun Protection). If no CLOTHING GUIDANCE block is present, suggest comfortable layers for variable conditions.
 5. Adjust for trip duration: longer trips need more consumables.
 6. Categories: ${CATEGORIES.map((c) => c.value).join(', ')}.
 7. Include 2-3 brief, specific tips based on the weather and trip details (e.g., "Charge the EcoFlow fully — limited solar expected with cloud cover Saturday").
