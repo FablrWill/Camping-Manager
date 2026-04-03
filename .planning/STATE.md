@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Gear Intelligence + Day-Of
 status: executing
-stopped_at: Phase 29 UI-SPEC approved
-last_updated: "2026-04-03T20:21:22.704Z"
-last_activity: 2026-04-03 -- Phase 29 execution started
+stopped_at: Completed 29-02-PLAN.md
+last_updated: "2026-04-03T20:38:04.323Z"
+last_activity: 2026-04-03
 progress:
   total_phases: 21
   completed_phases: 15
   total_plans: 43
-  completed_plans: 39
+  completed_plans: 40
   percent: 40
 ---
 
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-04-01)
 ## Current Position
 
 Phase: 29 (vehicle-pre-trip-checklist) — EXECUTING
-Plan: 1 of 3
-Status: Executing Phase 29
-Last activity: 2026-04-03 -- Phase 29 execution started
+Plan: 2 of 3
+Status: Ready to execute
+Last activity: 2026-04-03
 
 Progress: [████░░░░░░] 40%
 
@@ -71,6 +71,7 @@ Progress: [████░░░░░░] 40%
 | Phase 25-gear-docs-manual-finder P01 | 15 | 3 tasks | 8 files |
 | Phase 25-gear-docs-manual-finder P02 | 8 | 2 tasks | 5 files |
 | Phase 25 P03 | 13 | 2 tasks | 3 files |
+| Phase 29-vehicle-pre-trip-checklist P02 | 8 | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -115,6 +116,8 @@ Recent decisions affecting current work:
 - [Phase 25-gear-docs-manual-finder]: PDF download validates content-type (422 for non-PDF) — prevents saving HTML error pages
 - [Phase 25]: GearDocumentsTab rendered via GearForm extraContent slot — GearForm is fixed modal overlay, Documents must be injected inside
 - [Phase 25]: /docs/ URLs covered by existing SW cache-first fallthrough — no SW changes needed for PDF caching
+- [Phase 29-vehicle-pre-trip-checklist]: generateVehicleChecklist prompt uses only vehicle specs + trip context, no mods/weather (D-04/D-05)
+- [Phase 29-vehicle-pre-trip-checklist]: Vehicle checklist persists as JSON blob on Trip.vehicleChecklistResult (not separate model)
 
 ### Pending Todos
 
@@ -128,6 +131,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-03T20:03:37.417Z
-Stopped at: Phase 29 UI-SPEC approved
-Resume file: .planning/phases/29-vehicle-pre-trip-checklist/29-UI-SPEC.md
+Last session: 2026-04-03T20:38:04.318Z
+Stopped at: Completed 29-02-PLAN.md
+Resume file: None
