@@ -1,4 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk';
+import { z } from 'zod';
 import { prisma } from '@/lib/db';
 
 export const SLIDING_WINDOW_SIZE = 20;
@@ -85,7 +86,12 @@ Return ONLY valid JSON array, no markdown fences.`,
     const text = response.content[0]?.type === 'text' ? response.content[0].text : '';
     if (!text || text.trim() === '[]') return;
 
-    const memories: Array<{ key: string; value: string }> = JSON.parse(text);
+    const MemoryArraySchema = z.array(z.object({ key: z.string(), value: z.string() }));
+    let rawParsed: unknown;
+    try { rawParsed = JSON.parse(text); } catch { return; }
+    const parseResult = MemoryArraySchema.safeParse(rawParsed);
+    if (!parseResult.success) return;
+    const memories = parseResult.data;
     for (const { key, value } of memories) {
       if (key && value) {
         await prisma.agentMemory.upsert({
