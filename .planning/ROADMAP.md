@@ -238,7 +238,7 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 23-01-PLAN.md — Shared categories module + Prisma migration + seed re-categorization + API routes
+- [x] 23-01-PLAN.md — Shared categories module + Prisma migration + seed re-categorization + API routes
 - [ ] 23-02-PLAN.md — Replace category duplicates in DashboardClient, claude.ts, power.ts, agent tools
 - [ ] 23-03-PLAN.md — GearClient grouped filter chips + GearForm tech detail fields
 
@@ -287,7 +287,7 @@ Phases execute in numeric order: 12 -> 13 -> 14 -> 15
 | 20. Live Location Sharing | v2.0 | 0/TBD | Not started | - |
 | 21. Permit & Reservation | v2.0 | 0/TBD | Not started | - |
 | 22. Plan A/B/C Fallback Chain | v2.0 | 0/TBD | Not started | - |
-| 23. Gear Category Expansion | v2.0 | 0/3 | Not started | - |
+| 23. Gear Category Expansion | v2.0 | 1/3 | In Progress|  |
 | 24. Smart Inbox / Intake | v2.0 | 0/TBD | Not started | - |
 
 ---
