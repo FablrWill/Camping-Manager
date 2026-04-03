@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { safeParseFloat } from '@/lib/validate'
+import { CATEGORIES } from '@/lib/gear-categories'
 
 interface GearItem {
   id: string
@@ -20,12 +21,9 @@ interface GearItem {
   wattage: number | null
   hoursPerDay: number | null
   hasBattery: boolean
-}
-
-interface CategoryOption {
-  value: string
-  label: string
-  emoji: string
+  modelNumber: string | null
+  connectivity: string | null
+  manualUrl: string | null
 }
 
 interface ConditionOption {
@@ -35,7 +33,6 @@ interface ConditionOption {
 
 interface GearFormProps {
   item: GearItem | null
-  categories: readonly CategoryOption[]
   conditions: readonly ConditionOption[]
   onSave: (data: Record<string, unknown>) => Promise<void>
   onDelete?: () => void
@@ -44,7 +41,6 @@ interface GearFormProps {
 
 export default function GearForm({
   item,
-  categories,
   conditions,
   onSave,
   onDelete,
@@ -74,6 +70,9 @@ export default function GearForm({
       wattage: safeParseFloat(form.get('wattage')),
       hoursPerDay: safeParseFloat(form.get('hoursPerDay')),
       hasBattery: form.get('hasBattery') === 'on',
+      modelNumber: form.get('modelNumber') as string || null,
+      connectivity: form.get('connectivity') as string || null,
+      manualUrl: form.get('manualUrl') as string || null,
     }
 
     try {
@@ -133,7 +132,7 @@ export default function GearForm({
               <option value="" disabled>
                 Select a category
               </option>
-              {categories.map((cat) => (
+              {CATEGORIES.map((cat) => (
                 <option key={cat.value} value={cat.value}>
                   {cat.emoji} {cat.label}
                 </option>
@@ -308,6 +307,55 @@ export default function GearForm({
               placeholder="Any notes about this item..."
               className="w-full px-3 py-2.5 rounded-lg border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-400 dark:focus:ring-amber-500 resize-none"
             />
+          </div>
+
+          {/* Tech Details */}
+          <div className="border-t border-stone-200 dark:border-stone-700 pt-4 mt-4">
+            <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Tech Details (optional)</h3>
+
+            <div className="space-y-3">
+              <div>
+                <label htmlFor="gear-modelNumber" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Model Number
+                </label>
+                <input
+                  id="gear-modelNumber"
+                  name="modelNumber"
+                  type="text"
+                  defaultValue={item?.modelNumber ?? ''}
+                  placeholder="e.g. ESP32-WROOM-32"
+                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-400 dark:focus:ring-amber-500"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="gear-connectivity" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Connectivity
+                </label>
+                <input
+                  id="gear-connectivity"
+                  name="connectivity"
+                  type="text"
+                  defaultValue={item?.connectivity ?? ''}
+                  placeholder="e.g. WiFi, Bluetooth"
+                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-400 dark:focus:ring-amber-500"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="gear-manualUrl" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Manual URL
+                </label>
+                <input
+                  id="gear-manualUrl"
+                  name="manualUrl"
+                  type="url"
+                  defaultValue={item?.manualUrl ?? ''}
+                  placeholder="https://..."
+                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-400 dark:focus:ring-amber-500"
+                />
+              </div>
+            </div>
           </div>
 
           {/* Error */}
