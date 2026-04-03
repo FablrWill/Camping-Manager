@@ -45,7 +45,7 @@ A self-coordinating work queue for v2.0 features. Each Claude Code session claim
 | S05 | Live location sharing         | 20    | ⬜ Ready  | Sonnet, normal | —          |
 | S06 | Permit & reservation          | 21    | ⬜ Ready  | Sonnet, normal | S03, S05   |
 | S07 | Plan A/B/C fallback chain     | 22    | ⬜ Ready  | Sonnet, normal | S04, S06   |
-| S08 | Gear category expansion       | 23    | ⬜ Ready  | Sonnet, normal | —          |
+| S08 | Gear category expansion       | 23    | 🔄 In Progress 2026-04-03 | Sonnet, normal | —          |
 | S09 | Smart inbox / intake          | 24    | ⬜ Ready  | Sonnet, normal | S08        |
 
 **Why this order matters (conflict groups):**
