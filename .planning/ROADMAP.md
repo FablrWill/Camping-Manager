@@ -408,7 +408,7 @@ Plans:
 ### Phase 28: Weather-Aware Clothing
 **Goal**: Packing lists include weather-driven clothing suggestions — rain gear for rain, cold layers for low temps, UV protection for high UV
 **Depends on**: Phase 23 (clothing category exists)
-**Requirements**: TBD
+**Requirements**: CLOTH-01, CLOTH-02, CLOTH-03, CLOTH-04, CLOTH-05, CLOTH-06
 **Success Criteria** (what must be TRUE):
   1. Claude packing prompt includes specific clothing guidance based on weather forecast
   2. Rain gear suggested when forecast shows precipitation
@@ -416,7 +416,10 @@ Plans:
   4. UV protection suggested for high UV index days
   5. Clothing suggestions reference actual owned gear when available
   6. `npm run build` passes
-**Plans**: 0/TBD
+**Plans**: 1 plan
+
+Plans:
+- [ ] 28-01-PLAN.md — TDD: buildClothingGuidance() + UV in weather section + prompt update
 
 **Parallelization notes:**
 - Wave 2 — can run parallel with Phase 29
