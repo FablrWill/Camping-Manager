@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.1
-milestone_name: Close the Loop
-status: verifying
-stopped_at: Phase 8 UI-SPEC approved
-last_updated: "2026-04-01T23:32:05.536Z"
-last_activity: 2026-04-01
+milestone: v1.2
+milestone_name: Ship It
+status: executing
+stopped_at: Completed 13-address-review-findings-03-PLAN.md
+last_updated: "2026-04-03T00:39:32.961Z"
+last_activity: 2026-04-03
 progress:
-  total_phases: 9
-  completed_phases: 6
-  total_plans: 22
-  completed_plans: 22
+  total_phases: 4
+  completed_phases: 1
+  total_plans: 9
+  completed_plans: 6
   percent: 40
 ---
 
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-01)
 
 **Core value:** Personal camping second brain — a closed-loop system that plans, executes, and learns from every trip
-**Current focus:** Phase 07 — day-of-execution
+**Current focus:** Phase 13 — Address Review Findings
 
 ## Current Position
 
-Phase: 8
-Plan: Not started
-Status: Phase complete — ready for verification
-Last activity: 2026-04-01
+Phase: 13 (Address Review Findings) — EXECUTING
+Plan: 2 of 4
+Status: Ready to execute
+Last activity: 2026-04-03
 
 Progress: [████░░░░░░] 40%
 
@@ -62,6 +62,7 @@ Progress: [████░░░░░░] 40%
 | Phase 07-day-of-execution P01 | 13 | 2 tasks | 11 files |
 | Phase 07-day-of-execution P02 | 5 | 2 tasks | 8 files |
 | Phase 07-day-of-execution P03 | 252 | 2 tasks | 4 files |
+| Phase 13-address-review-findings P03 | 225 | 2 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -91,6 +92,8 @@ Recent decisions affecting current work:
 - [Phase 07-day-of-execution]: Departure section in TripPrepClient fetches departure checklist independently — not through /api/trips/[id]/prep
 - [Phase 07-day-of-execution]: composeFloatPlanEmail includes checklistStatus parameter — emergency contact sees departure preparation level (X of Y tasks completed)
 - [Phase 07-day-of-execution]: FloatPlanLog uses fire-and-forget .catch() — database log failure never blocks email send confirmation
+- [Phase 13-address-review-findings]: safeParseFloat/safeParseInt return null not NaN — correct for Prisma nullable fields
+- [Phase 13-address-review-findings]: vehicle/[id] PUT now explicitly maps fields — removes unsafe pass-through of raw request body to Prisma
 
 ### Pending Todos
 
@@ -104,6 +107,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-01T23:32:05.531Z
-Stopped at: Phase 8 UI-SPEC approved
-Resume file: .planning/phases/08-pwa-and-offline/08-UI-SPEC.md
+Last session: 2026-04-03T00:39:32.956Z
+Stopped at: Completed 13-address-review-findings-03-PLAN.md
+Resume file: None
