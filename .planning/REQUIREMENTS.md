@@ -45,6 +45,55 @@ Requirements for milestone v1.2 "Ship It". Each maps to roadmap phases.
 - [ ] **ACCESS-04**: HTTPS works via Tailscale (required for PWA service worker)
 - [ ] **ACCESS-05**: App is installable as PWA from phone over Tailscale
 
+## v2.0 Requirements
+
+Requirements for milestone v2.0 "Personal Second Brain". Each maps to v2.0 roadmap phases.
+
+### Photo Auto-Import (Phase 16)
+
+- [ ] **PHOTO-01**: Bulk file upload endpoint (`POST /api/photos/bulk-import`) accepts multipart array of files
+- [ ] **PHOTO-02**: Each file processed through existing EXIF extraction + sharp compression pipeline
+- [ ] **PHOTO-03**: Progress feedback shown during import; individual failures don't abort batch
+- [ ] **PHOTO-04**: Imported photos with GPS data appear as pins on Spots map
+
+### Feedback-Driven Packing (Phase 17)
+
+- [ ] **PACK-01**: `generatePackingList()` in `lib/claude.ts` accepts feedback context parameter
+- [ ] **PACK-02**: `/api/packing-list` queries last 3-5 `TripFeedback` records and aggregates per-item status
+- [ ] **PACK-03**: Graceful degradation — no trip history produces identical output to current behavior
+- [ ] **PACK-04**: Claude prompt includes gear feedback summary; output contains feedback-informed notes when history exists
+
+### Fuel & Last Stop Planner (Phase 18)
+
+- [ ] **FUEL-01**: New `lib/overpass.ts` utility queries Overpass API for fuel/grocery/hardware POIs
+- [ ] **FUEL-02**: New endpoint `GET /api/trips/[id]/last-stops` returns closest 1-2 of each POI type
+- [ ] **FUEL-03**: "Fuel & Last Stops" card in TripPrepClient shows name + distance; handles no-results case
+
+### Dog-Aware Trip Planning (Phase 19)
+
+- [ ] **DOG-01**: `bringingDog Boolean @default(false)` field on `Trip` model with migration
+- [ ] **DOG-02**: Trip create/edit form has "Bringing dog?" toggle
+- [ ] **DOG-03**: When `bringingDog` is true, packing list prompt includes dog gear section
+- [ ] **DOG-04**: Trip card shows 🐕 indicator when `bringingDog` is true
+
+### Live Location Sharing (Phase 20)
+
+- [ ] **LOC-01**: `SharedLocation` model with slug, lat, lon, label, updatedAt
+- [ ] **LOC-02**: Public route `/share/[slug]` renders Leaflet map with last-known pin + timestamp
+- [ ] **LOC-03**: Will can update location and copy shareable URL from within the app
+
+### Permit & Reservation (Phase 21)
+
+- [ ] **PERMIT-01**: `permitUrl` and `permitNotes` fields on `Trip` model with migration
+- [ ] **PERMIT-02**: "Permits & Reservations" card in TripPrepClient
+- [ ] **PERMIT-03**: Trip card shows 📋 indicator when `permitUrl` is set
+
+### Plan A/B/C Fallback Chain (Phase 22)
+
+- [ ] **ALT-01**: `fallbackFor` and `fallbackOrder` self-relation fields on `Trip` model with migration
+- [ ] **ALT-02**: "Add Plan B" flow in TripsClient; alternatives listed in TripPrepClient
+- [ ] **ALT-03**: Trip card shows badge when alternatives exist; deleting primary sets `fallbackFor = null`
+
 ## Future Requirements
 
 Deferred to future release. Tracked but not in current roadmap.
