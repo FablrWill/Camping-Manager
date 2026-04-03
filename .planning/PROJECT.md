@@ -72,6 +72,14 @@ A personal second brain for car camping — an AI-powered knowledge system that 
 - ✓ Post-trip AI summary (what to drop, what was missing, location rating) — v1.1
 - ✓ Voice debrief with automatic gear/location updates — v1.1
 
+### Validated in Phase 25 (gear-docs-manual-finder)
+
+- ✓ GearDocument model with cascade delete and indexed gearItemId — Phase 25
+- ✓ Migration: manualUrl data preserved → GearDocument rows, column dropped — Phase 25
+- ✓ Claude-powered manual finder (no auto-save, user confirms) — Phase 25
+- ✓ PDF download with content-type validation and local caching — Phase 25
+- ✓ GearDocumentsTab UI: find/list/add/download/delete within gear modal — Phase 25
+
 ### Active
 
 None — v1.2 Ship It complete as of 2026-04-03.
@@ -95,7 +103,7 @@ None — v1.2 Ship It complete as of 2026-04-03.
 
 ## Current State
 
-Phase 23 complete (2026-04-03) — Gear category expansion shipped: 15 categories across 4 groups (Living, Utility, Tech/Power, Action), single shared `lib/gear-categories.ts` module, tech gear schema fields (modelNumber, connectivity, manualUrl), all consumer files migrated to shared module, grouped filter chip UI in GearClient.
+Phase 25 complete (2026-04-03) — Gear document management shipped: GearDocument model with PDF/link storage, Claude-powered manual finder, document CRUD API routes, PDF download with local caching, and GearDocumentsTab UI wired into gear edit modal. manualUrl column removed and migrated to GearDocument rows.
 
 ## Current Milestone: ✅ v1.2 Ship It — COMPLETE (2026-04-03)
 
