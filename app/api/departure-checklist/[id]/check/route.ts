@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
+import { safeJsonParse } from '@/lib/safe-json'
+import type { DepartureChecklistResult } from '@/lib/parse-claude'
 
 export async function PATCH(
   request: NextRequest,
@@ -22,12 +24,8 @@ export async function PATCH(
       const checklist = await tx.departureChecklist.findUnique({ where: { id } })
       if (!checklist) throw new Error('NOT_FOUND')
 
-      const result = JSON.parse(checklist.result) as {
-        slots: Array<{
-          label: string
-          items: Array<{ id: string; text: string; checked: boolean; isUnpackedWarning: boolean }>
-        }>
-      }
+      const result = safeJsonParse<DepartureChecklistResult>(checklist.result)
+      if (!result) throw new Error('PARSE_ERROR')
 
       let found = false
       for (const slot of result.slots) {
@@ -54,6 +52,9 @@ export async function PATCH(
     if (error instanceof Error) {
       if (error.message === 'NOT_FOUND') {
         return NextResponse.json({ error: 'Checklist not found' }, { status: 404 })
+      }
+      if (error.message === 'PARSE_ERROR') {
+        return NextResponse.json({ error: 'Checklist data corrupted' }, { status: 500 })
       }
       if (error.message === 'ITEM_NOT_FOUND') {
         return NextResponse.json({ error: 'Item not found in checklist' }, { status: 400 })

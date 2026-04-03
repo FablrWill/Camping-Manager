@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { generateMealPlan } from '@/lib/claude'
 import { fetchWeather } from '@/lib/weather'
+import { safeJsonParse } from '@/lib/safe-json'
 
 export async function GET(request: NextRequest) {
   try {
@@ -15,8 +16,12 @@ export async function GET(request: NextRequest) {
     if (!mealPlan) {
       return NextResponse.json({ result: null, generatedAt: null })
     }
+    const parsed = safeJsonParse(mealPlan.result)
+    if (!parsed) {
+      return NextResponse.json({ error: 'Meal plan data corrupted' }, { status: 500 })
+    }
     return NextResponse.json({
-      result: JSON.parse(mealPlan.result),
+      result: parsed,
       generatedAt: mealPlan.generatedAt.toISOString(),
     })
   } catch (error) {
