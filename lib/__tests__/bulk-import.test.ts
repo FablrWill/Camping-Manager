@@ -1,7 +1,10 @@
+// @vitest-environment node
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { NextRequest } from 'next/server';
 
+// Mock named export: route uses `import { prisma } from '@/lib/db'`
 vi.mock('@/lib/db', () => ({
-  default: {
+  prisma: {
     photo: {
       create: vi.fn().mockResolvedValue({ id: 'test-id' }),
     },
@@ -16,37 +19,54 @@ vi.mock('@/lib/paths', () => ({
   getPhotosDir: vi.fn().mockReturnValue('/tmp/test-photos'),
 }));
 
-vi.mock('sharp', () => ({
-  default: vi.fn(() => ({
+// Sharp mock — default export is a function returning chainable builder
+vi.mock('sharp', () => {
+  const makeInstance = () => ({
     rotate: vi.fn().mockReturnThis(),
     resize: vi.fn().mockReturnThis(),
     jpeg: vi.fn().mockReturnThis(),
     toFile: vi.fn().mockResolvedValue(undefined),
-  })),
-}));
+  });
+  return { default: vi.fn().mockImplementation(makeInstance) };
+});
 
-vi.mock('fs/promises', () => ({
-  mkdir: vi.fn().mockResolvedValue(undefined),
-}));
+vi.mock('fs/promises', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('fs/promises')>();
+  return {
+    ...actual,
+    mkdir: vi.fn().mockResolvedValue(undefined),
+    writeFile: vi.fn().mockResolvedValue(undefined),
+  };
+});
 
-// This import will fail (RED state) because the endpoint does not exist yet
 import { POST } from '@/app/api/photos/bulk-import/route';
 import { extractGps } from '@/lib/exif';
-import prisma from '@/lib/db';
+import { prisma } from '@/lib/db';
+import sharpModule from 'sharp';
 
-function buildRequest(filename: string, buffer: Buffer): Request {
+function buildRequest(filename: string, buffer: Buffer): NextRequest {
   const fd = new FormData();
   const blob = new Blob([buffer], { type: 'image/jpeg' });
-  const file = new File([blob], filename, { type: 'image/jpeg' });
-  fd.append('photo', file);
-  return new Request('http://localhost/api/photos/bulk-import', {
+  fd.append('photo', blob, filename);
+  return new NextRequest('http://localhost/api/photos/bulk-import', {
     method: 'POST',
     body: fd,
   });
 }
 
 describe('bulk-import endpoint', () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    // Restore prisma.photo.create mock after clearAllMocks
+    vi.mocked(prisma.photo.create).mockResolvedValue({ id: 'test-id' } as unknown as Awaited<ReturnType<typeof prisma.photo.create>>);
+    // Restore default sharp mock implementation after clearAllMocks
+    vi.mocked(sharpModule).mockImplementation(() => ({
+      rotate: vi.fn().mockReturnThis(),
+      resize: vi.fn().mockReturnThis(),
+      jpeg: vi.fn().mockReturnThis(),
+      toFile: vi.fn().mockResolvedValue(undefined),
+    }) as unknown as ReturnType<typeof sharpModule>);
+  });
 
   it('processes valid JPEG: extractGps + sharp + prisma.create', async () => {
     vi.mocked(extractGps).mockReturnValue({
@@ -57,7 +77,7 @@ describe('bulk-import endpoint', () => {
     });
 
     const request = buildRequest('test-photo.jpg', Buffer.from('fake-jpeg-data'));
-    const response = await POST(request as unknown as import('next/server').NextRequest);
+    const response = await POST(request);
     const data = await response.json();
 
     expect(data.added).toBe(1);
@@ -70,7 +90,7 @@ describe('bulk-import endpoint', () => {
     vi.mocked(extractGps).mockReturnValue(null);
 
     const request = buildRequest('no-gps.jpg', Buffer.from('fake-jpeg-data'));
-    const response = await POST(request as unknown as import('next/server').NextRequest);
+    const response = await POST(request);
     const data = await response.json();
 
     expect(data).toEqual({ added: 0, skipped: 1, errors: [] });
@@ -85,17 +105,16 @@ describe('bulk-import endpoint', () => {
       takenAt: null,
     });
 
-    const sharpMock = await import('sharp');
-    const sharpInstance = {
+    // Override sharp to return an instance whose toFile rejects
+    vi.mocked(sharpModule).mockImplementationOnce(() => ({
       rotate: vi.fn().mockReturnThis(),
       resize: vi.fn().mockReturnThis(),
       jpeg: vi.fn().mockReturnThis(),
       toFile: vi.fn().mockRejectedValue(new Error('corrupt')),
-    };
-    vi.mocked(sharpMock.default).mockReturnValueOnce(sharpInstance as unknown as ReturnType<typeof sharpMock.default>);
+    }) as unknown as ReturnType<typeof sharpModule>);
 
     const request = buildRequest('corrupt.jpg', Buffer.from('bad-data'));
-    const response = await POST(request as unknown as import('next/server').NextRequest);
+    const response = await POST(request);
 
     expect(response.status).toBe(200);
     const data = await response.json();
