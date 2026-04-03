@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Ship It
-status: executing
-stopped_at: Completed 20-01-PLAN.md
-last_updated: "2026-04-03T05:11:25.896Z"
+status: verifying
+stopped_at: "Completed 20-02-PLAN.md (checkpoint:human-verify pending)"
+last_updated: "2026-04-03T05:17:17.370Z"
 last_activity: 2026-04-03
 progress:
   total_phases: 4
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-04-01)
 
 Phase: 20 (live-location-sharing) — EXECUTING
 Plan: 2 of 2
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-04-03
 
 Progress: [████░░░░░░] 40%
@@ -65,6 +65,7 @@ Progress: [████░░░░░░] 40%
 | Phase 13-address-review-findings P03 | 225 | 2 tasks | 11 files |
 | Phase 13 P04 | 300 | 1 tasks | 1 files |
 | Phase 20-live-location-sharing P01 | 383 | 2 tasks | 6 files |
+| Phase 20-live-location-sharing P02 | 203 | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -99,6 +100,7 @@ Recent decisions affecting current work:
 - [Phase 13]: All 74 Gemini findings accounted for — 27 fixed, 8 already handled, 10 deferred MEDIUM, 31 deferred LOW
 - [Phase 20-live-location-sharing]: SharedLocation uses singleton pattern (findFirst + create/update) — same approach as Settings model; one shared location at a time
 - [Phase 20-live-location-sharing]: upsertSharedLocation/deleteSharedLocation accept prismaClient argument — pure helpers testable without real DB
+- [Phase 20-live-location-sharing]: ssr:false dynamic import must live in Client Component — extracted to share-page-client.tsx; Server Components cannot use ssr:false in Next.js 16 App Router
 
 ### Pending Todos
 
@@ -112,6 +114,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-03T05:11:25.892Z
-Stopped at: Completed 20-01-PLAN.md
+Last session: 2026-04-03T05:17:17.366Z
+Stopped at: Completed 20-02-PLAN.md (checkpoint:human-verify pending)
 Resume file: None

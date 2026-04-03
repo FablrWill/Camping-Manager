@@ -116,8 +116,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DOG-TRIP-03 | Phase 19 | Pending |
 | DOG-TRIP-04 | Phase 19 | Pending |
 | LOCATION-SHARE-01 | Phase 20 | Complete |
-| LOCATION-SHARE-02 | Phase 20 | Pending |
-| LOCATION-SHARE-03 | Phase 20 | Pending |
+| LOCATION-SHARE-02 | Phase 20 | Complete |
+| LOCATION-SHARE-03 | Phase 20 | Complete |
 | LOCATION-SHARE-04 | Phase 20 | Complete |
 | LOCATION-SHARE-05 | Phase 20 | Complete |
 | PERMIT-01 | Phase 21 | Pending |
