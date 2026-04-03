@@ -31,6 +31,18 @@
 
 </details>
 
+### 🚧 v2.0 Feature Expansion (In Progress)
+
+**Milestone Goal:** Expand Outland OS with key v2.0 features: photo bulk import, feedback-driven packing, fuel/last-stop planning, dog-aware trips, live location sharing, permit tracking, and Plan A/B/C fallback chains.
+
+- [ ] **Phase 16: Photo Bulk Import** - Bulk photo import with EXIF GPS extraction and map pins
+- [ ] **Phase 17: Feedback-Driven Packing** - Use past trip debrief data to personalize packing lists
+- [ ] **Phase 18: Fuel & Last Stop Planner** - Show nearest gas/grocery/hardware before destination
+- [ ] **Phase 19: Dog-Aware Trip Planning** - Add dog support to packing lists and trip form
+- [ ] **Phase 20: Live Location Sharing** - Shareable URL showing Will's last known location
+- [ ] **Phase 21: Permit & Reservation** - Store permit URLs and notes with trips
+- [ ] **Phase 22: Plan A/B/C Fallback Chain** - Link fallback trips to primary trip
+
 ### 🚧 v1.2 Ship It (In Progress)
 
 **Milestone Goal:** Cross-AI review, fix all tech debt, get production build working, and deploy to Mac mini so Will can use Outland OS from his phone anywhere.
@@ -119,10 +131,25 @@ Plans:
 - Plan 15-01 is Wave 1 — Mac mini setup must complete first
 - Plan 15-02 is Wave 2 — requires Mac mini serving HTTPS before iPhone can verify
 
+### Phase 16: Photo Bulk Import
+**Goal**: Will can select multiple photos at once and bulk-import them; each is processed through the existing EXIF + compression pipeline and GPS pins appear on the Spots map
+**Depends on**: Phase 15 (app live and accessible)
+**Requirements**: PHOTO-01, PHOTO-02, PHOTO-03, PHOTO-04, PHOTO-05
+**Success Criteria** (what must be TRUE):
+  1. `POST /api/photos/bulk-import` accepts multipart with multiple files and returns per-file results
+  2. Each imported file runs through `lib/exif.ts` GPS extraction and `sharp` compression
+  3. Import UI shows real-time progress counter ("Importing X of Y...")
+  4. A batch with one corrupt file still imports all valid files; errors listed at end
+  5. Photos with GPS EXIF appear as pins on the `/spots` map
+**Plans**: 1 plan
+
+Plans:
+- [ ] 16-01-PLAN.md — Bulk import endpoint + PhotoUpload progress UI
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 12 -> 13 -> 14 -> 15
+Phases execute in numeric order: 12 -> 13 -> 14 -> 15 -> 16+
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -141,6 +168,7 @@ Phases execute in numeric order: 12 -> 13 -> 14 -> 15
 | 13. Address Review Findings | v1.2 | 4/4 | Complete    | 2026-04-03 |
 | 14. Production Deployment | v1.2 | 0/TBD | Not started | - |
 | 15. Remote Access & Go Live | v1.2 | 0/2 | Complete    | 2026-04-03 |
+| 16. Photo Bulk Import | v2.0 | 0/1 | Not started | - |
 
 ---
 *Full phase details for shipped milestones: see archives in `.planning/milestones/`*
