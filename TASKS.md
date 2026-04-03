@@ -1,6 +1,6 @@
 # Outland OS — Task Tracker
 
-> **Last updated:** 2026-04-03 (v1.2 + v2.0 shipped; v3.0 in progress — Phase 33 conversational trip planner merged)
+> **Last updated:** 2026-04-03 (v2.0 complete; v3.0 in progress — Phases 25-29 shipped, Phase 29 partially done)
 > **Start here** if you're picking up after a break.
 > **North star:** `docs/USER-JOURNEY.md` — read this before building anything new.
 
@@ -27,7 +27,7 @@
 | 19. Dog-Aware Trip Planning | ✅ Complete | Dog toggle on trips, dog gear section, dog-friendly notes |
 | 20. Live Location Sharing | ✅ Complete | Shareable public URL showing last known GPS location |
 | 21. Permit & Reservation | ✅ Complete | Store Recreation.gov confirmations with trip, surface reminders |
-| 22. Plan A/B/C Fallback Chain | 🔄 In Progress | Link fallback trips to primary, compare in trip prep — S07 in V2-SESSIONS.md |
+| 22. Plan A/B/C Fallback Chain | ✅ Complete | fallbackFor/fallbackOrder schema, alternatives API, TripCard badges, TripsClient Add Plan B, TripPrepClient fallback card |
 | 23. Gear Category Expansion | ✅ Complete | Expanded to 15 categories with visual grouping, tech gear fields |
 | 24. Smart Inbox / Universal Intake | ✅ Complete | Single intake endpoint + inbox UI for phone share-to-app workflow |
 
@@ -37,10 +37,17 @@
 
 | Phase | Status | Summary |
 |-------|--------|---------|
-| 25–32. Wave 1–4 phases | ○ Not started | Gear docs, trip sequencer, float plan, weather-aware clothing, vehicle checklist, product research, astro, deals — see `.planning/ROADMAP.md` |
+| 25. Gear Docs & Manual Finder | ✅ Complete | GearDocument model, Claude-powered manual finder, PDF download, GearDocumentsTab UI |
+| 26. Trip Day Sequencer | ✅ Complete | departureTime schema, departure checklist with time-anchored suggestions, DepartureChecklistClient |
+| 27. Safety Float Plan | ✅ Complete | Deterministic plain-text float plan email via float-plan API route (no AI token cost) |
+| 28. Weather-Aware Clothing | ✅ Complete | buildClothingGuidance() in lib/claude.ts, UV forecast, injected into packing list prompt |
+| 29. Vehicle Pre-Trip Checklist | 🔄 In Progress | Plan 01 done (schema + TDD tests), Plan 02 partially done, Plan 03 not started |
+| 30. Product Research Agent | ○ Not started | See `.planning/ROADMAP.md` |
+| 31. Astro Conditions | ○ Not started | See `.planning/ROADMAP.md` |
+| 32. Deals & Restocks | ○ Not started | See `.planning/ROADMAP.md` |
 | 33. Conversational Trip Planner | ✅ Complete | TripPlannerSheet full-screen chat + TripsClient wiring; UAT deferred |
 
-**Next:** Continue v3.0 wave phases per `.planning/ROADMAP.md` — or pick up S07 (Plan A/B/C) from `.planning/V2-SESSIONS.md`
+**Next:** Continue Phase 29 (Vehicle Pre-Trip Checklist, Plans 02–03) or pick up Phases 30–32
 
 ---
 
@@ -50,17 +57,15 @@ All 5 phases of v1.0 shipped. The app has: executive trip prep, NC camping knowl
 
 ## Milestone v1.1 — Close the Loop
 
-**Status:** Phase 10 planned and reviewed. Ready to execute.
+**Status:** ✅ Complete 2026-04-02
 
 | Phase | Status | Summary |
 |-------|--------|---------|
 | 6. Stabilization | ✅ Complete | AI output persistence, CRUD gaps fixed, design system migration, packing list fixes |
 | 7. Day-Of Execution | ✅ Complete | Departure checklist + float plan email, settings page, Nodemailer Gmail integration |
 | 8. PWA and Offline | ✅ Complete | Installable PWA, service worker, offline banner, "Leaving Now" trip caching, passive map tile caching |
-| 9. Learning Loop | ○ Not started | Post-trip gear usage tracking, Claude debrief, voice writeback |
-| 10. Offline Read Path | 📋 Planned | 4 plans, 3 waves — dual-mode components, tile prefetch, offline write queue, Phase 8 docs |
-
-**Status:** v1.1 shipped 2026-04-02. See v1.2 section above for current work.
+| 9. Learning Loop | ✅ Complete | Voice debrief, Whisper transcription, Claude insight extraction, TripFeedback model, post-trip review UI |
+| 10. Offline Read Path | ✅ Complete | Dual-mode components, tile prefetch, offline write queue |
 
 ---
 

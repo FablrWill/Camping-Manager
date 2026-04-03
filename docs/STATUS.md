@@ -1,13 +1,13 @@
 # Project Status — Outland OS
 
 ## Quick Pickup
-> **Last session:** 2026-04-03 (Session 30 — UX review + execution plan)
+> **Last session:** 2026-04-03 (doc sync — corrected stale status markers across TASKS.md + STATUS.md)
 > **Milestone v1.0:** ✅ Complete — all 5 phases shipped 2026-04-01
 > **Milestone v1.1:** ✅ Complete — Phases 6-11 shipped 2026-04-02
 > **Milestone v1.2:** ✅ Complete — Phases 12-15 shipped 2026-04-03
-> **Milestone v2.0:** ✅ Complete (mostly) — Phases 16-24 shipped 2026-04-03; Phase 22 (Plan A/B/C) still in progress per V2-SESSIONS.md
-> **Milestone v3.0:** 🚧 In progress — Phase 33 (conversational trip planner) merged; Phases 25-32 not yet started
-> **Next step:** Pick up S07 (Plan A/B/C fallback chain) from `.planning/V2-SESSIONS.md`, or continue v3.0 wave phases
+> **Milestone v2.0:** ✅ Complete — all phases 16-24 shipped 2026-04-03 including Phase 22 (Plan A/B/C)
+> **Milestone v3.0:** 🚧 In progress — Phases 25-28 + 33 complete; Phase 29 (vehicle checklist) in progress; Phases 30-32 not started
+> **Next step:** Finish Phase 29 (Vehicle Pre-Trip Checklist, Plan 03 UI), then Phases 30-32
 > **App name:** Outland OS
 > **Task tracker:** See `TASKS.md` in project root — start there.
 > **North star:** See `docs/USER-JOURNEY.md` — defines what to build and why.
@@ -33,26 +33,31 @@
 - **Production Deployment (Phase 14)** — PM2 config, deploy script, backup/watchdog crons, Mac mini setup guide
 - **Remote Access (Phase 15)** — Tailscale VPN, HTTPS, PWA verification from phone
 
-## What's Built (v2.0 — mostly complete)
+## What's Built (v2.0 — ✅ Complete)
 - **Photo Auto-Import (Phase 16)** — Bulk photo import with EXIF GPS extraction
 - **Feedback-Driven Packing (Phase 17)** — Packing lists personalized by post-trip feedback
 - **Fuel & Last Stop (Phase 18)** — Pre-trip stop cards via Overpass API
 - **Dog-Aware Planning (Phase 19)** — Dog toggle, dog gear section, dog-friendly notes
 - **Live Location Sharing (Phase 20)** — Shareable public URL with last known GPS
 - **Permit & Reservation (Phase 21)** — Recreation.gov confirmations with trip
+- **Plan A/B/C Fallback Chain (Phase 22)** — fallbackFor/fallbackOrder schema, alternatives API, TripCard badges, Add Plan B UI
 - **Gear Category Expansion (Phase 23)** — 15 categories, tech gear fields
 - **Smart Inbox (Phase 24)** — Intake endpoint + inbox UI for phone share-to-app
-- **Phase 22 (Plan A/B/C)** — 🔄 S07 in progress per `.planning/V2-SESSIONS.md`
 
 ## What's Built (v3.0 — in progress)
+- **Gear Docs & Manual Finder (Phase 25)** — GearDocument model, Claude-powered manual finder, PDF download
+- **Trip Day Sequencer (Phase 26)** — departureTime schema, time-anchored departure checklist
+- **Safety Float Plan (Phase 27)** — Deterministic plain-text float plan email (no AI cost)
+- **Weather-Aware Clothing (Phase 28)** — buildClothingGuidance(), UV forecast, injected into packing list
+- **Vehicle Pre-Trip Checklist (Phase 29)** — 🔄 In progress (Plans 01-02 done, Plan 03 UI checkpoint running)
 - **Conversational Trip Planner (Phase 33)** — TripPlannerSheet full-screen chat + TripsClient wiring; UAT deferred
-- **Phases 25-32** — Not yet started (see `.planning/ROADMAP.md` for wave structure)
+- **Phases 30-32** — Not yet started (product research, astro, deals)
 
 ## Known Blockers
-- **HA hardware** — In Durham. Will picking up ~mid-April 2026. Blocks HA bridge feature only.
+- **HA hardware** — In Durham. Will picking up ~mid-April 2026. Blocks HA bridge feature (S10) only.
 - **OpenAI API key** — Needed for voice debrief (Whisper). Add `OPENAI_API_KEY` to `.env` when ready.
 - **Gmail App Password** — Needed for float plan email. Add `GMAIL_USER` + `GMAIL_APP_PASSWORD` to `.env`.
-- **Phase 22 S07** — Plan A/B/C fallback chain is claimed but not complete. Resolve before S11/S12.
+- **S10/S11/S12** — Meal planning (S11) and shopping/prep (S12) blocked on S10 (HA integration), which needs hardware.
 
 ## Outstanding UAT (human testing needed)
 - Voice debrief end-to-end flow (needs device + mic + running server)
