@@ -65,8 +65,8 @@ Requirements for milestone v2.0 "Personal Second Brain". Each maps to v2.0 roadm
 
 ### Fuel & Last Stop Planner (Phase 18)
 
-- [ ] **FUEL-01**: New `lib/overpass.ts` utility queries Overpass API for fuel/grocery/hardware POIs
-- [ ] **FUEL-02**: New endpoint `GET /api/trips/[id]/last-stops` returns closest 1-2 of each POI type
+- [x] **FUEL-01**: New `lib/overpass.ts` utility queries Overpass API for fuel/grocery/hardware POIs
+- [x] **FUEL-02**: New endpoint `GET /api/trips/[id]/last-stops` returns closest 1-2 of each POI type
 - [ ] **FUEL-03**: "Fuel & Last Stops" card in TripPrepClient shows name + distance; handles no-results case
 
 ### Dog-Aware Trip Planning (Phase 19)

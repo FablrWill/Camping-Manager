@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Personal Second Brain
 status: verifying
-stopped_at: Completed 17-02-PLAN.md
-last_updated: "2026-04-03T05:06:20.790Z"
+stopped_at: Completed 18-01-PLAN.md
+last_updated: "2026-04-03T05:25:03.091Z"
 last_activity: 2026-04-03
 progress:
   total_phases: 6
-  completed_phases: 5
-  total_plans: 16
-  completed_plans: 16
+  completed_phases: 6
+  total_plans: 17
+  completed_plans: 17
   percent: 40
 ---
 
@@ -66,6 +66,7 @@ Progress: [████░░░░░░] 40%
 | Phase 13 P04 | 300 | 1 tasks | 1 files |
 | Phase 17-feedback-driven-packing P01 | 240 | 2 tasks | 2 files |
 | Phase 17-feedback-driven-packing P02 | 118 | 2 tasks | 3 files |
+| Phase 18-fuel-last-stop-planner P01 | 144 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -102,6 +103,8 @@ Recent decisions affecting current work:
 - [Phase 17-feedback-driven-packing]: filterSignificantFeedback() threshold: didntNeedCount >= 2 OR forgotCount >= 1 — single-trip signals excluded to avoid noise
 - [Phase 17-feedback-driven-packing]: aggregateGearFeedback uses immutable spread pattern — consistent with project coding standards
 - [Phase 17-feedback-driven-packing]: Feedback query in packing-list POST is non-blocking (try/catch) — same pattern as weather fetch; id: { not: tripId } excludes current trip
+- [Phase 18-fuel-last-stop-planner]: haversineDistanceMiles exported (not private) for direct test verification against known coordinate pairs
+- [Phase 18-fuel-last-stop-planner]: fetchLastStops deduplicates via Map<id> before filtering — same OSM node matching multiple tags appears once
 
 ### Pending Todos
 
@@ -115,6 +118,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-03T04:18:15.442Z
-Stopped at: Completed 17-02-PLAN.md
+Last session: 2026-04-03T05:25:03.084Z
+Stopped at: Completed 18-01-PLAN.md
 Resume file: None
