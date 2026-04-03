@@ -325,3 +325,13 @@ model Settings {
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
 }
+
+model SharedLocation {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  lat       Float
+  lon       Float
+  label     String?
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+}
