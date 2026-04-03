@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { getPhotosDir } from "@/lib/paths";
 import sharp from "sharp";
 import { mkdir, readFile } from "fs/promises";
 import { join, resolve } from "path";
@@ -36,7 +37,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const photosDir = join(process.cwd(), "public", "photos");
+    const photosDir = getPhotosDir();
     await mkdir(photosDir, { recursive: true });
 
     let imported = 0;

@@ -8,6 +8,7 @@ All notable changes to Outland OS are tracked here.
 
 | Session | Date | Summary |
 |---------|------|---------|
+| [27](changelog/session-27.md) | 2026-04-02 | Phase 14 execution — standalone build, photo path env, health endpoint, PM2 config, deploy script, backup/watchdog, Mac mini setup guide |
 | [26](changelog/session-26.md) | 2026-04-02 | Phase 10 planning revision — incorporated cross-AI review feedback (concurrent tiles, debounce, AppShell sync, typed offlineData) |
 | [25](changelog/session-25.md) | 2026-04-01 | Phase 08 execution complete — installable PWA, offline banner, "Leaving Now" trip caching, passive map tile caching |
 | [24](changelog/session-24.md) | 2026-04-01 | Phase 07 execution complete — departure checklist, float plan email, settings page |

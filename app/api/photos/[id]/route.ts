@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { resolvePhotoPath } from '@/lib/paths';
 import { unlink } from 'fs/promises';
 import path from 'path';
 
@@ -18,7 +19,7 @@ export async function DELETE(
     if (photo.imagePath) {
       const publicDir = path.resolve(process.cwd(), 'public');
       const photosDir = path.join(publicDir, 'photos');
-      const filePath = path.resolve(path.join(publicDir, photo.imagePath));
+      const filePath = resolvePhotoPath(photo.imagePath);
       // Path traversal guard: resolved path must stay within /public/photos/
       const isWithinPhotosDir =
         filePath.startsWith(photosDir + path.sep) || filePath.startsWith(photosDir + '/');
