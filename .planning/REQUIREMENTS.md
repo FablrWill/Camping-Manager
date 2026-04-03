@@ -69,6 +69,16 @@ Requirements for milestone v2.0 "Field Intelligence".
 
 Deferred to future release. Tracked but not in current roadmap.
 
+### Hardening (from Cross-AI Review, 2026-04-03)
+
+> Source: `.planning/review/CROSS-AI-REVIEWS.md` — Gemini (gemini-3-flash) + Codex (gpt-5.1-codex-max)
+
+- **HARDEN-01**: Auth middleware — shared-secret header or local-only check on all API routes (Codex HIGH, Gemini LOW)
+- **HARDEN-02**: File upload hardening — MIME allowlist + file size cap on photo/intake endpoints (both MEDIUM)
+- **HARDEN-03**: LLM tool safety — server-side confirmation for destructive agent tool operations (delete, bulk update) (Codex HIGH)
+- **HARDEN-04**: Rate limiting on Claude chat endpoint to prevent runaway API costs (both MEDIUM)
+- **HARDEN-05**: E2E smoke tests for critical flows (chat, upload, map, offline cache) (both flagged gap)
+
 ### Infrastructure
 
 - **INFRA-01**: Coolify or similar PaaS dashboard for visual management
