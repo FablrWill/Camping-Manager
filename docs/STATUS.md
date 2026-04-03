@@ -2,9 +2,12 @@
 
 ## Quick Pickup
 > **Last session:** 2026-04-03 (Session 30 — UX review + execution plan)
-> **Milestone v1.0:** Complete — all 5 phases shipped
-> **Milestone v1.1:** In progress — Phase 6 complete, Phase 7 UI-SPEC approved
-> **Next step:** `/gsd:plan-phase 7` — create execution plans for departure checklist + float plan
+> **Milestone v1.0:** ✅ Complete — all 5 phases shipped 2026-04-01
+> **Milestone v1.1:** ✅ Complete — Phases 6-11 shipped 2026-04-02
+> **Milestone v1.2:** ✅ Complete — Phases 12-15 shipped 2026-04-03
+> **Milestone v2.0:** ✅ Complete (mostly) — Phases 16-24 shipped 2026-04-03; Phase 22 (Plan A/B/C) still in progress per V2-SESSIONS.md
+> **Milestone v3.0:** 🚧 In progress — Phase 33 (conversational trip planner) merged; Phases 25-32 not yet started
+> **Next step:** Pick up S07 (Plan A/B/C fallback chain) from `.planning/V2-SESSIONS.md`, or continue v3.0 wave phases
 > **App name:** Outland OS
 > **Task tracker:** See `TASKS.md` in project root — start there.
 > **North star:** See `docs/USER-JOURNEY.md` — defines what to build and why.
@@ -16,27 +19,47 @@
 - **Spot recommendations** — Saved locations + knowledge base + weather forecasts, inline cards
 - **Voice debrief** — Record → Whisper transcribe → Claude extract insights → apply to gear/locations/trips
 
-## What's Built (v1.1 — in progress)
+## What's Built (v1.1)
 - **Stabilization (Phase 6)** — AI output persistence, missing CRUD, design system migration, packing list fixes, TripCard extraction, ConfirmDialogs
+- **Day-Of Execution (Phase 7)** — Departure checklist + safety float plan email, settings page, Nodemailer Gmail integration
+- **PWA and Offline (Phase 8)** — Installable PWA, service worker, offline banner, "Leaving Now" trip caching, passive map tile caching
+- **Learning Loop (Phase 9)** — Post-trip gear feedback, voice debrief improvements
+- **Offline Read Path (Phase 10)** — Dual-mode components, tile prefetch, offline write queue
+- **v1.1 Polish (Phase 11)** — Final v1.1 hardening and polish
 
-## Current Phase: 7 — Day-Of Execution
-- **Status:** UI-SPEC approved, ready for planning
-- **Goal:** Departure checklist + safety float plan email
-- **New pages:** `/trips/[id]/depart`, `/settings`
-- **Requirements:** EXEC-01, EXEC-02
+## What's Built (v1.2)
+- **Build & Clean (Phase 12)** — Production build fixed, lint/type errors cleared, 158 tests passing, Gemini cross-AI review
+- **Review Findings (Phase 13)** — Path traversal + XSS security fixes, JSON.parse hardening, input validation
+- **Production Deployment (Phase 14)** — PM2 config, deploy script, backup/watchdog crons, Mac mini setup guide
+- **Remote Access (Phase 15)** — Tailscale VPN, HTTPS, PWA verification from phone
+
+## What's Built (v2.0 — mostly complete)
+- **Photo Auto-Import (Phase 16)** — Bulk photo import with EXIF GPS extraction
+- **Feedback-Driven Packing (Phase 17)** — Packing lists personalized by post-trip feedback
+- **Fuel & Last Stop (Phase 18)** — Pre-trip stop cards via Overpass API
+- **Dog-Aware Planning (Phase 19)** — Dog toggle, dog gear section, dog-friendly notes
+- **Live Location Sharing (Phase 20)** — Shareable public URL with last known GPS
+- **Permit & Reservation (Phase 21)** — Recreation.gov confirmations with trip
+- **Gear Category Expansion (Phase 23)** — 15 categories, tech gear fields
+- **Smart Inbox (Phase 24)** — Intake endpoint + inbox UI for phone share-to-app
+- **Phase 22 (Plan A/B/C)** — 🔄 S07 in progress per `.planning/V2-SESSIONS.md`
+
+## What's Built (v3.0 — in progress)
+- **Conversational Trip Planner (Phase 33)** — TripPlannerSheet full-screen chat + TripsClient wiring; UAT deferred
+- **Phases 25-32** — Not yet started (see `.planning/ROADMAP.md` for wave structure)
 
 ## Known Blockers
-- **Claude API key** ✅ — Configured in `.env` (2026-03-30). AI features unblocked.
-- **Weather API key** — NOT NEEDED. Switched to Open-Meteo (free, no key). See `docs/AUDIT.md`.
 - **HA hardware** — In Durham. Will picking up ~mid-April 2026. Blocks HA bridge feature only.
-- **Voyage AI API key** ✅ — Configured in `.env` (2026-03-31). Knowledge base embeddings working.
 - **OpenAI API key** — Needed for voice debrief (Whisper). Add `OPENAI_API_KEY` to `.env` when ready.
-- **Gmail App Password** — Needed for Phase 7 float plan email. Add `GMAIL_USER` + `GMAIL_APP_PASSWORD` to `.env`.
+- **Gmail App Password** — Needed for float plan email. Add `GMAIL_USER` + `GMAIL_APP_PASSWORD` to `.env`.
+- **Phase 22 S07** — Plan A/B/C fallback chain is claimed but not complete. Resolve before S11/S12.
 
 ## Outstanding UAT (human testing needed)
 - Voice debrief end-to-end flow (needs device + mic + running server)
 - Recommendation cards in chat (needs running server + Claude API)
 - Chat streaming on mobile (needs device)
+- Conversational trip planner (Phase 33) — TripPlannerSheet + TripsClient wiring (needs running server)
+- Production deployment on Mac mini — PM2 startup + photo migration (needs Mac mini access)
 
 ## Session History
 - **Session 1** (2026-03-29) — Project kickoff, planning, docs
@@ -65,13 +88,20 @@
 - **Session 21** (2026-04-01) — Phase 6 full planning pipeline — discuss, research, UI-SPEC, plans, cross-AI review.
 - **Session 22** (2026-04-01) — Phase 6 gap closure execution — packing-list persistence, TripCard extraction, ConfirmDialogs.
 - **Session 23** (2026-04-01) — Phase 7 UI design contract — departure checklist, float plan, settings page.
+- **Session 24** (2026-04-01) — Phase 7 execution complete — departure checklist, float plan email, settings page.
+- **Session 25** (2026-04-01) — Phase 8 execution complete — installable PWA, offline banner, "Leaving Now" trip caching, passive map tile caching.
+- **Session 26** (2026-04-02) — Phase 10 planning revision — incorporated cross-AI review feedback.
+- **Session 27** (2026-04-02) — Phase 14 execution — PM2 config, deploy script, backup/watchdog, Mac mini setup guide.
+- **Session 28** (2026-04-03) — S01 photo bulk import: queue fix + verification (feature already shipped).
+- **Session 29** (2026-04-03) — Doc sync: reconcile STATUS/TASKS/CHANGELOG, fix ecosystem.config.js lint blocker.
 
 ## Key Files
 - `TASKS.md` — What's done, what's next, where to start
 - `docs/USER-JOURNEY.md` — The north star. Read before building.
 - `docs/FEATURE-PHASES.md` — Full feature roadmap by phase
-- `docs/STYLE-GUIDE.md` — Design system + component specs (includes trip prep UI specs)
+- `docs/STYLE-GUIDE.md` — Design system + component specs
 - `docs/AUDIT.md` — Full project audit: code health, integrations, PWA research, creative ideas
 - `docs/CHANGELOG.md` — Detailed session-by-session changes
 - `docs/ARCHITECTURE.md` — Tech stack, schema, project structure
 - `.planning/ROADMAP.md` — GSD milestone roadmap with phase tracking
+- `.planning/V2-SESSIONS.md` — v2.0 session queue with claiming protocol

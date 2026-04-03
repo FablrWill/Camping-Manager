@@ -1,21 +1,46 @@
 # Outland OS — Task Tracker
 
-> **Last updated:** 2026-04-02 (Phase 12 complete — build fixed, lint/types clean, tests all passing, Gemini review done)
+> **Last updated:** 2026-04-03 (v1.2 + v2.0 shipped; v3.0 in progress — Phase 33 conversational trip planner merged)
 > **Start here** if you're picking up after a break.
 > **North star:** `docs/USER-JOURNEY.md` — read this before building anything new.
 
 ---
 
-## 🏁 Milestone v1.2 — Ship It (In Progress)
+## 🏁 Milestone v1.2 — Ship It (Complete 2026-04-03)
 
 | Phase | Status | Summary |
 |-------|--------|---------|
-| 12. Fix Build & Clean House | ✅ Complete | Build fixed (serverExternalPackages), lint/type errors resolved, test stubs implemented (95 tests passing), Gemini cross-AI review completed |
-| 13. Address Review Findings | ○ Not started | Act on actionable Gemini feedback before shipping to production |
-| 14. Production Deployment | ○ Not started | Configure Mac mini with PM2, persistent data, backups, deploy script |
-| 15. Remote Access & Go Live | ○ Not started | Tailscale mesh VPN, HTTPS, PWA verification from phone |
+| 12. Fix Build & Clean House | ✅ Complete | Build fixed (serverExternalPackages), lint/type errors resolved, test stubs implemented, Gemini cross-AI review completed |
+| 13. Address Review Findings | ✅ Complete | Path traversal + XSS security fixes, JSON.parse hardening, input validation hardening |
+| 14. Production Deployment | ✅ Complete | PM2 config, deploy script, backup/watchdog crons, Mac mini setup guide |
+| 15. Remote Access & Go Live | ✅ Complete | Tailscale VPN, HTTPS, PWA verification from phone |
 
-**Next:** `/gsd:execute-phase 13` — address Gemini review findings
+---
+
+## 🏁 Milestone v2.0 — Smarter & Sharper (Complete 2026-04-03)
+
+| Phase | Status | Summary |
+|-------|--------|---------|
+| 16. Photo Auto-Import | ✅ Complete | Bulk photo import with EXIF GPS extraction |
+| 17. Feedback-Driven Packing | ✅ Complete | Packing lists personalized by post-trip gear feedback history |
+| 18. Fuel & Last Stop Planner | ✅ Complete | Pre-trip fuel/grocery/hardware stop cards via Overpass API |
+| 19. Dog-Aware Trip Planning | ✅ Complete | Dog toggle on trips, dog gear section, dog-friendly notes |
+| 20. Live Location Sharing | ✅ Complete | Shareable public URL showing last known GPS location |
+| 21. Permit & Reservation | ✅ Complete | Store Recreation.gov confirmations with trip, surface reminders |
+| 22. Plan A/B/C Fallback Chain | 🔄 In Progress | Link fallback trips to primary, compare in trip prep — S07 in V2-SESSIONS.md |
+| 23. Gear Category Expansion | ✅ Complete | Expanded to 15 categories with visual grouping, tech gear fields |
+| 24. Smart Inbox / Universal Intake | ✅ Complete | Single intake endpoint + inbox UI for phone share-to-app workflow |
+
+---
+
+## 🏁 Milestone v3.0 — Gear Intelligence + Day-Of (In Progress)
+
+| Phase | Status | Summary |
+|-------|--------|---------|
+| 25–32. Wave 1–4 phases | ○ Not started | Gear docs, trip sequencer, float plan, weather-aware clothing, vehicle checklist, product research, astro, deals — see `.planning/ROADMAP.md` |
+| 33. Conversational Trip Planner | ✅ Complete | TripPlannerSheet full-screen chat + TripsClient wiring; UAT deferred |
+
+**Next:** Continue v3.0 wave phases per `.planning/ROADMAP.md` — or pick up S07 (Plan A/B/C) from `.planning/V2-SESSIONS.md`
 
 ---
 
