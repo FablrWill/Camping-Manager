@@ -119,10 +119,119 @@ Plans:
 - Plan 15-01 is Wave 1 — Mac mini setup must complete first
 - Plan 15-02 is Wave 2 — requires Mac mini serving HTTPS before iPhone can verify
 
+## v2.0 Phases
+
+### Phase 16: Photo Auto-Import
+**Goal**: Will can bulk-import photos from his device camera roll or a local folder; each photo is auto-processed through EXIF extraction, GPS pinning, and compression without manual one-by-one upload
+**Depends on**: Phase 15 (app live)
+**Requirements**: PHOTO-IMPORT-01, PHOTO-IMPORT-02, PHOTO-IMPORT-03, PHOTO-IMPORT-04, PHOTO-IMPORT-05
+**Success Criteria** (what must be TRUE):
+  1. User can select multiple files at once via `<input type=file multiple>`
+  2. Each file is processed through the same EXIF + compress pipeline as single upload
+  3. Progress is shown during import (e.g., "Importing 12 of 50...")
+  4. Failures on individual files don't abort the whole batch — errors collected and reported at end
+  5. Imported photos with EXIF GPS appear on the Spots map with pins
+**Plans**: TBD
+
+**Parallelization notes:**
+- New `bulk-import` API route is independent of UI changes
+- `PhotoUpload.tsx` button addition is independent of API work
+
+### Phase 17: Feedback-Driven Packing
+**Goal**: Packing list generation uses past trip debrief data so Claude knows Will's gear history ("never uses camp chair", "always forgets headlamp") and reflects it in recommendations
+**Depends on**: Phase 15 (app live)
+**Requirements**: PACKING-FEEDBACK-01, PACKING-FEEDBACK-02, PACKING-FEEDBACK-03
+**Success Criteria** (what must be TRUE):
+  1. If no trip history exists, packing list generates same as before (graceful degradation)
+  2. If TripFeedback records exist, Claude prompt includes gear feedback summary (visible in server logs)
+  3. Packing list output includes at least one feedback-informed note when history is available
+**Plans**: TBD
+
+**Parallelization notes:**
+- TripFeedback query + aggregation logic is backend-only; no schema changes needed
+
+### Phase 18: Fuel & Last Stop Planner
+**Goal**: Trip Prep section shows the last gas station, grocery store, and hardware/outdoor store before the campsite, pre-populated from OpenStreetMap Overpass API based on the trip's destination coordinates
+**Depends on**: Phase 15 (app live)
+**Requirements**: FUEL-STOP-01, FUEL-STOP-02, FUEL-STOP-03, FUEL-STOP-04
+**Success Criteria** (what must be TRUE):
+  1. "Fuel & Last Stops" card appears in Trip Prep section with 3 categories: Fuel, Grocery, Hardware/Outdoor
+  2. Each category shows name + approximate distance from destination in miles
+  3. Loading state shown while fetching
+  4. If no results within 50km, shows "None found nearby — plan ahead"
+  5. Uses trip's existing `latitude`/`longitude` fields; no new dependencies added
+**Plans**: TBD
+
+**Parallelization notes:**
+- `lib/overpass.ts` utility and `app/api/trips/[id]/last-stops/route.ts` can be built before UI card
+
+### Phase 19: Dog-Aware Trip Planning
+**Goal**: When a trip is marked "bringing dog", the packing list includes a dedicated Dog section and the AI notes dog-friendly camping considerations
+**Depends on**: Phase 15 (app live)
+**Requirements**: DOG-TRIP-01, DOG-TRIP-02, DOG-TRIP-03, DOG-TRIP-04
+**Success Criteria** (what must be TRUE):
+  1. Trip form has a "Bringing dog?" toggle (boolean, defaults false)
+  2. When true, packing list includes a dedicated "Dog" section with essential dog gear
+  3. Dog indicator (🐕) visible on trip card when bringingDog is true
+  4. Trip edit supports toggling bringingDog
+  5. No dog gear added when bringingDog is false (no regression)
+**Plans**: TBD
+
+**Parallelization notes:**
+- Schema migration (`bringingDog` field on Trip) must land before UI and claude.ts changes
+- UI toggle and packing list prompt update are independent once schema is in place
+
+### Phase 20: Live Location Sharing
+**Goal**: Will can generate a shareable public URL that shows his most recent GPS location on a Leaflet map, which family can open in a browser without login or Tailscale
+**Depends on**: Phase 15 (app live)
+**Requirements**: LOCATION-SHARE-01, LOCATION-SHARE-02, LOCATION-SHARE-03, LOCATION-SHARE-04, LOCATION-SHARE-05
+**Success Criteria** (what must be TRUE):
+  1. Will can tap "Share Location" and receive a shareable URL
+  2. The shared page works in a plain browser (no auth required)
+  3. Shared page shows Leaflet map with a pin at last location, label, and "Last updated: X ago"
+  4. Will can update his location (new lat/lon replaces old)
+  5. Will can stop sharing (deletes the SharedLocation record)
+**Plans**: TBD
+
+**Parallelization notes:**
+- `SharedLocation` schema + API routes can be built before the public `/share/[slug]` page
+- Public page and `ShareLocationButton` component are independent
+
+### Phase 21: Permit & Reservation Awareness
+**Goal**: Will can attach a Recreation.gov confirmation URL and permit notes to any trip; the trip card shows a permit indicator and trip prep surfaces the booking details
+**Depends on**: Phase 18 (TripPrepClient.tsx), Phase 20 (SpotMap.tsx)
+**Requirements**: PERMIT-01, PERMIT-02, PERMIT-03, PERMIT-04
+**Success Criteria** (what must be TRUE):
+  1. Can add `permitUrl` and `permitNotes` to any trip via trip edit form
+  2. Trip card shows 📋 indicator when permitUrl is set
+  3. Trip prep card renders permit info with "View Booking" link (opens in new tab)
+  4. No Recreation.gov API — manual paste only; no new dependencies
+**Plans**: TBD
+
+**Parallelization notes:**
+- Schema migration + API patch can land before UI changes
+- TripCard indicator and TripPrepClient card are independent UI tasks
+
+### Phase 22: Plan A/B/C Fallback Chain
+**Goal**: Will can link Plan B and Plan C trips to a primary trip; trip prep shows all alternatives with weather comparison so he can pick the right destination on the day
+**Depends on**: Phase 19 (Trip model + claude.ts), Phase 21 (TripPrepClient.tsx)
+**Requirements**: FALLBACK-01, FALLBACK-02, FALLBACK-03, FALLBACK-04, FALLBACK-05
+**Success Criteria** (what must be TRUE):
+  1. Can create a trip as a Plan B or Plan C for any existing trip
+  2. Trip prep shows all alternatives with destination + weather comparison
+  3. Trip card shows how many alternatives exist
+  4. Alternatives are first-class trips with their own gear/checklists, just with a `fallbackFor` link
+  5. Deleting the primary trip does not cascade-delete alternatives (sets `fallbackFor = null`)
+**Plans**: TBD
+
+**Parallelization notes:**
+- Schema migration (self-relation on Trip) must land first
+- "Add Plan B" UI and TripPrepClient "Fallback Plans" card are independent once schema is in place
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 12 -> 13 -> 14 -> 15
+Phases execute in numeric order: 12 -> 13 -> 14 -> 15, then v2.0: 16-20 (parallel) -> 21 (needs 18+20) -> 22 (needs 19+21)
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -141,6 +250,13 @@ Phases execute in numeric order: 12 -> 13 -> 14 -> 15
 | 13. Address Review Findings | v1.2 | 4/4 | Complete    | 2026-04-03 |
 | 14. Production Deployment | v1.2 | 0/TBD | Not started | - |
 | 15. Remote Access & Go Live | v1.2 | 0/2 | Complete    | 2026-04-03 |
+| 16. Photo Auto-Import | v2.0 | 0/TBD | Not started | - |
+| 17. Feedback-Driven Packing | v2.0 | 0/TBD | Not started | - |
+| 18. Fuel & Last Stop Planner | v2.0 | 0/TBD | Not started | - |
+| 19. Dog-Aware Trip Planning | v2.0 | 0/TBD | Not started | - |
+| 20. Live Location Sharing | v2.0 | 0/TBD | Not started | - |
+| 21. Permit & Reservation | v2.0 | 0/TBD | Not started | - |
+| 22. Plan A/B/C Fallback Chain | v2.0 | 0/TBD | Not started | - |
 
 ---
 *Full phase details for shipped milestones: see archives in `.planning/milestones/`*

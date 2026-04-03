@@ -101,11 +101,43 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ACCESS-04 | Phase 15 | Pending |
 | ACCESS-05 | Phase 15 | Pending |
 
+| PHOTO-IMPORT-01 | Phase 16 | Pending |
+| PHOTO-IMPORT-02 | Phase 16 | Pending |
+| PHOTO-IMPORT-03 | Phase 16 | Pending |
+| PHOTO-IMPORT-04 | Phase 16 | Pending |
+| PHOTO-IMPORT-05 | Phase 16 | Pending |
+| PACKING-FEEDBACK-01 | Phase 17 | Pending |
+| PACKING-FEEDBACK-02 | Phase 17 | Pending |
+| PACKING-FEEDBACK-03 | Phase 17 | Pending |
+| FUEL-STOP-01 | Phase 18 | Pending |
+| FUEL-STOP-02 | Phase 18 | Pending |
+| FUEL-STOP-03 | Phase 18 | Pending |
+| FUEL-STOP-04 | Phase 18 | Pending |
+| DOG-TRIP-01 | Phase 19 | Pending |
+| DOG-TRIP-02 | Phase 19 | Pending |
+| DOG-TRIP-03 | Phase 19 | Pending |
+| DOG-TRIP-04 | Phase 19 | Pending |
+| LOCATION-SHARE-01 | Phase 20 | Pending |
+| LOCATION-SHARE-02 | Phase 20 | Pending |
+| LOCATION-SHARE-03 | Phase 20 | Pending |
+| LOCATION-SHARE-04 | Phase 20 | Pending |
+| LOCATION-SHARE-05 | Phase 20 | Pending |
+| PERMIT-01 | Phase 21 | Pending |
+| PERMIT-02 | Phase 21 | Pending |
+| PERMIT-03 | Phase 21 | Pending |
+| PERMIT-04 | Phase 21 | Pending |
+| FALLBACK-01 | Phase 22 | Pending |
+| FALLBACK-02 | Phase 22 | Pending |
+| FALLBACK-03 | Phase 22 | Pending |
+| FALLBACK-04 | Phase 22 | Pending |
+| FALLBACK-05 | Phase 22 | Pending |
+
 **Coverage:**
 - v1.2 requirements: 26 total
-- Mapped to phases: 26
+- v2.0 requirements: 30 total (phases 16-22)
+- Mapped to phases: 56
 - Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-02*
-*Last updated: 2026-04-02 after roadmap creation*
+*Last updated: 2026-04-02 — added v2.0 phases 16-22*
