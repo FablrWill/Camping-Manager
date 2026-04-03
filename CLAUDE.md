@@ -335,6 +335,15 @@ Use these entry points:
 Do not make direct repo edits outside a GSD workflow unless the user explicitly asks to bypass it.
 <!-- GSD:workflow-end -->
 
+## v2.0 Session Queue
+
+v2.0 features are tracked in `.planning/V2-SESSIONS.md`. Each Claude Code session should:
+1. Read `.planning/V2-SESSIONS.md`
+2. Claim the first `⬜ Ready` item whose deps are all `✅ Done`
+3. Commit the claim, execute via GSD workflow, mark done, push
+
+See `.planning/V2-SESSIONS.md` for full claiming protocol and per-session specs.
+
 <!-- GSD:profile-start -->
 ## Developer Profile
 

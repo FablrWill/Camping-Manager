@@ -38,7 +38,7 @@
 - [ ] **Phase 12: Fix Build & Clean House** - Fix broken build, resolve tech debt, run Gemini review in parallel
 - [x] **Phase 13: Address Review Findings** - Act on actionable Gemini feedback before shipping to production (completed 2026-04-03)
 - [ ] **Phase 14: Production Deployment** - Configure Mac mini with PM2, persistent data, backups, deploy script
-- [ ] **Phase 15: Remote Access & Go Live** - Tailscale mesh VPN, HTTPS, PWA verification from phone
+- [x] **Phase 15: Remote Access & Go Live** - Tailscale mesh VPN, HTTPS, PWA verification from phone (completed 2026-04-03)
 
 ## Phase Details
 
@@ -91,12 +91,14 @@ Plans:
   3. PM2 automatically restarts the app after a crash or Mac mini reboot
   4. A single deploy command (script) pulls latest code, builds, and restarts the service
   5. Daily SQLite backups run automatically via cron
-**Plans:** 3 plans
+**Plans**: TBD
 
-Plans:
-- [ ] 14-01-PLAN.md — Standalone build config, photo path migration, health endpoint (DEPLOY-01/02/03/08)
-- [ ] 14-02-PLAN.md — PM2 ecosystem config, deploy script, backup + watchdog scripts (DEPLOY-04/05/06/07)
-- [ ] 14-03-PLAN.md — Mac mini setup guide + build verification checkpoint (DEPLOY-05)
+**Parallelization notes:**
+- DEPLOY-01/DEPLOY-02/DEPLOY-03 (standalone config, data paths, DATABASE_URL) are sequential setup
+- DEPLOY-04/DEPLOY-05 (PM2 config, boot persistence) can run together after data paths are set
+- DEPLOY-06 (deploy script) depends on PM2 being configured
+- DEPLOY-07 (backup cron) is independent once data paths exist
+- DEPLOY-08 (SW cache version) is independent
 
 ### Phase 15: Remote Access & Go Live
 **Goal**: Will can access Outland OS from his phone anywhere via encrypted private network, with PWA install and offline mode working over the remote connection
@@ -107,7 +109,15 @@ Plans:
   2. The app is reachable via a stable MagicDNS hostname (no IP addresses to remember)
   3. HTTPS works over Tailscale (required for service worker / PWA functionality)
   4. The app is installable as a PWA from Will's phone over the Tailscale connection
-**Plans**: TBD
+**Plans:** 2/2 plans complete
+
+Plans:
+- [ ] 15-01-PLAN.md — Mac mini Tailscale install, MagicDNS + HTTPS setup, tailscale serve
+- [ ] 15-02-PLAN.md — iPhone Tailscale install + go-live PWA verification from phone
+
+**Parallelization notes:**
+- Plan 15-01 is Wave 1 — Mac mini setup must complete first
+- Plan 15-02 is Wave 2 — requires Mac mini serving HTTPS before iPhone can verify
 
 ## Progress
 
@@ -129,8 +139,8 @@ Phases execute in numeric order: 12 -> 13 -> 14 -> 15
 | 11. v1.1 Polish | v1.1 | 2/2 | Complete | 2026-04-02 |
 | 12. Fix Build & Clean House | v1.2 | 5/5 | Complete | 2026-04-02 |
 | 13. Address Review Findings | v1.2 | 4/4 | Complete    | 2026-04-03 |
-| 14. Production Deployment | v1.2 | 0/3 | Planned | - |
-| 15. Remote Access & Go Live | v1.2 | 0/TBD | Not started | - |
+| 14. Production Deployment | v1.2 | 0/TBD | Not started | - |
+| 15. Remote Access & Go Live | v1.2 | 0/2 | Complete    | 2026-04-03 |
 
 ---
 *Full phase details for shipped milestones: see archives in `.planning/milestones/`*
