@@ -44,39 +44,29 @@ The codebase is in generally good shape (tests pass), but there is **documentati
 
 ### 5) Tests pass
 
-- `npm run test` passes with **158 tests / 23 test files** (158 as of 2026-04-03; prior review counted 150/21 on the `work` branch at that time).
+- `npm run test` passes with **21 test files / 150 tests**.
 - Some expected error-path logs appear in test output, but test suite status is green.
 
-**Impact:** core regression coverage appears healthy.
+**Impact:** core regression coverage appears healthy on this branch.
 
 ### 6) Parallel-session merge visibility is limited in current checkout
 
-- Some branch checkouts have only partial local branch history.
-- Merge-state verification for specific sessions may require checking remote refs/history or a checkout with `main` present.
+- Local repo currently has only branch `work`; no local `main` branch is present.
+- Because of this, this checkout cannot directly prove whether "phase 29" or "phase 33" session outputs have been merged into `main`.
 
-**Impact:** merge-state verification for those sessions requires checking remote refs/history.
+**Impact:** merge-state verification for those sessions requires checking remote refs/history (or the repo that has `main`).
 
-## Resolution (applied in Session 29)
+## Recommended Fix Order
 
-| Finding | Action | Status |
-|---------|--------|--------|
-| STATUS.md stale | Full rewrite — now reflects sessions 1-29, all milestones | ✅ Fixed |
-| TASKS.md milestone tables stale | Marked v1.2 complete, added v2.0 + v3.0 sections | ✅ Fixed |
-| Lint blocker in ecosystem.config.js | Added `eslint-disable-next-line` (CommonJS required by PM2) | ✅ Fixed |
-| CHANGELOG.md missing session 29 | Added row + created session-29.md | ✅ Fixed |
+1. **Update source-of-truth docs in one pass:** `docs/STATUS.md`, `TASKS.md` (if needed), `docs/CHANGELOG.md`.
+2. **Resolve lint blocker in `ecosystem.config.js`** (convert require/import pattern or adjust lint scope for Node config files).
+3. **Reconcile roadmap docs:** align `docs/FEATURE-PHASES.md` and `.planning/REQUIREMENTS.md` with shipped phase statuses.
+4. **Run final gate:** `npm run lint && npm run test && npm run build` after doc/code cleanup.
 
-## Remaining Deferred Items
+## Notes
 
-| Item | Rationale for defer |
-|------|---------------------|
-| `docs/FEATURE-PHASES.md` label drift | Lower priority; informational doc, not pickup guide |
-| `.planning/REQUIREMENTS.md` Pending IDs | Planning-layer doc; ROADMAP.md is authoritative for phase status |
-| Phase 22 / S07 (Plan A/B/C) incomplete | Needs focused build session, not a doc fix |
-| Phase 33 UAT | Needs running server + manual device testing |
-| Mac mini deployment verification | Needs Will's physical access to Mac mini |
+This report intentionally distinguishes between:
+- **Code health** (tests/lint/build), and
+- **Project state documentation** (phase/session tracking).
 
-## Recommended Next Actions
-
-1. Pick up S07 (Plan A/B/C fallback chain) from `.planning/V2-SESSIONS.md` — it is the last incomplete v2.0 session.
-2. Run `npm run lint && npm run test` to confirm clean gate after Session 29 changes.
-3. When ready to continue v3.0, see `.planning/ROADMAP.md` Wave 1 phases (25-27 are parallelizable).
+Most risk currently sits in documentation drift, not runtime behavior.
