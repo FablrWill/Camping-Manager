@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.2
-milestone_name: Ship It
+milestone: v3.0
+milestone_name: Gear Intelligence + Day-Of
 status: executing
-stopped_at: Completed 22-02-PLAN.md — Phase 22 Plan B/C fallback chain UI
-last_updated: "2026-04-03T16:42:01.677Z"
+stopped_at: "Completed 25-01-PLAN.md — GearDocument foundation: schema, migration, Zod schema, getDocsDir, Wave 0 tests"
+last_updated: "2026-04-03T17:44:20.625Z"
 last_activity: 2026-04-03
 progress:
-  total_phases: 23
-  completed_phases: 21
-  total_plans: 70
-  completed_plans: 65
+  total_phases: 21
+  completed_phases: 12
+  total_plans: 36
+  completed_plans: 33
   percent: 40
 ---
 
@@ -21,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-01)
 
 **Core value:** Personal camping second brain — a closed-loop system that plans, executes, and learns from every trip
-**Current focus:** Phase 23 — gear-category-expansion
+**Current focus:** Phase 25 — gear-docs-manual-finder
 
 ## Current Position
 
-Phase: 24
-Plan: Not started
-Status: Executing Phase 23
+Phase: 25 (gear-docs-manual-finder) — EXECUTING
+Plan: 2 of 3
+Status: Ready to execute
 Last activity: 2026-04-03
 
 Progress: [████░░░░░░] 40%
@@ -68,6 +68,7 @@ Progress: [████░░░░░░] 40%
 | Phase 20-live-location-sharing P01 | 383 | 2 tasks | 6 files |
 | Phase 20-live-location-sharing P02 | 203 | 4 tasks | 9 files |
 | Phase 22-plan-fallback-chain P02 | 15 | 2 tasks | 3 files |
+| Phase 25-gear-docs-manual-finder P01 | 15 | 3 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -107,6 +108,7 @@ Recent decisions affecting current work:
 - [Phase 20-live-location-sharing]: ssr:false dynamic import must live in Client Component, not Server Component — Next.js App Router constraint; extracted to share-page-client.tsx
 - [Phase 20-live-location-sharing]: Bare layout.tsx at /share renders <html> directly — fully bypasses AppShell so family sees clean map-only page with no nav chrome
 - [Phase 22-plan-fallback-chain]: Add Plan B/C button placed in TripsClient (not TripCard) to keep TripCard interface minimal
+- [Phase 25-gear-docs-manual-finder]: GearDocument model uses gearItemId FK with cascade delete; existing manualUrl values migrated to support_link rows in single migration
 
 ### Pending Todos
 
@@ -120,6 +122,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-03T16:14:32.321Z
-Stopped at: Completed 22-02-PLAN.md — Phase 22 Plan B/C fallback chain UI
+Last session: 2026-04-03T17:44:20.621Z
+Stopped at: Completed 25-01-PLAN.md — GearDocument foundation: schema, migration, Zod schema, getDocsDir, Wave 0 tests
 Resume file: None

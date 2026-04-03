@@ -365,7 +365,7 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 25-01-PLAN.md — GearDocument schema + migration + drop manualUrl + Zod schema
+- [x] 25-01-PLAN.md — GearDocument schema + migration + drop manualUrl + Zod schema
 - [ ] 25-02-PLAN.md — Document CRUD API routes + Claude Find Manual + PDF download
 - [ ] 25-03-PLAN.md — GearDocumentsTab UI + wire into GearClient detail modal
 
@@ -514,7 +514,7 @@ Plans:
 | 22. Plan A/B/C Fallback Chain | v2.0 | 3/3 | Complete    | 2026-04-03 |
 | 23. Gear Category Expansion | v2.0 | 3/3 | Complete   | 2026-04-03 |
 | 24. Smart Inbox / Intake | v2.0 | 3/3 | Complete   | 2026-04-03 |
-| 25. Gear Docs & Manual Finder | v3.0 | 0/3 | Planned | - |
+| 25. Gear Docs & Manual Finder | v3.0 | 1/3 | In Progress|  |
 | 26. Trip Day Sequencer | v3.0 | 0/TBD | Not started | - |
 | 27. Safety Float Plan | v3.0 | 0/TBD | Not started | - |
 | 28. Weather-Aware Clothing | v3.0 | 0/TBD | Not started | - |
