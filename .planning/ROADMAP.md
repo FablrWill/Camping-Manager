@@ -514,7 +514,7 @@ Plans:
 | 22. Plan A/B/C Fallback Chain | v2.0 | 3/3 | Complete    | 2026-04-03 |
 | 23. Gear Category Expansion | v2.0 | 3/3 | Complete   | 2026-04-03 |
 | 24. Smart Inbox / Intake | v2.0 | 3/3 | Complete   | 2026-04-03 |
-| 25. Gear Docs & Manual Finder | v3.0 | 3/3 | Complete   | 2026-04-03 |
+| 25. Gear Docs & Manual Finder | v3.0 | 3/3 | Complete    | 2026-04-03 |
 | 26. Trip Day Sequencer | v3.0 | 0/TBD | Not started | - |
 | 27. Safety Float Plan | v3.0 | 0/TBD | Not started | - |
 | 28. Weather-Aware Clothing | v3.0 | 0/TBD | Not started | - |
