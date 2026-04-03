@@ -6,6 +6,7 @@ import ChatInput from './ChatInput'
 import SkeletonBubble from './SkeletonBubble'
 import ToolActivityIndicator from './ToolActivityIndicator'
 import EmptyState from './ui/EmptyState'
+import type { TripSummaryPayload } from '../lib/chat-extract'
 
 interface Message {
   id: string
@@ -17,9 +18,19 @@ interface ChatClientProps {
   initialMessages?: Array<{ id: string; role: string; content: string }>
   conversationId?: string | null
   pageContext?: string
+  apiEndpoint?: string
+  onTripCreated?: (tripId: string) => void
+  fullHeight?: boolean
 }
 
-export default function ChatClient({ initialMessages = [], conversationId: initialConversationId = null, pageContext }: ChatClientProps) {
+export default function ChatClient({
+  initialMessages = [],
+  conversationId: initialConversationId = null,
+  pageContext,
+  apiEndpoint = '/api/chat',
+  onTripCreated,
+  fullHeight = false,
+}: ChatClientProps) {
   const [messages, setMessages] = useState<Message[]>(
     initialMessages
       .filter(m => m.role === 'user' || m.role === 'assistant')
@@ -31,6 +42,7 @@ export default function ChatClient({ initialMessages = [], conversationId: initi
   const [skeletonVisible, setSkeletonVisible] = useState(false)
   const [toolActivity, setToolActivity] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [tripCreating, setTripCreating] = useState(false)
 
   const scrollRef = useRef<HTMLDivElement>(null)
   const streamingTextRef = useRef<string>('')
@@ -78,7 +90,7 @@ export default function ChatClient({ initialMessages = [], conversationId: initi
 
     let response: Response
     try {
-      response = await fetch('/api/chat', {
+      response = await fetch(apiEndpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ conversationId, userMessage: text.trim(), pageContext }),
@@ -174,7 +186,7 @@ export default function ChatClient({ initialMessages = [], conversationId: initi
       setSkeletonVisible(false)
       setToolActivity(null)
     }
-  }, [conversationId, pageContext, streaming, scrollToBottom])
+  }, [conversationId, pageContext, streaming, scrollToBottom, apiEndpoint])
 
   const handleConfirmDelete = useCallback((itemType: string) => {
     sendMessage(`Yes, go ahead and delete the ${itemType}.`)
@@ -184,8 +196,36 @@ export default function ChatClient({ initialMessages = [], conversationId: initi
     sendMessage('No, keep it.')
   }, [sendMessage])
 
+  const handleCreateTrip = useCallback(async (payload: TripSummaryPayload) => {
+    if (tripCreating) return
+    setTripCreating(true)
+    try {
+      const res = await fetch('/api/trips', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: payload.name,
+          startDate: payload.startDate,
+          endDate: payload.endDate,
+          locationId: payload.locationId ?? null,
+          notes: payload.notes ?? null,
+          bringingDog: payload.bringingDog,
+        }),
+      })
+      if (!res.ok) throw new Error('Failed to create trip')
+      const trip = await res.json()
+      if (onTripCreated) {
+        onTripCreated(trip.id)
+      }
+    } catch {
+      setError("Couldn't create your trip. Try again.")
+    } finally {
+      setTripCreating(false)
+    }
+  }, [onTripCreated, tripCreating])
+
   return (
-    <div className="flex flex-col" style={{ height: 'calc(100dvh - 48px - 80px)' }}>
+    <div className="flex flex-col" style={{ height: fullHeight ? '100%' : 'calc(100dvh - 48px - 80px)' }}>
       {/* Message scroll area */}
       <div
         ref={scrollRef}
@@ -212,6 +252,7 @@ export default function ChatClient({ initialMessages = [], conversationId: initi
                   content={msg.content}
                   onConfirmDelete={handleConfirmDelete}
                   onCancelDelete={handleCancelDelete}
+                  onCreateTrip={handleCreateTrip}
                 />
               ))}
               {skeletonVisible && <SkeletonBubble />}
@@ -226,7 +267,7 @@ export default function ChatClient({ initialMessages = [], conversationId: initi
       </div>
 
       {/* Input bar — sits above BottomNav */}
-      <div className="sticky bottom-20 bg-white dark:bg-stone-950">
+      <div className={`sticky ${fullHeight ? 'bottom-0' : 'bottom-20'} bg-white dark:bg-stone-950`}>
         <div className="max-w-2xl mx-auto">
           <ChatInput onSend={sendMessage} disabled={streaming} />
         </div>
