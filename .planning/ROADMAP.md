@@ -288,7 +288,7 @@ Phases execute in numeric order: 12 -> 13 -> 14 -> 15
 | 21. Permit & Reservation | v2.0 | 0/TBD | Not started | - |
 | 22. Plan A/B/C Fallback Chain | v2.0 | 0/TBD | Not started | - |
 | 23. Gear Category Expansion | v2.0 | 3/3 | Complete   | 2026-04-03 |
-| 24. Smart Inbox / Intake | v2.0 | 1/1 | Complete   | 2026-04-03 |
+| 24. Smart Inbox / Intake | v2.0 | 3/3 | Complete   | 2026-04-03 |
 
 ---
 *Full phase details for shipped milestones: see archives in `.planning/milestones/`*
