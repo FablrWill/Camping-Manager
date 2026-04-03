@@ -1,7 +1,8 @@
 ---
 phase: 33
 slug: conversational-trip-planner
-status: draft
+status: approved
+reviewed_at: 2026-04-03
 shadcn_initialized: false
 preset: none
 created: 2026-04-03
@@ -52,9 +53,9 @@ Exceptions: Touch targets minimum 44px height for all tappable elements (mobile-
 | Body / chat text | 16px | 400 regular | 1.5 | `text-base leading-relaxed` |
 | Label / UI chrome | 14px | 400 regular | 1.4 | `text-sm` |
 | Sheet heading | 18px | 600 semibold | 1.2 | `text-lg font-semibold` |
-| Section heading (page) | 24px | 700 bold | 1.2 | `text-2xl font-bold` |
+| Section heading (page) | 24px | 600 semibold | 1.2 | `text-2xl font-semibold` |
 
-Source: Verified in `ChatBubble.tsx` (`text-base leading-relaxed`), `Modal.tsx` (`text-lg font-bold`), `TripsClient.tsx` (`text-2xl font-bold`), `ChatInput.tsx` (`text-base`).
+Source: Verified in `ChatBubble.tsx` (`text-base leading-relaxed`), `Modal.tsx` (`text-lg font-bold`), `TripsClient.tsx` (`text-2xl font-bold`), `ChatInput.tsx` (`text-base`). Section heading weight unified to 600 (size provides hierarchy; 3-weight scale collapsed to 2).
 
 ---
 
@@ -277,11 +278,11 @@ Modified components this phase:
 
 ## Checker Sign-Off
 
-- [ ] Dimension 1 Copywriting: PASS
-- [ ] Dimension 2 Visuals: PASS
-- [ ] Dimension 3 Color: PASS
-- [ ] Dimension 4 Typography: PASS
-- [ ] Dimension 5 Spacing: PASS
-- [ ] Dimension 6 Registry Safety: PASS
+- [x] Dimension 1 Copywriting: PASS
+- [x] Dimension 2 Visuals: PASS
+- [x] Dimension 3 Color: PASS
+- [x] Dimension 4 Typography: PASS
+- [x] Dimension 5 Spacing: PASS (FLAG: py-3 header exception documented)
+- [x] Dimension 6 Registry Safety: PASS
 
-**Approval:** pending
+**Approval:** approved 2026-04-03
