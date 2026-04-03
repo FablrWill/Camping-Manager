@@ -95,7 +95,7 @@ None — v1.2 Ship It complete as of 2026-04-03.
 
 ## Current State
 
-Phase 22 complete (2026-04-03) — Plan A/B/C fallback chain shipped: DB schema, API routes, TripCard badges, TripsClient create flow, and trip prep Fallback Plans card with weather comparison.
+Phase 23 complete (2026-04-03) — Gear category expansion shipped: 15 categories across 4 groups (Living, Utility, Tech/Power, Action), single shared `lib/gear-categories.ts` module, tech gear schema fields (modelNumber, connectivity, manualUrl), all consumer files migrated to shared module, grouped filter chip UI in GearClient.
 
 ## Current Milestone: ✅ v1.2 Ship It — COMPLETE (2026-04-03)
 
@@ -184,4 +184,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-03 after Phase 22 complete — Plan A/B/C fallback chain*
+*Last updated: 2026-04-03 after Phase 23 complete — Gear category expansion (15 categories, shared module, tech fields)*
