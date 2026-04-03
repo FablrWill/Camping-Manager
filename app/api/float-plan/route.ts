@@ -1,9 +1,41 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { composeFloatPlanEmail } from '@/lib/claude'
 import { sendFloatPlan } from '@/lib/email'
-import type { DepartureChecklistResult } from '@/lib/parse-claude'
-import { safeJsonParse } from '@/lib/safe-json'
+
+function composeFloatPlanTemplate(params: {
+  tripName: string;
+  startDate: string;
+  endDate: string;
+  destinationName: string | null;
+  vehicleName: string | null;
+  notes: string | null;
+  mapsLink: string | null;
+}): { subject: string; body: string } {
+  const destination = params.destinationName || params.tripName;
+
+  const lines: string[] = [
+    `Will is camping at ${destination} from ${params.startDate} to ${params.endDate}.`,
+  ];
+
+  if (params.vehicleName) {
+    lines.push(`Vehicle: ${params.vehicleName}.`);
+  }
+
+  lines.push(`Expected return: ${params.endDate}.`);
+
+  if (params.notes) {
+    lines.push(`Notes: ${params.notes}`);
+  }
+
+  if (params.mapsLink) {
+    lines.push(`Map: ${params.mapsLink}`);
+  }
+
+  return {
+    subject: `Float Plan: ${params.tripName} (${params.startDate})`,
+    body: lines.join('\n'),
+  };
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -20,19 +52,12 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    if (!process.env.ANTHROPIC_API_KEY) {
-      return NextResponse.json({ error: 'Claude API key not configured' }, { status: 500 })
-    }
-
-    // Fetch trip with all related data
+    // Fetch trip with vehicle and location only
     const trip = await prisma.trip.findUnique({
       where: { id: tripId },
       include: {
-        packingItems: { include: { gear: true } },
-        mealPlan: true,
         vehicle: true,
         location: true,
-        departureChecklist: true,
       },
     })
 
@@ -56,87 +81,29 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Build packed gear summary grouped by category
-    const packedItems = trip.packingItems.filter((item) => item.packed)
-    const gearByCategory: Record<string, string[]> = {}
-    for (const item of packedItems) {
-      const cat = item.gear.category || 'misc'
-      if (!gearByCategory[cat]) gearByCategory[cat] = []
-      gearByCategory[cat].push(item.gear.name)
-    }
-    const packedGearSummary =
-      Object.entries(gearByCategory)
-        .map(([cat, names]) => `${cat}: ${names.join(', ')}`)
-        .join('; ') || 'No items marked as packed yet.'
-
-    // Build checklist status string
-    let checklistStatus = 'Departure checklist not yet generated.'
-    if (trip.departureChecklist) {
-      const checklistResult = safeJsonParse<DepartureChecklistResult>(trip.departureChecklist.result)
-      if (checklistResult) {
-        const totalItems = checklistResult.slots.reduce(
-          (sum, slot) => sum + slot.items.length,
-          0
-        )
-        const checkedItems = checklistResult.slots.reduce(
-          (sum, slot) => sum + slot.items.filter((i) => i.checked).length,
-          0
-        )
-        checklistStatus = `${checkedItems} of ${totalItems} departure tasks completed`
-      }
-    }
-
     // Build Google Maps link if location has coordinates
     const hasCoords =
-      trip.location?.latitude !== null &&
-      trip.location?.latitude !== undefined &&
-      trip.location?.longitude !== null &&
-      trip.location?.longitude !== undefined
-
+      trip.location?.latitude != null && trip.location?.longitude != null;
     const mapsLink = hasCoords
       ? `https://www.google.com/maps?q=${trip.location!.latitude},${trip.location!.longitude}`
-      : null
+      : null;
 
-    // Compose email via Claude
-    let emailResult
-    try {
-      emailResult = await composeFloatPlanEmail({
-        tripName: trip.name,
-        startDate: trip.startDate.toISOString().split('T')[0],
-        endDate: trip.endDate.toISOString().split('T')[0],
-        destinationName: trip.location?.name ?? null,
-        destinationLat: trip.location?.latitude ?? null,
-        destinationLon: trip.location?.longitude ?? null,
-        packedGearSummary,
-        vehicleName: trip.vehicle?.name ?? null,
-        weatherNotes: trip.weatherNotes ?? null,
-        tripNotes: trip.notes ?? null,
-        emergencyContactName: recipientName,
-        checklistStatus,
-      })
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to compose email'
-      if (message.includes('schema mismatch') || message.includes('non-JSON')) {
-        console.error('Float plan Claude parse error:', error)
-        return NextResponse.json({ error: message }, { status: 422 })
-      }
-      throw error
-    }
-
-    // Append Google Maps link to body if coordinates exist
-    let emailBody = emailResult.body
-    if (mapsLink && trip.location?.name) {
-      emailBody = `${emailBody}\n\nDestination: ${trip.location.name} - ${mapsLink}`
-    } else if (mapsLink) {
-      emailBody = `${emailBody}\n\nDestination map: ${mapsLink}`
-    }
+    const emailResult = composeFloatPlanTemplate({
+      tripName: trip.name,
+      startDate: trip.startDate.toISOString().split('T')[0],
+      endDate: trip.endDate.toISOString().split('T')[0],
+      destinationName: trip.location?.name ?? null,
+      vehicleName: trip.vehicle?.name ?? null,
+      notes: trip.notes ?? null,
+      mapsLink,
+    });
 
     // Send email as plain text (NOT html)
     await sendFloatPlan({
       to: recipientEmail,
       toName: recipientName,
       subject: emailResult.subject,
-      text: emailBody,
+      text: emailResult.body,
     })
 
     // Log to FloatPlanLog — fire-and-forget (don't let log failure block response)
@@ -147,7 +114,7 @@ export async function POST(request: NextRequest) {
           sentTo: recipientEmail,
           sentToName: recipientName,
           subject: emailResult.subject,
-          body: emailBody,
+          body: emailResult.body,
         },
       })
       .catch((err: unknown) => console.error('Failed to log float plan:', err))
