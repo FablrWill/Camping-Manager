@@ -4,7 +4,8 @@
 
 - ✅ **v1.0 Foundation** — Phases 1-5 (shipped 2026-04-01) — [archive](milestones/v1.0-ROADMAP.md)
 - ✅ **v1.1 Close the Loop** — Phases 6-11 (shipped 2026-04-02) — [archive](milestones/v1.1-ROADMAP.md)
-- 🚧 **v1.2 Ship It** — Phases 12-15 (in progress)
+- ✅ **v1.2 Ship It** — Phases 12-15 (shipped 2026-04-03)
+- 🚧 **v2.0 Personal Second Brain** — Phases 16-22 (in progress)
 
 ## Phases
 
@@ -31,7 +32,7 @@
 
 </details>
 
-### 🚧 v1.2 Ship It (In Progress)
+### ✅ v1.2 Ship It (Shipped 2026-04-03)
 
 **Milestone Goal:** Cross-AI review, fix all tech debt, get production build working, and deploy to Mac mini so Will can use Outland OS from his phone anywhere.
 
@@ -118,6 +119,51 @@ Plans:
 **Parallelization notes:**
 - Plan 15-01 is Wave 1 — Mac mini setup must complete first
 - Plan 15-02 is Wave 2 — requires Mac mini serving HTTPS before iPhone can verify
+
+### 🚧 v2.0 Personal Second Brain (In Progress)
+
+**Milestone Goal:** Turn Outland OS into a true camping second brain — AI that remembers, learns from past trips, and plans smarter over time. Each phase adds a self-contained v2.0 capability.
+
+- [ ] **Phase 16: Photo Auto-Import** - Bulk import from device camera roll; EXIF GPS extraction; progress tracking
+- [ ] **Phase 17: Feedback-Driven Packing** - Use post-trip gear feedback history to improve future packing list AI recommendations
+- [ ] **Phase 18: Fuel & Last Stop Planner** - Pre-trip last gas/grocery/hardware finder via OpenStreetMap Overpass API
+- [ ] **Phase 19: Dog-Aware Trip Planning** - Dog toggle on trips; dog gear section in packing list; dog-friendly notes
+- [ ] **Phase 20: Live Location Sharing** - Shareable public URL showing Will's last known location on a Leaflet map
+- [ ] **Phase 21: Permit & Reservation Awareness** - Store Recreation.gov confirmation URL + notes on trips; permit card in trip prep
+- [ ] **Phase 22: Plan A/B/C Fallback Chain** - Link trips as fallback alternatives; fallback card in trip prep with weather compare
+
+## Feature Specs
+
+### Phase 16: Photo Auto-Import (Phase 16)
+**Goal**: Will can select multiple photos at once and bulk-import them — EXIF GPS is extracted automatically and photos appear on the Spots map
+**Depends on**: Phase 15 (production app running)
+**Requirements**: PHOTO-01, PHOTO-02, PHOTO-03, PHOTO-04
+**Success Criteria** (what must be TRUE):
+  1. User can select multiple files via `<input type=file multiple>` in the Photos section
+  2. Each file is processed through the existing EXIF + sharp compress pipeline
+  3. Progress feedback shown during import (e.g., "Importing 12 of 50...")
+  4. Individual file failures don't abort the batch — errors collected and reported at end
+  5. Imported photos with GPS EXIF appear as pins on the Spots map
+
+### Phase 17: Feedback-Driven Packing
+**Goal**: Packing list generation uses gear feedback from past trips — items marked "didn't need" are deprioritized, forgotten items are flagged
+**Depends on**: Phase 15 (production app running)
+**Requirements**: PACK-01, PACK-02, PACK-03, PACK-04
+**Success Criteria** (what must be TRUE):
+  1. `generatePackingList()` in `lib/claude.ts` accepts and injects gear feedback history into the Claude prompt
+  2. Feedback is aggregated from last 3-5 `TripFeedback` records (existing model, no schema change)
+  3. When no trip history exists, packing list generates identically to current behavior
+  4. When history exists, Claude prompt includes a gear feedback summary (visible in server logs)
+  5. Packing list output contains at least one feedback-informed note when history is available
+**Plans:** 2 plans
+
+Plans:
+- [ ] 17-01-PLAN.md — GearFeedbackSummary interface + buildFeedbackSection() + tests (PACK-01, PACK-03, PACK-04)
+- [ ] 17-02-PLAN.md — API route feedback aggregation query + wiring (PACK-02)
+
+**Parallelization notes:**
+- Plan 17-01 is Wave 1 — pure function additions to lib/claude.ts
+- Plan 17-02 is Wave 2 — depends on Plan 01 exports for API route wiring
 
 ## Progress
 
