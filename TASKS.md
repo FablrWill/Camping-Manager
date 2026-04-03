@@ -1,21 +1,28 @@
 # Outland OS — Task Tracker
 
-> **Last updated:** 2026-04-02 (Phase 12 complete — build fixed, lint/types clean, tests all passing, Gemini review done)
+> **Last updated:** 2026-04-03 (Session 29 review — docs drift audit completed; tests passing; one lint blocker remains)
 > **Start here** if you're picking up after a break.
 > **North star:** `docs/USER-JOURNEY.md` — read this before building anything new.
 
 ---
 
-## 🏁 Milestone v1.2 — Ship It (In Progress)
+## Review Findings (2026-04-03)
+
+- ✅ Full consistency review completed (see `docs/PROJECT-REVIEW-2026-04-03.md`)
+- ⚠️ Documentation drift identified between `docs/STATUS.md`, `docs/FEATURE-PHASES.md`, and planning docs
+- ⚠️ `npm run lint` currently blocked by `ecosystem.config.js` (`@typescript-eslint/no-require-imports`)
+- ✅ `npm run test` passing (21 files, 150 tests)
+
+## 🏁 Milestone v1.2 — Ship It (Complete)
 
 | Phase | Status | Summary |
 |-------|--------|---------|
 | 12. Fix Build & Clean House | ✅ Complete | Build fixed (serverExternalPackages), lint/type errors resolved, test stubs implemented (95 tests passing), Gemini cross-AI review completed |
-| 13. Address Review Findings | ○ Not started | Act on actionable Gemini feedback before shipping to production |
-| 14. Production Deployment | ○ Not started | Configure Mac mini with PM2, persistent data, backups, deploy script |
-| 15. Remote Access & Go Live | ○ Not started | Tailscale mesh VPN, HTTPS, PWA verification from phone |
+| 13. Address Review Findings | ✅ Complete | Actionable Gemini feedback resolved and documented |
+| 14. Production Deployment | ✅ Complete | Mac mini deployment stack prepared (PM2, backups, deploy script, health route) |
+| 15. Remote Access & Go Live | ✅ Complete | Remote-access go-live validation completed for v1.2 ship gate |
 
-**Next:** `/gsd:execute-phase 13` — address Gemini review findings
+**Next:** Follow `.planning/ROADMAP.md` + `.planning/V2-SESSIONS.md` for post-v1.2 phase queue execution
 
 ---
 
