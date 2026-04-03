@@ -76,6 +76,13 @@ A personal second brain for car camping — an AI-powered knowledge system that 
 
 None — v1.2 Ship It complete as of 2026-04-03.
 
+### Validated in Phase 16 (photo-bulk-import)
+
+- ✓ Bulk photo import with per-file EXIF GPS extraction + sharp compression — Phase 16
+- ✓ Real-time "Importing X of Y..." progress counter in PhotoUpload UI — Phase 16
+- ✓ Per-file error isolation (corrupt/GPS-less files skip without aborting batch) — Phase 16
+- ✓ Imported photos with GPS appear as map pins after import — Phase 16
+
 ### Validated in v1.2 Ship It (Phases 12–15)
 
 - ✓ Cross-AI review (Gemini full-project audit) — Phase 12
@@ -85,6 +92,10 @@ None — v1.2 Ship It complete as of 2026-04-03.
 - ✓ Production deployment on Mac mini (PM2 + launchd, `/data/outland/`) — Phase 14
 - ✓ Remote access via Tailscale (`lisa-mini.tailfd6d06.ts.net`) — Phase 15
 - ✓ PWA installed on iPhone, works offline over Tailscale — Phase 15
+
+## Current State
+
+Phase 16 complete (2026-04-03) — bulk photo import shipped with progress counter and per-file error isolation.
 
 ## Current Milestone: ✅ v1.2 Ship It — COMPLETE (2026-04-03)
 

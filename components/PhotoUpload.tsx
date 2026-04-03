@@ -16,6 +16,7 @@ export default function PhotoUpload({ onUploadComplete }: PhotoUploadProps) {
   const [uploading, setUploading] = useState(false);
   const [result, setResult] = useState<UploadResult | null>(null);
   const [dragOver, setDragOver] = useState(false);
+  const [progress, setProgress] = useState<{ current: number; total: number } | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   async function handleFiles(files: FileList | null) {
@@ -23,28 +24,34 @@ export default function PhotoUpload({ onUploadComplete }: PhotoUploadProps) {
 
     setUploading(true);
     setResult(null);
+    setProgress(null);
 
-    const formData = new FormData();
-    for (let i = 0; i < files.length; i++) {
-      formData.append("photos", files[i]);
-    }
+    const totals = { added: 0, skipped: 0, errors: [] as string[] };
 
     try {
-      const res = await fetch("/api/photos/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      const data = await res.json();
-      setResult(data);
-      if (data.added > 0) {
+      for (let i = 0; i < files.length; i++) {
+        setProgress({ current: i + 1, total: files.length });
+        const fd = new FormData();
+        fd.append('photo', files[i]);
+        try {
+          const res = await fetch('/api/photos/bulk-import', { method: 'POST', body: fd });
+          const data = await res.json();
+          totals.added += data.added ?? 0;
+          totals.skipped += data.skipped ?? 0;
+          if (data.error) totals.errors.push(`${files[i].name}: ${data.error}`);
+          if (data.errors?.length) totals.errors.push(...data.errors.map((e: string) => `${files[i].name}: ${e}`));
+        } catch {
+          totals.errors.push(`${files[i].name}: network error`);
+        }
+      }
+      setResult(totals);
+      if (totals.added > 0) {
         onUploadComplete();
       }
-    } catch {
-      setResult({ added: 0, skipped: 0, errors: ["Upload failed. Try again."] });
     } finally {
       setUploading(false);
-      if (inputRef.current) inputRef.current.value = "";
+      setProgress(null);
+      if (inputRef.current) inputRef.current.value = '';
     }
   }
 
@@ -77,8 +84,14 @@ export default function PhotoUpload({ onUploadComplete }: PhotoUploadProps) {
 
         {uploading ? (
           <div className="space-y-2">
-            <div className="animate-spin text-2xl">⏳</div>
-            <p className="text-sm text-stone-600">Extracting GPS data...</p>
+            <div className="animate-spin text-2xl">&#x23F3;</div>
+            {progress ? (
+              <p className="text-sm text-stone-600">
+                Importing {progress.current} of {progress.total}...
+              </p>
+            ) : (
+              <p className="text-sm text-stone-600">Extracting GPS data...</p>
+            )}
           </div>
         ) : (
           <div className="space-y-2">
