@@ -50,7 +50,7 @@
 - [x] **Phase 18: Fuel & Last Stop Planner** - Pre-trip fuel/grocery/hardware stop cards via Overpass API (completed 2026-04-03)
 - [x] **Phase 19: Dog-Aware Trip Planning** - Dog toggle on trips, dog gear packing section, dog-friendly notes (completed 2026-04-03)
 - [x] **Phase 20: Live Location Sharing** - Shareable public URL showing Will's last known GPS location (completed 2026-04-03)
-- [ ] **Phase 21: Permit & Reservation** - Store Recreation.gov confirmations with trip, surface reminders
+- [x] **Phase 21: Permit & Reservation** - Store Recreation.gov confirmations with trip, surface reminders (completed 2026-04-03)
 - [ ] **Phase 22: Plan A/B/C Fallback Chain** - Link fallback trips to primary, compare in trip prep
 - [x] **Phase 23: Gear Category Expansion** - Expand from 7 to 15 categories with visual grouping, add tech gear fields (completed 2026-04-03)
 - [ ] **Phase 24: Smart Inbox / Universal Intake** - Single intake endpoint + inbox UI for phone share-to-app workflow
