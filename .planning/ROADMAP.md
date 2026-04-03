@@ -235,7 +235,16 @@ Plans:
   5. Power budget correctly excludes non-powered categories
   6. All category references use the shared `lib/gear-categories.ts` module (no local duplicates)
   7. `npm run build` passes
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 23-01-PLAN.md — Shared categories module + Prisma migration + seed re-categorization + API routes
+- [ ] 23-02-PLAN.md — Replace category duplicates in DashboardClient, claude.ts, power.ts, agent tools
+- [ ] 23-03-PLAN.md — GearClient grouped filter chips + GearForm tech detail fields
+
+**Parallelization notes:**
+- Plan 23-01 is Wave 1 — shared module and schema must exist before consumers can import
+- Plans 23-02 and 23-03 are Wave 2 — parallel, no file overlap
 
 ### Phase 24: Smart Inbox / Universal Intake
 **Goal**: Single intake endpoint + inbox UI so Will can share anything from his phone (screenshot, URL, text) and AI triages it into the right entity type
@@ -278,7 +287,7 @@ Phases execute in numeric order: 12 -> 13 -> 14 -> 15
 | 20. Live Location Sharing | v2.0 | 0/TBD | Not started | - |
 | 21. Permit & Reservation | v2.0 | 0/TBD | Not started | - |
 | 22. Plan A/B/C Fallback Chain | v2.0 | 0/TBD | Not started | - |
-| 23. Gear Category Expansion | v2.0 | 0/TBD | Not started | - |
+| 23. Gear Category Expansion | v2.0 | 0/3 | Not started | - |
 | 24. Smart Inbox / Intake | v2.0 | 0/TBD | Not started | - |
 
 ---
