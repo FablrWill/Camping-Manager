@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Ship It
 status: executing
-stopped_at: Phase 15 planned — 2 plans ready
-last_updated: "2026-04-03T03:21:20.908Z"
+stopped_at: Completed 20-01-PLAN.md
+last_updated: "2026-04-03T05:11:25.896Z"
 last_activity: 2026-04-03
 progress:
   total_phases: 4
-  completed_phases: 3
-  total_plans: 11
-  completed_plans: 11
+  completed_phases: 4
+  total_plans: 14
+  completed_plans: 14
   percent: 40
 ---
 
@@ -21,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-01)
 
 **Core value:** Personal camping second brain — a closed-loop system that plans, executes, and learns from every trip
-**Current focus:** Phase 15 — remote-access-go-live
+**Current focus:** Phase 20 — live-location-sharing
 
 ## Current Position
 
-Phase: 15
-Plan: Not started
-Status: Executing Phase 15
+Phase: 20 (live-location-sharing) — EXECUTING
+Plan: 2 of 2
+Status: Ready to execute
 Last activity: 2026-04-03
 
 Progress: [████░░░░░░] 40%
@@ -64,6 +64,7 @@ Progress: [████░░░░░░] 40%
 | Phase 07-day-of-execution P03 | 252 | 2 tasks | 4 files |
 | Phase 13-address-review-findings P03 | 225 | 2 tasks | 11 files |
 | Phase 13 P04 | 300 | 1 tasks | 1 files |
+| Phase 20-live-location-sharing P01 | 383 | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -96,6 +97,8 @@ Recent decisions affecting current work:
 - [Phase 13-address-review-findings]: safeParseFloat/safeParseInt return null not NaN — correct for Prisma nullable fields
 - [Phase 13-address-review-findings]: vehicle/[id] PUT now explicitly maps fields — removes unsafe pass-through of raw request body to Prisma
 - [Phase 13]: All 74 Gemini findings accounted for — 27 fixed, 8 already handled, 10 deferred MEDIUM, 31 deferred LOW
+- [Phase 20-live-location-sharing]: SharedLocation uses singleton pattern (findFirst + create/update) — same approach as Settings model; one shared location at a time
+- [Phase 20-live-location-sharing]: upsertSharedLocation/deleteSharedLocation accept prismaClient argument — pure helpers testable without real DB
 
 ### Pending Todos
 
@@ -109,6 +112,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-03T02:47:44.066Z
-Stopped at: Phase 15 planned — 2 plans ready
-Resume file: .planning/phases/15-remote-access-go-live/15-01-PLAN.md
+Last session: 2026-04-03T05:11:25.892Z
+Stopped at: Completed 20-01-PLAN.md
+Resume file: None
