@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Ship It
 status: executing
-stopped_at: Completed 22-03-PLAN.md — Fallback Plans card in TripPrepClient
-last_updated: "2026-04-03T16:19:07.507Z"
+stopped_at: Completed 22-02-PLAN.md — Phase 22 Plan B/C fallback chain UI
+last_updated: "2026-04-03T16:14:32.326Z"
 last_activity: 2026-04-03
 progress:
   total_phases: 23
   completed_phases: 20
   total_plans: 70
-  completed_plans: 64
+  completed_plans: 63
   percent: 40
 ---
 
@@ -21,12 +21,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-01)
 
 **Core value:** Personal camping second brain — a closed-loop system that plans, executes, and learns from every trip
-**Current focus:** Phase 22 — plan-fallback-chain
+**Current focus:** Phase 24 — smart-inbox-universal-intake
 
 ## Current Position
 
-Phase: 22 (plan-fallback-chain) — EXECUTING
-Plan: 3 of 3
+Phase: 24 (smart-inbox-universal-intake) — EXECUTING
+Plan: 2 of 3
 Status: Ready to execute
 Last activity: 2026-04-03
 
@@ -67,8 +67,7 @@ Progress: [████░░░░░░] 40%
 | Phase 18-fuel-last-stop-planner P02 | 10 | 1 tasks | 1 files |
 | Phase 20-live-location-sharing P01 | 383 | 2 tasks | 6 files |
 | Phase 20-live-location-sharing P02 | 203 | 4 tasks | 9 files |
-| Phase 22-plan-fallback-chain P01 | 3 | 2 tasks | 5 files |
-| Phase 22 P03 | 17 | 1 tasks | 3 files |
+| Phase 22-plan-fallback-chain P02 | 15 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -107,9 +106,7 @@ Recent decisions affecting current work:
 - [Phase 20-live-location-sharing]: upsertSharedLocation/deleteSharedLocation accept prismaClient argument — pure helpers testable without real DB
 - [Phase 20-live-location-sharing]: ssr:false dynamic import must live in Client Component, not Server Component — Next.js App Router constraint; extracted to share-page-client.tsx
 - [Phase 20-live-location-sharing]: Bare layout.tsx at /share renders <html> directly — fully bypasses AppShell so family sees clean map-only page with no nav chrome
-- [Phase 22-plan-fallback-chain]: Manual migration SQL used for fallback_chain — FTS virtual tables triggered non-interactive Prisma warning; ALTER TABLE pattern applied directly
-- [Phase 22-plan-fallback-chain]: FallbackChain self-relation uses onDelete:NoAction + manual updateMany pre-delete — SQLite/Prisma does not reliably enforce onDelete:SetNull on self-relations
-- [Phase 22]: Use correct DayForecast field names: highF/lowF/precipProbability — not plan alias tempHigh/tempLow/precipChance
+- [Phase 22-plan-fallback-chain]: Add Plan B/C button placed in TripsClient (not TripCard) to keep TripCard interface minimal
 
 ### Pending Todos
 
@@ -123,6 +120,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-03T16:19:07.503Z
-Stopped at: Completed 22-03-PLAN.md — Fallback Plans card in TripPrepClient
+Last session: 2026-04-03T16:14:32.321Z
+Stopped at: Completed 22-02-PLAN.md — Phase 22 Plan B/C fallback chain UI
 Resume file: None
