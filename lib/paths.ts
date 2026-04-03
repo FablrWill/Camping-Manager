@@ -13,6 +13,18 @@ export function getPhotosDir(): string {
 }
 
 /**
+ * Resolves the directory where downloaded gear document PDFs are stored.
+ * Production: /data/outland/docs (set via DOCS_DIR env var)
+ * Development: process.cwd()/public/docs (default)
+ */
+export function getDocsDir(): string {
+  if (process.env.DOCS_DIR) {
+    return process.env.DOCS_DIR;
+  }
+  return path.join(process.cwd(), 'public', 'docs');
+}
+
+/**
  * Resolves the full filesystem path for a photo's imagePath.
  * imagePath is stored in the DB as "/photos/filename.jpg".
  * Production: PHOTOS_DIR + "/filename.jpg"

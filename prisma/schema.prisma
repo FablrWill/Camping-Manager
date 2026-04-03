@@ -26,11 +26,11 @@ model GearItem {
   hasBattery  Boolean  @default(false) // has internal rechargeable battery — reminder to charge before trips
   modelNumber   String?  // e.g. "ESP32-WROOM-32"
   connectivity  String?  // e.g. "WiFi, Bluetooth"
-  manualUrl     String?  // URL to product manual
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   packingItems PackingItem[]
+  documents    GearDocument[]
 }
 
 model Vehicle {
@@ -363,4 +363,20 @@ model InboxItem {
 
   @@index([status])
   @@index([createdAt])
+}
+
+// --- Phase 25: Gear Docs & Manual Finder ---
+
+model GearDocument {
+  id         String   @id @default(cuid())
+  gearItemId String
+  type       String   // "manual_pdf" | "support_link" | "warranty" | "product_page"
+  url        String
+  title      String
+  localPath  String?  // set when PDF downloaded, e.g. /docs/abc123.pdf
+  createdAt  DateTime @default(now())
+
+  gearItem GearItem @relation(fields: [gearItemId], references: [id], onDelete: Cascade)
+
+  @@index([gearItemId])
 }
