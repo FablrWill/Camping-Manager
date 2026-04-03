@@ -6,7 +6,7 @@
 - ✅ **v1.1 Close the Loop** — Phases 6-11 (shipped 2026-04-02) — [archive](milestones/v1.1-ROADMAP.md)
 - ✅ **v1.2 Ship It** — Phases 12-15 (shipped 2026-04-03)
 - ✅ **v2.0 Smarter & Sharper** — Phases 16-24 (shipped 2026-04-03)
-- 🚧 **v3.0 Gear Intelligence + Day-Of** — Phases 25-32 (in progress)
+- 🚧 **v3.0 Gear Intelligence + Day-Of** — Phases 25-33 (in progress)
 
 ## Phases
 
@@ -516,6 +516,17 @@ Plans:
 | 30. Gear Product Research | v3.0 | 0/TBD | Not started | - |
 | 31. Dark Sky & Astro Info | v3.0 | 0/TBD | Not started | - |
 | 32. Deal Monitoring | v3.0 | 0/TBD | Not started | - |
+| 33. Conversational Trip Planner | v3.0 | 0/TBD | Not started | - |
+
+### Phase 33: Conversational Trip Planner
+
+**Goal:** Replace the static "Create Trip" form with a multi-turn Claude agent chat that asks dynamic questions, calls gear/weather/web tools, and creates the trip when ready. Chat is the primary creation path; existing edit form stays for post-creation edits. "Add manually" escape hatch preserved.
+**Requirements**: TBD
+**Depends on:** Phase 24
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 33 to break down)
 
 ---
 *Full phase details for shipped milestones: see archives in `.planning/milestones/`*

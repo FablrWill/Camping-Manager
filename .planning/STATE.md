@@ -112,6 +112,10 @@ Recent decisions affecting current work:
 
 None yet.
 
+### Roadmap Evolution
+
+- Phase 33 added: Conversational Trip Planner — replace Create Trip form with multi-turn Claude agent chat (dynamic questions, tool use, trip creation)
+
 ### Blockers/Concerns
 
 - Serwist/Turbopack: if manual sw.js fails App Router URL pattern validation in spike, fall back to Serwist with --webpack flag
