@@ -125,7 +125,7 @@ Plans:
 **Milestone Goal:** Turn Outland OS into a true camping second brain — AI that remembers, learns from past trips, and plans smarter over time. Each phase adds a self-contained v2.0 capability.
 
 - [ ] **Phase 16: Photo Auto-Import** - Bulk import from device camera roll; EXIF GPS extraction; progress tracking
-- [ ] **Phase 17: Feedback-Driven Packing** - Use post-trip gear feedback history to improve future packing list AI recommendations
+- [x] **Phase 17: Feedback-Driven Packing** - Use post-trip gear feedback history to improve future packing list AI recommendations (completed 2026-04-03)
 - [ ] **Phase 18: Fuel & Last Stop Planner** - Pre-trip last gas/grocery/hardware finder via OpenStreetMap Overpass API
 - [ ] **Phase 19: Dog-Aware Trip Planning** - Dog toggle on trips; dog gear section in packing list; dog-friendly notes
 - [ ] **Phase 20: Live Location Sharing** - Shareable public URL showing Will's last known location on a Leaflet map
@@ -155,11 +155,11 @@ Plans:
   3. When no trip history exists, packing list generates identically to current behavior
   4. When history exists, Claude prompt includes a gear feedback summary (visible in server logs)
   5. Packing list output contains at least one feedback-informed note when history is available
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 
 Plans:
 - [x] 17-01-PLAN.md — GearFeedbackSummary interface + buildFeedbackSection() + tests (PACK-01, PACK-03, PACK-04)
-- [ ] 17-02-PLAN.md — API route feedback aggregation query + wiring (PACK-02)
+- [x] 17-02-PLAN.md — API route feedback aggregation query + wiring (PACK-02)
 
 **Parallelization notes:**
 - Plan 17-01 is Wave 1 — pure function additions to lib/claude.ts

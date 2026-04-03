@@ -59,7 +59,7 @@ Requirements for milestone v2.0 "Personal Second Brain". Each maps to v2.0 roadm
 ### Feedback-Driven Packing (Phase 17)
 
 - [x] **PACK-01**: `generatePackingList()` in `lib/claude.ts` accepts feedback context parameter
-- [ ] **PACK-02**: `/api/packing-list` queries last 3-5 `TripFeedback` records and aggregates per-item status
+- [x] **PACK-02**: `/api/packing-list` queries last 3-5 `TripFeedback` records and aggregates per-item status
 - [x] **PACK-03**: Graceful degradation — no trip history produces identical output to current behavior
 - [x] **PACK-04**: Claude prompt includes gear feedback summary; output contains feedback-informed notes when history exists
 
