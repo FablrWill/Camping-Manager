@@ -341,3 +341,20 @@ model SharedLocation {
   updatedAt DateTime @updatedAt
   createdAt DateTime @default(now())
 }
+
+model InboxItem {
+  id           String    @id @default(cuid())
+  sourceType   String    // "text" | "url" | "image"
+  rawContent   String    // original input: text content, URL, or image path
+  status       String    @default("pending")  // "pending" | "accepted" | "rejected"
+  triageType   String?   // "gear" | "location" | "knowledge" | "tip" | "unknown"
+  suggestion   String?   // JSON blob of extracted suggestion (GearDraft, LocationDraft, etc.)
+  summary      String?   // human-readable one-liner of what was found
+  confidence   String?   // "high" | "medium" | "low"
+  imagePath    String?   // stored image path if sourceType=image
+  createdAt    DateTime  @default(now())
+  processedAt  DateTime?
+
+  @@index([status])
+  @@index([createdAt])
+}
