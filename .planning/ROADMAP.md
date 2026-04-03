@@ -541,7 +541,7 @@ Plans:
 ### Phase 34: Meal Planning Core
 **Goal**: AI-generated meal plans linked to trips — every meal slot for every day, based on trip duration, weather, dog status, and available cooking gear
 **Depends on**: Phase 22 (Trip model + claude.ts + TripPrepClient settled), Phase 33 (schema settled)
-**Requirements**: TBD
+**Requirements**: MEAL-01, MEAL-02, MEAL-03, MEAL-04, MEAL-05, MEAL-06, MEAL-07
 **Success Criteria** (what must be TRUE):
   1. Meal plan generates for any trip with a start/end date
   2. Plan covers every day × every slot (breakfast, lunch, dinner)
@@ -549,9 +549,10 @@ Plans:
   4. Meal plan section visible in trip prep with day-by-day layout
   5. Trip card shows meal plan status ("Meal plan ready" / "No meal plan")
   6. `npm run build` passes
-**Plans**: 3 plans
+**Plans**: 4 plans
 
 Plans:
+- [ ] 34-00-PLAN.md — Wave 0 test stubs (meal-plan-route, meal-regenerate-route, meal-plan-schema)
 - [ ] 34-01-PLAN.md — Schema migration (normalize MealPlan + create Meal table) + Zod schemas
 - [ ] 34-02-PLAN.md — lib/claude.ts updates (bringingDog, regenerateMeal) + all API routes
 - [ ] 34-03-PLAN.md — MealPlanClient component + TripPrepClient wiring + TripsClient badge
