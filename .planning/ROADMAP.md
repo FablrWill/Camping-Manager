@@ -516,7 +516,7 @@ Plans:
 | 30. Gear Product Research | v3.0 | 0/TBD | Not started | - |
 | 31. Dark Sky & Astro Info | v3.0 | 0/TBD | Not started | - |
 | 32. Deal Monitoring | v3.0 | 0/TBD | Not started | - |
-| 33. Conversational Trip Planner | v3.0 | 4/4 | Complete   | 2026-04-03 |
+| 33. Conversational Trip Planner | v3.0 | 4/4 | Complete    | 2026-04-03 |
 
 ### Phase 33: Conversational Trip Planner
 
