@@ -45,7 +45,7 @@ Declared values (must be multiples of 4):
 
 Exceptions:
 - Touch target minimum: 44px (`min-h-[44px]` already on `DepartureChecklistItem`). The departure time input row must also meet this minimum. Use `min-h-[44px]` on the container row.
-- Departure time input `datetime-local`: native browser input, styled to match existing `Input` component: `px-3 py-2.5 rounded-lg border`.
+- Departure time input `datetime-local`: native browser input, styled to match existing `Input` component: `px-3 py-2 rounded-lg border`.
 
 Source: Existing `DepartureChecklistClient.tsx` and `DepartureChecklistItem.tsx` spacing patterns.
 
@@ -62,7 +62,7 @@ Source: Existing `DepartureChecklistClient.tsx` and `DepartureChecklistItem.tsx`
 
 Time badge (`suggestedTime`): 12px (`text-xs`), weight 400, `tabular-nums` class for clock alignment, color `text-stone-400 dark:text-stone-500`.
 
-Departure time display (when set): 14px (`text-sm`), weight 600 (`font-semibold`), color `text-stone-900 dark:text-stone-100`.
+Departure time display (when set): 14px (`text-sm`), weight 700 (`font-bold`), color `text-stone-900 dark:text-stone-100`.
 
 Departure time label: 14px (`text-sm`), weight 400, color `text-stone-500 dark:text-stone-400`.
 
@@ -117,7 +117,7 @@ This section specifies the two net-new UI elements Phase 26 adds to the existing
 ```
 [label: "Departure time:"]  [formatted date: "Fri Apr 18 at 7:00 AM"]  [edit icon button]
 ```
-- Formatted value: `text-sm font-semibold text-stone-900 dark:text-stone-100`
+- Formatted value: `text-sm font-bold text-stone-900 dark:text-stone-100`
 - Edit icon: `Pencil` (size 14) from Lucide, `text-stone-400 dark:text-stone-500`, tap opens inline datetime-local input
 - Saving: PATCH fires on `blur` or on explicit confirmation — no auto-regen (D-04)
 
@@ -173,6 +173,8 @@ Source: Existing strings from `DepartureChecklistClient.tsx` (kept verbatim). Ne
 ---
 
 ## States and Interactions Summary
+
+**Primary focal point:** When the checklist is fully loaded, the primary visual anchor is the first slot heading (`text-lg font-bold`) followed immediately by its checklist items — the eye enters at the top slot and scans down through the task list.
 
 | State | What the user sees |
 |-------|--------------------|
