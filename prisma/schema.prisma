@@ -189,6 +189,7 @@ model Trip {
   cachedAt               DateTime? // Phase 8 offline snapshot (D-11)
   emergencyContactName   String?   // per-trip override for emergency contact name (Phase 7)
   emergencyContactEmail  String?   // per-trip override for emergency contact email (Phase 7)
+  bringingDog            Boolean   @default(false)  // Phase 19: dog-aware trip planning
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
