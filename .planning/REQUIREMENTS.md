@@ -57,6 +57,16 @@ Requirements for milestone v2.0 "Smarter & Sharper". Each maps to roadmap phases
 - [x] **DOG-04**: When `bringingDog = false`, no dog items appear in packing list (no regression to existing behavior)
 - [x] **DOG-05**: Trip edit supports toggling `bringingDog` on existing trips (PUT endpoint accepts + persists)
 
+### Gear Category Expansion (Phase 23)
+
+- [ ] **GEAR-CAT-01**: `lib/gear-categories.ts` is the single source of truth — all category definitions, emojis, groups, and helpers exported from this module
+- [ ] **GEAR-CAT-02**: 15 categories in 4 visual groups (Living: shelter/sleep/cook/hydration/clothing; Utility: lighting/tools/safety/furniture; Tech/Power: power/electronics/vehicle; Action: navigation/hiking/dog)
+- [ ] **GEAR-CAT-03**: Gear page shows grouped filter chips using the 4 visual groups
+- [ ] **GEAR-CAT-04**: GearForm includes 3 new optional fields: modelNumber, connectivity, manualUrl (for tech gear)
+- [ ] **GEAR-CAT-05**: Prisma migration adds modelNumber, connectivity, manualUrl to GearItem
+- [ ] **GEAR-CAT-06**: Seed data re-categorizes 9 items (fairy lights/wall sconces/flood lights→lighting, camp table/Helinox Chair→furniture, fire extinguisher/first aid kit→safety, Garmin inReach→navigation, water jug pump→hydration)
+- [ ] **GEAR-CAT-07**: All local category duplicates removed (GearClient, DashboardClient, claude.ts, power.ts, agent tools) — all import from shared module
+
 ## Future Requirements
 
 Deferred to future release. Tracked but not in current roadmap.
@@ -118,9 +128,18 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DOG-04 | Phase 19 Plan 01 | Complete |
 | DOG-05 | Phase 19 Plan 01 | Complete |
 
+| GEAR-CAT-01 | Phase 23 | Pending |
+| GEAR-CAT-02 | Phase 23 | Pending |
+| GEAR-CAT-03 | Phase 23 | Pending |
+| GEAR-CAT-04 | Phase 23 | Pending |
+| GEAR-CAT-05 | Phase 23 | Pending |
+| GEAR-CAT-06 | Phase 23 | Pending |
+| GEAR-CAT-07 | Phase 23 | Pending |
+
 **Coverage:**
 - v1.2 requirements: 26 total
-- Mapped to phases: 26
+- v2.0 requirements: 12 total (5 DOG + 7 GEAR-CAT)
+- Mapped to phases: 38
 - Unmapped: 0
 
 ---

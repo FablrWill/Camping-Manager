@@ -52,6 +52,8 @@
 - [ ] **Phase 20: Live Location Sharing** - Shareable public URL showing Will's last known GPS location
 - [ ] **Phase 21: Permit & Reservation** - Store Recreation.gov confirmations with trip, surface reminders
 - [ ] **Phase 22: Plan A/B/C Fallback Chain** - Link fallback trips to primary, compare in trip prep
+- [ ] **Phase 23: Gear Category Expansion** - Expand from 7 to 15 categories with visual grouping, add tech gear fields
+- [ ] **Phase 24: Smart Inbox / Universal Intake** - Single intake endpoint + inbox UI for phone share-to-app workflow
 
 ## Phase Details
 
@@ -221,6 +223,32 @@ Plans:
   5. Deleting primary trip sets `fallbackFor = null` on alternatives (no cascade delete)
 **Plans**: TBD
 
+### Phase 23: Gear Category Expansion
+**Goal**: Expand gear from 7 to 15 categories with visual grouping, add 3 new schema fields for tech gear, and centralize all category definitions in a shared module
+**Depends on**: None (independent)
+**Requirements**: GEAR-CAT-01, GEAR-CAT-02, GEAR-CAT-03, GEAR-CAT-04, GEAR-CAT-05, GEAR-CAT-06, GEAR-CAT-07
+**Success Criteria** (what must be TRUE):
+  1. 15 categories render as grouped filter chips in gear page (4 visual groups: Living, Utility, Tech/Power, Action)
+  2. Existing items display in correct new categories after seed re-categorization
+  3. GearForm has tech detail fields (modelNumber, connectivity, manualUrl)
+  4. Packing list generation references all 15 categories
+  5. Power budget correctly excludes non-powered categories
+  6. All category references use the shared `lib/gear-categories.ts` module (no local duplicates)
+  7. `npm run build` passes
+**Plans**: TBD
+
+### Phase 24: Smart Inbox / Universal Intake
+**Goal**: Single intake endpoint + inbox UI so Will can share anything from his phone (screenshot, URL, text) and AI triages it into the right entity type
+**Depends on**: Phase 23 (needs 15 categories for proper triage routing)
+**Requirements**: INBOX-01, INBOX-02, INBOX-03, INBOX-04, INBOX-05
+**Success Criteria** (what must be TRUE):
+  1. POST endpoint accepts FormData with text, url, or file
+  2. AI triage classifies input into gear/location/knowledge/tip categories
+  3. Inbox page shows pending items with accept/edit/reject actions
+  4. Accept creates real entity (gear item, location, etc.) from AI suggestion
+  5. `npm run build` passes
+**Plans**: TBD
+
 ## Progress
 
 **Execution Order:**
@@ -243,6 +271,15 @@ Phases execute in numeric order: 12 -> 13 -> 14 -> 15
 | 13. Address Review Findings | v1.2 | 4/4 | Complete    | 2026-04-03 |
 | 14. Production Deployment | v1.2 | 0/TBD | Not started | - |
 | 15. Remote Access & Go Live | v1.2 | 0/2 | Complete    | 2026-04-03 |
+| 16. Photo Auto-Import | v2.0 | 0/TBD | Not started | - |
+| 17. Feedback-Driven Packing | v2.0 | 0/TBD | Not started | - |
+| 18. Fuel & Last Stop Planner | v2.0 | 0/TBD | Not started | - |
+| 19. Dog-Aware Trip Planning | v2.0 | 2/2 | Complete | 2026-04-03 |
+| 20. Live Location Sharing | v2.0 | 0/TBD | Not started | - |
+| 21. Permit & Reservation | v2.0 | 0/TBD | Not started | - |
+| 22. Plan A/B/C Fallback Chain | v2.0 | 0/TBD | Not started | - |
+| 23. Gear Category Expansion | v2.0 | 0/TBD | Not started | - |
+| 24. Smart Inbox / Intake | v2.0 | 0/TBD | Not started | - |
 
 ---
 *Full phase details for shipped milestones: see archives in `.planning/milestones/`*
