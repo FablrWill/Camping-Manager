@@ -17,6 +17,18 @@ L.Icon.Default.mergeOptions({
   shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 });
 
+// --- HTML Escaping (XSS prevention for Leaflet popup innerHTML) ---
+
+function escHtml(s: string | null | undefined): string {
+  if (!s) return '';
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 // --- Marker Icons ---
 
 function makeIcon(bg: string, emoji: string, badge?: string) {
@@ -321,24 +333,24 @@ const SpotMap = forwardRef<SpotMapHandle, SpotMapProps>(function SpotMap(
       const visionBadge =
         photo.locationSource === "vision"
           ? `<p style="margin:4px 0;font-size:11px;color:#666;">
-              🤖 ${photo.locationDescription || "AI-inferred location"}
+              🤖 ${escHtml(photo.locationDescription) || "AI-inferred location"}
               ${photo.visionApproximate ? '<br><span style="color:#f59e0b;">⚠ Approximate — AI inferred from map screenshot</span>' : ""}
             </p>`
           : "";
 
       const googleLink = photo.googleUrl
-        ? `<a href="${photo.googleUrl}" target="_blank" style="color:#3b82f6;font-size:12px;">View in Google Photos</a>`
+        ? `<a href="${escHtml(photo.googleUrl)}" target="_blank" style="color:#3b82f6;font-size:12px;">View in Google Photos</a>`
         : "";
 
       const deleteBtn = `<button data-photo-delete="${photo.id}" style="margin-top:8px;padding:6px 12px;background:#dc2626;color:white;border:none;border-radius:6px;font-size:12px;cursor:pointer;width:100%;">Delete Photo</button>`;
 
       marker.bindPopup(`
         <div style="min-width:200px;font-family:system-ui;">
-          <img src="${photo.imagePath}" alt="${photo.title}"
+          <img src="${escHtml(photo.imagePath)}" alt="${escHtml(photo.title)}"
             style="width:100%;max-width:280px;border-radius:6px;margin-bottom:6px;"
             loading="lazy" onerror="this.style.display='none'"
           />
-          <h3 style="margin:0 0 2px;font-size:14px;font-weight:600;">${photo.title}</h3>
+          <h3 style="margin:0 0 2px;font-size:14px;font-weight:600;">${escHtml(photo.title)}</h3>
           ${date ? `<p style="margin:2px 0;color:#666;font-size:12px;">📅 ${date}</p>` : ""}
           ${photo.altitude ? `<p style="margin:2px 0;color:#666;font-size:12px;">🏔️ ${Math.round(photo.altitude)}m</p>` : ""}
           ${visionBadge}
@@ -392,10 +404,10 @@ const SpotMap = forwardRef<SpotMapHandle, SpotMapProps>(function SpotMap(
 
       const popup = L.popup().setContent(`
         <div style="min-width:180px;font-family:system-ui;">
-          <h3 style="margin:0 0 4px;font-size:15px;font-weight:600;">${loc.name}</h3>
+          <h3 style="margin:0 0 4px;font-size:15px;font-weight:600;">${escHtml(loc.name)}</h3>
           ${typeLabel ? `<p style="margin:2px 0;color:#666;font-size:12px;">${typeLabel}</p>` : ""}
           ${stars ? `<p style="margin:2px 0;">${stars}</p>` : ""}
-          ${loc.description ? `<p style="margin:4px 0;font-size:13px;color:#444;">${loc.description.slice(0, 120)}${loc.description.length > 120 ? "..." : ""}</p>` : ""}
+          ${loc.description ? `<p style="margin:4px 0;font-size:13px;color:#444;">${escHtml(loc.description.slice(0, 120))}${loc.description.length > 120 ? "..." : ""}</p>` : ""}
           ${onLocationEdit ? `<button data-edit-location="${loc.id}" style="margin-top:6px;padding:4px 12px;background:#d97706;color:white;border:none;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;">Edit</button>` : ""}
         </div>
       `);
@@ -512,8 +524,8 @@ const SpotMap = forwardRef<SpotMapHandle, SpotMapProps>(function SpotMap(
 
       circle.bindPopup(`
         <div style="font-family:system-ui;min-width:180px;">
-          <h3 style="margin:0 0 4px;font-size:15px;font-weight:600;">📍 ${pv.name}</h3>
-          ${pv.address ? `<p style="margin:2px 0;color:#666;font-size:12px;">📮 ${pv.address}</p>` : ""}
+          <h3 style="margin:0 0 4px;font-size:15px;font-weight:600;">📍 ${escHtml(pv.name)}</h3>
+          ${pv.address ? `<p style="margin:2px 0;color:#666;font-size:12px;">📮 ${escHtml(pv.address)}</p>` : ""}
           <p style="margin:2px 0;color:#666;font-size:12px;">⏱ ${duration}</p>
           <p style="margin:2px 0;color:#666;font-size:12px;">🕐 ${startTime} – ${endTime}</p>
         </div>

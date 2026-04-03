@@ -130,3 +130,34 @@ export const TripSummaryResultSchema = z.object({
 });
 
 export type TripSummaryResult = z.infer<typeof TripSummaryResultSchema>;
+
+// --- Voice Insight Schemas (matches lib/voice/types.ts InsightPayload) ---
+
+const InsightItemSchema = z.object({
+  text: z.string(),
+});
+
+const GearFeedbackItemSchema = z.object({
+  text: z.string(),
+  gearName: z.string().nullable(),
+});
+
+const SpotRatingSchema = z.object({
+  locationName: z.string().nullable(),
+  rating: z.number().min(1).max(5).nullable(),
+});
+
+export const InsightPayloadSchema = z.object({
+  whatWorked: z.array(InsightItemSchema).default([]),
+  whatDidnt: z.array(InsightItemSchema).default([]),
+  gearFeedback: z.array(GearFeedbackItemSchema).default([]),
+  spotRating: SpotRatingSchema,
+});
+
+export type InsightPayload = z.infer<typeof InsightPayloadSchema>;
+
+// --- Agent Memory Schema ---
+
+export const MemoryArraySchema = z.array(
+  z.object({ key: z.string(), value: z.string() })
+);
