@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Gear Intelligence + Day-Of
 status: executing
-stopped_at: Completed 29-02-PLAN.md
-last_updated: "2026-04-03T20:38:04.323Z"
+stopped_at: Completed 29-03-PLAN.md
+last_updated: "2026-04-03T20:50:29.304Z"
 last_activity: 2026-04-03
 progress:
   total_phases: 21
-  completed_phases: 15
+  completed_phases: 16
   total_plans: 43
-  completed_plans: 40
+  completed_plans: 42
   percent: 40
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-01)
 ## Current Position
 
 Phase: 29 (vehicle-pre-trip-checklist) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 Status: Ready to execute
 Last activity: 2026-04-03
 
@@ -72,6 +72,7 @@ Progress: [████░░░░░░] 40%
 | Phase 25-gear-docs-manual-finder P02 | 8 | 2 tasks | 5 files |
 | Phase 25 P03 | 13 | 2 tasks | 3 files |
 | Phase 29-vehicle-pre-trip-checklist P02 | 8 | 2 tasks | 7 files |
+| Phase 29-vehicle-pre-trip-checklist P03 | 15 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -118,6 +119,7 @@ Recent decisions affecting current work:
 - [Phase 25]: /docs/ URLs covered by existing SW cache-first fallthrough — no SW changes needed for PDF caching
 - [Phase 29-vehicle-pre-trip-checklist]: generateVehicleChecklist prompt uses only vehicle specs + trip context, no mods/weather (D-04/D-05)
 - [Phase 29-vehicle-pre-trip-checklist]: Vehicle checklist persists as JSON blob on Trip.vehicleChecklistResult (not separate model)
+- [Phase 29-vehicle-pre-trip-checklist]: VehicleChecklistCard fetches independently via useEffect — same pattern as DepartureChecklistClient, not through /api/trips/[id]/prep
 
 ### Pending Todos
 
@@ -131,6 +133,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-03T20:38:04.318Z
-Stopped at: Completed 29-02-PLAN.md
+Last session: 2026-04-03T20:50:29.299Z
+Stopped at: Completed 29-03-PLAN.md
 Resume file: None

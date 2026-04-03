@@ -67,7 +67,7 @@
 
 **Wave 2 — Depends on Wave 1:**
 - [ ] **Phase 28: Weather-Aware Clothing** - Rain/cold/UV-driven clothing suggestions in packing lists, clothing subcategories
-- [ ] **Phase 29: Vehicle Pre-Trip Checklist** - Tire pressure, oil, coolant, terrain-aware checks paired with Day Sequencer
+- [x] **Phase 29: Vehicle Pre-Trip Checklist** - Tire pressure, oil, coolant, terrain-aware checks paired with Day Sequencer (completed 2026-04-03)
 
 **Wave 3 — Depends on Wave 2:**
 - [ ] **Phase 30: Gear Product Research** - AI-powered "Research" button, best-in-class comparison, upgrade recommendations
@@ -533,7 +533,7 @@ Plans:
 | 26. Trip Day Sequencer | v3.0 | 3/3 | Complete   | 2026-04-03 |
 | 27. Safety Float Plan | v3.0 | 1/1 | Complete    | 2026-04-03 |
 | 28. Weather-Aware Clothing | v3.0 | 0/TBD | Not started | - |
-| 29. Vehicle Pre-Trip Checklist | v3.0 | 1/3 | In Progress|  |
+| 29. Vehicle Pre-Trip Checklist | v3.0 | 3/3 | Complete   | 2026-04-03 |
 | 30. Gear Product Research | v3.0 | 0/TBD | Not started | - |
 | 31. Dark Sky & Astro Info | v3.0 | 0/TBD | Not started | - |
 | 32. Deal Monitoring | v3.0 | 0/TBD | Not started | - |
