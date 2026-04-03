@@ -86,13 +86,13 @@ Every feature mapped to a build phase.
 | Safety float plan | ❌ Planned | Send trip summary to emergency contacts |
 | Nearby trails & recreation API | ❌ Planned | OSM, NPS, Recreation.gov near a saved location |
 | NC camping knowledge base | ❌ Planned | PDF ingestion + RAG for local area knowledge |
-| Wishlist deal finder | ❌ Planned | eBay, Google Shopping, FB Marketplace for wishlist items |
-| User guide finder | ❌ Planned | Auto-search for product manuals, save PDF |
+| Wishlist deal finder | ❌ Planned | eBay, Google Shopping, FB Marketplace for wishlist items → expanded in v2.0 Phase B |
+| User guide finder | ❌ Planned | Auto-search for product manuals, save PDF → expanded in v2.0 Phase A |
 | Fuel & last stop planner | ❌ Planned | Route-aware: last gas, grocery, ice before backcountry |
 | Permit & registration handling | ❌ Planned | Agent fills out recreation.gov, USFS permits |
 | Vehicle pre-trip checklist | ❌ Planned | Tire pressure, oil, coolant — terrain-aware |
 | Post-trip auto-review | ❌ Planned | What you forgot, what you didn't use — feeds back |
-| Wear planning | ❌ Planned | Weather-based clothing recommendations |
+| Wear planning | ❌ Planned | Weather-based clothing recommendations → part of v2.0 Phase A category expansion |
 | Agent orchestration layer | ❌ Planned | Route tasks to Haiku/Sonnet/Opus by complexity + cost |
 
 ---
@@ -104,7 +104,7 @@ Every feature mapped to a build phase.
 |---------|--------|-------|
 | Offline-first / PWA | ✅ Done | Phase 8 — installable PWA, service worker with app shell + tile caching |
 | "Download for Offline" pre-trip step | ✅ Done | Phase 8 — "Leaving Now" caches weather, packing, meals, checklist, spots, vehicle to IndexedDB |
-| Gear manuals available offline | ❌ Planned | PDFs cached locally for no-signal use |
+| Gear manuals available offline | ❌ Planned | PDFs cached locally for no-signal use → depends on v2.0 Phase A (GearDocument model) |
 | Deploy to Vercel | ❌ Planned | Switch SQLite → Postgres (one-line Prisma change) |
 | Trip timeline view | ❌ Planned | Chronological view of all camping trips |
 | Shareable trip reports | ❌ Planned | Journal + photos + route = sendable summary |
@@ -119,9 +119,59 @@ Every feature mapped to a build phase.
 
 ---
 
+## v2.0 — Gear Intelligence (After v1.2 deployment)
+*Smarter gear management: expanded categories, support docs, product research, deal monitoring*
+
+> **Planned 2026-04-03** based on brainstorm session. Build after v1.2 (deploy + remote access) ships.
+> Consolidates scattered Phase 3/4 features (user guide finder, wishlist deal finder, wear planning, offline manuals) into a cohesive gear intelligence system.
+
+### Phase A — Category Expansion + Weather-Aware Clothing
+*More granular gear categories, clothing subcategories, and weather-driven packing suggestions*
+
+| Feature | Status | Notes |
+|---------|--------|-------|
+| Expand gear categories | ❌ Planned | Add: hygiene, safety, water, lighting, navigation, food-storage. Packing list generator can match owned gear in these categories instead of suggesting generic items. |
+| Subcategory / product-type field | ❌ Planned | Add `productType` to GearItem (e.g. category=clothing, productType=rain_jacket). Enables smarter matching and research. |
+| Weather-aware clothing in packing lists | ❌ Planned | Rain gear suggested when forecast shows rain. Cold layers suggested for low temps. UV protection for high UV index. Builds on existing weather integration. |
+| Category migration | ❌ Planned | Re-categorize existing gear items that belong in new categories. Update seed data. |
+
+### Phase B — Support Documentation
+*Find, save, and access product manuals and support links for owned gear*
+
+| Feature | Status | Notes |
+|---------|--------|-------|
+| GearDocument model | ❌ Planned | New model: type (manual_pdf, support_link, warranty, product_page), url, localPath, title, linked to GearItem |
+| Manual finder (Claude + web search) | ❌ Planned | "Find Manual" button on gear items. Claude searches for manufacturer support page + PDF manual, saves links. |
+| PDF download + local storage | ❌ Planned | Download PDFs to public/docs/, store localPath on GearDocument. View inline or download. |
+| Docs tab on gear detail | ❌ Planned | UI to view/manage all documents for a gear item. Quick access to manuals in the field. |
+| Offline manual caching | ❌ Planned | Cache downloaded PDFs in service worker for no-signal access. Extends Phase 8 PWA offline support. |
+
+### Phase C — Best-in-Class Research
+*AI-powered product research to help identify upgrade opportunities*
+
+| Feature | Status | Notes |
+|---------|--------|-------|
+| Product research via Claude | ❌ Planned | "Research" button on gear items. Claude researches best-in-class for that product type, how current item compares, upgrade path, price ranges. |
+| GearResearch model or JSON field | ❌ Planned | Store research results: product category, research date, top picks with reasons, upgrade recommendation. |
+| Research staleness tracking | ❌ Planned | "Last researched" date. Flag items with stale research (>90 days). |
+| Upgrade recommendations on dashboard | ❌ Planned | Surface top upgrade opportunities on home page or gear page. |
+
+### Phase D — Deal Monitoring
+*Track prices on wishlist/upgrade items, surface deals*
+
+| Feature | Status | Notes |
+|---------|--------|-------|
+| Target price field on gear items | ❌ Planned | Add `targetPrice` and `upgradeToProduct` fields. Used for wishlist items and owned items with upgrade recommendations. |
+| On-demand price check via Claude | ❌ Planned | "Check Price" button or chat command. Claude searches current prices, compares to target. |
+| Deal check in conversational agent | ❌ Planned | Ask the chat agent "any deals on my wishlist?" — searches all wishlist items with target prices. |
+| Periodic background price check | ❌ Planned | Optional scheduled job that checks prices and flags deals. Show "price dropped" indicators in gear list. |
+
+---
+
 ## Phase Principles
 - **Phase 1** = get the basics working, data in the database
 - **Phase 2** = visual/spatial (maps, photos) + trip prep (the core loop)
 - **Phase 3** = deeper intelligence and agent features
 - **Phase 4** = offline, deploy, sharing
+- **v2.0** = gear intelligence — expanded categories, docs, research, deals
 - "Done enough" = Will can plan a trip start-to-finish in the app. See `docs/USER-JOURNEY.md`.
