@@ -95,7 +95,7 @@ None — v1.2 Ship It complete as of 2026-04-03.
 
 ## Current State
 
-Phase 27 complete (2026-04-03) — Float plan email refactored to deterministic plain-text template. No Claude API call, no gear list, no checklist status. Dead code (composeFloatPlanEmail, FloatPlanEmailSchema, FloatPlanEmail) removed from claude.ts and parse-claude.ts.
+Phase 28 complete (2026-04-03) — Weather-aware clothing guidance added to packing list generation. `buildClothingGuidance()` fires rain gear directive at ≥40% precip, cold layers at ≤50°F, UV protection at UV index ≥6. UV index added to per-day forecast lines. 14 unit tests, TDD.
 
 ## Current Milestone: ✅ v1.2 Ship It — COMPLETE (2026-04-03)
 
@@ -184,4 +184,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-03 after Phase 27 complete — Plain-text float plan template (no Claude call, dead code removed)*
+*Last updated: 2026-04-03
