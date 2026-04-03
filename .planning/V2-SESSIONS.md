@@ -36,15 +36,15 @@ A self-coordinating work queue for v2.0 features. Each Claude Code session claim
 
 ## Queue
 
-| ID  | Feature                       | Phase | Status    | Depends On |
-|-----|-------------------------------|-------|-----------|------------|
-| S01 | Photo auto-import             | 16    | ⬜ Ready  | —          |
-| S02 | Feedback-driven packing       | 17    | ⬜ Ready  | —          |
-| S03 | Fuel & last stop planner      | 18    | ⬜ Ready  | —          |
-| S04 | Dog-aware trip planning       | 19    | ⬜ Ready  | —          |
-| S05 | Live location sharing         | 20    | ⬜ Ready  | —          |
-| S06 | Permit & reservation          | 21    | ⬜ Ready  | S03, S05   |
-| S07 | Plan A/B/C fallback chain     | 22    | ⬜ Ready  | S04, S06   |
+| ID  | Feature                       | Phase | Status    | Model          | Depends On |
+|-----|-------------------------------|-------|-----------|----------------|------------|
+| S01 | Photo auto-import             | 16    | ⬜ Ready  | Sonnet, normal | —          |
+| S02 | Feedback-driven packing       | 17    | ⬜ Ready  | Sonnet, normal | —          |
+| S03 | Fuel & last stop planner      | 18    | ⬜ Ready  | Sonnet, normal | —          |
+| S04 | Dog-aware trip planning       | 19    | ⬜ Ready  | Sonnet, normal | —          |
+| S05 | Live location sharing         | 20    | ⬜ Ready  | Sonnet, normal | —          |
+| S06 | Permit & reservation          | 21    | ⬜ Ready  | Sonnet, normal | S03, S05   |
+| S07 | Plan A/B/C fallback chain     | 22    | ⬜ Ready  | Sonnet, normal | S04, S06   |
 
 **Why this order matters (conflict groups):**
 
@@ -277,6 +277,61 @@ Will is bringing his dog on this trip. Add a "Dog" section to the packing list w
 - Out of scope: AI to suggest which plan to pick (just present the options)
 - Out of scope: more than 2 fallback levels (Plan D etc.)
 - Max 2 fallbacks per primary trip is a soft limit — not enforced in DB, just in UI
+
+---
+
+## Starter Prompts
+
+Copy-paste one of these to begin each session. All use **claude-sonnet-4-6**, normal effort (no special flags needed).
+
+---
+
+**S01 — Photo auto-import**
+```
+Pull origin main, then claim S01 in .planning/V2-SESSIONS.md (mark it 🔄 In Progress, commit + push the claim). Then run /gsd:plan-phase 16 to plan the photo bulk-import feature — the full spec is in V2-SESSIONS.md under S01. After planning is approved, run /gsd:execute-phase 16. When done, mark S01 ✅ Done in V2-SESSIONS.md, commit, and push.
+```
+
+---
+
+**S02 — Feedback-driven packing**
+```
+Pull origin main, then claim S02 in .planning/V2-SESSIONS.md (mark it 🔄 In Progress, commit + push the claim). Then run /gsd:plan-phase 17 to plan the feedback-driven packing feature — the full spec is in V2-SESSIONS.md under S02. After planning is approved, run /gsd:execute-phase 17. When done, mark S02 ✅ Done in V2-SESSIONS.md, commit, and push.
+```
+
+---
+
+**S03 — Fuel & last stop planner**
+```
+Pull origin main, then claim S03 in .planning/V2-SESSIONS.md (mark it 🔄 In Progress, commit + push the claim). Then run /gsd:plan-phase 18 to plan the fuel & last stop feature — the full spec is in V2-SESSIONS.md under S03. After planning is approved, run /gsd:execute-phase 18. When done, mark S03 ✅ Done in V2-SESSIONS.md, commit, and push.
+```
+
+---
+
+**S04 — Dog-aware trip planning**
+```
+Pull origin main, then claim S04 in .planning/V2-SESSIONS.md (mark it 🔄 In Progress, commit + push the claim). Then run /gsd:plan-phase 19 to plan the dog-aware trip planning feature — the full spec is in V2-SESSIONS.md under S04. After planning is approved, run /gsd:execute-phase 19. When done, mark S04 ✅ Done in V2-SESSIONS.md, commit, and push.
+```
+
+---
+
+**S05 — Live location sharing**
+```
+Pull origin main, then claim S05 in .planning/V2-SESSIONS.md (mark it 🔄 In Progress, commit + push the claim). Then run /gsd:plan-phase 20 to plan the live location sharing feature — the full spec is in V2-SESSIONS.md under S05. After planning is approved, run /gsd:execute-phase 20. When done, mark S05 ✅ Done in V2-SESSIONS.md, commit, and push.
+```
+
+---
+
+**S06 — Permit & reservation** *(start only after S03 and S05 are both ✅ Done)*
+```
+Pull origin main, then claim S06 in .planning/V2-SESSIONS.md (mark it 🔄 In Progress, commit + push the claim). Then run /gsd:plan-phase 21 to plan the permit & reservation feature — the full spec is in V2-SESSIONS.md under S06. After planning is approved, run /gsd:execute-phase 21. When done, mark S06 ✅ Done in V2-SESSIONS.md, commit, and push.
+```
+
+---
+
+**S07 — Plan A/B/C fallback chain** *(start only after S04 and S06 are both ✅ Done)*
+```
+Pull origin main, then claim S07 in .planning/V2-SESSIONS.md (mark it 🔄 In Progress, commit + push the claim). Then run /gsd:plan-phase 22 to plan the Plan A/B/C fallback feature — the full spec is in V2-SESSIONS.md under S07. After planning is approved, run /gsd:execute-phase 22. When done, mark S07 ✅ Done in V2-SESSIONS.md, commit, and push.
+```
 
 ---
 
