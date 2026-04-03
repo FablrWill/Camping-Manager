@@ -170,6 +170,51 @@ pm2 show outland
 
 ---
 
+## Cloudflare Tunnel — Live Location Sharing
+
+This step exposes only the `/share/*` routes publicly so family can open share URLs without Tailscale. The main Outland OS app stays Tailscale-only.
+
+**Prerequisites:** You need a domain already on Cloudflare (free account works).
+
+```bash
+# 1. Install cloudflared
+brew install cloudflared
+
+# 2. Authenticate (opens browser — select your domain)
+cloudflared tunnel login
+
+# 3. Create the tunnel
+cloudflared tunnel create outland-share
+# Note the tunnel ID printed in the output
+
+# 4. Create the config file
+# Copy docs/cloudflare-tunnel.yml.example to ~/.cloudflared/config.yml
+# Fill in TUNNEL-ID, your-username, and your domain
+cp ~/outland/docs/cloudflare-tunnel.yml.example ~/.cloudflared/config.yml
+nano ~/.cloudflared/config.yml
+
+# 5. Add DNS record (replace with your actual domain)
+cloudflared tunnel route dns outland-share share.yourdomain.com
+
+# 6. Add NEXT_PUBLIC_BASE_URL to your .env
+echo 'NEXT_PUBLIC_BASE_URL=https://share.yourdomain.com' >> ~/outland/.env
+
+# 7. Rebuild and restart
+cd ~/outland && ./deploy.sh
+
+# 8. Test the tunnel
+cloudflared tunnel run outland-share
+# Create a share record, open the URL on your phone with Tailscale off
+
+# 9. Install as a service (runs on reboot)
+sudo cloudflared service install
+sudo launchctl start com.cloudflare.cloudflared
+```
+
+**Verify it works:** Turn off Tailscale on your phone, open `https://share.yourdomain.com/share/{slug}`. You should see the map.
+
+---
+
 ## Subsequent deploys
 
 From your MacBook:

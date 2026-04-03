@@ -65,6 +65,8 @@ Progress: [████░░░░░░] 40%
 | Phase 13-address-review-findings P03 | 225 | 2 tasks | 11 files |
 | Phase 13 P04 | 300 | 1 tasks | 1 files |
 | Phase 18-fuel-last-stop-planner P02 | 10 | 1 tasks | 1 files |
+| Phase 20-live-location-sharing P01 | 383 | 2 tasks | 6 files |
+| Phase 20-live-location-sharing P02 | 203 | 4 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -99,6 +101,10 @@ Recent decisions affecting current work:
 - [Phase 13]: All 74 Gemini findings accounted for — 27 fixed, 8 already handled, 10 deferred MEDIUM, 31 deferred LOW
 - [Phase 18-fuel-last-stop-planner]: Card fetches independently via useEffect, not through /api/trips/[id]/prep — isolates Overpass latency (D-10)
 - [Phase 18-fuel-last-stop-planner]: Fuel card NOT added to PREP_SECTIONS — renders outside sections map to avoid injecting external API calls into static prep loop
+- [Phase 20-live-location-sharing]: SharedLocation uses singleton pattern (findFirst + create/update) — same approach as Settings model; one shared location at a time
+- [Phase 20-live-location-sharing]: upsertSharedLocation/deleteSharedLocation accept prismaClient argument — pure helpers testable without real DB
+- [Phase 20-live-location-sharing]: ssr:false dynamic import must live in Client Component, not Server Component — Next.js App Router constraint; extracted to share-page-client.tsx
+- [Phase 20-live-location-sharing]: Bare layout.tsx at /share renders <html> directly — fully bypasses AppShell so family sees clean map-only page with no nav chrome
 
 ### Pending Todos
 
@@ -112,6 +118,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-03T05:43:26.653Z
-Stopped at: Completed 18-02-PLAN.md — Phase 18 Fuel & Last Stop Planner complete
+Last session: 2026-04-03T06:30:00.000Z
+Stopped at: Completed 20-02-PLAN.md — Phase 20 Live Location Sharing complete
 Resume file: None

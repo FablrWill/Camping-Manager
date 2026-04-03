@@ -184,4 +184,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-03 after Phase 17 complete — feedback-driven packing (PackingItem.usageStatus aggregation wired into Claude prompt)*
+*Last updated: 2026-04-03 after Phase 20 complete — live location sharing (shareable public URL, ShareMap, Cloudflare Tunnel config)*

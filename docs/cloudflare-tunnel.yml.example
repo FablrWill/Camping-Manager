@@ -1,0 +1,28 @@
+# Cloudflare Tunnel config for Outland OS — Live Location Sharing
+#
+# Place this file at: ~/.cloudflared/config.yml  (on your Mac mini)
+# After running: cloudflared tunnel create outland-share
+#
+# Replace TUNNEL-ID with the ID shown by the create command.
+# Replace <your-username> with your Mac mini username.
+# Replace share.yourdomain.com with your actual domain.
+#
+# Only /share/* and /api/share/* routes are exposed publicly.
+# All other traffic returns 404 — the main Outland OS app stays Tailscale-only.
+
+tunnel: <TUNNEL-ID>
+credentials-file: /Users/<your-username>/.cloudflared/<TUNNEL-ID>.json
+
+ingress:
+  # Public share page
+  - hostname: share.yourdomain.com
+    path: /share
+    service: http://localhost:3000
+
+  # Public share API (read-only slug lookup for the share page itself)
+  - hostname: share.yourdomain.com
+    path: /api/share/location
+    service: http://localhost:3000
+
+  # Block everything else — keeps the private app private
+  - service: http_status:404
