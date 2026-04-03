@@ -438,6 +438,8 @@ export async function generateDepartureChecklist(params: {
   vehicleMods: Array<{ name: string; description: string | null }>
   weatherNotes: string | null
   tripNotes: string | null
+  departureTime: string | null
+  lastStopNames: string[]
 }): Promise<DepartureChecklistResult> {
   const {
     tripName,
@@ -450,6 +452,8 @@ export async function generateDepartureChecklist(params: {
     vehicleMods,
     weatherNotes,
     tripNotes,
+    departureTime,
+    lastStopNames,
   } = params
 
   const unpackedItems = packingItems.filter((i) => !i.packed)
@@ -491,15 +495,27 @@ ${powerBudget ? `POWER BUDGET: A power budget exists. Include device charging an
 
 ${weatherNotes ? `WEATHER NOTES: ${weatherNotes}` : ''}
 
+${departureTime
+  ? `DEPARTURE TIME: ${departureTime}
+For each task, include a "suggestedTime" field with an absolute clock time (e.g. "9:00 PM Thu", "6:30 AM", "7:00 AM -- depart") anchored to this departure time. Night-before tasks get the prior evening. Day-of tasks get morning times. Final task is the departure time itself.`
+  : `DEPARTURE TIME: Not set. Use suggestedTime: null for all items. Use slot label names as the only time reference (e.g. "Night Before", "Morning Of").`
+}
+
+${lastStopNames.length > 0
+  ? `LAST STOPS BEFORE DESTINATION (include a reminder task for the nearest stop): ${lastStopNames.join(', ')}`
+  : ''
+}
+
 INSTRUCTIONS:
 1. Organize checklist into 2-5 time-ordered slots (e.g. "Night Before - Pack Vehicle", "Morning of Departure - Kitchen & Cooler", "Before Driving - Final Safety Checks"). Choose slot names and count based on trip complexity.
 2. For each vehicle mod, generate at least one specific check item (e.g. "Check roof rack straps are tight", "Verify tire pressure is correct").
 3. For any UNPACKED items listed above, include them as checklist items with isUnpackedWarning=true.
 4. Add weather-aware tips if weather notes are provided (e.g. "Rain expected — pack tarps in easy-access spot").
-5. Include meal prep items if a meal plan exists (e.g. "Pack cooler with vacuum-sealed meals").
-6. Include power-related items if a power budget exists (e.g. "Charge all devices fully", "Pack solar panel cable in accessible location").
+5. If a meal plan exists, include ONE phase-level reminder: "Prep meals (see meal plan)". Only add extra meal tasks for time-sensitive items you spot (e.g. "Marinate meat tonight").
+6. If a power budget exists, include "Charge EcoFlow to 100%". If current battery percentage is given, add context: "Currently at X% -- needs ~Yh to full."
 7. Generate a unique ID for each item using format "chk-{slot_index}-{item_index}" (0-based).
 8. Keep item text concise and action-oriented (verb-first: "Check", "Pack", "Verify", "Load").
+9. Every item MUST include "suggestedTime" — either a clock time string or null.
 
 Respond ONLY with valid JSON matching this exact structure:
 {
@@ -507,8 +523,8 @@ Respond ONLY with valid JSON matching this exact structure:
     {
       "label": "Night Before - Pack Vehicle",
       "items": [
-        { "id": "chk-0-0", "text": "Pack sleeping bags and sleep system", "checked": false, "isUnpackedWarning": false },
-        { "id": "chk-0-1", "text": "Load camp chairs and table", "checked": false, "isUnpackedWarning": true }
+        { "id": "chk-0-0", "text": "Pack sleeping bags and sleep system", "checked": false, "isUnpackedWarning": false, "suggestedTime": "9:00 PM Thu" },
+        { "id": "chk-0-1", "text": "Load camp chairs and table", "checked": false, "isUnpackedWarning": true, "suggestedTime": "9:30 PM Thu" }
       ]
     }
   ]
