@@ -370,14 +370,19 @@ Plans:
 ### Phase 26: Trip Day Sequencer
 **Goal**: Time-ordered departure checklist for the morning of a trip, pulling tasks from packing list, meal plan, power budget, and route — the ADHD-friendly "just follow the list" screen
 **Depends on**: None (uses existing trip prep data)
-**Requirements**: TBD
+**Requirements**: D-01, D-02, D-03, D-04, D-05, D-06, D-07, D-08, D-09, D-10
 **Success Criteria** (what must be TRUE):
   1. Trip prep has a "Departure Day" section with time-sequenced tasks
   2. Tasks are generated from existing trip data (packing status, meal prep steps, power charge needs, drive time)
   3. Each task has a suggested time and can be checked off
   4. Sequence adapts to departure time (set by user on trip)
   5. `npm run build` passes
-**Plans**: 0/TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 26-P01-PLAN.md — Schema migration (departureTime) + Zod schema (suggestedTime) + PATCH handler + Wave 0 tests
+- [ ] 26-P02-PLAN.md — Claude prompt upgrade (time anchoring + fuel stops) + API route enhancement
+- [ ] 26-P03-PLAN.md — UI: departure time input/display + suggestedTime badges on checklist items
 
 **Parallelization notes:**
 - Wave 1 — fully parallel with Phases 25 and 27
