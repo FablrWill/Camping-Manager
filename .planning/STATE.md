@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.1
-milestone_name: Close the Loop
+milestone: v1.2
+milestone_name: Ship It
 status: verifying
-stopped_at: Phase 8 UI-SPEC approved
-last_updated: "2026-04-01T23:32:05.536Z"
+stopped_at: Completed 13-address-review-findings-01-PLAN.md
+last_updated: "2026-04-03T00:27:30.597Z"
 last_activity: 2026-04-01
 progress:
-  total_phases: 9
-  completed_phases: 6
-  total_plans: 22
-  completed_plans: 22
+  total_phases: 4
+  completed_phases: 2
+  total_plans: 6
+  completed_plans: 6
   percent: 40
 ---
 
@@ -62,6 +62,7 @@ Progress: [████░░░░░░] 40%
 | Phase 07-day-of-execution P01 | 13 | 2 tasks | 11 files |
 | Phase 07-day-of-execution P02 | 5 | 2 tasks | 8 files |
 | Phase 07-day-of-execution P03 | 252 | 2 tasks | 4 files |
+| Phase 13-address-review-findings P01 | 239 | 4 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -91,6 +92,9 @@ Recent decisions affecting current work:
 - [Phase 07-day-of-execution]: Departure section in TripPrepClient fetches departure checklist independently — not through /api/trips/[id]/prep
 - [Phase 07-day-of-execution]: composeFloatPlanEmail includes checklistStatus parameter — emergency contact sees departure preparation level (X of Y tasks completed)
 - [Phase 07-day-of-execution]: FloatPlanLog uses fire-and-forget .catch() — database log failure never blocks email send confirmation
+- [Phase 13-address-review-findings]: Path traversal guard uses resolve()+startsWith() pattern — validates after full resolution, not string prefix matching
+- [Phase 13-address-review-findings]: escHtml() placed at module level in SpotMap.tsx — reusable within file, no new dependency needed
+- [Phase 13-address-review-findings]: InsightPayloadSchema and MemoryArraySchema added to lib/parse-claude.ts — all Claude/LLM schemas co-located in one file
 
 ### Pending Todos
 
@@ -104,6 +108,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-01T23:32:05.531Z
-Stopped at: Phase 8 UI-SPEC approved
-Resume file: .planning/phases/08-pwa-and-offline/08-UI-SPEC.md
+Last session: 2026-04-03T00:27:30.593Z
+Stopped at: Completed 13-address-review-findings-01-PLAN.md
+Resume file: None
