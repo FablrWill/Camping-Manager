@@ -109,7 +109,15 @@ Plans:
   2. The app is reachable via a stable MagicDNS hostname (no IP addresses to remember)
   3. HTTPS works over Tailscale (required for service worker / PWA functionality)
   4. The app is installable as a PWA from Will's phone over the Tailscale connection
-**Plans**: TBD
+**Plans:** 2 plans
+
+Plans:
+- [ ] 15-01-PLAN.md — Mac mini Tailscale install, MagicDNS + HTTPS setup, tailscale serve
+- [ ] 15-02-PLAN.md — iPhone Tailscale install + go-live PWA verification from phone
+
+**Parallelization notes:**
+- Plan 15-01 is Wave 1 — Mac mini setup must complete first
+- Plan 15-02 is Wave 2 — requires Mac mini serving HTTPS before iPhone can verify
 
 ## Progress
 
@@ -132,7 +140,7 @@ Phases execute in numeric order: 12 -> 13 -> 14 -> 15
 | 12. Fix Build & Clean House | v1.2 | 5/5 | Complete | 2026-04-02 |
 | 13. Address Review Findings | v1.2 | 4/4 | Complete    | 2026-04-03 |
 | 14. Production Deployment | v1.2 | 0/TBD | Not started | - |
-| 15. Remote Access & Go Live | v1.2 | 0/TBD | Not started | - |
+| 15. Remote Access & Go Live | v1.2 | 0/2 | Not started | - |
 
 ---
 *Full phase details for shipped milestones: see archives in `.planning/milestones/`*
