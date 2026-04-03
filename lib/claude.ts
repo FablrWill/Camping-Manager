@@ -75,6 +75,40 @@ export function filterSignificantFeedback(
   return feedback.filter((g) => g.didntNeedCount >= 2 || g.forgotCount >= 1)
 }
 
+export function aggregateGearFeedback(
+  trips: ReadonlyArray<{
+    id: string
+    packingItems: ReadonlyArray<{
+      gearId: string
+      usageStatus: string | null
+      gear: { name: string }
+    }>
+  }>
+): GearFeedbackSummary[] {
+  const totals: Record<string, GearFeedbackSummary> = {}
+  for (const trip of trips) {
+    for (const item of trip.packingItems) {
+      if (!item.usageStatus) continue
+      if (!totals[item.gearId]) {
+        totals[item.gearId] = {
+          gearName: item.gear.name,
+          usedCount: 0,
+          didntNeedCount: 0,
+          forgotCount: 0,
+          totalTrips: 0,
+        }
+      }
+      const g = totals[item.gearId]
+      const updated = { ...g, totalTrips: g.totalTrips + 1 }
+      if (item.usageStatus === 'used') updated.usedCount = g.usedCount + 1
+      else if (item.usageStatus === "didn't need") updated.didntNeedCount = g.didntNeedCount + 1
+      else if (item.usageStatus === 'forgot but needed') updated.forgotCount = g.forgotCount + 1
+      totals[item.gearId] = updated
+    }
+  }
+  return Object.values(totals)
+}
+
 export function buildFeedbackSection(feedback?: GearFeedbackSummary[]): string {
   if (!feedback || feedback.length === 0) return ''
   const lines = feedback.map((f) => {

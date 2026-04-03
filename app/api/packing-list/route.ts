@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { generatePackingList } from '@/lib/claude'
+import { generatePackingList, filterSignificantFeedback, aggregateGearFeedback } from '@/lib/claude'
 import { fetchWeather } from '@/lib/weather'
 import { safeJsonParse } from '@/lib/safe-json'
 
@@ -119,6 +119,40 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Query gear feedback from last 5 completed trips (PACK-02)
+    let feedbackContext = undefined
+    try {
+      const recentTrips = await prisma.trip.findMany({
+        where: {
+          packingItems: {
+            some: { usageStatus: { not: null } },
+          },
+          id: { not: tripId },
+        },
+        orderBy: { endDate: 'desc' },
+        take: 5,
+        select: {
+          id: true,
+          packingItems: {
+            where: { usageStatus: { not: null } },
+            select: {
+              gearId: true,
+              usageStatus: true,
+              gear: { select: { name: true } },
+            },
+          },
+        },
+      })
+
+      if (recentTrips.length > 0) {
+        const allFeedback = aggregateGearFeedback(recentTrips)
+        const significant = filterSignificantFeedback(allFeedback)
+        feedbackContext = significant.length > 0 ? significant : undefined
+      }
+    } catch (err) {
+      console.error('Feedback query failed (non-blocking):', err)
+    }
+
     // Generate packing list via Claude (throws on Zod validation failure)
     let packingList
     try {
@@ -133,6 +167,7 @@ export async function POST(request: NextRequest) {
         tripNotes: trip.notes ?? undefined,
         gearInventory,
         weather,
+        feedbackContext,
       })
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to generate packing list'
