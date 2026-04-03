@@ -38,7 +38,7 @@ A self-coordinating work queue for v2.0 features. Each Claude Code session claim
 
 | ID  | Feature                       | Phase | Status    | Model          | Depends On |
 |-----|-------------------------------|-------|-----------|----------------|------------|
-| S01 | Photo auto-import             | 16    | ⬜ Ready  | Sonnet, normal | —          |
+| S01 | Photo auto-import             | 16    | 🔄 In Progress 2026-04-02 | Sonnet, normal | —          |
 | S02 | Feedback-driven packing       | 17    | ⬜ Ready  | Sonnet, normal | —          |
 | S03 | Fuel & last stop planner      | 18    | ⬜ Ready  | Sonnet, normal | —          |
 | S04 | Dog-aware trip planning       | 19    | ⬜ Ready  | Sonnet, normal | —          |
