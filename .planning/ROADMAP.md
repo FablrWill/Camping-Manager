@@ -66,7 +66,7 @@
 - [x] **Phase 27: Safety Float Plan** - Replace Claude-composed email with plain-text template, strip gear list (completed 2026-04-03)
 
 **Wave 2 — Depends on Wave 1:**
-- [ ] **Phase 28: Weather-Aware Clothing** - Rain/cold/UV-driven clothing suggestions in packing lists, clothing subcategories
+- [x] **Phase 28: Weather-Aware Clothing** - Rain/cold/UV-driven clothing suggestions in packing lists, clothing subcategories (completed 2026-04-03)
 - [ ] **Phase 29: Vehicle Pre-Trip Checklist** - Tire pressure, oil, coolant, terrain-aware checks paired with Day Sequencer
 
 **Wave 3 — Depends on Wave 2:**
@@ -419,7 +419,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 28-01-PLAN.md — TDD: buildClothingGuidance() + UV in weather section + prompt update
+- [x] 28-01-PLAN.md — TDD: buildClothingGuidance() + UV in weather section + prompt update
 
 **Parallelization notes:**
 - Wave 2 — can run parallel with Phase 29
@@ -522,7 +522,7 @@ Plans:
 | 25. Gear Docs & Manual Finder | v3.0 | 0/TBD | Not started | - |
 | 26. Trip Day Sequencer | v3.0 | 3/3 | Complete   | 2026-04-03 |
 | 27. Safety Float Plan | v3.0 | 1/1 | Complete    | 2026-04-03 |
-| 28. Weather-Aware Clothing | v3.0 | 0/TBD | Not started | - |
+| 28. Weather-Aware Clothing | v3.0 | 1/1 | Complete   | 2026-04-03 |
 | 29. Vehicle Pre-Trip Checklist | v3.0 | 0/TBD | Not started | - |
 | 30. Gear Product Research | v3.0 | 0/TBD | Not started | - |
 | 31. Dark Sky & Astro Info | v3.0 | 0/TBD | Not started | - |
