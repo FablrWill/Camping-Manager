@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Fragment } from 'react'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import TripPrepSection from '@/components/TripPrepSection'
@@ -11,6 +11,7 @@ import PowerBudget from '@/components/PowerBudget'
 import { PREP_SECTIONS, PrepState, PrepSection } from '@/lib/prep-sections'
 import { formatDateRange, daysUntil, tripNights } from '@/lib/trip-utils'
 import type { DayForecast, WeatherAlert } from '@/lib/weather'
+import type { LastStopsResult } from '@/lib/overpass'
 import type { DepartureChecklistResult } from '@/lib/parse-claude'
 import { useOnlineStatus } from '@/lib/use-online-status'
 import { getTripSnapshot, type TripSnapshot } from '@/lib/offline-storage'
@@ -63,6 +64,9 @@ export default function TripPrepClient({ trip }: TripPrepClientProps) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [departureChecklist, setDepartureChecklist] = useState<DepartureChecklistData | null>(null)
+  const [lastStops, setLastStops] = useState<LastStopsResult | null>(null)
+  const [lastStopsLoading, setLastStopsLoading] = useState(false)
+  const [lastStopsError, setLastStopsError] = useState<string | null>(null)
 
   // Load offline snapshot when device goes offline
   useEffect(() => {
@@ -114,6 +118,25 @@ export default function TripPrepClient({ trip }: TripPrepClientProps) {
     fetchDepartureChecklist()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [trip.id])
+
+  useEffect(() => {
+    if (!trip.location?.latitude || !trip.location?.longitude) return
+    setLastStopsLoading(true)
+    setLastStopsError(null)
+    fetch(`/api/trips/${trip.id}/last-stops`)
+      .then(r => {
+        if (!r.ok) throw new Error('Failed to fetch')
+        return r.json()
+      })
+      .then((data: LastStopsResult) => {
+        setLastStops(data)
+        setLastStopsLoading(false)
+      })
+      .catch(() => {
+        setLastStopsError('Could not load nearby stops')
+        setLastStopsLoading(false)
+      })
+  }, [trip.id, trip.location?.latitude, trip.location?.longitude])
 
   const nights = tripNights(trip.startDate, trip.endDate)
   const countdown = getCountdown(trip.startDate, trip.endDate)
@@ -213,8 +236,9 @@ export default function TripPrepClient({ trip }: TripPrepClientProps) {
             const defaultExpanded = getDefaultExpanded(prepState.sections, config.key)
 
             return (
+              <Fragment key={config.key}>
               <TripPrepSection
-                key={config.key}
+                key={`section-${config.key}`}
                 title={config.label}
                 emoji={config.emoji}
                 status={status}
@@ -295,6 +319,57 @@ export default function TripPrepClient({ trip }: TripPrepClientProps) {
                   </div>
                 )}
               </TripPrepSection>
+
+              {/* Fuel & Last Stops card — after weather, before packing (D-09) */}
+              {config.key === 'weather' && trip.location?.latitude && trip.location?.longitude && (
+                <div className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-700 p-4">
+                  <h3 className="text-sm font-semibold text-stone-900 dark:text-stone-50 mb-3">Fuel & Last Stops</h3>
+
+                  {lastStopsLoading && (
+                    <div role="status" aria-label="Loading nearby stops" className="space-y-3">
+                      {['Fuel', 'Grocery', 'Outdoor / Gear'].map(label => (
+                        <div key={label}>
+                          <div className="h-3 w-20 animate-pulse bg-stone-200 dark:bg-stone-700 rounded mb-1" />
+                          <div className="h-4 w-48 animate-pulse bg-stone-200 dark:bg-stone-700 rounded" />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {lastStopsError && (
+                    <div role="alert" className="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-lg p-3">
+                      <p className="text-sm font-semibold text-red-600 dark:text-red-400">Could not load nearby stops</p>
+                      <p className="text-xs text-red-600 dark:text-red-400 mt-1">Check your connection and reload the page.</p>
+                    </div>
+                  )}
+
+                  {lastStops && !lastStopsLoading && !lastStopsError && (
+                    <div className="space-y-3">
+                      {([
+                        { key: 'fuel' as const, emoji: '\u26FD', label: 'Fuel' },
+                        { key: 'grocery' as const, emoji: '\uD83D\uDED2', label: 'Grocery' },
+                        { key: 'outdoor' as const, emoji: '\uD83C\uDFD5\uFE0F', label: 'Outdoor / Gear' },
+                      ]).map(({ key, emoji, label }) => (
+                        <div key={key}>
+                          <p className="text-xs font-semibold uppercase text-stone-500 dark:text-stone-400 mb-1">{emoji} {label}</p>
+                          {lastStops[key].length === 0 ? (
+                            <p className="text-sm text-stone-500 dark:text-stone-400 italic">None found nearby — plan ahead</p>
+                          ) : (
+                            <div className="space-y-0.5">
+                              {lastStops[key].map((stop, i) => (
+                                <p key={i} className="text-sm text-stone-900 dark:text-stone-50">
+                                  {stop.name} <span className="text-xs text-stone-500 dark:text-stone-400">— {stop.distanceMiles.toFixed(1)} mi</span>
+                                </p>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+              </Fragment>
             )
           })}
 

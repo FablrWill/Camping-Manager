@@ -47,15 +47,13 @@ Requirements for milestone v1.2 "Ship It". Each maps to roadmap phases.
 
 ## v2.0 Requirements
 
-Requirements for milestone v2.0 "Smarter & Sharper". Each maps to roadmap phases 16-22.
+Requirements for milestone v2.0 "Field Intelligence".
 
-### Dog-Aware Trip Planning (Phase 19)
+### Fuel & Last Stop Planner (Phase 18)
 
-- [x] **DOG-01**: Trip create/edit form has "Bringing dog?" boolean toggle (defaults false) — UI in 19-02
-- [x] **DOG-02**: When `bringingDog = true`, packing list includes a "Dog" section with: food + collapsible bowl, water bowl, leash + backup leash, poop bags (2x), dog first aid (tweezers, wound spray)
-- [x] **DOG-03**: Trip card shows 🐕 indicator when `bringingDog` is true — UI in 19-02
-- [x] **DOG-04**: When `bringingDog = false`, no dog items appear in packing list (no regression to existing behavior)
-- [x] **DOG-05**: Trip edit supports toggling `bringingDog` on existing trips (PUT endpoint accepts + persists)
+- [x] **FUEL-01**: New API endpoint `app/api/trips/[id]/last-stops/route.ts` — queries Overpass API for fuel, supermarket, hardware stops within 50km of trip destination coordinates; returns sorted-by-distance results
+- [x] **FUEL-02**: New utility `lib/overpass.ts` — wraps Overpass API queries for amenity=fuel, shop=supermarket, shop=hardware; calculates distance from destination; returns structured results
+- [x] **FUEL-03**: "Fuel & Last Stops" card added to `components/TripPrepClient.tsx` — shows after weather card, before packing list; renders 3 categories with name + distance; shows loading state; shows "None found nearby" fallback
 
 ## Future Requirements
 
@@ -99,6 +97,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | REVIEW-01 | Phase 12 | Pending |
 | REVIEW-02 | Phase 12 | Pending |
 | REVIEW-03 | Phase 13 | Complete |
+| FUEL-01 | Phase 18 | Complete |
+| FUEL-02 | Phase 18 | Complete |
+| FUEL-03 | Phase 18 | Complete |
 | DEPLOY-01 | Phase 14 | Pending |
 | DEPLOY-02 | Phase 14 | Pending |
 | DEPLOY-03 | Phase 14 | Pending |
@@ -112,11 +113,6 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ACCESS-03 | Phase 15 | Pending |
 | ACCESS-04 | Phase 15 | Pending |
 | ACCESS-05 | Phase 15 | Pending |
-| DOG-01 | Phase 19 Plan 02 | Pending (UI in 19-02) |
-| DOG-02 | Phase 19 Plan 01 | Complete |
-| DOG-03 | Phase 19 Plan 02 | Pending (UI in 19-02) |
-| DOG-04 | Phase 19 Plan 01 | Complete |
-| DOG-05 | Phase 19 Plan 01 | Complete |
 
 **Coverage:**
 - v1.2 requirements: 26 total
