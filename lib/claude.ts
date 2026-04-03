@@ -1,5 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk'
-import { parseClaudeJSON, PackingListResultSchema, MealPlanResultSchema, DepartureChecklistResultSchema, DepartureChecklistResult, FloatPlanEmailSchema, FloatPlanEmail, TripSummaryResultSchema, type TripSummaryResult } from '@/lib/parse-claude'
+import { parseClaudeJSON, PackingListResultSchema, MealPlanResultSchema, DepartureChecklistResultSchema, DepartureChecklistResult, TripSummaryResultSchema, type TripSummaryResult, GearDocumentResultSchema, type GearDocumentResult } from '@/lib/parse-claude'
 import { CATEGORY_EMOJI, CATEGORIES } from '@/lib/gear-categories'
 
 const anthropic = new Anthropic({
@@ -438,6 +438,8 @@ export async function generateDepartureChecklist(params: {
   vehicleMods: Array<{ name: string; description: string | null }>
   weatherNotes: string | null
   tripNotes: string | null
+  departureTime: string | null
+  lastStopNames: string[]
 }): Promise<DepartureChecklistResult> {
   const {
     tripName,
@@ -450,6 +452,8 @@ export async function generateDepartureChecklist(params: {
     vehicleMods,
     weatherNotes,
     tripNotes,
+    departureTime,
+    lastStopNames,
   } = params
 
   const unpackedItems = packingItems.filter((i) => !i.packed)
@@ -491,15 +495,27 @@ ${powerBudget ? `POWER BUDGET: A power budget exists. Include device charging an
 
 ${weatherNotes ? `WEATHER NOTES: ${weatherNotes}` : ''}
 
+${departureTime
+  ? `DEPARTURE TIME: ${departureTime}
+For each task, include a "suggestedTime" field with an absolute clock time (e.g. "9:00 PM Thu", "6:30 AM", "7:00 AM -- depart") anchored to this departure time. Night-before tasks get the prior evening. Day-of tasks get morning times. Final task is the departure time itself.`
+  : `DEPARTURE TIME: Not set. Use suggestedTime: null for all items. Use slot label names as the only time reference (e.g. "Night Before", "Morning Of").`
+}
+
+${lastStopNames.length > 0
+  ? `LAST STOPS BEFORE DESTINATION (include a reminder task for the nearest stop): ${lastStopNames.join(', ')}`
+  : ''
+}
+
 INSTRUCTIONS:
 1. Organize checklist into 2-5 time-ordered slots (e.g. "Night Before - Pack Vehicle", "Morning of Departure - Kitchen & Cooler", "Before Driving - Final Safety Checks"). Choose slot names and count based on trip complexity.
 2. For each vehicle mod, generate at least one specific check item (e.g. "Check roof rack straps are tight", "Verify tire pressure is correct").
 3. For any UNPACKED items listed above, include them as checklist items with isUnpackedWarning=true.
 4. Add weather-aware tips if weather notes are provided (e.g. "Rain expected — pack tarps in easy-access spot").
-5. Include meal prep items if a meal plan exists (e.g. "Pack cooler with vacuum-sealed meals").
-6. Include power-related items if a power budget exists (e.g. "Charge all devices fully", "Pack solar panel cable in accessible location").
+5. If a meal plan exists, include ONE phase-level reminder: "Prep meals (see meal plan)". Only add extra meal tasks for time-sensitive items you spot (e.g. "Marinate meat tonight").
+6. If a power budget exists, include "Charge EcoFlow to 100%". If current battery percentage is given, add context: "Currently at X% -- needs ~Yh to full."
 7. Generate a unique ID for each item using format "chk-{slot_index}-{item_index}" (0-based).
 8. Keep item text concise and action-oriented (verb-first: "Check", "Pack", "Verify", "Load").
+9. Every item MUST include "suggestedTime" — either a clock time string or null.
 
 Respond ONLY with valid JSON matching this exact structure:
 {
@@ -507,8 +523,8 @@ Respond ONLY with valid JSON matching this exact structure:
     {
       "label": "Night Before - Pack Vehicle",
       "items": [
-        { "id": "chk-0-0", "text": "Pack sleeping bags and sleep system", "checked": false, "isUnpackedWarning": false },
-        { "id": "chk-0-1", "text": "Load camp chairs and table", "checked": false, "isUnpackedWarning": true }
+        { "id": "chk-0-0", "text": "Pack sleeping bags and sleep system", "checked": false, "isUnpackedWarning": false, "suggestedTime": "9:00 PM Thu" },
+        { "id": "chk-0-1", "text": "Load camp chairs and table", "checked": false, "isUnpackedWarning": true, "suggestedTime": "9:30 PM Thu" }
       ]
     }
   ]
@@ -529,95 +545,6 @@ Rules:
     message.content[0].type === 'text' ? message.content[0].text : ''
 
   const parseResult = parseClaudeJSON(text, DepartureChecklistResultSchema)
-  if (!parseResult.success) {
-    throw new Error(parseResult.error)
-  }
-
-  return parseResult.data
-}
-
-export async function composeFloatPlanEmail(params: {
-  tripName: string
-  startDate: string
-  endDate: string
-  destinationName: string | null
-  destinationLat: number | null
-  destinationLon: number | null
-  packedGearSummary: string
-  vehicleName: string | null
-  weatherNotes: string | null
-  tripNotes: string | null
-  emergencyContactName: string
-  checklistStatus: string
-}): Promise<FloatPlanEmail> {
-  const {
-    tripName,
-    startDate,
-    endDate,
-    destinationName,
-    destinationLat,
-    destinationLon,
-    packedGearSummary,
-    vehicleName,
-    weatherNotes,
-    tripNotes,
-    emergencyContactName,
-    checklistStatus,
-  } = params
-
-  const mapsLinkNote =
-    destinationLat !== null && destinationLon !== null
-      ? `A Google Maps link for the destination will be appended by the sender after this email is composed.`
-      : ''
-
-  const userMessage = `Write a safety float plan email for this car camping trip.
-
-TRIP DETAILS:
-- Trip Name: ${tripName}
-- Start Date: ${startDate}
-- End Date: ${endDate}
-${destinationName ? `- Destination: ${destinationName}` : '- Destination: Not specified'}
-${vehicleName ? `- Vehicle: ${vehicleName}` : ''}
-${weatherNotes ? `- Weather Notes: ${weatherNotes}` : ''}
-${tripNotes ? `- Trip Notes: ${tripNotes}` : ''}
-
-PACKED GEAR SUMMARY:
-${packedGearSummary || 'No packed gear recorded.'}
-
-DEPARTURE CHECKLIST STATUS:
-${checklistStatus}
-
-EMERGENCY CONTACT (recipient):
-${emergencyContactName}
-
-${mapsLinkNote}
-
-INSTRUCTIONS:
-- Write the email body as a message to the emergency contact (address them by name: ${emergencyContactName})
-- Include: trip name, dates, destination, a brief summary of packed gear, the departure checklist status (${checklistStatus}), and when to expect my return
-- End with: "Reply to this email if you need to reach me."
-- Keep it friendly and readable for a non-camper
-- Use blank lines for paragraph breaks
-- PLAIN TEXT ONLY — no markdown, no bullet characters like -, *, #, no HTML
-
-Return valid JSON in this exact format:
-{
-  "subject": "Float Plan: ${tripName} — ${startDate} to ${endDate}",
-  "body": "The full plain text email body here"
-}`
-
-  const message = await anthropic.messages.create({
-    model: 'claude-sonnet-4-20250514',
-    max_tokens: 1500,
-    system:
-      'You are writing a safety float plan email for a car camping trip. Write in natural, readable prose that a non-camper emergency contact can understand. Be concise but include all essential safety information. Adapt tone to trip context (solo vs. group, weather concerns, remote vs. developed campground). Write PLAIN TEXT only -- no markdown, no HTML tags. Use blank lines for paragraph breaks. The email will be sent as plain text.',
-    messages: [{ role: 'user', content: userMessage }],
-  })
-
-  const text =
-    message.content[0].type === 'text' ? message.content[0].text : ''
-
-  const parseResult = parseClaudeJSON(text, FloatPlanEmailSchema)
   if (!parseResult.success) {
     throw new Error(parseResult.error)
   }
@@ -671,4 +598,52 @@ Return ONLY valid JSON, no markdown.`
     throw new Error(parsed.error)
   }
   return parsed.data
+}
+
+export async function findGearManual(params: {
+  name: string;
+  brand: string | null;
+  modelNumber: string | null;
+  category: string;
+}): Promise<GearDocumentResult> {
+  const { name, brand, modelNumber, category } = params;
+  const prompt = `You are a product manual research assistant.
+Given gear details, return the most likely manufacturer support page URL and PDF manual URL.
+
+GEAR:
+- Name: ${name}
+- Brand: ${brand || 'Unknown'}
+- Model Number: ${modelNumber || 'Unknown'}
+- Category: ${category}
+
+INSTRUCTIONS:
+1. Generate the most likely URL for the manufacturer's support/product page for this exact model.
+2. If the brand typically hosts PDF manuals (e.g. MSR, GSI, Black Diamond, Garmin, Goal Zero), generate the likely PDF URL.
+3. For each URL, provide a confidence level: "high" (you know this brand's URL pattern well) or "low" (guessing).
+4. Generate a descriptive title for each document (e.g. "MSR Hubba Hubba NX Owner's Manual").
+5. Only include URLs you believe are real. If you cannot determine a likely URL, return an empty documents array.
+
+Respond ONLY with valid JSON (no markdown code blocks):
+{
+  "documents": [
+    {
+      "type": "support_link" | "manual_pdf" | "product_page",
+      "url": "https://...",
+      "title": "Brand Model Document Title",
+      "confidence": "high" | "low"
+    }
+  ]
+}`;
+
+  const message = await anthropic.messages.create({
+    model: 'claude-sonnet-4-20250514',
+    max_tokens: 1500,
+    messages: [{ role: 'user', content: prompt }],
+  });
+  const text = message.content[0].type === 'text' ? message.content[0].text : '';
+  const parseResult = parseClaudeJSON(text, GearDocumentResultSchema);
+  if (!parseResult.success) {
+    throw new Error(parseResult.error);
+  }
+  return parseResult.data;
 }

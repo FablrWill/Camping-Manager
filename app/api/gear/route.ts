@@ -69,7 +69,6 @@ export async function POST(request: NextRequest) {
         hasBattery: body.hasBattery ?? false,
         modelNumber: body.modelNumber || null,
         connectivity: body.connectivity || null,
-        manualUrl: body.manualUrl || null,
       },
     })
 

@@ -58,7 +58,6 @@ export async function PUT(
         hasBattery: body.hasBattery ?? false,
         modelNumber: body.modelNumber || null,
         connectivity: body.connectivity || null,
-        manualUrl: body.manualUrl || null,
       },
     })
 

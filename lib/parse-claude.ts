@@ -96,6 +96,7 @@ const DepartureChecklistItemSchema = z.object({
   text: z.string(),
   checked: z.boolean().default(false),
   isUnpackedWarning: z.boolean().default(false),
+  suggestedTime: z.string().nullable().optional(),
 });
 
 const DepartureChecklistSlotSchema = z.object({
@@ -110,15 +111,6 @@ export const DepartureChecklistResultSchema = z.object({
 export type DepartureChecklistResult = z.infer<typeof DepartureChecklistResultSchema>;
 export type DepartureChecklistItem = z.infer<typeof DepartureChecklistItemSchema>;
 export type DepartureChecklistSlot = z.infer<typeof DepartureChecklistSlotSchema>;
-
-// --- Float Plan Email Schema ---
-
-export const FloatPlanEmailSchema = z.object({
-  subject: z.string(),
-  body: z.string(),
-});
-
-export type FloatPlanEmail = z.infer<typeof FloatPlanEmailSchema>;
 
 // --- Trip Summary Schema (Phase 9 - LEARN-02) ---
 
@@ -193,3 +185,16 @@ export const TextClassificationSchema = z.object({
   extractedData: z.record(z.string(), z.unknown()).optional(),
 });
 export type TextClassification = z.infer<typeof TextClassificationSchema>;
+
+// --- Gear Document Schemas (matches GearDocument model) ---
+
+export const GearDocumentResultSchema = z.object({
+  documents: z.array(z.object({
+    type: z.enum(['manual_pdf', 'support_link', 'warranty', 'product_page']),
+    url: z.string().url(),
+    title: z.string(),
+    confidence: z.enum(['high', 'low']).optional(),
+  })),
+});
+
+export type GearDocumentResult = z.infer<typeof GearDocumentResultSchema>;
