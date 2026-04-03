@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { generatePackingList } from '@/lib/claude'
 import { fetchWeather } from '@/lib/weather'
+import { safeJsonParse } from '@/lib/safe-json'
 
 export async function GET(request: NextRequest) {
   try {
@@ -26,8 +27,12 @@ export async function GET(request: NextRequest) {
       packedState[item.gearId] = item.packed
       usageState[item.gearId] = item.usageStatus ?? null
     }
+    const parsedResult = trip.packingListResult ? safeJsonParse(trip.packingListResult) : null
+    if (trip.packingListResult && !parsedResult) {
+      return NextResponse.json({ error: 'Packing list data corrupted' }, { status: 500 })
+    }
     return NextResponse.json({
-      result: trip.packingListResult ? JSON.parse(trip.packingListResult) : null,
+      result: parsedResult,
       generatedAt: trip.packingListGeneratedAt?.toISOString() ?? null,
       packedState,
       usageState,

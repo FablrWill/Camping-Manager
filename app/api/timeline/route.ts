@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { safeJsonParse } from "@/lib/safe-json";
 
 export async function GET(request: NextRequest) {
   try {
@@ -47,7 +48,7 @@ export async function GET(request: NextRequest) {
     ...seg,
     startMs: Number(seg.startMs),
     endMs: Number(seg.endMs),
-    waypoints: seg.waypoints ? JSON.parse(seg.waypoints) : [],
+    waypoints: safeJsonParse(seg.waypoints) ?? [],
   }));
 
   const serializedPoints = points.map((pt) => ({

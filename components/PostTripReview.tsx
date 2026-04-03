@@ -5,6 +5,7 @@ import { Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui'
 import type { PackingListResult } from '@/lib/claude'
 import type { TripSummaryResult } from '@/lib/parse-claude'
+import { safeJsonParse } from '@/lib/safe-json'
 
 interface PostTripReviewProps {
   tripId: string
@@ -61,12 +62,10 @@ export default function PostTripReview({ tripId }: PostTripReviewProps) {
         if (feedbackRes.ok) {
           const feedbackData = await feedbackRes.json()
           if (feedbackData.feedback?.summary) {
-            try {
-              const parsed = JSON.parse(feedbackData.feedback.summary) as TripSummaryResult
+            const parsed = safeJsonParse<TripSummaryResult>(feedbackData.feedback.summary)
+            if (parsed) {
               setSummary(parsed)
               setSummaryExists(true)
-            } catch {
-              // Summary JSON parse failed — treat as no summary
             }
           }
         }
@@ -97,9 +96,13 @@ export default function PostTripReview({ tripId }: PostTripReviewProps) {
       }
       const data = await res.json()
       if (data.feedback?.summary) {
-        const parsed = JSON.parse(data.feedback.summary) as TripSummaryResult
-        setSummary(parsed)
-        setSummaryExists(true)
+        const parsed = safeJsonParse<TripSummaryResult>(data.feedback.summary)
+        if (parsed) {
+          setSummary(parsed)
+          setSummaryExists(true)
+        } else {
+          setSummaryError('Trip summary data could not be loaded.')
+        }
       }
     } catch (err) {
       console.error('Failed to generate trip summary:', err)

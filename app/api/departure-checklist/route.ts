@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { generateDepartureChecklist } from '@/lib/claude'
+import { safeJsonParse } from '@/lib/safe-json'
 
 export async function GET(request: NextRequest) {
   try {
@@ -17,8 +18,12 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ result: null })
     }
 
+    const parsed = safeJsonParse(checklist.result)
+    if (!parsed) {
+      return NextResponse.json({ error: 'Checklist data corrupted' }, { status: 500 })
+    }
     return NextResponse.json({
-      result: JSON.parse(checklist.result),
+      result: parsed,
       id: checklist.id,
       generatedAt: checklist.generatedAt.toISOString(),
     })
