@@ -61,7 +61,7 @@
 **Milestone Goal:** Make gear smarter (docs, research, deals, weather-aware clothing) and nail the departure morning experience (sequenced checklist, vehicle prep, safety contact).
 
 **Wave 1 — Parallel (no dependencies):**
-- [ ] **Phase 25: Gear Docs & Manual Finder** - GearDocument model, Claude-powered manual search, PDF download + offline caching
+- [x] **Phase 25: Gear Docs & Manual Finder** - GearDocument model, Claude-powered manual search, PDF download + offline caching (completed 2026-04-03)
 - [x] **Phase 26: Trip Day Sequencer** - Time-ordered departure checklist pulling from packing/meals/power/route (completed 2026-04-03)
 - [x] **Phase 27: Safety Float Plan** - Replace Claude-composed email with plain-text template, strip gear list (completed 2026-04-03)
 
@@ -354,7 +354,7 @@ Plans:
 ### Phase 25: Gear Docs & Manual Finder
 **Goal**: Every gear item can have attached documents (manuals, warranties, support links) that Claude finds automatically and are cached for offline access
 **Depends on**: Phase 23 (expanded categories with modelNumber field)
-**Requirements**: TBD
+**Requirements**: GEARDOC-01, GEARDOC-02, GEARDOC-03, GEARDOC-04, GEARDOC-05, GEARDOC-06
 **Success Criteria** (what must be TRUE):
   1. GearDocument model exists with type (manual_pdf, support_link, warranty, product_page), url, localPath, title
   2. "Find Manual" button on gear detail calls Claude to search for manufacturer support page + PDF
@@ -362,10 +362,16 @@ Plans:
   4. Documents tab on gear detail shows all attached docs
   5. Downloaded PDFs cached in service worker for offline access
   6. `npm run build` passes
-**Plans**: 0/TBD
+**Plans**: 3 plans
+
+Plans:
+- [x] 25-01-PLAN.md — GearDocument schema + migration + drop manualUrl + Zod schema
+- [x] 25-02-PLAN.md — Document CRUD API routes + Claude Find Manual + PDF download
+- [x] 25-03-PLAN.md — GearDocumentsTab UI + wire into GearClient detail modal
 
 **Parallelization notes:**
-- Wave 1 — fully parallel with Phases 26 and 27
+- Plan 25-01 is Wave 1 — schema and migration must complete first
+- Plans 25-02 and 25-03 are Wave 2 — parallel, no file overlap
 
 ### Phase 26: Trip Day Sequencer
 **Goal**: Time-ordered departure checklist for the morning of a trip, pulling tasks from packing list, meal plan, power budget, and route — the ADHD-friendly "just follow the list" screen
@@ -516,7 +522,7 @@ Plans:
 | 22. Plan A/B/C Fallback Chain | v2.0 | 3/3 | Complete    | 2026-04-03 |
 | 23. Gear Category Expansion | v2.0 | 3/3 | Complete   | 2026-04-03 |
 | 24. Smart Inbox / Intake | v2.0 | 3/3 | Complete   | 2026-04-03 |
-| 25. Gear Docs & Manual Finder | v3.0 | 0/TBD | Not started | - |
+| 25. Gear Docs & Manual Finder | v3.0 | 3/3 | Complete    | 2026-04-03 |
 | 26. Trip Day Sequencer | v3.0 | 3/3 | Complete   | 2026-04-03 |
 | 27. Safety Float Plan | v3.0 | 1/1 | Complete    | 2026-04-03 |
 | 28. Weather-Aware Clothing | v3.0 | 0/TBD | Not started | - |

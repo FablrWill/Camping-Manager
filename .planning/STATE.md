@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Gear Intelligence + Day-Of
 status: executing
-stopped_at: Phase 26 UI-SPEC approved
-last_updated: "2026-04-03T17:36:38.385Z"
-last_activity: 2026-04-03 -- Phase 26 execution started
+stopped_at: Phase 27 complete
+last_updated: "2026-04-03T18:08:31.499Z"
+last_activity: 2026-04-03 -- Phases 25, 26, 27 all complete
 progress:
   total_phases: 21
-  completed_phases: 12
+  completed_phases: 13
   total_plans: 36
-  completed_plans: 32
+  completed_plans: 35
   percent: 40
 ---
 
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-01)
 
 **Core value:** Personal camping second brain — a closed-loop system that plans, executes, and learns from every trip
-**Current focus:** Phase 26 — trip-day-sequencer
+**Current focus:** Phase 26 — trip-day-sequencer (complete), Phase 27 — safety-float-plan (complete)
 
 ## Current Position
 
-Phase: 26 (trip-day-sequencer) — EXECUTING
-Plan: 1 of 3
-Status: Executing Phase 26
-Last activity: 2026-04-03 -- Phase 26 execution started
+Phase: 27 (safety-float-plan) — COMPLETE
+Plan: 3 of 3
+Status: Phases 25, 26, 27 all complete
+Last activity: 2026-04-03 -- Phase 27 execution complete
 
 Progress: [████░░░░░░] 40%
 
@@ -68,6 +68,9 @@ Progress: [████░░░░░░] 40%
 | Phase 20-live-location-sharing P01 | 383 | 2 tasks | 6 files |
 | Phase 20-live-location-sharing P02 | 203 | 4 tasks | 9 files |
 | Phase 22-plan-fallback-chain P02 | 15 | 2 tasks | 3 files |
+| Phase 25-gear-docs-manual-finder P01 | 15 | 3 tasks | 8 files |
+| Phase 25-gear-docs-manual-finder P02 | 8 | 2 tasks | 5 files |
+| Phase 25 P03 | 13 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -107,6 +110,11 @@ Recent decisions affecting current work:
 - [Phase 20-live-location-sharing]: ssr:false dynamic import must live in Client Component, not Server Component — Next.js App Router constraint; extracted to share-page-client.tsx
 - [Phase 20-live-location-sharing]: Bare layout.tsx at /share renders <html> directly — fully bypasses AppShell so family sees clean map-only page with no nav chrome
 - [Phase 22-plan-fallback-chain]: Add Plan B/C button placed in TripsClient (not TripCard) to keep TripCard interface minimal
+- [Phase 25-gear-docs-manual-finder]: GearDocument model uses gearItemId FK with cascade delete; existing manualUrl values migrated to support_link rows in single migration
+- [Phase 25-gear-docs-manual-finder]: findGearManual does not auto-save — returns results for UI confirmation
+- [Phase 25-gear-docs-manual-finder]: PDF download validates content-type (422 for non-PDF) — prevents saving HTML error pages
+- [Phase 25]: GearDocumentsTab rendered via GearForm extraContent slot — GearForm is fixed modal overlay, Documents must be injected inside
+- [Phase 25]: /docs/ URLs covered by existing SW cache-first fallthrough — no SW changes needed for PDF caching
 
 ### Pending Todos
 
@@ -120,6 +128,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-03T17:26:02.228Z
-Stopped at: Phase 26 UI-SPEC approved
-Resume file: .planning/phases/26-trip-day-sequencer/26-UI-SPEC.md
+Last session: 2026-04-03T18:08:31.894Z
+Stopped at: Phase 27 complete — float plan refactored to plain-text template
+Resume file: None

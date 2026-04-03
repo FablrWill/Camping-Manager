@@ -39,6 +39,9 @@ prisma/*.db-journal
 # User-uploaded photos (stored locally, referenced in DB)
 public/photos/
 
+# Downloaded gear document PDFs (stored locally, referenced in DB)
+public/docs/
+
 # DropBox processing inbox (contents are transient, not tracked)
 DropBox/*
 !DropBox/.gitkeep

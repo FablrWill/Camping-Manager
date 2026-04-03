@@ -72,6 +72,14 @@ A personal second brain for car camping — an AI-powered knowledge system that 
 - ✓ Post-trip AI summary (what to drop, what was missing, location rating) — v1.1
 - ✓ Voice debrief with automatic gear/location updates — v1.1
 
+### Validated in Phase 25 (gear-docs-manual-finder)
+
+- ✓ GearDocument model with cascade delete and indexed gearItemId — Phase 25
+- ✓ Migration: manualUrl data preserved → GearDocument rows, column dropped — Phase 25
+- ✓ Claude-powered manual finder (no auto-save, user confirms) — Phase 25
+- ✓ PDF download with content-type validation and local caching — Phase 25
+- ✓ GearDocumentsTab UI: find/list/add/download/delete within gear modal — Phase 25
+
 ### Active
 
 None — v1.2 Ship It complete as of 2026-04-03.
@@ -95,7 +103,7 @@ None — v1.2 Ship It complete as of 2026-04-03.
 
 ## Current State
 
-Phase 27 complete (2026-04-03) — Float plan email refactored to deterministic plain-text template. No Claude API call, no gear list, no checklist status. Dead code (composeFloatPlanEmail, FloatPlanEmailSchema, FloatPlanEmail) removed from claude.ts and parse-claude.ts.
+Phase 27 complete (2026-04-03) — Float plan email refactored to deterministic plain-text template. No Claude API call, no gear list, no checklist status. Dead code (composeFloatPlanEmail, FloatPlanEmailSchema, FloatPlanEmail) removed from claude.ts and parse-claude.ts. Phase 25 also complete: GearDocument model with Claude-powered manual finder, PDF download + local caching, GearDocumentsTab UI wired into gear edit modal.
 
 ## Current Milestone: ✅ v1.2 Ship It — COMPLETE (2026-04-03)
 

@@ -185,3 +185,16 @@ export const TextClassificationSchema = z.object({
   extractedData: z.record(z.string(), z.unknown()).optional(),
 });
 export type TextClassification = z.infer<typeof TextClassificationSchema>;
+
+// --- Gear Document Schemas (matches GearDocument model) ---
+
+export const GearDocumentResultSchema = z.object({
+  documents: z.array(z.object({
+    type: z.enum(['manual_pdf', 'support_link', 'warranty', 'product_page']),
+    url: z.string().url(),
+    title: z.string(),
+    confidence: z.enum(['high', 'low']).optional(),
+  })),
+});
+
+export type GearDocumentResult = z.infer<typeof GearDocumentResultSchema>;
