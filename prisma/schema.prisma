@@ -193,6 +193,8 @@ model Trip {
   emergencyContactName   String?   // per-trip override for emergency contact name (Phase 7)
   emergencyContactEmail  String?   // per-trip override for emergency contact email (Phase 7)
   bringingDog            Boolean   @default(false)  // Phase 19: dog-aware trip planning
+  permitUrl              String?   // Phase 21: Recreation.gov or other booking confirmation URL
+  permitNotes            String?   // Phase 21: site number, check-in time, special instructions
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

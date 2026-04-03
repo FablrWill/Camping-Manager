@@ -21,6 +21,8 @@ interface TripData {
   createdAt: string
   updatedAt: string
   bringingDog: boolean
+  permitUrl: string | null
+  permitNotes: string | null
 }
 
 interface WeatherData {
@@ -67,6 +69,8 @@ export default function TripsClient({ initialTrips, locations, vehicles }: Trips
   const [editVehicleId, setEditVehicleId] = useState('')
   const [editNotes, setEditNotes] = useState('')
   const [editBringingDog, setEditBringingDog] = useState(false)
+  const [editPermitUrl, setEditPermitUrl] = useState('')
+  const [editPermitNotes, setEditPermitNotes] = useState('')
 
   function openEdit(trip: TripData) {
     setEditingTrip(trip)
@@ -77,6 +81,8 @@ export default function TripsClient({ initialTrips, locations, vehicles }: Trips
     setEditVehicleId(trip.vehicle?.id ?? '')
     setEditNotes(trip.notes ?? '')
     setEditBringingDog(trip.bringingDog ?? false)
+    setEditPermitUrl(trip.permitUrl ?? '')
+    setEditPermitNotes(trip.permitNotes ?? '')
     setError(null)
   }
 
@@ -97,6 +103,8 @@ export default function TripsClient({ initialTrips, locations, vehicles }: Trips
           vehicleId: editVehicleId || null,
           notes: editNotes || null,
           bringingDog: editBringingDog,
+          permitUrl: editPermitUrl || null,
+          permitNotes: editPermitNotes || null,
         }),
       })
       if (!res.ok) throw new Error('Failed to save')
@@ -470,6 +478,30 @@ export default function TripsClient({ initialTrips, locations, vehicles }: Trips
             value={editNotes}
             onChange={(e) => setEditNotes(e.target.value)}
           />
+          <div>
+            <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">
+              Booking URL
+            </label>
+            <input
+              type="url"
+              value={editPermitUrl}
+              onChange={(e) => setEditPermitUrl(e.target.value)}
+              placeholder="https://www.recreation.gov/..."
+              className="w-full rounded-lg border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 px-3 py-2 text-sm text-stone-900 dark:text-stone-50 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-400"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-stone-500 dark:text-stone-400 mb-1">
+              Permit Notes
+            </label>
+            <textarea
+              value={editPermitNotes}
+              onChange={(e) => setEditPermitNotes(e.target.value)}
+              placeholder="Site number, check-in time, special instructions..."
+              rows={2}
+              className="w-full rounded-lg border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 px-3 py-2 text-sm text-stone-900 dark:text-stone-50 placeholder:text-stone-400 dark:placeholder:text-stone-500 resize-none focus:outline-none focus:ring-2 focus:ring-amber-400"
+            />
+          </div>
           {error && (
             <p className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30 rounded-lg px-3 py-2">
               {error}

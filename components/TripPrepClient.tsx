@@ -24,6 +24,8 @@ interface TripPrepClientProps {
     endDate: string
     location: { id: string; name: string; latitude: number | null; longitude: number | null } | null
     vehicle: { id: string; name: string } | null
+    permitUrl: string | null
+    permitNotes: string | null
   }
 }
 
@@ -67,6 +69,11 @@ export default function TripPrepClient({ trip }: TripPrepClientProps) {
   const [lastStops, setLastStops] = useState<LastStopsResult | null>(null)
   const [lastStopsLoading, setLastStopsLoading] = useState(false)
   const [lastStopsError, setLastStopsError] = useState<string | null>(null)
+  const [permitUrl, setPermitUrl] = useState<string>(trip.permitUrl ?? '')
+  const [permitNotes, setPermitNotes] = useState<string>(trip.permitNotes ?? '')
+  const [permitSaving, setPermitSaving] = useState(false)
+  const [permitError, setPermitError] = useState<string | null>(null)
+  const [permitSaved, setPermitSaved] = useState(false)
 
   // Load offline snapshot when device goes offline
   useEffect(() => {
@@ -98,6 +105,34 @@ export default function TripPrepClient({ trip }: TripPrepClientProps) {
       setError(err instanceof Error ? err.message : 'Failed to load prep status')
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function savePermit() {
+    setPermitSaving(true)
+    setPermitError(null)
+    setPermitSaved(false)
+    try {
+      const res = await fetch(`/api/trips/${trip.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: trip.name,
+          startDate: trip.startDate,
+          endDate: trip.endDate,
+          locationId: trip.location?.id ?? null,
+          vehicleId: trip.vehicle?.id ?? null,
+          permitUrl: permitUrl || null,
+          permitNotes: permitNotes || null,
+        }),
+      })
+      if (!res.ok) throw new Error('Failed to save')
+      setPermitSaved(true)
+      setTimeout(() => setPermitSaved(false), 2000)
+    } catch {
+      setPermitError('Could not save — try again.')
+    } finally {
+      setPermitSaving(false)
     }
   }
 
@@ -367,6 +402,61 @@ export default function TripPrepClient({ trip }: TripPrepClientProps) {
                       ))}
                     </div>
                   )}
+                </div>
+              )}
+              {/* Permits & Reservations card — after Fuel & Last Stops (Phase 21) */}
+              {config.key === 'weather' && (
+                <div className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-700 p-4">
+                  <h3 className="text-sm font-semibold text-stone-900 dark:text-stone-50 mb-3">📋 Permits & Reservations</h3>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-xs font-semibold uppercase text-stone-500 dark:text-stone-400 mb-1 block">
+                        Booking URL
+                      </label>
+                      <input
+                        type="url"
+                        value={permitUrl}
+                        onChange={(e) => setPermitUrl(e.target.value)}
+                        placeholder="https://www.recreation.gov/camping/..."
+                        className="w-full rounded-lg border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 px-3 py-2 text-sm text-stone-900 dark:text-stone-50 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-400"
+                      />
+                      {permitUrl && (
+                        <a
+                          href={permitUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="mt-1 inline-flex items-center gap-1 text-xs text-amber-600 dark:text-amber-400 hover:underline"
+                        >
+                          View Booking →
+                        </a>
+                      )}
+                    </div>
+                    <div>
+                      <label className="text-xs font-semibold uppercase text-stone-500 dark:text-stone-400 mb-1 block">
+                        Notes
+                      </label>
+                      <textarea
+                        value={permitNotes}
+                        onChange={(e) => setPermitNotes(e.target.value)}
+                        placeholder="Site number, check-in time, special instructions..."
+                        rows={3}
+                        className="w-full rounded-lg border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 px-3 py-2 text-sm text-stone-900 dark:text-stone-50 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-400 resize-none"
+                      />
+                    </div>
+                    <p className="text-xs text-stone-400 dark:text-stone-500 italic">
+                      Check cancelation policy before departure.
+                    </p>
+                    {permitError && (
+                      <p className="text-xs text-red-500 dark:text-red-400">{permitError}</p>
+                    )}
+                    <button
+                      onClick={savePermit}
+                      disabled={permitSaving}
+                      className="w-full py-2 rounded-lg bg-amber-500 dark:bg-amber-600 text-white text-sm font-medium hover:bg-amber-600 dark:hover:bg-amber-500 disabled:opacity-50 transition-colors"
+                    >
+                      {permitSaving ? 'Saving…' : permitSaved ? 'Saved ✓' : 'Save'}
+                    </button>
+                  </div>
                 </div>
               )}
               </Fragment>

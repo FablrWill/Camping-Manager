@@ -34,6 +34,8 @@ interface TripData {
   createdAt: string
   updatedAt: string
   bringingDog: boolean
+  permitUrl: string | null
+  permitNotes: string | null
 }
 
 interface WeatherData {
@@ -93,6 +95,11 @@ export default function TripCard({
               {trip.bringingDog && (
                 <span title="Bringing dog" aria-label="Bringing dog" className="text-base leading-none shrink-0">
                   🐕
+                </span>
+              )}
+              {trip.permitUrl && (
+                <span title="Booking confirmed" aria-label="Booking confirmed" className="text-base leading-none shrink-0">
+                  📋
                 </span>
               )}
               {/* Edit/delete buttons */}
