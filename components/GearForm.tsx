@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { safeParseFloat } from '@/lib/validate'
 
 interface GearItem {
   id: string
@@ -65,13 +66,13 @@ export default function GearForm({
       category: form.get('category'),
       description: form.get('description') || null,
       condition: form.get('condition') || null,
-      weight: form.get('weight') || null,
+      weight: safeParseFloat(form.get('weight')),
       storageLocation: form.get('storageLocation') || null,
       purchaseUrl: form.get('purchaseUrl') || null,
-      price: form.get('price') || null,
+      price: safeParseFloat(form.get('price')),
       notes: form.get('notes') || null,
-      wattage: form.get('wattage') || null,
-      hoursPerDay: form.get('hoursPerDay') || null,
+      wattage: safeParseFloat(form.get('wattage')),
+      hoursPerDay: safeParseFloat(form.get('hoursPerDay')),
       hasBattery: form.get('hasBattery') === 'on',
     }
 

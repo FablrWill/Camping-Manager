@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { safeParseFloat, safeParseInt, isValidDate } from '@/lib/validate'
 import {
   Car,
   Fuel,
@@ -133,16 +134,16 @@ export default function VehicleClient({ vehicle: initialVehicle }: { vehicle: Ve
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: editName,
-          year: editYear ? parseInt(editYear) : null,
+          year: safeParseInt(editYear),
           make: editMake || null,
           model: editModel || null,
           drivetrain: editDrivetrain || null,
           fuelEconomy: editFuelEconomy || null,
-          groundClearance: editGroundClearance ? parseFloat(editGroundClearance) : null,
-          towingCapacity: editTowingCapacity ? parseInt(editTowingCapacity) : null,
-          cargoVolume: editCargoVolume ? parseFloat(editCargoVolume) : null,
-          cargoLength: editCargoLength ? parseFloat(editCargoLength) : null,
-          cargoWidth: editCargoWidth ? parseFloat(editCargoWidth) : null,
+          groundClearance: safeParseFloat(editGroundClearance),
+          towingCapacity: safeParseInt(editTowingCapacity),
+          cargoVolume: safeParseFloat(editCargoVolume),
+          cargoLength: safeParseFloat(editCargoLength),
+          cargoWidth: safeParseFloat(editCargoWidth),
           notes: editNotes || null,
         }),
       })
@@ -182,8 +183,8 @@ export default function VehicleClient({ vehicle: initialVehicle }: { vehicle: Ve
     const data = {
       name: form.get('name') as string,
       description: (form.get('description') as string) || null,
-      cost: form.get('cost') ? parseFloat(form.get('cost') as string) : null,
-      installedAt: form.get('installedAt') ? new Date(form.get('installedAt') as string).toISOString() : null,
+      cost: safeParseFloat(form.get('cost')),
+      installedAt: (() => { const d = isValidDate(form.get('installedAt') as string | null); return d ? d.toISOString() : null; })(),
       notes: (form.get('notes') as string) || null,
     }
 
