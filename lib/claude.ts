@@ -61,6 +61,32 @@ interface WeatherAlert {
   severity: string
 }
 
+export interface GearFeedbackSummary {
+  gearName: string
+  usedCount: number
+  didntNeedCount: number
+  forgotCount: number
+  totalTrips: number
+}
+
+export function filterSignificantFeedback(
+  feedback: GearFeedbackSummary[]
+): GearFeedbackSummary[] {
+  return feedback.filter((g) => g.didntNeedCount >= 2 || g.forgotCount >= 1)
+}
+
+export function buildFeedbackSection(feedback?: GearFeedbackSummary[]): string {
+  if (!feedback || feedback.length === 0) return ''
+  const lines = feedback.map((f) => {
+    const parts: string[] = []
+    if (f.didntNeedCount >= 2) parts.push(`marked "didn't need" on ${f.didntNeedCount}/${f.totalTrips} trips`)
+    if (f.forgotCount >= 1) parts.push(`forgotten but needed on ${f.forgotCount}/${f.totalTrips} trips`)
+    if (f.usedCount > 0 && parts.length === 0) parts.push(`used on ${f.usedCount}/${f.totalTrips} trips`)
+    return `- ${f.gearName}: ${parts.join(', ')}`
+  })
+  return `GEAR HISTORY FROM PAST TRIPS:\n${lines.join('\n')}`
+}
+
 export interface MealPlanMeal {
   name: string
   prepType: string  // "home" | "camp"
@@ -120,6 +146,7 @@ export async function generatePackingList(params: {
     days: WeatherDay[]
     alerts: WeatherAlert[]
   }
+  feedbackContext?: GearFeedbackSummary[]
 }): Promise<PackingListResult> {
   const {
     tripName,
@@ -132,6 +159,7 @@ export async function generatePackingList(params: {
     tripNotes,
     gearInventory,
     weather,
+    feedbackContext,
   } = params
 
   const gearByCategory: Record<string, GearItem[]> = {}
@@ -151,6 +179,7 @@ export async function generatePackingList(params: {
     .join('\n\n')
 
   const weatherSection = buildWeatherSection(weather)
+  const feedbackSection = buildFeedbackSection(feedbackContext)
 
   const prompt = `You are a car camping trip packing assistant. Generate a smart, categorized packing list for this trip.
 
@@ -166,6 +195,8 @@ ${weatherSection}
 GEAR INVENTORY (items the user owns):
 ${gearSection || 'No gear in inventory yet.'}
 
+${feedbackSection}
+
 INSTRUCTIONS:
 1. Build the packing list primarily from the user's gear inventory. Reference items by their [id:xxx] tag.
 2. Add essential items NOT in the inventory (like food cooler, firewood, water, toiletries, etc.) — mark these as not from inventory.
@@ -174,6 +205,7 @@ INSTRUCTIONS:
 5. Adjust for trip duration: longer trips need more consumables.
 6. Categories: shelter, sleep, cook, power, clothing, tools, vehicle, hygiene, safety, misc.
 7. Include 2-3 brief, specific tips based on the weather and trip details (e.g., "Charge the EcoFlow fully — limited solar expected with cloud cover Saturday").
+8. If GEAR HISTORY is provided, use it to inform recommendations: deprioritize items marked "didn't need" on 2+ trips, and flag items frequently forgotten as "RECOMMENDED — frequently forgotten".
 
 Respond ONLY with valid JSON matching this exact structure:
 {
