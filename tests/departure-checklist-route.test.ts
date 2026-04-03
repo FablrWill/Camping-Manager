@@ -89,9 +89,9 @@ describe('POST /api/departure-checklist', () => {
   it('Test 1: fetches fuel stops and passes stop names to generateDepartureChecklist when trip has location coordinates', async () => {
     vi.mocked(prisma.trip.findUnique).mockResolvedValue(mockTripWithLocation as never)
     vi.mocked(fetchLastStops).mockResolvedValue({
-      fuel: [{ name: 'Shell', lat: 35.85, lon: -81.85, distanceKm: 12, type: 'fuel' }],
-      grocery: [{ name: 'Food Lion', lat: 35.87, lon: -81.87, distanceKm: 14, type: 'grocery' }],
-      outdoor: [{ name: 'Lowes Hardware', lat: 35.88, lon: -81.88, distanceKm: 15, type: 'outdoor' }],
+      fuel: [{ name: 'Shell', distanceMiles: 7.5, category: 'fuel' }],
+      grocery: [{ name: 'Food Lion', distanceMiles: 8.7, category: 'grocery' }],
+      outdoor: [{ name: 'Lowes Hardware', distanceMiles: 9.3, category: 'outdoor' }],
     })
 
     const req = makePostRequest({ tripId: 'trip-1' })
