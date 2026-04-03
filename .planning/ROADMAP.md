@@ -6,7 +6,7 @@
 - ✅ **v1.1 Close the Loop** — Phases 6-11 (shipped 2026-04-02) — [archive](milestones/v1.1-ROADMAP.md)
 - ✅ **v1.2 Ship It** — Phases 12-15 (shipped 2026-04-03)
 - ✅ **v2.0 Smarter & Sharper** — Phases 16-24 (shipped 2026-04-03)
-- 🚧 **v3.0 Gear Intelligence + Day-Of** — Phases 25-32 (in progress)
+- 🚧 **v3.0 Gear Intelligence + Day-Of** — Phases 25-33 (in progress)
 
 ## Phases
 
@@ -61,9 +61,9 @@
 **Milestone Goal:** Make gear smarter (docs, research, deals, weather-aware clothing) and nail the departure morning experience (sequenced checklist, vehicle prep, safety contact).
 
 **Wave 1 — Parallel (no dependencies):**
-- [x] **Phase 25: Gear Docs & Manual Finder** - GearDocument model, Claude-powered manual search, PDF download + offline caching (completed 2026-04-03)
-- [x] **Phase 26: Trip Day Sequencer** - Time-ordered departure checklist pulling from packing/meals/power/route (completed 2026-04-03)
-- [x] **Phase 27: Safety Float Plan** - Replace Claude-composed email with plain-text template, strip gear list (completed 2026-04-03)
+- [ ] **Phase 25: Gear Docs & Manual Finder** - GearDocument model, Claude-powered manual search, PDF download + offline caching
+- [ ] **Phase 26: Trip Day Sequencer** - Time-ordered departure checklist pulling from packing/meals/power/route
+- [ ] **Phase 27: Safety Float Plan** - SMS/email trip summary to emergency contact before departure
 
 **Wave 2 — Depends on Wave 1:**
 - [ ] **Phase 28: Weather-Aware Clothing** - Rain/cold/UV-driven clothing suggestions in packing lists, clothing subcategories
@@ -354,7 +354,7 @@ Plans:
 ### Phase 25: Gear Docs & Manual Finder
 **Goal**: Every gear item can have attached documents (manuals, warranties, support links) that Claude finds automatically and are cached for offline access
 **Depends on**: Phase 23 (expanded categories with modelNumber field)
-**Requirements**: GEARDOC-01, GEARDOC-02, GEARDOC-03, GEARDOC-04, GEARDOC-05, GEARDOC-06
+**Requirements**: TBD
 **Success Criteria** (what must be TRUE):
   1. GearDocument model exists with type (manual_pdf, support_link, warranty, product_page), url, localPath, title
   2. "Find Manual" button on gear detail calls Claude to search for manufacturer support page + PDF
@@ -362,16 +362,10 @@ Plans:
   4. Documents tab on gear detail shows all attached docs
   5. Downloaded PDFs cached in service worker for offline access
   6. `npm run build` passes
-**Plans**: 3 plans
-
-Plans:
-- [x] 25-01-PLAN.md — GearDocument schema + migration + drop manualUrl + Zod schema
-- [x] 25-02-PLAN.md — Document CRUD API routes + Claude Find Manual + PDF download
-- [x] 25-03-PLAN.md — GearDocumentsTab UI + wire into GearClient detail modal
+**Plans**: 0/TBD
 
 **Parallelization notes:**
-- Plan 25-01 is Wave 1 — schema and migration must complete first
-- Plans 25-02 and 25-03 are Wave 2 — parallel, no file overlap
+- Wave 1 — fully parallel with Phases 26 and 27
 
 ### Phase 26: Trip Day Sequencer
 **Goal**: Time-ordered departure checklist for the morning of a trip, pulling tasks from packing list, meal plan, power budget, and route — the ADHD-friendly "just follow the list" screen
@@ -383,30 +377,22 @@ Plans:
   3. Each task has a suggested time and can be checked off
   4. Sequence adapts to departure time (set by user on trip)
   5. `npm run build` passes
-**Plans**: 3/3 — completed 2026-04-03
-
-Plans:
-- [x] 26-P01-PLAN.md — Schema migration + PATCH endpoint + Zod type
-- [x] 26-P02-PLAN.md — Claude prompt upgrade with departureTime + fuel stop params
-- [x] 26-P03-PLAN.md — UI layer: departureTime row + suggestedTime badges
+**Plans**: 0/TBD
 
 **Parallelization notes:**
 - Wave 1 — fully parallel with Phases 25 and 27
 
 ### Phase 27: Safety Float Plan
-**Goal**: Replace Claude-composed float plan email with a deterministic plain-text template, strip gear list and checklist status, keep email-only delivery
+**Goal**: Send a trip summary (dates, location, vehicle, expected return) to an emergency contact before departure
 **Depends on**: None
-**Requirements**: FLOAT-TEMPLATE-01, FLOAT-TEMPLATE-02, FLOAT-TEMPLATE-03
+**Requirements**: TBD
 **Success Criteria** (what must be TRUE):
-  1. Float plan email uses plain-text template (no Claude API call, no AI token cost)
-  2. Email contains only: destination, dates, vehicle, expected return, notes, map link
-  3. Gear list, checklist status, and weather notes removed from email body
-  4. Dead code (composeFloatPlanEmail, FloatPlanEmailSchema) removed from codebase
+  1. User can set an emergency contact (name, phone/email) in settings
+  2. "Send Float Plan" button on trip prep generates a summary message
+  3. Message includes: destination, dates, vehicle, expected return, any notes
+  4. Sends via SMS (iMessage on Mac) or email
   5. `npm run build` passes
-**Plans**: 1 plan
-
-Plans:
-- [x] 27-01-PLAN.md — Replace Claude call with plain-text template + remove dead code
+**Plans**: 0/TBD
 
 **Parallelization notes:**
 - Wave 1 — fully parallel with Phases 25 and 26
@@ -522,14 +508,41 @@ Plans:
 | 22. Plan A/B/C Fallback Chain | v2.0 | 3/3 | Complete    | 2026-04-03 |
 | 23. Gear Category Expansion | v2.0 | 3/3 | Complete   | 2026-04-03 |
 | 24. Smart Inbox / Intake | v2.0 | 3/3 | Complete   | 2026-04-03 |
-| 25. Gear Docs & Manual Finder | v3.0 | 3/3 | Complete    | 2026-04-03 |
-| 26. Trip Day Sequencer | v3.0 | 3/3 | Complete   | 2026-04-03 |
-| 27. Safety Float Plan | v3.0 | 1/1 | Complete    | 2026-04-03 |
+| 25. Gear Docs & Manual Finder | v3.0 | 0/TBD | Not started | - |
+| 26. Trip Day Sequencer | v3.0 | 0/TBD | Not started | - |
+| 27. Safety Float Plan | v3.0 | 0/TBD | Not started | - |
 | 28. Weather-Aware Clothing | v3.0 | 0/TBD | Not started | - |
 | 29. Vehicle Pre-Trip Checklist | v3.0 | 0/TBD | Not started | - |
 | 30. Gear Product Research | v3.0 | 0/TBD | Not started | - |
 | 31. Dark Sky & Astro Info | v3.0 | 0/TBD | Not started | - |
 | 32. Deal Monitoring | v3.0 | 0/TBD | Not started | - |
+| 33. Conversational Trip Planner | v3.0 | 1/4 | In Progress|  |
+
+### Phase 33: Conversational Trip Planner
+
+**Goal:** Replace the static "Create Trip" form with a multi-turn Claude agent chat that asks dynamic questions, calls gear/weather/web tools, and creates the trip when ready. Chat is the primary creation path; existing edit form stays for post-creation edits. "Add manually" escape hatch preserved.
+**Requirements**: TRIP-CHAT-01, TRIP-CHAT-02, TRIP-CHAT-03, TRIP-CHAT-04, TRIP-CHAT-05, TRIP-CHAT-06, TRIP-CHAT-07, TRIP-CHAT-08, TRIP-CHAT-09
+**Depends on:** Phase 24
+**Success Criteria** (what must be TRUE):
+  1. "Plan Trip" button opens a full-screen chat sheet with a conversational agent
+  2. Agent asks dynamic questions and uses tools (gear, weather, locations, web search)
+  3. Agent presents a summary card with "Create Trip" button when enough info is collected
+  4. Confirming creates the trip and navigates to /trips/[id]/prep
+  5. "Add manually" escape hatch opens the old static form
+  6. Trip-creation conversations are persisted to the database
+  7. `npm run build` passes
+**Plans:** 1/4 plans executed
+
+Plans:
+- [x] 33-00-PLAN.md — Wave 0 test stubs (trip planner tools + ChatBubble extraction)
+- [ ] 33-01-PLAN.md — Trip planner API route + system prompt + web search tool + tool registry
+- [ ] 33-02-PLAN.md — ChatClient + ChatBubble modifications (apiEndpoint, fullHeight, trip_summary card)
+- [ ] 33-03-PLAN.md — TripPlannerSheet component + TripsClient integration
+
+**Parallelization notes:**
+- Plan 33-00 is Wave 0 — test stubs, no dependencies
+- Plans 33-01 and 33-02 are Wave 1 — parallel, depend on 33-00, no file overlap
+- Plan 33-03 is Wave 2 — depends on both 33-01 (API route) and 33-02 (ChatClient props)
 
 ---
 *Full phase details for shipped milestones: see archives in `.planning/milestones/`*
