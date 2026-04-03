@@ -52,7 +52,7 @@
 - [ ] **Phase 20: Live Location Sharing** - Shareable public URL showing Will's last known GPS location
 - [ ] **Phase 21: Permit & Reservation** - Store Recreation.gov confirmations with trip, surface reminders
 - [ ] **Phase 22: Plan A/B/C Fallback Chain** - Link fallback trips to primary, compare in trip prep
-- [ ] **Phase 23: Gear Category Expansion** - Expand from 7 to 15 categories with visual grouping, add tech gear fields
+- [x] **Phase 23: Gear Category Expansion** - Expand from 7 to 15 categories with visual grouping, add tech gear fields (completed 2026-04-03)
 - [ ] **Phase 24: Smart Inbox / Universal Intake** - Single intake endpoint + inbox UI for phone share-to-app workflow
 
 ## Phase Details
@@ -239,7 +239,7 @@ Plans:
 
 Plans:
 - [x] 23-01-PLAN.md — Shared categories module + Prisma migration + seed re-categorization + API routes
-- [ ] 23-02-PLAN.md — Replace category duplicates in DashboardClient, claude.ts, power.ts, agent tools
+- [x] 23-02-PLAN.md — Replace category duplicates in DashboardClient, claude.ts, power.ts, agent tools
 - [x] 23-03-PLAN.md — GearClient grouped filter chips + GearForm tech detail fields
 
 **Parallelization notes:**
@@ -287,7 +287,7 @@ Phases execute in numeric order: 12 -> 13 -> 14 -> 15
 | 20. Live Location Sharing | v2.0 | 0/TBD | Not started | - |
 | 21. Permit & Reservation | v2.0 | 0/TBD | Not started | - |
 | 22. Plan A/B/C Fallback Chain | v2.0 | 0/TBD | Not started | - |
-| 23. Gear Category Expansion | v2.0 | 2/3 | In Progress|  |
+| 23. Gear Category Expansion | v2.0 | 3/3 | Complete   | 2026-04-03 |
 | 24. Smart Inbox / Intake | v2.0 | 0/TBD | Not started | - |
 
 ---
