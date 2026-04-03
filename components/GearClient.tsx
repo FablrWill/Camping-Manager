@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import GearForm from './GearForm'
+import GearDocumentsTab from './GearDocumentsTab'
 import ChatContextButton from '@/components/ChatContextButton'
 import { CATEGORY_GROUPS, CATEGORIES, getCategoryEmoji, getCategoryLabel } from '@/lib/gear-categories'
 
@@ -362,6 +363,18 @@ export default function GearClient({ initialItems }: { initialItems: GearItem[] 
             setShowForm(false)
             setEditingItem(null)
           }}
+          extraContent={editingItem ? (
+            <div className="border-t border-stone-200 dark:border-stone-700 pt-4 mt-2">
+              <h3 className="text-sm font-medium text-stone-700 dark:text-stone-300 mb-3">Documents</h3>
+              <GearDocumentsTab
+                gearItemId={editingItem.id}
+                gearName={editingItem.name}
+                gearBrand={editingItem.brand}
+                gearModelNumber={editingItem.modelNumber}
+                gearCategory={editingItem.category}
+              />
+            </div>
+          ) : undefined}
         />
       )}
 

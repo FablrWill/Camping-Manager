@@ -36,6 +36,7 @@ interface GearFormProps {
   onSave: (data: Record<string, unknown>) => Promise<void>
   onDelete?: () => void
   onClose: () => void
+  extraContent?: React.ReactNode
 }
 
 export default function GearForm({
@@ -44,6 +45,7 @@ export default function GearForm({
   onSave,
   onDelete,
   onClose,
+  extraContent,
 }: GearFormProps) {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -342,6 +344,9 @@ export default function GearForm({
 
             </div>
           </div>
+
+          {/* Extra content slot (e.g. GearDocumentsTab) */}
+          {extraContent}
 
           {/* Error */}
           {error && (
