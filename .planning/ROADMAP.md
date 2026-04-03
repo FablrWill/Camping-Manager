@@ -428,19 +428,26 @@ Plans:
 - Wave 2 — can run parallel with Phase 29
 
 ### Phase 29: Vehicle Pre-Trip Checklist
-**Goal**: Terrain-aware vehicle checklist (tires, oil, coolant, cargo) that surfaces in trip prep alongside the Day Sequencer
+**Goal**: Claude-generated vehicle pre-trip checklist (tires, fluids, lights, cargo) that surfaces as 6th section in trip prep, with check-off state persisted as JSON blob on Trip
 **Depends on**: Phase 26 (integrates with departure sequence)
-**Requirements**: TBD
+**Requirements**: SC-1, SC-2, SC-3, SC-4, SC-5
 **Success Criteria** (what must be TRUE):
   1. Trip prep has a "Vehicle Check" card with checklist items
   2. Checklist items adapt to trip type (highway vs dirt road vs off-road)
   3. Items can be checked off and state persists
   4. Integrates with vehicle profile (shows relevant specs)
   5. `npm run build` passes
-**Plans**: 0/TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 29-PLAN-01-schema-and-tests.md -- Prisma migration + Zod schema + Wave 0 test scaffolds
+- [ ] 29-PLAN-02-api-routes.md -- generateVehicleChecklist + GET/POST route + PATCH check-off route
+- [ ] 29-PLAN-03-ui-component.md -- VehicleChecklistCard component + PREP_SECTIONS + TripPrepClient wiring
 
 **Parallelization notes:**
-- Wave 2 — can run parallel with Phase 28
+- Plan 01 is Wave 1 -- schema and tests
+- Plan 02 is Wave 2 -- API routes depend on schema
+- Plan 03 is Wave 3 -- UI depends on API routes
 
 ### Phase 30: Gear Product Research
 **Goal**: AI-powered "Research" button on gear items that finds best-in-class alternatives, compares to current item, and surfaces upgrade recommendations
@@ -526,7 +533,7 @@ Plans:
 | 26. Trip Day Sequencer | v3.0 | 3/3 | Complete   | 2026-04-03 |
 | 27. Safety Float Plan | v3.0 | 1/1 | Complete    | 2026-04-03 |
 | 28. Weather-Aware Clothing | v3.0 | 0/TBD | Not started | - |
-| 29. Vehicle Pre-Trip Checklist | v3.0 | 0/TBD | Not started | - |
+| 29. Vehicle Pre-Trip Checklist | v3.0 | 0/3 | Planning | - |
 | 30. Gear Product Research | v3.0 | 0/TBD | Not started | - |
 | 31. Dark Sky & Astro Info | v3.0 | 0/TBD | Not started | - |
 | 32. Deal Monitoring | v3.0 | 0/TBD | Not started | - |
