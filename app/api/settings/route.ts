@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { isValidEmail } from '@/lib/validate';
 
 const SETTINGS_ID = 'user_settings';
 
@@ -25,7 +26,7 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: 'Name and email are required' }, { status: 400 });
     }
 
-    if (!body.email.includes('@') || !body.email.includes('.')) {
+    if (!isValidEmail(body.email)) {
       return NextResponse.json({ error: 'Invalid email format' }, { status: 400 });
     }
 

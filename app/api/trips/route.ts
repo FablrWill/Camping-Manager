@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import { NextResponse } from "next/server";
+import { isValidDate } from "@/lib/validate";
 
 export async function GET() {
   try {
@@ -29,11 +30,17 @@ export async function POST(req: Request) {
       )
     }
 
+    const startDate = isValidDate(data.startDate)
+    const endDate = isValidDate(data.endDate)
+    if (!startDate || !endDate) {
+      return NextResponse.json({ error: 'Invalid date format' }, { status: 400 })
+    }
+
     const trip = await prisma.trip.create({
       data: {
         name: data.name,
-        startDate: new Date(data.startDate),
-        endDate: new Date(data.endDate),
+        startDate,
+        endDate,
         locationId: data.locationId || null,
         vehicleId: data.vehicleId || null,
         notes: data.notes || null,

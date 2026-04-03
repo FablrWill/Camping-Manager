@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/db'
 import { NextRequest, NextResponse } from 'next/server'
+import { isValidDate } from '@/lib/validate'
 
 type Params = { params: Promise<{ id: string }> }
 
@@ -33,12 +34,18 @@ export async function PUT(req: NextRequest, { params }: Params) {
       return NextResponse.json({ error: 'name, startDate, and endDate are required' }, { status: 400 })
     }
 
+    const startDate = isValidDate(data.startDate)
+    const endDate = isValidDate(data.endDate)
+    if (!startDate || !endDate) {
+      return NextResponse.json({ error: 'Invalid date format' }, { status: 400 })
+    }
+
     const trip = await prisma.trip.update({
       where: { id },
       data: {
         name: data.name,
-        startDate: new Date(data.startDate),
-        endDate: new Date(data.endDate),
+        startDate,
+        endDate,
         locationId: data.locationId ?? null,
         vehicleId: data.vehicleId ?? null,
         notes: data.notes ?? null,

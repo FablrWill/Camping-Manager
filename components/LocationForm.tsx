@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Button, Input, Select, Textarea, ConfirmDialog } from "@/components/ui";
+import { isValidDate } from "@/lib/validate";
 
 export interface LocationData {
   id?: string;
@@ -109,7 +110,7 @@ export default function LocationForm({
       cellSignal: cellSignal || null,
       starlinkSignal: starlinkSignal || null,
       waterAccess,
-      visitedAt: visitedAt ? new Date(visitedAt).toISOString() : null,
+      visitedAt: isValidDate(visitedAt) ? isValidDate(visitedAt)!.toISOString() : null,
       notes: notes.trim() || null,
     };
 

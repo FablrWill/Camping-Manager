@@ -36,7 +36,7 @@
 **Milestone Goal:** Cross-AI review, fix all tech debt, get production build working, and deploy to Mac mini so Will can use Outland OS from his phone anywhere.
 
 - [ ] **Phase 12: Fix Build & Clean House** - Fix broken build, resolve tech debt, run Gemini review in parallel
-- [ ] **Phase 13: Address Review Findings** - Act on actionable Gemini feedback before shipping to production
+- [x] **Phase 13: Address Review Findings** - Act on actionable Gemini feedback before shipping to production (completed 2026-04-03)
 - [ ] **Phase 14: Production Deployment** - Configure Mac mini with PM2, persistent data, backups, deploy script
 - [ ] **Phase 15: Remote Access & Go Live** - Tailscale mesh VPN, HTTPS, PWA verification from phone
 
@@ -69,11 +69,17 @@ Plans:
   1. Every critical/high finding from the Gemini review is either fixed or has a documented deferral reason
   2. Medium findings are triaged (fix now vs. defer to v2.0)
   3. `npm run build` still passes after all changes
-**Plans**: TBD
+**Plans:** 4/4 plans complete
+
+Plans:
+- [x] 13-01-PLAN.md — Path traversal + XSS security fixes (HIGH)
+- [x] 13-02-PLAN.md — JSON.parse hardening across LLM output + DB content (HIGH/MEDIUM)
+- [x] 13-03-PLAN.md — Input validation: parseFloat/parseInt, dates, email (MEDIUM)
+- [x] 13-04-PLAN.md — Build verification + deferral documentation
 
 **Parallelization notes:**
-- Individual findings are likely independent fixes that can run as parallel agents
-- Build verification must run after all fixes are applied
+- Plans 13-01, 13-02, 13-03 run in parallel (Wave 1) — independent file sets
+- Plan 13-04 runs after all fixes (Wave 2) — build verification + triage doc
 
 ### Phase 14: Production Deployment
 **Goal**: Outland OS runs as a production service on the Mac mini with persistent data, auto-restart, backups, and a one-command deploy workflow
@@ -122,7 +128,7 @@ Phases execute in numeric order: 12 -> 13 -> 14 -> 15
 | 10. Offline Read Path | v1.1 | 4/4 | Complete | 2026-04-02 |
 | 11. v1.1 Polish | v1.1 | 2/2 | Complete | 2026-04-02 |
 | 12. Fix Build & Clean House | v1.2 | 5/5 | Complete | 2026-04-02 |
-| 13. Address Review Findings | v1.2 | 0/TBD | Not started | - |
+| 13. Address Review Findings | v1.2 | 4/4 | Complete    | 2026-04-03 |
 | 14. Production Deployment | v1.2 | 0/3 | Planned | - |
 | 15. Remote Access & Go Live | v1.2 | 0/TBD | Not started | - |
 

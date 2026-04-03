@@ -16,12 +16,20 @@ export async function DELETE(
 
     // Delete file from disk first (best effort -- file may already be gone)
     if (photo.imagePath) {
-      const filePath = path.join(process.cwd(), 'public', photo.imagePath);
-      try {
-        await unlink(filePath);
-      } catch {
-        // File may already be deleted or missing -- non-fatal
+      const publicDir = path.resolve(process.cwd(), 'public');
+      const photosDir = path.join(publicDir, 'photos');
+      const filePath = path.resolve(path.join(publicDir, photo.imagePath));
+      // Path traversal guard: resolved path must stay within /public/photos/
+      const isWithinPhotosDir =
+        filePath.startsWith(photosDir + path.sep) || filePath.startsWith(photosDir + '/');
+      if (isWithinPhotosDir) {
+        try {
+          await unlink(filePath);
+        } catch {
+          // File may already be deleted or missing -- non-fatal
+        }
       }
+      // If path is outside photos dir, skip the delete silently (record still removed from DB)
     }
 
     await prisma.photo.delete({ where: { id } });

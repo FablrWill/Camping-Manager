@@ -2,21 +2,32 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { calculatePowerBudget } from '@/lib/power'
 import { fetchWeather } from '@/lib/weather'
+import { safeParseFloat } from '@/lib/validate'
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { tripId, currentBatteryPct } = body as {
+    const { tripId } = body as {
       tripId: string
-      currentBatteryPct?: number
+      currentBatteryPct?: unknown
     }
 
     if (!tripId) {
       return NextResponse.json({ error: 'tripId is required' }, { status: 400 })
     }
 
+    const rawBatteryPct = (body as Record<string, unknown>).currentBatteryPct
+    let currentBatteryPct: number | undefined
+    if (rawBatteryPct !== undefined && rawBatteryPct !== null) {
+      const parsed = safeParseFloat(rawBatteryPct)
+      if (parsed === null) {
+        return NextResponse.json({ error: 'currentBatteryPct must be a number' }, { status: 400 })
+      }
+      currentBatteryPct = parsed
+    }
+
     // Persist battery level if provided
-    if (currentBatteryPct !== undefined && currentBatteryPct !== null) {
+    if (currentBatteryPct !== undefined) {
       await prisma.trip.update({
         where: { id: tripId },
         data: {

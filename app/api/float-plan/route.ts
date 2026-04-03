@@ -3,6 +3,7 @@ import { prisma } from '@/lib/db'
 import { composeFloatPlanEmail } from '@/lib/claude'
 import { sendFloatPlan } from '@/lib/email'
 import type { DepartureChecklistResult } from '@/lib/parse-claude'
+import { safeJsonParse } from '@/lib/safe-json'
 
 export async function POST(request: NextRequest) {
   try {
@@ -71,8 +72,8 @@ export async function POST(request: NextRequest) {
     // Build checklist status string
     let checklistStatus = 'Departure checklist not yet generated.'
     if (trip.departureChecklist) {
-      try {
-        const checklistResult = JSON.parse(trip.departureChecklist.result) as DepartureChecklistResult
+      const checklistResult = safeJsonParse<DepartureChecklistResult>(trip.departureChecklist.result)
+      if (checklistResult) {
         const totalItems = checklistResult.slots.reduce(
           (sum, slot) => sum + slot.items.length,
           0
@@ -82,8 +83,6 @@ export async function POST(request: NextRequest) {
           0
         )
         checklistStatus = `${checkedItems} of ${totalItems} departure tasks completed`
-      } catch {
-        // Ignore parse errors — fall back to default message
       }
     }
 

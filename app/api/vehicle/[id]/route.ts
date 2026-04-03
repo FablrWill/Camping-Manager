@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import { NextResponse } from "next/server";
+import { safeParseInt, safeParseFloat } from '@/lib/validate';
 
 export async function GET(
   _req: Request,
@@ -28,7 +29,20 @@ export async function PUT(
     const data = await req.json();
     const vehicle = await prisma.vehicle.update({
       where: { id },
-      data,
+      data: {
+        name: data.name,
+        year: safeParseInt(data.year),
+        make: data.make ?? null,
+        model: data.model ?? null,
+        drivetrain: data.drivetrain ?? null,
+        fuelEconomy: data.fuelEconomy ?? null,
+        groundClearance: safeParseFloat(data.groundClearance),
+        towingCapacity: safeParseInt(data.towingCapacity),
+        cargoVolume: safeParseFloat(data.cargoVolume),
+        cargoLength: safeParseFloat(data.cargoLength),
+        cargoWidth: safeParseFloat(data.cargoWidth),
+        notes: data.notes ?? null,
+      },
     });
     return NextResponse.json(vehicle);
   } catch (error) {

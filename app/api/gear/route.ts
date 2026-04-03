@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
+import { safeParseFloat } from '@/lib/validate'
 
 // GET /api/gear — list all gear items, optional category/wishlist filters
 export async function GET(request: NextRequest) {
@@ -56,15 +57,15 @@ export async function POST(request: NextRequest) {
         category: body.category,
         description: body.description || null,
         condition: body.condition || null,
-        weight: body.weight ? parseFloat(body.weight) : null,
+        weight: safeParseFloat(body.weight),
         photoUrl: body.photoUrl || null,
         storageLocation: body.storageLocation || null,
         isWishlist: body.isWishlist ?? false,
         purchaseUrl: body.purchaseUrl || null,
-        price: body.price ? parseFloat(body.price) : null,
+        price: safeParseFloat(body.price),
         notes: body.notes || null,
-        wattage: body.wattage ? parseFloat(body.wattage) : null,
-        hoursPerDay: body.hoursPerDay ? parseFloat(body.hoursPerDay) : null,
+        wattage: safeParseFloat(body.wattage),
+        hoursPerDay: safeParseFloat(body.hoursPerDay),
         hasBattery: body.hasBattery ?? false,
       },
     })

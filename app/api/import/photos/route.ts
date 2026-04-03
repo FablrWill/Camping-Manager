@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import sharp from "sharp";
-import { writeFile, mkdir, readFile } from "fs/promises";
-import { join } from "path";
+import { mkdir, readFile } from "fs/promises";
+import { join, resolve } from "path";
 import { randomUUID } from "crypto";
 import { existsSync } from "fs";
 
@@ -50,7 +50,14 @@ export async function POST(request: NextRequest) {
         let savedPath: string | null = null;
 
         if (photo.imagePath && takeoutRoot) {
-          const sourcePath = join(takeoutRoot, photo.imagePath);
+          const resolvedRoot = resolve(takeoutRoot);
+          const sourcePath = resolve(join(takeoutRoot, photo.imagePath));
+          // Path traversal guard: resolved source must stay within takeoutRoot
+          if (!sourcePath.startsWith(resolvedRoot + "/") && sourcePath !== resolvedRoot) {
+            errors.push(`${photo.title}: Rejected — path outside takeout root`);
+            skipped++;
+            continue;
+          }
           if (existsSync(sourcePath)) {
             const id = randomUUID();
             const filename = `${id}.jpg`;
