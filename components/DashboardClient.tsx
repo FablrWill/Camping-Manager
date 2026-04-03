@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { Backpack, Car, MapPin, Tent, ChevronRight, Plus } from 'lucide-react'
 import { daysUntil } from '@/lib/trip-utils'
+import { getCategoryEmoji } from '@/lib/gear-categories'
 
 interface DashboardStats {
   gearCount: number
@@ -28,16 +29,6 @@ interface UpcomingTrip {
   startDate: string
   endDate: string
   locationName: string | null
-}
-
-const CATEGORY_EMOJI: Record<string, string> = {
-  shelter: '⛺',
-  sleep: '🛏️',
-  cook: '🍳',
-  power: '🔋',
-  clothing: '🧥',
-  tools: '🔧',
-  vehicle: '🚙',
 }
 
 export default function DashboardClient({
@@ -210,7 +201,7 @@ export default function DashboardClient({
                 href="/gear"
                 className="flex items-center gap-3 bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-700 p-3 hover:border-amber-400 dark:hover:border-amber-500 transition-colors"
               >
-                <span className="text-lg">{CATEGORY_EMOJI[item.category] ?? '📦'}</span>
+                <span className="text-lg">{getCategoryEmoji(item.category)}</span>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-stone-900 dark:text-stone-50 truncate">
                     {item.name}
