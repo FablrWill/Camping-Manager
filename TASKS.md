@@ -1,6 +1,6 @@
 # Outland OS — Task Tracker
 
-> **Last updated:** 2026-04-04 (Phase 29 marked complete — VehicleChecklistCard confirmed shipped; S16-S19 UX sprint added to V2-SESSIONS.md queue)
+> **Last updated:** 2026-04-04 (S16-S19 UX sprint complete; Phases 30+31 marked complete; Milestone v3.0 fully done; next: v4.0 backlog sessions S20+)
 > **Start here** if you're picking up after a break.
 > **North star:** `docs/USER-JOURNEY.md` — read this before building anything new.
 
@@ -42,8 +42,8 @@
 | 27. Safety Float Plan | ✅ Complete | Deterministic plain-text float plan email via float-plan API route (no AI token cost) |
 | 28. Weather-Aware Clothing | ✅ Complete | buildClothingGuidance() in lib/claude.ts, UV forecast, injected into packing list prompt |
 | 29. Vehicle Pre-Trip Checklist | ✅ Complete | Schema + Zod schemas, Claude generation, GET/POST/PATCH API routes, VehicleChecklistCard in TripPrepClient |
-| 30. Product Research Agent | ○ Not started | See `.planning/ROADMAP.md` |
-| 31. Astro Conditions | ○ Not started | See `.planning/ROADMAP.md` |
+| 30. Product Research Agent | ✅ Complete | GearResearchCard, /api/gear/[id]/research, Claude alternatives comparison (S14) |
+| 31. Astro Conditions | ✅ Complete | lib/astro.ts, AstroCard in TripCard, Bortle/moon/sunrise data (session 34b) |
 | 32. Deals & Restocks | ✅ Complete | targetPrice field, Claude price check, GearDealsTab, Deals modal tab, dashboard deals card |
 | 33. Conversational Trip Planner | ✅ Complete | TripPlannerSheet full-screen chat + TripsClient wiring; UAT deferred |
 
