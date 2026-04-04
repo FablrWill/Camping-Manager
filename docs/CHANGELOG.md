@@ -8,6 +8,15 @@ All notable changes to Outland OS are tracked here.
 
 | Session | Date | Summary |
 |---------|------|---------|
+| [48](changelog/session-48.md) | 2026-04-04 | S30 Road trip scenic layer: fetchScenicStops() via Overpass, ScenicStopsCard, 🏞️💧🏛️🌿 type emojis, OSM links |
+| [47](changelog/session-47.md) | 2026-04-04 | S29 Altitude awareness: getAltitudeWarning() pure function, AltitudeCard in trip prep, altitude in LocationForm + SpotMap popup |
+| [46](changelog/session-46.md) | 2026-04-04 | S27 Gear maintenance reminders: GearMaintenanceLog model, maintenance log API, GearMaintenancePanel, overdue badge + banner |
+| [45](changelog/session-45.md) | 2026-04-04 | S26 Gear lending tracker: GearLoan model, full CRUD API, GearLoanPanel, Loans tab badge, active loans banner |
+| [44](changelog/session-44.md) | 2026-04-04 | S23 Fire ban + pre-trip alerts: PreTripAlertCard, pre-trip-alert agent job type, heuristic season/region awareness |
+| [43](changelog/session-43.md) | 2026-04-04 | S21 Gear ROI tracker: GearROITab with cost-per-trip + ROI grade (A/B/C/D), /api/gear/[id]/roi route |
+| [42](changelog/session-42.md) | 2026-04-04 | S19 Empty states + skeleton loaders: Skeleton component, empty states on Gear/Trips/Spots with action CTAs |
+| [41](changelog/session-41.md) | 2026-04-04 | S18 TripPrepStepper: 5-step prep progress indicator in Dashboard and TripPrepClient |
+| [40](changelog/session-40.md) | 2026-04-04 | S16 UX quick wins: FilterChip component, live trip count, theme toggle to Settings, dark mode spots fix |
 | [39](changelog/session-39.md) | 2026-04-04 | S25 LNT pack-out checklist: Haiku-generated location-specific checklist, amber/green progress bar, persisted checkboxes |
 | [38](changelog/session-38.md) | 2026-04-04 | S24 Siri/Reminders inbox bridge: sourceHint param, reminders extractor, Shortcut setup doc |
 | [37b](changelog/session-37b.md) | 2026-04-04 | S20 Voice Ghostwriter: record trip monologue → Claude writes journal entry → saved to trip |

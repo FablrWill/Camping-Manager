@@ -1,6 +1,6 @@
 # Outland OS — Task Tracker
 
-> **Last updated:** 2026-04-04 (S16-S19 UX sprint complete; Phases 30+31 marked complete; Milestone v3.0 fully done; next: v4.0 backlog sessions S20+)
+> **Last updated:** 2026-04-04 (S20-S30 complete; Milestone v4.0 nearly complete; S28 shareable trip reports in progress)
 > **Start here** if you're picking up after a break.
 > **North star:** `docs/USER-JOURNEY.md` — read this before building anything new.
 
@@ -33,7 +33,7 @@
 
 ---
 
-## 🏁 Milestone v3.0 — Gear Intelligence + Day-Of (In Progress)
+## 🏁 Milestone v3.0 — Gear Intelligence + Day-Of (Complete 2026-04-04)
 
 | Phase | Status | Summary |
 |-------|--------|---------|
@@ -47,7 +47,27 @@
 | 32. Deals & Restocks | ✅ Complete | targetPrice field, Claude price check, GearDealsTab, Deals modal tab, dashboard deals card |
 | 33. Conversational Trip Planner | ✅ Complete | TripPlannerSheet full-screen chat + TripsClient wiring; UAT deferred |
 
-**Next:** Continue Phase 29 (Vehicle Pre-Trip Checklist, Plans 02–03) or pick up Phases 30–32
+---
+
+## 🔄 Milestone v4.0 — Smarter Feedback Loops (In Progress 2026-04-04)
+
+| Session | Status | Summary |
+|---------|--------|---------|
+| S16. UX Quick Wins | ✅ Complete | FilterChip component, live trip count on dashboard, theme toggle → Settings, dark mode spots fix |
+| S17. Nav Restructure | ✅ Complete | 5-tab BottomNav + MoreSheet (Chat, Inbox, Vehicle, Settings) |
+| S18. TripPrepStepper | ✅ Complete | 5-step prep progress indicator in Dashboard and TripPrepClient |
+| S19. Empty States | ✅ Complete | Skeleton loader component, empty states on Gear/Trips/Spots |
+| S20. Voice Ghostwriter | ✅ Complete | Record monologue → Claude writes journal entry → saved to trip |
+| S21. Gear ROI Tracker | ✅ Complete | Cost-per-trip ROI grade (A/B/C/D), GearROITab in gear detail |
+| S22. Seasonal Spot Ratings | ✅ Complete | SeasonalRating model, 2×2 star pickers, "Best in [Season]" map badge |
+| S23. Fire Ban + Pre-Trip Alerts | ✅ Complete | PreTripAlertCard, pre-trip-alert agent job, heuristic season awareness |
+| S24. Siri/Reminders Inbox | ✅ Complete | sourceHint routing, reminders extractor, Siri Shortcut setup doc |
+| S25. LNT Checklist | ✅ Complete | Haiku-generated LNT checklist, persistent checkboxes, amber/green progress bar |
+| S26. Gear Lending Tracker | ✅ Complete | GearLoan model, CRUD API, GearLoanPanel, active loans banner |
+| S27. Gear Maintenance Reminders | ✅ Complete | GearMaintenanceLog model, maintenance log API, overdue badge + banner |
+| S28. Shareable Trip Reports | 🔄 In Progress | shareToken on Trip, public read-only trip report page |
+| S29. Altitude Awareness | ✅ Complete | getAltitudeWarning() pure function, AltitudeCard in trip prep, altitude in SpotMap |
+| S30. Road Trip Scenic Layer | ✅ Complete | fetchScenicStops() via Overpass, ScenicStopsCard in trip prep |
 
 ---
 
