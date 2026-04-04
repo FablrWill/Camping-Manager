@@ -12,6 +12,7 @@ import MedicationManager from '@/components/MedicationManager'
 import MealPlanClient from '@/components/MealPlanClient'
 import PowerBudget from '@/components/PowerBudget'
 import VehicleChecklistCard from '@/components/VehicleChecklistCard'
+import LNTChecklistCard from '@/components/LNTChecklistCard'
 import { PREP_SECTIONS, PrepState, PrepSection } from '@/lib/prep-sections'
 import { formatDateRange, daysUntil, tripNights } from '@/lib/trip-utils'
 import type { DayForecast, WeatherAlert } from '@/lib/weather'
@@ -442,6 +443,10 @@ export default function TripPrepClient({ trip, tripPrepStatus }: TripPrepClientP
                     tripId={trip.id}
                     hasVehicle={!!trip.vehicle}
                   />
+                )}
+
+                {config.key === 'lnt' && (
+                  <LNTChecklistCard tripId={trip.id} />
                 )}
               </TripPrepSection>
 

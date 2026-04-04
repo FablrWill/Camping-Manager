@@ -63,7 +63,7 @@ A self-coordinating work queue for v2.0 features. Each Claude Code session claim
 | S22 | Seasonal spot ratings                | —     | ✅ Done 2026-04-04        | Sonnet, normal | —          |
 | S23 | Fire ban + pre-trip alerts           | —     | ✅ Done 2026-04-04        | Sonnet, normal | —          |
 | S24 | Siri/Reminders inbox                 | —     | ⬜ Ready          | Sonnet, normal | —          |
-| S25 | LNT pack-out checklist               | —     | ⬜ Ready          | Sonnet, normal | —          |
+| S25 | LNT pack-out checklist               | —     | ✅ Done 2026-04-04        | Sonnet, normal | —          |
 | S26 | Gear lending tracker                 | —     | ⬜ Ready          | Sonnet, normal | —          |
 
 **Why this order matters (conflict groups):**

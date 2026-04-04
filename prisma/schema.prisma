@@ -254,6 +254,8 @@ model Trip {
   departureTime          DateTime? // Phase 26: departure time anchor for day sequencer
   vehicleChecklistResult      String?   // Phase 29: JSON blob of VehicleChecklistResult
   vehicleChecklistGeneratedAt DateTime? // Phase 29: when vehicle checklist was last generated
+  lntChecklistResult          String?   // S25: JSON blob of LNTChecklistResult
+  lntChecklistGeneratedAt     DateTime? // S25: when LNT checklist was last generated
   fallbackFor   String?   // Phase 22: ID of the primary trip this is a fallback for
   fallbackOrder Int?      // Phase 22: 2 = Plan B, 3 = Plan C
   journalEntry   String?   // S20: Voice Ghostwriter journal entry (Claude-written narrative)
