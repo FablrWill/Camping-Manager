@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Smarter Feedback Loops
-status: executing
-last_updated: "2026-04-04T19:28:57.703Z"
+status: verifying
+last_updated: "2026-04-04T19:34:10.214Z"
 last_activity: 2026-04-04
 progress:
   total_phases: 26
-  completed_phases: 24
+  completed_phases: 25
   total_plans: 69
-  completed_plans: 68
+  completed_plans: 69
   percent: 40
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-01)
 
 Phase: 39 (personal-signal-map) — EXECUTING
 Plan: 2 of 2
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-04-04
 
 Progress: [████░░░░░░] 40%
@@ -80,6 +80,7 @@ Progress: [████░░░░░░] 40%
 | Phase 35 P05 | 8 | 4 tasks | 3 files |
 | Phase 38 P02 | 15 | 1 tasks | 2 files |
 | Phase 39-personal-signal-map P01 | 3 | 2 tasks | 3 files |
+| Phase 39-personal-signal-map P02 | 179 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -141,6 +142,7 @@ Recent decisions affecting current work:
 - [Phase 35]: buildMealHistorySection called with global last-10 feedback query (no trip scope) for cross-trip preference carry-forward
 - [Phase 38]: aria-label regex /liked/i matches disliked — use /^liked /i with word boundary in tests
 - [Phase 39-personal-signal-map]: getSignalTier checks red before yellow to prevent cellBars=0 matching yellow clause
+- [Phase 39-personal-signal-map]: signalFilteredLocations replaces inline ternary in SpotMap locations prop — single source of truth regardless of signal filter or online state
 
 ### Pending Todos
 
@@ -174,7 +176,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-04T19:28:57.698Z
+Last session: 2026-04-04T19:34:10.209Z
 Last activity: Completed S36 RAG knowledge base refresh
 Resume file: None
 

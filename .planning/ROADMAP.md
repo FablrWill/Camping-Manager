@@ -692,11 +692,11 @@ Plans:
 - Single-wave — all changes are independent. Can be executed in one pass.
 - Touches `SpotMap.tsx` and `spots-client.tsx` — do not run in parallel with sessions that touch these files.
 
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 
 Plans:
 - [x] 39-01-PLAN.md — Signal summary library + API endpoint
-- [ ] 39-02-PLAN.md — Map signal dots, layer toggle, filter chips
+- [x] 39-02-PLAN.md — Map signal dots, layer toggle, filter chips
 
 ---
 
