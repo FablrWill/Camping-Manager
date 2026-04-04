@@ -1,6 +1,6 @@
 # Outland OS — Task Tracker
 
-> **Last updated:** 2026-04-04 (medication tracker shipped — persistent med list, dog med support, auto-calculated packing quantities; next: Phase 29 cont., 30, 31)
+> **Last updated:** 2026-04-04 (Phase 32 complete — deal monitoring: targetPrice field, Claude price check function, GearDealsTab, dashboard deals card; next: Phase 29 cont., 30, 31, 33)
 > **Start here** if you're picking up after a break.
 > **North star:** `docs/USER-JOURNEY.md` — read this before building anything new.
 
@@ -44,7 +44,7 @@
 | 29. Vehicle Pre-Trip Checklist | 🔄 In Progress | Plan 01 done (schema + TDD tests), Plan 02 partially done, Plan 03 not started |
 | 30. Product Research Agent | ○ Not started | See `.planning/ROADMAP.md` |
 | 31. Astro Conditions | ○ Not started | See `.planning/ROADMAP.md` |
-| 32. Deals & Restocks | ○ Not started | See `.planning/ROADMAP.md` |
+| 32. Deals & Restocks | ✅ Complete | targetPrice field, Claude price check, GearDealsTab, Deals modal tab, dashboard deals card |
 | 33. Conversational Trip Planner | ✅ Complete | TripPlannerSheet full-screen chat + TripsClient wiring; UAT deferred |
 
 **Next:** Continue Phase 29 (Vehicle Pre-Trip Checklist, Plans 02–03) or pick up Phases 30–32

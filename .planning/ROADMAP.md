@@ -75,7 +75,7 @@
 - [x] **Phase 31: Dark Sky, Astro Info & Activity Gear Recommendations** - Bortle/moon/sunrise data + activities gear category + trip planner activity suggestions (completed 2026-04-04)
 
 **Wave 4 — Depends on Wave 3:**
-- [ ] **Phase 32: Deal Monitoring** - Target price on wishlist items, on-demand price check via Claude, deal alerts
+- [x] **Phase 32: Deal Monitoring** - Target price on wishlist items, on-demand price check via Claude, deal alerts (completed 2026-04-04)
 
 ## Phase Details
 
@@ -616,7 +616,7 @@ Plans:
 | 29. Vehicle Pre-Trip Checklist | v3.0 | 3/3 | Complete    | 2026-04-03 |
 | 30. Gear Product Research | v3.0 | 0/TBD | Not started | - |
 | 31. Dark Sky, Astro & Activity Gear | v3.0 | 0/TBD | Not started | - |
-| 32. Deal Monitoring | v3.0 | 0/TBD | Not started | - |
+| 32. Deal Monitoring | v3.0 | 4/4 | Complete    | 2026-04-04 |
 | 33. Conversational Trip Planner | v3.0 | 4/4 | Complete    | 2026-04-03 |
 | 34. Home Assistant Integration | v3.0 | 4/4 | Complete    | 2026-04-04 |
 | 35. Meal Planning Core | v3.0 | 6/6 | Complete    | 2026-04-04 |
