@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Smarter Feedback Loops
 status: executing
-stopped_at: Completed 38-03-PLAN.md
-last_updated: "2026-04-04T07:34:00.000Z"
-last_activity: 2026-04-04 - Completed quick task 260404-j64: Build shareable trip reports (S28)
+stopped_at: Completed 44-01-PLAN.md
+last_updated: "2026-04-04T19:27:46Z"
+last_activity: 2026-04-04 - Completed 44-01 Google Maps list import core library and API route
 progress:
-  total_phases: 25
-  completed_phases: 21
-  total_plans: 67
-  completed_plans: 63
+  total_phases: 26
+  completed_phases: 24
+  total_plans: 70
+  completed_plans: 68
   percent: 40
 ---
 
@@ -25,10 +25,10 @@ See: .planning/PROJECT.md (updated 2026-04-01)
 
 ## Current Position
 
-Phase: 35
-Plan: Not started
-Status: Ready to execute
-Last activity: 2026-04-04 - Completed quick task 260404-k7z: Refresh and improve the RAG knowledge base (S36)
+Phase: 44 (google-maps-list-import) — EXECUTING
+Plan: 2 of 3
+Status: Executing Phase 44
+Last activity: 2026-04-04 - Completed 44-01 Google Maps list import core library and API route
 
 Progress: [████░░░░░░] 40%
 
@@ -80,6 +80,7 @@ Progress: [████░░░░░░] 40%
 | Phase 35 P04 | 15 | 2 tasks | 4 files |
 | Phase 35 P05 | 8 | 4 tasks | 3 files |
 | Phase 38 P02 | 15 | 1 tasks | 2 files |
+| Phase 44 P01 | 241 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -140,6 +141,9 @@ Recent decisions affecting current work:
 - [Phase 35]: mealId validated as required in feedback POST before other fields — primary key for upsert pattern
 - [Phase 35]: buildMealHistorySection called with global last-10 feedback query (no trip scope) for cross-trip preference carry-forward
 - [Phase 38]: aria-label regex /liked/i matches disliked — use /^liked /i with word boundary in tests
+- [Phase 44-01]: Use ES import (not require()) for fetchGmapsList in tests — Vitest ESM mode does not support require() for TypeScript modules
+- [Phase 44-01]: extractNameNear scans backward 500 chars from coordinate match; returns last double-quoted 2-80 char string; replaces escaped quotes before matching
+- [Phase 44-01]: JSON-LD fallback uses unknown type narrowing throughout — no any usage, @type check before array access
 
 ### Pending Todos
 
@@ -170,6 +174,7 @@ None yet.
 | 260404-j64 | Build shareable trip reports (S28) | 2026-04-04 | 26f743a | [260404-j64-build-shareable-trip-reports-s28](./quick/260404-j64-build-shareable-trip-reports-s28/) |
 | 260404-k4h | Add persistent chat agent memory (S33) | 2026-04-04 | 6218cb5 | [260404-k4h-add-persistent-chat-agent-memory-s33](./quick/260404-k4h-add-persistent-chat-agent-memory-s33/) |
 | 260404-k7z | Refresh and improve RAG knowledge base (S36) | 2026-04-04 | 212254c | [260404-k7z-refresh-and-improve-the-rag-knowledge-ba](./quick/260404-k7z-refresh-and-improve-the-rag-knowledge-ba/) |
+| 260404-km8 | Smart packing v2 — richer historical context for packing list generator (S35) | 2026-04-04 | 5f621a6 | [260404-km8-upgrade-the-packing-list-generator-to-us](./quick/260404-km8-upgrade-the-packing-list-generator-to-us/) |
 
 ## Session Continuity
 

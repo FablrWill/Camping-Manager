@@ -677,7 +677,7 @@ Plans:
 
 **Goal**: Let Will paste a shared Google Maps list URL, have the server scrape and parse the page HTML (no API key), extract place names and coordinates, and present a checklist of draft Location previews he can confirm to import. Zero friction path from a saved Google Maps list to Outland OS Spots map.
 
-**Status**: ⬜ Ready
+**Status**: 🚧 In progress
 **Depends on**: None
 **Requirements**: GMAPS-01, GMAPS-02, GMAPS-03, GMAPS-04, GMAPS-05
 **Success Criteria** (what must be TRUE):
@@ -688,10 +688,11 @@ Plans:
   5. Invalid URL or zero-result scrape surfaces a clear error message (no crash)
   6. `npm run build` passes with no TypeScript errors
 
-**Plans:** 3 plans
+**Plans:** 1/3 plans executed
+
 Plans:
-- [ ] 44-00-PLAN.md — Wave 0 test stubs for gmaps-import parsing logic
-- [ ] 44-01-PLAN.md — Core lib/gmaps-import.ts + POST API route
+- [x] 44-00-PLAN.md — Wave 0 test stubs for gmaps-import parsing logic (included in 44-01)
+- [x] 44-01-PLAN.md — Core lib/gmaps-import.ts + POST API route
 - [ ] 44-02-PLAN.md — GmapsImportModal UI + spots-client wiring
 
 ---

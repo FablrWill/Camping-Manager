@@ -3,6 +3,7 @@ import { prisma } from '@/lib/db'
 import { generatePackingList, filterSignificantFeedback, aggregateGearFeedback } from '@/lib/claude'
 import { fetchWeather } from '@/lib/weather'
 import { safeJsonParse } from '@/lib/safe-json'
+import { buildPackingContext } from '@/lib/packing-intelligence'
 
 export async function GET(request: NextRequest) {
   try {
@@ -161,6 +162,14 @@ export async function POST(request: NextRequest) {
       console.error('Medication fetch failed (non-blocking):', err)
     }
 
+    // Build rich historical context (S35 Smart Packing v2)
+    let packingContext = undefined
+    try {
+      packingContext = await buildPackingContext(tripId)
+    } catch (err) {
+      console.error('Packing context build failed (non-blocking):', err)
+    }
+
     // Generate packing list via Claude (throws on Zod validation failure)
     let packingList
     try {
@@ -177,6 +186,7 @@ export async function POST(request: NextRequest) {
         weather,
         feedbackContext,
         bringingDog: trip.bringingDog ?? false,
+        packingContext,
       })
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to generate packing list'
