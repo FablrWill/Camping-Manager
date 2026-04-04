@@ -1,5 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk'
-import { parseClaudeJSON, PackingListResultSchema, MealPlanResultSchema, DepartureChecklistResultSchema, DepartureChecklistResult, TripSummaryResultSchema, type TripSummaryResult, GearDocumentResultSchema, type GearDocumentResult, VehicleChecklistResultSchema, type VehicleChecklistResult, NormalizedMealPlanResultSchema, type NormalizedMealPlanResult, SingleMealSchema, type SingleMeal, GearResearchResultSchema, type GearResearchResult, ShoppingListResultSchema, type ShoppingListResult, PrepGuideResultSchema, type PrepGuideResult } from '@/lib/parse-claude'
+import { parseClaudeJSON, PackingListResultSchema, MealPlanResultSchema, DepartureChecklistResultSchema, DepartureChecklistResult, TripSummaryResultSchema, type TripSummaryResult, GearDocumentResultSchema, type GearDocumentResult, VehicleChecklistResultSchema, type VehicleChecklistResult, NormalizedMealPlanResultSchema, type NormalizedMealPlanResult, SingleMealSchema, type SingleMeal, GearResearchResultSchema, type GearResearchResult, ShoppingListResultSchema, type ShoppingListResult, PrepGuideResultSchema, type PrepGuideResult, GearPriceCheckResultSchema, type GearPriceCheckResult } from '@/lib/parse-claude'
 import { CATEGORY_EMOJI, CATEGORIES } from '@/lib/gear-categories'
 
 export const anthropic = new Anthropic({
@@ -491,6 +491,53 @@ Rules for the JSON:
   }
 
   return parseResult.data
+}
+
+// ── Phase 32: Gear Price Check ────────────────────────────────────────────────
+
+export async function generateGearPriceCheck(params: {
+  name: string
+  brand: string | null
+  modelNumber: string | null
+  category: string
+  price: number | null
+  targetPrice: number | null
+}): Promise<{ success: true; data: GearPriceCheckResult } | { success: false; error: string }> {
+  const { name, brand, modelNumber, category, price, targetPrice } = params
+
+  const prompt = `You are a camping gear pricing expert. Based on your training data, provide current approximate market pricing for this item.
+
+GEAR:
+- Name: ${name}
+- Brand: ${brand || 'Unknown'}
+- Model: ${modelNumber || 'Unknown'}
+- Category: ${category}
+- Listed price: ${price != null ? `$${price}` : 'Unknown'}
+${targetPrice != null ? `- Target price (deal threshold): $${targetPrice}` : ''}
+
+INSTRUCTIONS:
+1. Provide the current typical price range for this exact item (or closest known equivalent) based on your training data.
+2. List 2-4 known retailers that carry this item (e.g., "REI", "Amazon", "Backcountry").
+3. Report foundPriceLow as the lowest price in the range (as a number, no $ sign).
+4. Include a short disclaimer noting your data has a knowledge cutoff and prices change.
+
+Respond ONLY with valid JSON (no markdown):
+{
+  "foundPriceRange": "$XX – $YY",
+  "foundPriceLow": 49.99,
+  "retailers": ["REI", "Amazon"],
+  "disclaimer": "Prices based on training data and may not reflect current sales or promotions."
+}`
+
+  const message = await anthropic.messages.create({
+    model: 'claude-sonnet-4-6',
+    max_tokens: 1024,
+    messages: [{ role: 'user', content: prompt }],
+  })
+
+  const text = message.content[0].type === 'text' ? message.content[0].text : ''
+
+  return parseClaudeJSON(text, GearPriceCheckResultSchema)
 }
 
 export async function regenerateMeal(params: {

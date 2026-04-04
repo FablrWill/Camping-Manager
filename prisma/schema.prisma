@@ -28,11 +28,29 @@ model GearItem {
   connectivity  String?  // e.g. "WiFi, Bluetooth"
   researchResult  String?   // JSON: { alternatives: [...], summary, recommendation }
   researchedAt    DateTime? // when research was last run — stale after 90 days
+  targetPrice     Float?    // Phase 32: deal monitoring target price
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   packingItems PackingItem[]
   documents    GearDocument[]
+  priceCheck   GearPriceCheck?
+}
+
+// --- Phase 32: Deal Monitoring ---
+
+model GearPriceCheck {
+  id               String   @id @default(cuid())
+  gearItemId       String   @unique
+  gearItem         GearItem @relation(fields: [gearItemId], references: [id], onDelete: Cascade)
+  foundPriceRange  String
+  foundPriceLow    Float
+  retailers        String   @default("[]")
+  disclaimer       String
+  isAtOrBelowTarget Boolean @default(false)
+  checkedAt        DateTime
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 }
 
 model Vehicle {

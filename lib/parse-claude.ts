@@ -300,6 +300,17 @@ export const ShoppingListResultSchema = z.object({
 
 export type ShoppingListResult = z.infer<typeof ShoppingListResultSchema>;
 
+// --- Phase 32: Gear Price Check Schema ---
+
+export const GearPriceCheckResultSchema = z.object({
+  foundPriceRange: z.string(),
+  foundPriceLow: z.number(),
+  retailers: z.array(z.string()),
+  disclaimer: z.string(),
+});
+
+export type GearPriceCheckResult = z.infer<typeof GearPriceCheckResultSchema>;
+
 // --- Phase 35: Prep Guide Schema ---
 
 const PrepStepSchema = z.object({
