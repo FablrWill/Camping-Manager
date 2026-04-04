@@ -66,9 +66,17 @@ A self-coordinating work queue for v2.0 features. Each Claude Code session claim
 | S25 | LNT pack-out checklist               | —     | ✅ Done 2026-04-04        | Sonnet, normal | —          |
 | S26 | Gear lending tracker                 | —     | ✅ Done 2026-04-04        | Sonnet, normal | —          |
 | S27 | Gear maintenance reminders           | —     | ✅ Done 2026-04-04        | Sonnet, normal | —          |
-| S28 | Shareable trip reports               | —     | 🔄 In Progress 2026-04-04 | Sonnet, normal | —          |
+| S28 | Shareable trip reports               | —     | ✅ Done 2026-04-04 | Sonnet, normal | —          |
 | S29 | Altitude awareness callouts          | —     | ✅ Done 2026-04-04 | Sonnet, normal | —          |
 | S30 | Road trip scenic layer               | —     | ✅ Done 2026-04-04 | Sonnet, normal | —          |
+| — | **✅ v4.0 "Personal Touch" complete** | — | — | — | — |
+| S31 | Destination discovery                | —     | ⬜ Ready          | Sonnet, normal | —          |
+| S32 | Mac mini scheduled intelligence      | —     | ⬜ Ready          | Sonnet, normal | —          |
+| S33 | Chat agent memory                    | —     | ⬜ Ready          | Sonnet, normal | S32        |
+| S34 | Trip intelligence report             | —     | ⬜ Ready          | Sonnet, normal | —          |
+| S35 | Smart packing v2                     | —     | ⬜ Ready          | Sonnet, normal | —          |
+| S36 | Knowledge base refresh               | —     | ⬜ Ready          | Sonnet, normal | —          |
+| S10 | Home Assistant integration           | 33    | ⏸ Blocked (~mid-Apr hardware) | Sonnet, normal | S09 |
 
 **Why this order matters (conflict groups):**
 
@@ -97,6 +105,15 @@ A self-coordinating work queue for v2.0 features. Each Claude Code session claim
 - S29 touches only `components/LocationForm.tsx` (altitude warning inline) and `components/TripPrepClient.tsx` (altitude callout card) — **no schema change; fully independent, can run in parallel with S24, S27, S30**
 - S30 touches `lib/overpass.ts` (new scenic query), new `components/ScenicStopsCard.tsx`, `components/TripPrepClient.tsx` (add card) — **no schema change; S30 must not run in parallel with S29 (both touch TripPrepClient); run sequentially or accept a one-line merge**
 - **Maximum parallelism right now: S24 + S27 + S29 can all run simultaneously. S30 runs after S29 merges (or in parallel accepting a small TripPrepClient conflict).**
+
+**v5.0 conflict groups:**
+- S31 is all new files (`lib/destination-discovery.ts`, new API route, new component) + adds one tool to the chat agent — **no conflict with any other session**
+- S32 touches `prisma/schema.prisma` (adds `scheduledFor`, `recurring` to AgentJob) + new `scripts/scheduler.js` + extends Mac mini runner — **must not run in parallel with S33**
+- S33 touches `prisma/schema.prisma` (new `AgentMemory` model) + modifies `lib/agent/tools/` to inject memory context — **depends on S32 (uses scheduler infrastructure); run after S32**
+- S34 is new files only (`app/api/trips/intelligence/route.ts`, new `lib/trip-intelligence.ts`, new `components/TripIntelligenceCard.tsx`) — **no conflict with any other session; can run in parallel with S31, S32**
+- S35 touches `lib/claude.ts` (upgrade packing prompt), `app/api/packing-list/route.ts` (richer context fetch), `lib/packing-intelligence.ts` (new) — **no schema changes; can run in parallel with S31, S34; avoid running in parallel with S33 (both touch lib/claude.ts)**
+- S36 touches `lib/rag/` ingest pipeline, new `scripts/refresh-corpus.ts`, `prisma/schema.prisma` (add `source`, `refreshedAt` to KnowledgeEntry) — **must not run in parallel with S32 or S33 (schema)**
+- **Maximum v5.0 parallelism: S31 + S34 can run simultaneously with anything. S32 first, then S33. S35 after S31 (avoid lib/claude.ts conflict). S36 after S32 merges.**
 
 ---
 
@@ -1377,6 +1394,321 @@ Actually, simpler: add two nullable fields via a **new migration** — `lastMain
 
 ---
 
+---
+
+### S31 — Destination Discovery
+
+**What to build:** "Where should I go this weekend?" — a new AI feature that scores all of Will's saved locations against the upcoming weekend's weather forecast and surfaces 3 ranked suggestions with reasoning. Accessible from the dashboard and from the "Create Trip" flow.
+
+**User story:** It's Wednesday. Will opens the app and taps "Where should I go?" He picks a weekend (Fri–Sun). The app scores his 15 saved spots against the Open-Meteo forecast for each, weighs in seasonal ratings, recent-visit recency, and drive distance from Asheville, and shows: "1. Black Balsam — 74°F, sunny, no rain, 1.5hr drive, best fall rating ⭐⭐⭐⭐. 2. Linville Gorge — 68°F, 20% rain Sat afternoon... 3. Davidson River — ..." He taps Black Balsam and a new trip is pre-filled.
+
+**Key files:**
+- `lib/destination-discovery.ts` — `suggestDestinations(params: { weekendStart: Date, weekendEnd: Date, bringingDog: boolean, maxDriveMiles?: number }): Promise<SuggestionResult[]>`. Fetches weather for all saved locations with coordinates (reuse `lib/weather.ts`), scores each on: weather score (clear/mild high, rain/extreme low), recency bonus (not visited in 30+ days), seasonal rating for current season, straight-line distance from Asheville (35.5°N, 82.5°W). Returns top 3 sorted by composite score.
+- `app/api/destinations/suggest/route.ts` — POST, body: `{ weekendStart, weekendEnd, bringingDog }`. Calls `suggestDestinations()`, returns `{ suggestions: SuggestionResult[] }`.
+- `components/DestinationSuggesterSheet.tsx` — full-height sheet. Date range picker (defaults to next Friday–Sunday). "Find spots" button → calls API → shows 3 cards: spot name, weather headline, drive estimate, seasonal rating stars, one-line reasoning. "Plan this trip" button pre-fills `TripsClient` new-trip form with location + dates.
+- `components/DashboardClient.tsx` — add "Where should I go?" button card to the dashboard quick-actions area.
+- `lib/agent/tools/suggest-destination.ts` — new chat agent tool so Will can ask the agent "where should I go next weekend?" and get the same suggestions inline in chat.
+
+**Scoring formula (in `lib/destination-discovery.ts`):**
+- Weather score: 0–40 pts (clear + ideal temp = 40, heavy rain = 0)
+- Recency: +15 if not visited in 30+ days, +5 if not in 14 days, 0 if recent
+- Seasonal rating: multiply stored rating (1–5) × 6 = 6–30 pts
+- Distance: 0–15 pts (under 1hr = 15, 2hr = 8, 3hr+ = 0, using 60mph straight-line estimate)
+
+**Acceptance criteria:**
+- "Where should I go?" button on dashboard launches the sheet
+- Sheet shows date picker, then 3 suggestions with weather + reasoning
+- Tapping "Plan this trip" opens trip create form with location + dates pre-filled
+- Chat agent can answer "where should I go next weekend?" with the same data
+- Falls back gracefully if fewer than 3 locations have coordinates
+- Build passes, no TypeScript errors
+
+**Constraints:**
+- No new npm packages — reuse `lib/weather.ts` (Open-Meteo) and existing scoring patterns
+- Distance is straight-line only (no routing API) — accurate enough for "ballpark" ranking
+- Dog filter: if `bringingDog`, boost locations tagged dog-friendly (from location notes containing "dog" — no new schema needed for now)
+- Out of scope: multi-day weather aggregation — use the forecast for trip midpoint date only
+
+---
+
+### S32 — Mac Mini Scheduled Intelligence
+
+**What to build:** Extend the AgentJob system with scheduled recurring jobs. The Mac mini becomes proactive — checking deals, surfacing maintenance due items, and flagging weather problems for upcoming trips — without Will having to trigger anything.
+
+**User story:** Will wakes up Monday morning. The app dashboard has a new "Intel" card: "🔧 Tent fly is overdue for resealing (set 12-month reminder, logged 14 months ago). 💰 Your Jetboil target price ($89) — current market estimate: ~$85. ⛈️ Your Shining Rock trip (this Friday) has a 70% rain forecast — check your Plan B."
+
+**Schema changes:**
+```prisma
+// Add to AgentJob:
+scheduledFor  DateTime?   // when this job should next run
+recurringCron String?     // cron expression for repeating jobs: "0 8 * * *" = 8am daily
+```
+
+**New job types:**
+- `deal_check` — daily 8am. For each GearItem with `targetPrice` set, Claude estimates current market price and flags if within 10% of target.
+- `maintenance_due` — weekly Sunday 8am. Queries all GearItems where `maintenanceIntervalDays` is set and `lastMaintenanceAt + interval < today`. Returns list of overdue items.
+- `trip_weather_alert` — daily 7am. For any upcoming trip starting in the next 5 days, fetches weather and flags problematic forecasts (rain > 60%, temp extreme, high wind).
+- `weekly_briefing` — Sunday 9am. Summarizes the week: deals found, maintenance due, upcoming trip weather, any new gear enrichment results.
+
+**Key files:**
+- `prisma/schema.prisma` — add `scheduledFor DateTime?` and `recurringCron String?` to `AgentJob`. Run migration.
+- `app/api/agent/jobs/route.ts` — extend GET to also return jobs where `scheduledFor <= now` (not just `status=pending`). Extend POST to accept `scheduledFor` and `recurringCron`.
+- `lib/agent/jobs/deal-check.ts` — new handler. Queries GearItems with `targetPrice`, calls Claude with item name + target price, parses market estimate, creates result.
+- `lib/agent/jobs/maintenance-due.ts` — new handler. Queries overdue maintenance items, formats summary.
+- `lib/agent/jobs/trip-weather-alert.ts` — new handler. Queries upcoming trips, fetches weather via `lib/weather.ts`, flags bad forecasts.
+- `lib/agent/jobs/weekly-briefing.ts` — new handler. Aggregates results from the other three job types into a single briefing object.
+- `scripts/scheduler.ts` — new Mac mini script. Run by PM2 on a 1-minute interval. Checks for AgentJobs with `scheduledFor <= now`, creates the job if it's time, and creates the next occurrence using `recurringCron`. Seeds the 4 initial recurring jobs on first run if they don't exist.
+- `components/IntelligenceCard.tsx` — new dashboard card. Shows the most recent `weekly_briefing` result, with inline badges for deals/maintenance/weather. Tap to expand each section.
+- `components/DashboardClient.tsx` — render `IntelligenceCard` below the stats grid when any briefing results exist.
+
+**Acceptance criteria:**
+- AgentJob table has `scheduledFor` and `recurringCron` fields, migration passes
+- `scripts/scheduler.ts` seeds the 4 recurring jobs on first run
+- Mac mini runner picks up and executes each job type correctly
+- Dashboard shows IntelligenceCard when briefing data exists
+- Deal check correctly identifies items near their target price
+- Maintenance due correctly flags overdue items
+- Weather alert flags trips with bad forecasts
+- Build passes, no TypeScript errors
+
+**Constraints:**
+- No new npm packages for the scheduler — use `node-cron` only if already in package.json, otherwise use a simple setInterval checking `scheduledFor` timestamps
+- Claude calls in job handlers use `claude-haiku-4-5` — these are lightweight structured queries, not creative tasks
+- Do not run in parallel with S33 (both touch schema.prisma)
+- Out of scope: push notifications — briefing surfaces in dashboard only for now
+
+---
+
+### S33 — Chat Agent Memory
+
+**Depends on:** S32 (uses scheduler infrastructure for periodic memory refresh)
+
+**What to build:** Give the chat agent persistent memory between conversations. Right now every chat session starts blank. This session adds a lightweight `AgentMemory` key/value store that persists Will's camping patterns, preferences, and important facts across sessions — so the agent can reference "last time you camped at Linville" or "you prefer spots above 3000ft."
+
+**User story:** Will tells the agent: "Remember I don't like exposed ridge camps in summer — too hot and no shade." Next week, in a new session, Will asks "where should I camp in July?" The agent says "...I'd suggest avoiding the Black Balsam ridge for July given your preference for shade — Davidson River would be better."
+
+**Schema changes:**
+```prisma
+model AgentMemory {
+  id         String   @id @default(cuid())
+  key        String   @unique  // e.g. "camping_patterns", "gear_preferences", "location_notes"
+  value      String            // JSON blob
+  summary    String            // short human-readable summary of what's stored
+  updatedAt  DateTime @updatedAt
+  createdAt  DateTime @default(now())
+}
+```
+
+**Memory keys (initial set):**
+- `camping_patterns` — inferred from trip history: typical drive distance, preferred seasons, common trip duration, favorite spot types
+- `gear_preferences` — inferred from gear feedback: items Will always brings, never uses, or has flagged
+- `explicit_preferences` — things Will has explicitly told the agent to remember
+- `location_notes` — notes Will has added about specific spots that the agent should recall
+
+**Key files:**
+- `prisma/schema.prisma` — add `AgentMemory` model. Run migration.
+- `app/api/agent/memory/route.ts` — GET returns all memory entries; POST upserts a memory by key.
+- `lib/agent/memory.ts` — `loadMemoryContext(): Promise<string>` fetches all AgentMemory entries and formats them as a compact context block for injection into the chat system prompt. `upsertMemory(key, value, summary)` writes a memory entry.
+- `lib/agent/tools/remember.ts` — new chat tool `remember_this`. When Will says "remember that..." the agent calls this tool to persist it. Takes `key: 'explicit_preferences'` and the preference text.
+- `app/api/chat/route.ts` — inject `loadMemoryContext()` output into the system prompt before the conversation begins.
+- `lib/agent/jobs/refresh-memory.ts` — new scheduled job (weekly via S32 scheduler). Re-analyzes trip history, gear feedback, and post-trip reviews to update `camping_patterns` and `gear_preferences` memory keys.
+
+**Acceptance criteria:**
+- Agent has access to persistent memory between chat sessions
+- Will can say "remember that..." and the agent stores it
+- Memory context appears in the system prompt (verify in server logs)
+- Weekly memory refresh job runs and updates pattern keys
+- Agent correctly references prior preferences when answering questions
+- Build passes, no TypeScript errors
+
+**Constraints:**
+- No new npm packages
+- Memory context injected as a compact block (< 500 tokens) — summarize, don't dump raw data
+- `explicit_preferences` key is append-only from the agent's perspective — Will can clear it from Settings if needed (add a "Clear agent memory" button in SettingsClient)
+- Out of scope: per-conversation memory (episodic memory) — just persistent facts/patterns for now
+
+---
+
+### S34 — Trip Intelligence Report
+
+**What to build:** An on-demand "camping report card" that Claude generates from Will's full trip history. Surfaces patterns he might not notice himself — favorite seasons, gear he always brings but never uses, spots worth revisiting, how his camping has evolved.
+
+**User story:** Will taps "My Camping Profile" in Settings. Claude analyzes all his trips, gear feedback, seasonal ratings, and post-trip reviews and returns: "You've camped 12 times this year, averaging 2.1 nights. Your peak season is October–November (6 of 12 trips). You go 83% of the time within 2 hours of Asheville. Your most-used gear: tent, Jetboil, headlamp. Least-used: camp chair (brought 10×, used 2×). Spots worth revisiting: Davidson River (visited 3×, always rated 4–5★). Gear to reconsider: chair — you never use it."
+
+**Key files:**
+- `lib/trip-intelligence.ts` — `generateTripIntelligence(): Promise<TripIntelligenceReport>`. Queries all trips with their locations, gear packed, feedback, and reviews. Computes stats (trip count, avg duration, seasonal distribution, distance histogram). Passes the summary to Claude with a structured prompt asking for pattern analysis and recommendations. Returns typed report.
+- `app/api/trips/intelligence/route.ts` — POST triggers generation, GET returns the most recent cached report (stored as JSON on a new `CampingProfile` singleton row).
+- `prisma/schema.prisma` — add `CampingProfile` model: `{ id, reportJson String, generatedAt DateTime }`. Single-row singleton (upsert by a fixed id).
+- `components/TripIntelligenceCard.tsx` — expandable card showing: stat badges at top (trip count, avg duration, top season), then sections: Patterns, Gear Insights, Spots to Revisit. "Refresh" button re-runs generation.
+- `components/SettingsClient.tsx` — add "My Camping Profile" section with the TripIntelligenceCard embedded.
+
+**Report shape:**
+```typescript
+interface TripIntelligenceReport {
+  stats: { tripCount: number, avgNights: number, totalNights: number, topSeason: string, avgDriveMiles: number }
+  patterns: string[]          // 3–5 plain-English observations
+  gearInsights: { name: string, insight: string, action: 'keep' | 'reconsider' | 'always_bring' }[]
+  spotsToRevisit: { name: string, reason: string }[]
+  generatedAt: string
+}
+```
+
+**Acceptance criteria:**
+- "My Camping Profile" section appears in Settings
+- Report generates from real trip data (graceful if fewer than 3 trips — shows "Not enough trips yet")
+- Stats section shows accurate counts
+- Gear insights correctly identify high/low-use items from TripFeedback history
+- Report caches so it doesn't re-run Claude on every page load
+- Build passes, no TypeScript errors
+
+**Constraints:**
+- No new npm packages
+- Use `claude-sonnet-4-6` for the analysis (pattern recognition, not just data formatting)
+- No schema changes beyond the `CampingProfile` singleton — all trip/gear data already exists
+- Out of scope: auto-refresh on schedule — on-demand only with a "Refresh" button
+
+---
+
+### S35 — Smart Packing v2
+
+**What to build:** Upgrade the packing list generator to use richer historical context. Currently it injects a basic summary of gear feedback from recent trips. v2 makes it truly personalized: location-specific patterns, seasonal patterns, gear age/wear awareness, and an optional weight budget.
+
+**User story:** Will generates a packing list for a 2-night October trip to Black Balsam (8,400ft). The list says: "⚠️ October at Black Balsam — temps dropped to 28°F on your last visit. Adding: extra down layer, hand warmers. 📦 Skipping: camp chair (you've brought it 6× to similar trips, used it 0×). ⚖️ Current pack weight: ~34 lbs — consider leaving the cast iron skillet (4.5 lbs) to stay under 30 lbs."
+
+**Key files:**
+- `lib/packing-intelligence.ts` — new module. `buildPackingContext(tripId): Promise<PackingContext>`. Queries: past trips to same location or nearby locations (same region), gear feedback from last 10 trips, seasonal patterns from TripIntelligence cache (if available), altitude from location. Returns a structured context object.
+- `lib/claude.ts` — update `generatePackingList()` to accept `PackingContext` and inject it into the prompt as additional context blocks: location history, seasonal notes, gear-to-skip suggestions, weight summary.
+- `app/api/packing-list/route.ts` — call `buildPackingContext(tripId)` before calling `generatePackingList()`. Pass context through.
+- `components/PackingList.tsx` — add a small "Why was this suggested?" tooltip/expand on each packing item that shows the context reason if available (e.g. "Added: Oct at altitude = cold nights").
+
+**Context blocks injected into prompt:**
+1. **Location history**: "Will has camped at or near [location] [N] times. Notes from past trips: [...]"
+2. **Seasonal context**: "It's October. Past October trips averaged 31°F overnight at this elevation."
+3. **Gear skip list**: "Items Will has brought but never used on similar trips: [list]. Suggest skipping or flag as low-priority."
+4. **Weight note**: "If trip is 2+ nights backpacking, total packed weight from gear inventory is ~[X] lbs. Flag if over 35 lbs."
+
+**Acceptance criteria:**
+- Packing list for a trip with prior location history includes location-specific notes
+- Items Will has consistently not used are flagged or deprioritized
+- Seasonal temperature context is injected when available
+- Weight estimate appears when gear inventory has weights recorded
+- Falls back gracefully to current behavior if no history exists
+- Build passes, no TypeScript errors
+
+**Constraints:**
+- No new npm packages
+- No schema changes — all data already exists; this is purely prompt engineering + context fetching
+- Do not run in parallel with S33 (both touch `lib/claude.ts`)
+- Out of scope: per-item "why" explanations in the UI — that's a future polish task
+
+---
+
+### S36 — Knowledge Base Refresh
+
+**What to build:** Update the RAG corpus (built March 2026) with fresh content, improve chunking quality, and add a Mac mini agent job to detect and re-ingest stale sources. The chat agent's answers are only as good as the corpus — this keeps it current.
+
+**User story:** Will asks the agent "are there any new dispersed camping options near Pisgah this season?" The agent has current-year trail updates and Forest Service announcements because the corpus was refreshed last week, not from March.
+
+**Schema changes:**
+```prisma
+// Add to KnowledgeEntry (or whatever the RAG document model is called):
+source       String?   // URL or source name
+refreshedAt  DateTime? // last time this entry was re-ingested
+contentHash  String?   // SHA-256 of content — detect if source has changed
+```
+
+**New content sources to add:**
+- USFS Pisgah/Nantahala recreation alerts (public RSS feed)
+- NC State Parks camping availability notes (public web pages)
+- Leave No Trace guidelines (lnt.org, public)
+- iOverlander North Carolina data export (public API)
+- Campendium NC campground reviews (public)
+
+**Key files:**
+- `prisma/schema.prisma` — add `source`, `refreshedAt`, `contentHash` to the knowledge document model (check actual model name in schema). Run migration.
+- `scripts/refresh-corpus.ts` — new Mac mini script. For each registered source URL, fetch content, compute hash, compare to stored hash. If changed, re-chunk and re-embed. Registers as an `AgentJob` of type `corpus_refresh` so results are visible in the dashboard.
+- `lib/rag/sources.ts` — new registry of source URLs with their scraping strategy (RSS feed, static page, API endpoint).
+- `lib/rag/chunker.ts` — improve chunking: switch from flat text splitting to semantic sections (split on headers, preserve metadata like source URL and date in each chunk).
+- `app/api/agent/jobs/` — add handler for `corpus_refresh` job type.
+- `components/SettingsClient.tsx` — add "Knowledge Base" section showing: corpus size (entry count), last refresh date, "Refresh now" button that triggers a `corpus_refresh` AgentJob.
+
+**Acceptance criteria:**
+- Knowledge entries have `source`, `refreshedAt`, `contentHash` fields
+- `refresh-corpus.ts` script fetches at least 2 real sources and ingests them
+- Content hash comparison prevents re-ingesting unchanged content
+- Corpus refresh shows up as an AgentJob with status tracking
+- Settings page shows corpus health stats
+- Chat agent answers reflect updated corpus content
+- Build passes, no TypeScript errors
+
+**Constraints:**
+- No new npm packages beyond what's already used for RAG (check existing ingest pipeline dependencies)
+- Do not run in parallel with S32 or S33 (schema conflict)
+- Respect robots.txt on all scraped sources — only use public data
+- Out of scope: automated scheduling of corpus refresh — manual trigger only in this session; scheduling can be added via S32 infrastructure later
+
+---
+
+## v5.0 Copy-Paste Prompts
+
+All v5.0 sessions use `/gsd:quick`. Full specs are in `.planning/V2-SESSIONS.md` above.
+
+---
+
+**S31 — Destination discovery** *(independent — can run any time)*
+```
+Pull origin main, then claim S31 in .planning/V2-SESSIONS.md (mark it 🔄 In Progress, commit + push). Then run /gsd:quick with this task:
+
+Build destination discovery — a "Where should I go this weekend?" feature. Create lib/destination-discovery.ts with a suggestDestinations() function that scores all saved locations against the Open-Meteo weekend forecast using: weather score (0–40pts), recency bonus (+15 if not visited in 30+ days), seasonal rating (stored SeasonalRating × 6), and drive distance from Asheville 35.5°N/82.5°W (0–15pts). Create POST /api/destinations/suggest. Build DestinationSuggesterSheet.tsx (date picker → 3 ranked suggestion cards with weather, distance, reasoning → "Plan this trip" pre-fills trip create form). Add a "Where should I go?" button to DashboardClient. Add a suggest_destination tool to the chat agent. Full spec in V2-SESSIONS.md under S31. When done, mark S31 ✅ Done, commit, push.
+```
+
+---
+
+**S32 — Mac mini scheduled intelligence** *(independent — can run any time)*
+```
+Pull origin main, then claim S32 in .planning/V2-SESSIONS.md (mark it 🔄 In Progress, commit + push). Then run /gsd:quick with this task:
+
+Extend AgentJob with scheduled recurring jobs. Add scheduledFor DateTime? and recurringCron String? to the AgentJob schema and run a migration. Extend GET /api/agent/jobs to also return jobs where scheduledFor <= now. Build 4 new job type handlers: deal_check (daily 8am — Claude estimates market price for gear with targetPrice set), maintenance_due (weekly Sunday — surfaces overdue maintenance items), trip_weather_alert (daily 7am — flags upcoming trips with bad weather forecasts), weekly_briefing (Sunday 9am — aggregates all three into one summary). Create scripts/scheduler.ts for the Mac mini (PM2 managed, checks every minute, seeds recurring jobs on first run). Build IntelligenceCard.tsx and wire it into DashboardClient. All Claude calls in job handlers use claude-haiku-4-5. Full spec in V2-SESSIONS.md under S32. When done, mark S32 ✅ Done, commit, push.
+```
+
+---
+
+**S33 — Chat agent memory** *(start only after S32 is ✅ Done)*
+```
+Pull origin main, then claim S33 in .planning/V2-SESSIONS.md (mark it 🔄 In Progress, commit + push). Then run /gsd:quick with this task:
+
+Add persistent memory to the chat agent. Create an AgentMemory model in Prisma (id, key String @unique, value String JSON, summary String, updatedAt, createdAt) and run a migration. Create GET/POST /api/agent/memory. Build lib/agent/memory.ts with loadMemoryContext() (fetches all entries, formats as < 500 token context block) and upsertMemory(). Inject loadMemoryContext() into the chat system prompt in app/api/chat/route.ts. Add a remember_this chat tool so Will can say "remember that..." and it persists. Add a refresh-memory scheduled job (weekly, via S32 scheduler) that re-analyzes trip history and gear feedback to update camping_patterns and gear_preferences keys. Add a "Clear agent memory" button in SettingsClient. Full spec in V2-SESSIONS.md under S33. When done, mark S33 ✅ Done, commit, push.
+```
+
+---
+
+**S34 — Trip intelligence report** *(independent — can run any time)*
+```
+Pull origin main, then claim S34 in .planning/V2-SESSIONS.md (mark it 🔄 In Progress, commit + push). Then run /gsd:quick with this task:
+
+Build an on-demand camping report card. Create lib/trip-intelligence.ts with generateTripIntelligence() that queries all trips/gear/feedback, computes stats (trip count, avg nights, top season, avg drive distance), then calls claude-sonnet-4-6 to analyze patterns and return: patterns[], gearInsights[], spotsToRevisit[]. Add a CampingProfile singleton model to Prisma (id, reportJson, generatedAt) and run a migration. Create POST /api/trips/intelligence (generate + cache) and GET (return cached). Build TripIntelligenceCard.tsx with stat badges, patterns section, gear insights, spots to revisit, and a Refresh button. Wire it into SettingsClient under "My Camping Profile". Full spec in V2-SESSIONS.md under S34. When done, mark S34 ✅ Done, commit, push.
+```
+
+---
+
+**S35 — Smart packing v2** *(run after S33 merges — both touch lib/claude.ts)*
+```
+Pull origin main, then claim S35 in .planning/V2-SESSIONS.md (mark it 🔄 In Progress, commit + push). Then run /gsd:quick with this task:
+
+Upgrade the packing list generator with richer historical context. Create lib/packing-intelligence.ts with buildPackingContext(tripId) that queries: past trips to the same or nearby location, gear feedback from last 10 trips, seasonal patterns, and altitude. Update generatePackingList() in lib/claude.ts to accept PackingContext and inject 4 context blocks into the prompt: location history, seasonal temperature notes, gear-to-skip suggestions (items brought but never used on similar trips), and a weight estimate if gear weights are recorded. Update app/api/packing-list/route.ts to call buildPackingContext before generating. No schema changes needed — all data already exists. Full spec in V2-SESSIONS.md under S35. When done, mark S35 ✅ Done, commit, push.
+```
+
+---
+
+**S36 — Knowledge base refresh** *(run after S32 merges — both touch schema.prisma)*
+```
+Pull origin main, then claim S36 in .planning/V2-SESSIONS.md (mark it 🔄 In Progress, commit + push). Then run /gsd:quick with this task:
+
+Refresh and improve the RAG knowledge base. Add source String?, refreshedAt DateTime?, contentHash String? to the knowledge document model in Prisma and run a migration. Create lib/rag/sources.ts as a registry of public NC camping sources (USFS Pisgah/Nantahala alerts RSS, NC State Parks pages, LNT guidelines, iOverlander NC export, Campendium NC). Build scripts/refresh-corpus.ts for the Mac mini: fetch each source, compute SHA-256 hash, skip if unchanged, re-chunk and re-embed if changed. Improve lib/rag/chunker.ts to split on semantic sections (headers) and preserve source/date metadata per chunk. Add corpus_refresh AgentJob type handler. Add a "Knowledge Base" section to SettingsClient showing corpus size, last refresh date, and a "Refresh now" button. Respect robots.txt on all scraped sources. Full spec in V2-SESSIONS.md under S36. When done, mark S36 ✅ Done, commit, push.
+```
+
+---
+
 ## Adding More Sessions
 
-When Will has new feature ideas, add them at the bottom of the queue table and write a spec below. Set deps based on the conflict groups above. All new features in v2.0 run on MacBook.
+When Will has new feature ideas, add them at the bottom of the queue table and write a spec below. Set deps based on the conflict groups above. All new features run on MacBook (Mac mini scripts go in /scripts).
