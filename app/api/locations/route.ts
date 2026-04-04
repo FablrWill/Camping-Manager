@@ -1,18 +1,34 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 
+function deriveBestSeason(ratings: { season: string; rating: number }[]): string | null {
+  if (!ratings.length) return null;
+  const top = ratings.reduce((a, b) => (b.rating > a.rating ? b : a));
+  if (top.rating < 4) return null;
+  const tied = ratings.filter((r) => r.rating === top.rating);
+  if (tied.length > 1) return null; // no clear winner
+  return top.season;
+}
+
 export async function GET() {
   try {
     const locations = await prisma.location.findMany({
       orderBy: { updatedAt: "desc" },
+      include: { seasonalRatings: true },
     });
 
-    const serialized = locations.map((loc) => ({
-      ...loc,
-      visitedAt: loc.visitedAt?.toISOString() ?? null,
-      createdAt: loc.createdAt.toISOString(),
-      updatedAt: loc.updatedAt.toISOString(),
-    }));
+    const serialized = locations.map((loc) => {
+      // Derive best season: highest rating ≥ 4 that is uniquely the top score
+      const bestSeason = deriveBestSeason(loc.seasonalRatings);
+      return {
+        ...loc,
+        visitedAt: loc.visitedAt?.toISOString() ?? null,
+        createdAt: loc.createdAt.toISOString(),
+        updatedAt: loc.updatedAt.toISOString(),
+        seasonalRatings: undefined, // don't leak full rows to client
+        bestSeason,
+      };
+    });
 
     return NextResponse.json(serialized);
   } catch (error) {
