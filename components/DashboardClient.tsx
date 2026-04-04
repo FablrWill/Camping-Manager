@@ -2,13 +2,14 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Backpack, Car, MapPin, Tent, ChevronRight, Plus, Tag, ChevronDown } from 'lucide-react'
+import { Backpack, Car, MapPin, Tent, ChevronRight, Plus, Tag, ChevronDown, Compass } from 'lucide-react'
 import { daysUntil } from '@/lib/trip-utils'
 import { getCategoryEmoji } from '@/lib/gear-categories'
 import AgentJobsBadge from './AgentJobsBadge'
 import TripPrepStepper from './TripPrepStepper'
 import IntelligenceCard from './IntelligenceCard'
 import type { WeeklyBriefingResult } from '@/lib/agent/jobs/weekly-briefing'
+import DestinationDiscoverySheet from './DestinationDiscoverySheet'
 
 interface DashboardStats {
   gearCount: number
@@ -73,8 +74,13 @@ export default function DashboardClient({
   latestBriefing?: WeeklyBriefingResult | null
 }) {
   const [dealsOpen, setDealsOpen] = useState(false)
+  const [showDiscovery, setShowDiscovery] = useState(false)
 
   return (
+    <>
+      {showDiscovery && (
+        <DestinationDiscoverySheet onClose={() => setShowDiscovery(false)} />
+      )}
     <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
       {/* Hero */}
       <section className="text-center py-6 relative">
@@ -375,8 +381,19 @@ export default function DashboardClient({
             </div>
             <span className="text-sm font-medium text-stone-700 dark:text-stone-300">View Map</span>
           </Link>
+
+          <button
+            onClick={() => setShowDiscovery(true)}
+            className="col-span-2 flex items-center gap-2 bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-700 p-3 hover:border-amber-400 dark:hover:border-amber-500 transition-colors w-full"
+          >
+            <div className="w-8 h-8 rounded-lg bg-amber-50 dark:bg-amber-900/30 flex items-center justify-center">
+              <Compass size={16} className="text-amber-600 dark:text-amber-400" />
+            </div>
+            <span className="text-sm font-medium text-stone-700 dark:text-stone-300">Where should I go?</span>
+          </button>
         </div>
       </section>
     </div>
+    </>
   )
 }
