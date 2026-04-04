@@ -355,7 +355,7 @@ Plans:
 ### Phase 25: Gear Docs & Manual Finder
 **Goal**: Every gear item can have attached documents (manuals, warranties, support links) that Claude finds automatically and are cached for offline access
 **Depends on**: Phase 23 (expanded categories with modelNumber field)
-**Requirements**: SHOP-01, SHOP-02, SHOP-03, SHOP-04, SHOP-05, SHOP-06, PREP-01, PREP-02, PREP-03, PREP-04, FEED-01, FEED-02, FEED-03, FEED-04, DASH-01, TABS-01
+**Requirements**: TBD
 **Success Criteria** (what must be TRUE):
   1. GearDocument model exists with type (manual_pdf, support_link, warranty, product_page), url, localPath, title
   2. "Find Manual" button on gear detail calls Claude to search for manufacturer support page + PDF
@@ -376,7 +376,7 @@ Plans:
 ### Phase 26: Trip Day Sequencer
 **Goal**: Time-ordered departure checklist for the morning of a trip, pulling tasks from packing list, meal plan, power budget, and route — the ADHD-friendly "just follow the list" screen
 **Depends on**: None (uses existing trip prep data)
-**Requirements**: SHOP-01, SHOP-02, SHOP-03, SHOP-04, SHOP-05, SHOP-06, PREP-01, PREP-02, PREP-03, PREP-04, FEED-01, FEED-02, FEED-03, FEED-04, DASH-01, TABS-01
+**Requirements**: TBD
 **Success Criteria** (what must be TRUE):
   1. Trip prep has a "Departure Day" section with time-sequenced tasks
   2. Tasks are generated from existing trip data (packing status, meal prep steps, power charge needs, drive time)
@@ -396,7 +396,7 @@ Plans:
 ### Phase 27: Safety Float Plan
 **Goal**: Send a trip summary (dates, location, vehicle, expected return) to an emergency contact before departure
 **Depends on**: None
-**Requirements**: SHOP-01, SHOP-02, SHOP-03, SHOP-04, SHOP-05, SHOP-06, PREP-01, PREP-02, PREP-03, PREP-04, FEED-01, FEED-02, FEED-03, FEED-04, DASH-01, TABS-01
+**Requirements**: TBD
 **Success Criteria** (what must be TRUE):
   1. User can set an emergency contact (name, phone/email) in settings
   2. "Send Float Plan" button on trip prep generates a summary message
@@ -416,7 +416,7 @@ Plans:
 ### Phase 28: Weather-Aware Clothing
 **Goal**: Packing lists include weather-driven clothing suggestions — rain gear for rain, cold layers for low temps, UV protection for high UV
 **Depends on**: Phase 23 (clothing category exists)
-**Requirements**: SHOP-01, SHOP-02, SHOP-03, SHOP-04, SHOP-05, SHOP-06, PREP-01, PREP-02, PREP-03, PREP-04, FEED-01, FEED-02, FEED-03, FEED-04, DASH-01, TABS-01
+**Requirements**: TBD
 **Success Criteria** (what must be TRUE):
   1. Claude packing prompt includes specific clothing guidance based on weather forecast
   2. Rain gear suggested when forecast shows precipitation
@@ -459,7 +459,7 @@ Plans:
 ### Phase 30: Gear Product Research
 **Goal**: AI-powered "Research" button on gear items that finds best-in-class alternatives, compares to current item, and surfaces upgrade recommendations
 **Depends on**: Phase 25 (GearDocument model for storing research)
-**Requirements**: SHOP-01, SHOP-02, SHOP-03, SHOP-04, SHOP-05, SHOP-06, PREP-01, PREP-02, PREP-03, PREP-04, FEED-01, FEED-02, FEED-03, FEED-04, DASH-01, TABS-01
+**Requirements**: TBD
 **Success Criteria** (what must be TRUE):
   1. "Research" button on gear detail triggers Claude research
   2. Results show top alternatives with pros/cons vs current item
@@ -474,7 +474,7 @@ Plans:
 ### Phase 31: Dark Sky, Astro Info & Activity Gear Recommendations
 **Goal**: Show Bortle class, moon phase, sunrise/sunset per location/trip; add `activities` gear category (kayak, telescope, projector, speakers, etc.); trip planner agent infers location suitability from existing notes and surfaces owned/wishlist activity gear as accept/reject suggestions
 **Depends on**: None (independent, but lower priority)
-**Requirements**: SHOP-01, SHOP-02, SHOP-03, SHOP-04, SHOP-05, SHOP-06, PREP-01, PREP-02, PREP-03, PREP-04, FEED-01, FEED-02, FEED-03, FEED-04, DASH-01, TABS-01
+**Requirements**: TBD
 **Success Criteria** (what must be TRUE):
   1. Trip prep shows sunrise/sunset times for trip dates
   2. Moon phase displayed for each night of the trip
@@ -492,7 +492,7 @@ Plans:
 ### Phase 32: Deal Monitoring
 **Goal**: Set target prices on wishlist gear items, check prices on demand via Claude, surface deals
 **Depends on**: Phase 30 (research model for storing price data)
-**Requirements**: SHOP-01, SHOP-02, SHOP-03, SHOP-04, SHOP-05, SHOP-06, PREP-01, PREP-02, PREP-03, PREP-04, FEED-01, FEED-02, FEED-03, FEED-04, DASH-01, TABS-01
+**Requirements**: TBD
 **Success Criteria** (what must be TRUE):
   1. Wishlist gear items have optional targetPrice field
   2. "Check Price" button triggers Claude to search current prices
@@ -512,7 +512,7 @@ Plans:
 ### Phase 33: Home Assistant Integration
 **Goal**: Connect Outland OS to a campsite Home Assistant instance so Will can see live sensor data (battery, propane, weather, vehicle, dog GPS) on the dashboard and trip prep pages
 **Depends on**: Phase 24 (schema stable, nav settled)
-**Requirements**: SHOP-01, SHOP-02, SHOP-03, SHOP-04, SHOP-05, SHOP-06, PREP-01, PREP-02, PREP-03, PREP-04, FEED-01, FEED-02, FEED-03, FEED-04, DASH-01, TABS-01
+**Requirements**: TBD
 **Success Criteria** (what must be TRUE):
   1. Settings page has HA config section with URL, token (write-only), and "Test Connection" button
   2. Test Connection calls HA REST API and shows success ("Connected — N entities found") or error
@@ -557,7 +557,7 @@ Plans:
 ### Phase 35: Meal Planning: Shopping List, Prep Guide & Feedback
 **Goal**: Extend meal planning with a consolidated shopping list, pre-trip prep guide, and post-trip feedback loop that improves future meal plans
 **Depends on**: Phase 34 (MealPlan + Meal models in place)
-**Requirements**: SHOP-01, SHOP-02, SHOP-03, SHOP-04, SHOP-05, SHOP-06, PREP-01, PREP-02, PREP-03, PREP-04, FEED-01, FEED-02, FEED-03, FEED-04, DASH-01, TABS-01
+**Requirements**: TBD
 **Success Criteria** (what must be TRUE):
   1. "Shopping List" tab shows consolidated ingredient list across all meals, grouped by category
   2. Quantities are summed across recipes (e.g., 3 meals needing olive oil → 1 combined entry)
@@ -566,14 +566,7 @@ Plans:
   5. Feedback is surfaced to Claude on the next meal plan generation
   6. Dashboard shows meal feedback prompt after a trip ends
   7. `npm run build` passes
-**Plans**: 5 plans
-
-Plans:
-- [ ] 35-00-PLAN.md — Schema migration (ShoppingListItem, MealFeedback, prepGuide) + Zod schemas + test stubs
-- [ ] 35-01-PLAN.md — Shopping list + prep guide API routes + Claude generation functions
-- [ ] 35-02-PLAN.md — Feedback API route + history injection into meal plan generation
-- [ ] 35-03-PLAN.md — UI components: tab bar, ShoppingListClient, PrepGuideClient, MealFeedbackButton
-- [ ] 35-04-PLAN.md — Dashboard meal plan status card + build verification
+**Plans**: 0/TBD
 
 **Parallelization notes:**
 - Wave 7 — depends on Phase 34 meal plan core
@@ -626,7 +619,7 @@ Plans:
 | 32. Deal Monitoring | v3.0 | 0/TBD | Not started | - |
 | 33. Conversational Trip Planner | v3.0 | 4/4 | Complete    | 2026-04-03 |
 | 34. Home Assistant Integration | v3.0 | 4/4 | Complete    | 2026-04-04 |
-| 35. Meal Planning Core | v3.0 | 1/5 | In Progress|  |
+| 35. Meal Planning Core | v3.0 | 1/1 | Complete   | 2026-04-04 |
 | 36. Meal Planning: Shopping/Prep/Feedback | v3.0 | 0/TBD | Not started | - |
 
 ### Phase 33: Conversational Trip Planner
@@ -642,7 +635,7 @@ Plans:
   5. "Add manually" escape hatch opens the old static form
   6. Trip-creation conversations are persisted to the database
   7. `npm run build` passes
-**Plans:** 1/5 plans executed
+**Plans:** 1/1 plans complete
 
 Plans:
 - [x] 33-00-PLAN.md — Wave 0 test stubs (trip planner tools + ChatBubble extraction)

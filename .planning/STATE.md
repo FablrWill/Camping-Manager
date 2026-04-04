@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Gear Intelligence + Day-Of
 status: executing
-stopped_at: Completed 35-00-PLAN.md
-last_updated: "2026-04-04T04:40:36.860Z"
+stopped_at: Completed 35-01-PLAN.md
+last_updated: "2026-04-04T04:41:18.567Z"
 last_activity: 2026-04-04
 progress:
   total_phases: 24
-  completed_phases: 19
-  total_plans: 57
+  completed_phases: 20
+  total_plans: 53
   completed_plans: 52
   percent: 40
 ---
@@ -76,7 +76,7 @@ Progress: [████░░░░░░] 40%
 | Phase 34 P01 | 5 | 2 tasks | 5 files |
 | Phase 34 P02 | 3 | 2 tasks | 4 files |
 | Phase 34 P03 | 12 | 2 tasks | 5 files |
-| Phase 35-meal-planning-shopping-prep-feedback P00 | 15 | 2 tasks | 7 files |
+| Phase 35 P01 | 195 | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -131,8 +131,8 @@ Recent decisions affecting current work:
 - [Phase 34]: POST /generate persists Meal rows in prisma.$transaction with atomic Trip.mealPlanGeneratedAt update
 - [Phase 34]: MealPlanClient renders day-by-day collapsible meals with per-meal PATCH regeneration; old MealPlan component replaced in TripPrepClient
 - [Phase 34]: Meal plan status badge (ready/none) shown per trip in TripsClient using mealPlanGeneratedAt field
-- [Phase 35-meal-planning-shopping-prep-feedback]: MealFeedback mealId nullable with SetNull cascade — feedback survives meal regeneration
-- [Phase 35-meal-planning-shopping-prep-feedback]: mealName denormalized on MealFeedback — history prompt builder needs no JOIN after meal regeneration
+- [Phase 35-01]: Shopping list aggregated on-the-fly from meal ingredients — no ShoppingListItem Prisma model added; simpler approach works without migration
+- [Phase 35-01]: generateShoppingList() and generatePrepGuide() added to lib/claude.ts; prepGuide prompt includes vacuum sealer + sous vide context
 
 ### Pending Todos
 
@@ -150,6 +150,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-04T04:40:36.855Z
-Stopped at: Completed 35-00-PLAN.md
+Last session: 2026-04-04T04:41:18.562Z
+Stopped at: Completed 35-01-PLAN.md
 Resume file: None
