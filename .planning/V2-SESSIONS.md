@@ -76,6 +76,7 @@ A self-coordinating work queue for v2.0 features. Each Claude Code session claim
 | S34 | Trip intelligence report             | —     | ✅ Done 2026-04-04 | Sonnet, normal | —          |
 | S35 | Smart packing v2                     | —     | ⬜ Ready          | Sonnet, normal | —          |
 | S36 | Knowledge base refresh               | —     | ✅ Done 2026-04-04 | Sonnet, normal | —          |
+| S37 | Google Maps list import              | 44    | 🔄 In Progress    | Sonnet, normal | —          |
 | S10 | Home Assistant integration           | 33    | ⏸ Blocked (~mid-Apr hardware) | Sonnet, normal | S09 |
 
 **Why this order matters (conflict groups):**
@@ -113,6 +114,7 @@ A self-coordinating work queue for v2.0 features. Each Claude Code session claim
 - S34 is new files only (`app/api/trips/intelligence/route.ts`, new `lib/trip-intelligence.ts`, new `components/TripIntelligenceCard.tsx`) — **no conflict with any other session; can run in parallel with S31, S32**
 - S35 touches `lib/claude.ts` (upgrade packing prompt), `app/api/packing-list/route.ts` (richer context fetch), `lib/packing-intelligence.ts` (new) — **no schema changes; can run in parallel with S31, S34; avoid running in parallel with S33 (both touch lib/claude.ts)**
 - S36 touches `lib/rag/` ingest pipeline, new `scripts/refresh-corpus.ts`, `prisma/schema.prisma` (add `source`, `refreshedAt` to KnowledgeEntry) — **must not run in parallel with S32 or S33 (schema)**
+- S37 touches new files only (`app/api/import/gmaps-list/route.ts`, `components/GmapsImportModal.tsx`, `lib/gmaps-import.ts`) — **no schema changes; no conflict with any other session; can run in parallel with anything**
 - **Maximum v5.0 parallelism: S31 + S34 can run simultaneously with anything. S32 first, then S33. S35 after S31 (avoid lib/claude.ts conflict). S36 after S32 merges.**
 
 ---
@@ -1722,6 +1724,49 @@ Pull origin main, then claim S36 in .planning/V2-SESSIONS.md (mark it 🔄 In Pr
 Refresh and improve the RAG knowledge base. Add source String?, refreshedAt DateTime?, contentHash String? to the knowledge document model in Prisma and run a migration. Create lib/rag/sources.ts as a registry of public NC camping sources (USFS Pisgah/Nantahala alerts RSS, NC State Parks pages, LNT guidelines, iOverlander NC export, Campendium NC). Build scripts/refresh-corpus.ts for the Mac mini: fetch each source, compute SHA-256 hash, skip if unchanged, re-chunk and re-embed if changed. Improve lib/rag/chunker.ts to split on semantic sections (headers) and preserve source/date metadata per chunk. Add corpus_refresh AgentJob type handler. Add a "Knowledge Base" section to SettingsClient showing corpus size, last refresh date, and a "Refresh now" button. Respect robots.txt on all scraped sources. Full spec in V2-SESSIONS.md under S36.
 
 When done: mark S36 ✅ Done in V2-SESSIONS.md, commit, push, then merge to main:
+git checkout main && git merge - && git push origin main
+```
+
+---
+
+---
+
+### S37 — Google Maps List Import
+
+**What to build:** Let Will paste a shared Google Maps list URL (e.g., `https://maps.app.goo.gl/...` or `https://www.google.com/maps/...`). The server fetches and scrapes the page HTML, extracts place names, addresses, and coordinates from the embedded JSON-LD / `window.__PWA_INITIAL_STATE__` data, and returns a list of draft Location previews. Will reviews the list and taps "Import selected" to save them as Locations. Scraping only — no Google Maps API key required.
+
+**User story:** Will has a saved Google Maps list called "NC Camping Spots" with 12 places. He opens the Import modal, pastes the share URL, taps Fetch, and sees a preview list: "Rough Ridge Parking Area — 36.0871, -81.8765 · Linville Gorge Wilderness — 35.9443, -81.9231 …". He checks all 12, taps Import, and they show up on his Spots map.
+
+**Key files:**
+- `lib/gmaps-import.ts` — `fetchGmapsList(url: string): Promise<GmapsPlace[]>`. Uses `fetch()` to GET the share URL (following redirects), parses the HTML response. Extracts place data from: (1) `<script type="application/ld+json">` blocks (ItemList schema), (2) the serialized `window.APP_INITIALIZATION_STATE` / `__PWA_INITIAL_STATE__` JSON blob embedded in `<script>` tags — look for lat/lng arrays near place names. Returns `GmapsPlace[]`: `{ name: string; address: string | null; lat: number | null; lng: number | null }`. If parsing yields 0 results, throw a descriptive error so the UI can surface it. No npm scraping packages — use native `fetch` + string/regex parsing on the raw HTML.
+- `app/api/import/gmaps-list/route.ts` — `POST { url: string }`. Validates URL starts with `https://maps.app.goo.gl` or `https://www.google.com/maps`. Calls `fetchGmapsList(url)`. Returns `{ places: GmapsPlace[] }`. Standard try-catch error handling with `console.error` + JSON error response.
+- `components/GmapsImportModal.tsx` — new client component. State machine: `idle → fetching → preview → importing → done`. UI: (1) idle — text input for URL + "Fetch" button; (2) fetching — spinner; (3) preview — checklist of scraped places with name, address, lat/lng badge; "Select all / None" toggle; "Import N selected" button; (4) importing — progress indicator; (5) done — "N locations added" + close button. On import, fires `POST /api/locations` for each checked place (sequentially, not Promise.all, to avoid race conditions). No new npm packages.
+- `components/SpotMap.tsx` or wherever the import entry point lives — add an "Import from Google Maps" button/menu item that opens `GmapsImportModal`. After the modal closes with new locations, re-fetch the locations list.
+
+**Acceptance criteria:**
+- Pasting a valid Google Maps share URL and tapping Fetch returns ≥1 place preview
+- Each place shows name and coordinates (address optional — some map pins may not have one)
+- Unchecking a place excludes it from the import
+- Imported locations appear on the Spots map immediately after modal closes
+- If the URL is invalid or scraping yields 0 results, the UI shows a clear error message (not a crash)
+- Build passes, no TypeScript errors
+
+**Constraints:**
+- No Google Maps API key — scraping only
+- No new npm packages
+- No schema changes — imports into existing `Location` model with `name`, `latitude`, `longitude`, `description` (use address as description if available)
+- Scraping is best-effort: Google can change their HTML structure. The feature should degrade gracefully (clear error) rather than crash
+- Do not store or cache the raw HTML response
+
+---
+
+**S37 — Google Maps list import** *(independent — can run any time)*
+```
+Pull origin main, then claim S37 in .planning/V2-SESSIONS.md (mark it 🔄 In Progress, commit + push). Then run /gsd:plan-phase 44 to plan the feature, with this task:
+
+Build a Google Maps list importer. User pastes a shared Google Maps list URL, the server fetches and scrapes the page HTML (no API key), extracts place names + coordinates from embedded JSON data, returns draft Location previews. User reviews the checklist and confirms which to import. Create lib/gmaps-import.ts (fetch + parse logic), app/api/import/gmaps-list/route.ts (POST endpoint), and GmapsImportModal.tsx (idle → fetching → preview → importing → done state machine). Wire an "Import from Google Maps" entry point into the Spots map UI. No new npm packages, no schema changes. Full spec in V2-SESSIONS.md under S37.
+
+When done: mark S37 ✅ Done in V2-SESSIONS.md, commit, push, then merge to main:
 git checkout main && git merge - && git push origin main
 ```
 
