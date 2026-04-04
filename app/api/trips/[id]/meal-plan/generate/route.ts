@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { generateMealPlan, buildMealHistorySection, type GearItem } from '@/lib/claude'
+import { generateMealPlan, type GearItem } from '@/lib/claude'
 import { fetchWeather } from '@/lib/weather'
 
 // POST /api/trips/:id/meal-plan/generate — generate full meal plan via Claude
@@ -60,18 +60,33 @@ export async function POST(
       (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
     )
 
-    // 5. Fetch recent meal feedback across all trips for prompt injection (non-blocking)
-    let mealHistory: string | undefined
+    // 5. Fetch prior meal feedback from previous plans for this trip (non-blocking)
+    let feedbackHistory: string | undefined
     try {
-      const recentFeedback = await prisma.mealFeedback.findMany({
-        orderBy: { createdAt: 'desc' },
-        take: 10,
-        select: { mealName: true, rating: true, notes: true },
+      const mealPlanRecord = await prisma.mealPlan.findUnique({
+        where: { tripId },
+        select: { id: true },
       })
-      mealHistory = buildMealHistorySection(recentFeedback) || undefined
+      if (mealPlanRecord) {
+        const priorFeedback = await prisma.mealFeedback.findMany({
+          where: { mealPlanId: mealPlanRecord.id },
+          orderBy: { createdAt: 'desc' },
+          take: 10,
+        })
+        if (priorFeedback.length > 0) {
+          const liked = priorFeedback.filter((f) => f.rating === 'liked' || f.rating === 'loved').map((f) => f.mealName)
+          const disliked = priorFeedback.filter((f) => f.rating === 'disliked' || f.rating === 'skip')
+          const lines: string[] = []
+          if (liked.length > 0) lines.push(`Previously liked: ${liked.join(', ')}.`)
+          if (disliked.length > 0) {
+            const parts = disliked.map((f) => f.notes ? `${f.mealName} (${f.notes})` : f.mealName)
+            lines.push(`Previously disliked: ${parts.join(', ')}.`)
+          }
+          if (lines.length > 0) feedbackHistory = `Will's meal history:\n${lines.join('\n')}`
+        }
+      }
     } catch (err) {
-      console.error('Failed to fetch meal feedback (non-blocking):', err)
-      // Continue without feedback — user still gets a valid meal plan
+      console.error('Feedback fetch failed (non-blocking):', err)
     }
 
     // 6. Call Claude generateMealPlan with bringingDog and feedback history
@@ -87,7 +102,7 @@ export async function POST(
       cookingGear: cookingGear as GearItem[],
       weather,
       bringingDog: trip.bringingDog,
-      mealHistory,
+      feedbackHistory,
     })
 
     // 7. Map Claude result to Meal rows
@@ -191,7 +206,7 @@ export async function POST(
       include: {
         meals: {
           orderBy: [{ day: 'asc' }, { slot: 'asc' }],
-          include: { feedback: true },
+          include: { feedbacks: { orderBy: { createdAt: 'desc' }, take: 1 } },
         },
       },
     })
@@ -203,7 +218,8 @@ export async function POST(
               ...savedPlan,
               meals: savedPlan.meals.map((m) => ({
                 ...m,
-                ingredients: JSON.parse(m.ingredients),
+                ingredients: JSON.parse(m.ingredients) as unknown,
+                feedback: m.feedbacks[0] ?? null,
               })),
             }
           : null,

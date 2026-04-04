@@ -287,13 +287,13 @@ model MealPlan {
   tripId      String   @unique
   generatedAt DateTime @default(now())
   notes       String?
-  prepGuide   String?
+  prepGuide   String?  // JSON: PrepGuideResult persisted after generation
   createdAt   DateTime @default(now())
 
-  trip          Trip              @relation(fields: [tripId], references: [id], onDelete: Cascade)
-  meals         Meal[]
-  shoppingItems ShoppingListItem[]
-  feedbacks     MealFeedback[]
+  trip              Trip               @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  meals             Meal[]
+  shoppingListItems ShoppingListItem[]
+  feedbacks         MealFeedback[]
 }
 
 model Meal {
@@ -336,7 +336,7 @@ model MealFeedback {
   mealId     String?
   mealPlanId String
   mealName   String
-  rating     String
+  rating     String   // "liked" | "disliked"
   notes      String?
   createdAt  DateTime @default(now())
 

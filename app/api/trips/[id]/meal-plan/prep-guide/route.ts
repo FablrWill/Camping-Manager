@@ -2,16 +2,47 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { generatePrepGuide } from '@/lib/claude'
 
-interface PrepEntry {
-  mealId: string
-  day: number
-  slot: string
-  mealName: string
-  prepNotes: string
+interface MealIngredient {
+  item: string
+  quantity: string
+  unit: string
 }
 
-// GET /api/trips/:id/meal-plan/prep-guide — collect all prepNotes ordered by day/slot
+// GET /api/trips/:id/meal-plan/prep-guide — return persisted prep guide from MealPlan.prepGuide
 export async function GET(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id: tripId } = await params
+
+    const mealPlan = await prisma.mealPlan.findUnique({
+      where: { tripId },
+      select: { prepGuide: true },
+    })
+
+    if (!mealPlan) {
+      return NextResponse.json({ error: 'No meal plan found for this trip' }, { status: 404 })
+    }
+
+    if (!mealPlan.prepGuide) {
+      return NextResponse.json({ prepGuide: null })
+    }
+
+    try {
+      const prepGuide = JSON.parse(mealPlan.prepGuide) as unknown
+      return NextResponse.json({ prepGuide })
+    } catch {
+      return NextResponse.json({ prepGuide: null })
+    }
+  } catch (error) {
+    console.error('Failed to fetch prep guide:', error)
+    return NextResponse.json({ error: 'Failed to fetch prep guide' }, { status: 500 })
+  }
+}
+
+// POST /api/trips/:id/meal-plan/prep-guide — generate via Claude, persist, return guide
+export async function POST(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -29,20 +60,44 @@ export async function GET(
       return NextResponse.json({ error: 'No meal plan found for this trip' }, { status: 404 })
     }
 
-    const entries: PrepEntry[] = mealPlan.meals
-      .filter((meal) => meal.prepNotes && meal.prepNotes.trim().length > 0)
-      .map((meal) => ({
-        mealId: meal.id,
+    const trip = await prisma.trip.findUnique({
+      where: { id: tripId },
+      select: { name: true },
+    })
+
+    if (!trip) {
+      return NextResponse.json({ error: 'Trip not found' }, { status: 404 })
+    }
+
+    const meals = mealPlan.meals.map((meal) => {
+      let ingredients: MealIngredient[] = []
+      try {
+        ingredients = JSON.parse(meal.ingredients) as MealIngredient[]
+      } catch {
+        ingredients = []
+      }
+      return {
         day: meal.day,
         slot: meal.slot,
-        mealName: meal.name,
-        prepNotes: meal.prepNotes as string,
-      }))
+        name: meal.name,
+        ingredients,
+        cookInstructions: meal.cookInstructions,
+        prepNotes: meal.prepNotes,
+      }
+    })
 
-    return NextResponse.json({ prepGuide: entries })
+    const result = await generatePrepGuide({ tripName: trip.name, meals })
+
+    // Persist to MealPlan.prepGuide
+    await prisma.mealPlan.update({
+      where: { tripId },
+      data: { prepGuide: JSON.stringify(result) },
+    })
+
+    return NextResponse.json({ prepGuide: result })
   } catch (error) {
-    console.error('Failed to build prep guide:', error)
-    return NextResponse.json({ error: 'Failed to build prep guide' }, { status: 500 })
+    console.error('Failed to generate prep guide:', error)
+    return NextResponse.json({ error: 'Failed to generate prep guide' }, { status: 500 })
   }
 }
 

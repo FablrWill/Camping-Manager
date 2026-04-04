@@ -265,37 +265,37 @@ export const NormalizedMealPlanResultSchema = z.object({
 
 export type NormalizedMealPlanResult = z.infer<typeof NormalizedMealPlanResultSchema>;
 
-// --- Phase 35: Shopping List Schema ---
+// ── Phase 35: Shopping list schema ───────────────────────────────────────────
 
 const ShoppingListItemResultSchema = z.object({
   item: z.string(),
-  quantity: z.string(),
+  quantity: z.string().default(''),
   unit: z.string().default(''),
   category: z.enum(['produce', 'protein', 'dairy', 'dry', 'frozen', 'other']).default('other'),
-});
+})
 
 export const ShoppingListResultSchema = z.object({
   items: z.array(ShoppingListItemResultSchema),
-});
+})
 
-export type ShoppingListResult = z.infer<typeof ShoppingListResultSchema>;
+export type ShoppingListResult = z.infer<typeof ShoppingListResultSchema>
 
-// --- Phase 35: Prep Guide Schema ---
+// ── Phase 35: Prep guide schema ───────────────────────────────────────────────
 
-const PrepStepSchema = z.object({
+const BeforeLeaveStepSchema = z.object({
   step: z.string(),
   meals: z.array(z.string()).default([]),
-});
+})
 
 const AtCampStepSchema = z.object({
-  day: z.number(),
+  day: z.number().int(),
   mealSlot: z.string(),
   steps: z.array(z.string()),
-});
+})
 
 export const PrepGuideResultSchema = z.object({
-  beforeLeave: z.array(PrepStepSchema),
+  beforeLeave: z.array(BeforeLeaveStepSchema),
   atCamp: z.array(AtCampStepSchema),
-});
+})
 
-export type PrepGuideResult = z.infer<typeof PrepGuideResultSchema>;
+export type PrepGuideResult = z.infer<typeof PrepGuideResultSchema>

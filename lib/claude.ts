@@ -101,32 +101,6 @@ export function aggregateGearFeedback(
   return Object.values(totals)
 }
 
-export function buildMealHistorySection(
-  feedback: Array<{ mealName: string; rating: string; notes: string | null }>
-): string {
-  if (feedback.length === 0) return ''
-
-  const liked = feedback.filter(f => f.rating === 'liked').map(f => f.mealName)
-  const disliked = feedback.filter(f => f.rating === 'disliked')
-
-  const lines: string[] = []
-  if (liked.length > 0) {
-    lines.push(`Previously liked: ${liked.join(', ')}.`)
-  }
-  if (disliked.length > 0) {
-    const dislikedText = disliked
-      .map(f => f.notes ? `${f.mealName} (${f.notes})` : f.mealName)
-      .join(', ')
-    lines.push(`Previously disliked: ${dislikedText}.`)
-    const avoidPatterns = disliked.filter(f => f.notes).map(f => f.notes!)
-    if (avoidPatterns.length > 0) {
-      lines.push(`Avoid: ${avoidPatterns.join('; ')}.`)
-    }
-  }
-
-  return `WILL'S MEAL HISTORY:\n${lines.join('\n')}`
-}
-
 export function buildFeedbackSection(feedback?: GearFeedbackSummary[]): string {
   if (!feedback || feedback.length === 0) return ''
   const lines = feedback.map((f) => {
@@ -372,7 +346,6 @@ export async function generateMealPlan(params: {
   }
   bringingDog?: boolean
   feedbackHistory?: string
-  mealHistory?: string  // Feedback history block for prompt injection (from buildMealHistorySection)
 }): Promise<NormalizedMealPlanResult> {
   const {
     tripName,
@@ -387,7 +360,6 @@ export async function generateMealPlan(params: {
     weather,
     bringingDog,
     feedbackHistory,
-    mealHistory,
   } = params
 
   const weatherSection = buildWeatherSection(weather)
@@ -409,10 +381,6 @@ export async function generateMealPlan(params: {
     ? `\nPAST MEAL FEEDBACK:\n${feedbackHistory}\nUse this history to avoid repeating meals rated "skip", suggest fewer "ok" meals, and lean into the style of "loved" meals.\n`
     : ''
 
-  const mealHistorySection = mealHistory
-    ? `\n${mealHistory}\nRepeat liked meals if appropriate. Avoid disliked meals and patterns noted above.\n`
-    : ''
-
   const prompt = `You are a car camping meal planner. Generate a practical, delicious meal plan for this trip.
 
 TRIP DETAILS:
@@ -424,7 +392,7 @@ ${vehicleName ? `- Vehicle: ${vehicleName}` : ''}
 ${tripNotes ? `- Notes: ${tripNotes}` : ''}
 
 ${weatherSection}
-${dogSection}${feedbackSection}${mealHistorySection}
+${dogSection}${feedbackSection}
 COOKING EQUIPMENT (from gear inventory):
 ${cookingGearSection || 'No cooking gear in inventory — suggest simple no-cook meals and recommend basic gear to add.'}
 
@@ -882,7 +850,7 @@ Respond ONLY with valid JSON (no markdown):
   return parseResult.data
 }
 
-// --- Phase 35: Shopping List & Prep Guide Generation ---
+// ── Phase 35: Shopping list generator ────────────────────────────────────────
 
 export async function generateShoppingList(params: {
   tripName: string
@@ -895,7 +863,7 @@ export async function generateShoppingList(params: {
 
   const mealLines = meals.map((m) => {
     const ings = m.ingredients
-      .map((i) => `    - ${i.quantity} ${i.unit} ${i.item}`.trim())
+      .map((i) => `    - ${[i.quantity, i.unit, i.item].filter(Boolean).join(' ')}`.trimEnd())
       .join('\n')
     return `  ${m.name}:\n${ings}`
   }).join('\n')
@@ -917,25 +885,22 @@ INSTRUCTIONS:
 JSON format:
 {"items": [{"item": "sweet potatoes", "quantity": "2", "unit": "lbs", "category": "produce"}]}`
 
-  try {
-    const message = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 2048,
-      messages: [{ role: 'user', content: prompt }],
-    })
+  const message = await anthropic.messages.create({
+    model: 'claude-haiku-4-5',
+    max_tokens: 2048,
+    messages: [{ role: 'user', content: prompt }],
+  })
 
-    const text = message.content[0].type === 'text' ? message.content[0].text : ''
-    const parseResult = parseClaudeJSON(text, ShoppingListResultSchema)
-    if (!parseResult.success) {
-      throw new Error(parseResult.error)
-    }
-
-    return parseResult.data
-  } catch (error) {
-    console.error('Failed to generate shopping list:', error)
-    throw error
+  const text = message.content[0].type === 'text' ? message.content[0].text : ''
+  const parseResult = parseClaudeJSON(text, ShoppingListResultSchema)
+  if (!parseResult.success) {
+    throw new Error(parseResult.error)
   }
+
+  return parseResult.data
 }
+
+// ── Phase 35: Prep guide generator ───────────────────────────────────────────
 
 export async function generatePrepGuide(params: {
   tripName: string
@@ -951,7 +916,7 @@ export async function generatePrepGuide(params: {
   const { tripName, meals } = params
 
   const mealLines = meals.map((m) => {
-    const ings = m.ingredients.map((i) => `${i.quantity} ${i.unit} ${i.item}`.trim()).join(', ')
+    const ings = m.ingredients.map((i) => [i.quantity, i.unit, i.item].filter(Boolean).join(' ')).join(', ')
     const cook = m.cookInstructions ? `\n    Cook: ${m.cookInstructions}` : ''
     const prep = m.prepNotes ? `\n    Prep notes: ${m.prepNotes}` : ''
     return `  Day ${m.day} ${m.slot} — ${m.name}\n    Ingredients: ${ings}${cook}${prep}`
@@ -978,22 +943,43 @@ JSON format:
   "atCamp": [{"day": 1, "mealSlot": "dinner", "steps": ["Heat cast iron over fire", "Sear chicken 4 min per side"]}]
 }`
 
-  try {
-    const message = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 2048,
-      messages: [{ role: 'user', content: prompt }],
-    })
+  const message = await anthropic.messages.create({
+    model: 'claude-haiku-4-5',
+    max_tokens: 2048,
+    messages: [{ role: 'user', content: prompt }],
+  })
 
-    const text = message.content[0].type === 'text' ? message.content[0].text : ''
-    const parseResult = parseClaudeJSON(text, PrepGuideResultSchema)
-    if (!parseResult.success) {
-      throw new Error(parseResult.error)
-    }
-
-    return parseResult.data
-  } catch (error) {
-    console.error('Failed to generate prep guide:', error)
-    throw error
+  const text = message.content[0].type === 'text' ? message.content[0].text : ''
+  const parseResult = parseClaudeJSON(text, PrepGuideResultSchema)
+  if (!parseResult.success) {
+    throw new Error(parseResult.error)
   }
+
+  return parseResult.data
+}
+
+// ── Phase 35: Meal history section for prompt injection ───────────────────────
+
+export function buildMealHistorySection(feedbacks: Array<{
+  mealName: string
+  rating: string
+  notes: string | null
+}>): string {
+  if (feedbacks.length === 0) return ''
+
+  const liked = feedbacks.filter((f) => f.rating === 'liked').map((f) => f.mealName)
+  const disliked = feedbacks.filter((f) => f.rating === 'disliked')
+
+  const lines: string[] = []
+  if (liked.length > 0) {
+    lines.push(`Previously liked: ${liked.join(', ')}.`)
+  }
+  if (disliked.length > 0) {
+    const dislikedParts = disliked.map((f) =>
+      f.notes ? `${f.mealName} (${f.notes})` : f.mealName
+    )
+    lines.push(`Previously disliked: ${dislikedParts.join(', ')}.`)
+  }
+
+  return `\n\n## Will's meal history\n${lines.join('\n')}\n`
 }

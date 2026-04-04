@@ -37,14 +37,15 @@ export async function POST(
 ) {
   try {
     const { id: tripId } = await params
-    const body = await request.json()
+    const body = await request.json() as {
+      mealId?: string
+      mealName?: string
+      rating?: string
+      notes?: string
+    }
 
     const { mealId, mealName, rating, notes } = body
 
-    // Validate required fields
-    if (!mealId) {
-      return NextResponse.json({ error: 'mealId is required' }, { status: 400 })
-    }
     if (!mealName) {
       return NextResponse.json({ error: 'mealName is required' }, { status: 400 })
     }
@@ -55,7 +56,6 @@ export async function POST(
       )
     }
 
-    // Find the meal plan for this trip
     const mealPlan = await prisma.mealPlan.findUnique({
       where: { tripId },
       select: { id: true },
@@ -65,10 +65,12 @@ export async function POST(
       return NextResponse.json({ error: 'No meal plan found for this trip' }, { status: 404 })
     }
 
-    // Use findFirst + create/update pattern (no @@unique constraint on mealId + mealPlanId)
-    const existing = await prisma.mealFeedback.findFirst({
-      where: { mealId, mealPlanId: mealPlan.id },
-    })
+    // Find existing feedback for this meal in this plan
+    const existing = mealId
+      ? await prisma.mealFeedback.findFirst({
+          where: { mealId, mealPlanId: mealPlan.id },
+        })
+      : null
 
     if (existing) {
       const updated = await prisma.mealFeedback.update({
@@ -79,7 +81,7 @@ export async function POST(
     } else {
       const created = await prisma.mealFeedback.create({
         data: {
-          mealId,
+          mealId: mealId ?? null,
           mealPlanId: mealPlan.id,
           mealName,
           rating,
