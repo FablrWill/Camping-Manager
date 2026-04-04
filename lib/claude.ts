@@ -1,5 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk'
-import { parseClaudeJSON, PackingListResultSchema, MealPlanResultSchema, DepartureChecklistResultSchema, DepartureChecklistResult, TripSummaryResultSchema, type TripSummaryResult, GearDocumentResultSchema, type GearDocumentResult, VehicleChecklistResultSchema, type VehicleChecklistResult } from '@/lib/parse-claude'
+import { parseClaudeJSON, PackingListResultSchema, MealPlanResultSchema, DepartureChecklistResultSchema, DepartureChecklistResult, TripSummaryResultSchema, type TripSummaryResult, GearDocumentResultSchema, type GearDocumentResult, VehicleChecklistResultSchema, type VehicleChecklistResult, GearResearchResultSchema, type GearResearchResult } from '@/lib/parse-claude'
 import { CATEGORY_EMOJI, CATEGORIES } from '@/lib/gear-categories'
 
 const anthropic = new Anthropic({
@@ -755,4 +755,68 @@ Respond ONLY with valid JSON (no markdown):
   }
 
   return parseResult.data
+}
+
+// --- Phase 30: Gear Product Research ---
+
+export async function generateGearResearch(params: {
+  name: string;
+  brand: string | null;
+  modelNumber: string | null;
+  category: string;
+  condition: string | null;
+  price: number | null;
+}): Promise<GearResearchResult> {
+  const itemDesc = [
+    params.name,
+    params.brand ? `by ${params.brand}` : null,
+    params.modelNumber ? `(model: ${params.modelNumber})` : null,
+    params.category ? `Category: ${params.category}` : null,
+    params.condition ? `Condition: ${params.condition}` : null,
+    params.price ? `Paid: $${params.price}` : null,
+  ].filter(Boolean).join('. ');
+
+  const prompt = `You are a camping gear expert. Analyze this gear item and recommend the top 3 best-in-class alternatives available today.
+
+Current item: ${itemDesc}
+
+${!params.brand && !params.modelNumber ? 'Note: Brand and model are unknown. Recommend the best options for this category in general.' : ''}
+
+For each alternative, provide:
+- name: Product name
+- brand: Manufacturer (optional if unclear)
+- priceRange: Approximate retail price range (e.g. "$180-220"). Note: prices may be from training data and could be outdated.
+- pros: List of advantages vs the current item
+- cons: List of disadvantages vs the current item
+- reason: One sentence explaining why this is a good alternative
+
+Then provide an overall verdict — one of exactly:
+- "Worth upgrading" — if the current item is clearly outclassed
+- "Keep what you have" — if the current item is already excellent or alternatives aren't significantly better
+- "Only if budget allows" — if upgrades exist but are significantly more expensive
+
+Also provide:
+- summary: 1-2 sentence overall assessment
+- priceDisclaimer: A note that prices may be outdated
+
+Respond with ONLY a JSON object matching this structure:
+{
+  "verdict": "Worth upgrading" | "Keep what you have" | "Only if budget allows",
+  "alternatives": [{ "name", "brand?", "priceRange", "pros": [], "cons": [], "reason" }],
+  "summary": "...",
+  "priceDisclaimer": "..."
+}`;
+
+  const message = await anthropic.messages.create({
+    model: 'claude-sonnet-4-20250514',
+    max_tokens: 2000,
+    messages: [{ role: 'user', content: prompt }],
+  });
+
+  const text = message.content[0].type === 'text' ? message.content[0].text : '';
+  const parseResult = parseClaudeJSON(text, GearResearchResultSchema);
+  if (!parseResult.success) {
+    throw new Error(parseResult.error);
+  }
+  return parseResult.data;
 }
