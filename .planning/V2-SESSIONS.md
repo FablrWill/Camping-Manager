@@ -66,9 +66,9 @@ A self-coordinating work queue for v2.0 features. Each Claude Code session claim
 | S25 | LNT pack-out checklist               | —     | ✅ Done 2026-04-04        | Sonnet, normal | —          |
 | S26 | Gear lending tracker                 | —     | ✅ Done 2026-04-04        | Sonnet, normal | —          |
 | S27 | Gear maintenance reminders           | —     | ✅ Done 2026-04-04        | Sonnet, normal | —          |
-| S28 | Shareable trip reports               | —     | ⬜ Ready          | Sonnet, normal | —          |
-| S29 | Altitude awareness callouts          | —     | ✅ Done          | Sonnet, normal | objective-chebyshev |
-| S30 | Road trip scenic layer               | —     | ⬜ Ready          | Sonnet, normal | —          |
+| S28 | Shareable trip reports               | —     | 🔄 In Progress 2026-04-04 | Sonnet, normal | —          |
+| S29 | Altitude awareness callouts          | —     | ✅ Done 2026-04-04 | Sonnet, normal | —          |
+| S30 | Road trip scenic layer               | —     | ✅ Done 2026-04-04 | Sonnet, normal | —          |
 
 **Why this order matters (conflict groups):**
 
