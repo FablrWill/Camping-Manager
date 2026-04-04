@@ -377,6 +377,7 @@ export default function SpotsClient({
           ))}
           <button
             onClick={() => setDarkMode(!darkMode)}
+            aria-label="Toggle dark map"
             className={`px-2.5 py-1 text-xs rounded-full font-medium transition-colors ${
               darkMode
                 ? "bg-indigo-600 text-white"
@@ -513,6 +514,15 @@ export default function SpotsClient({
         {!isOnline && offlineLocations.length > 0 && (
           <div className="absolute top-2 left-2 z-[1000] bg-stone-800/90 text-stone-300 text-xs px-2 py-1 rounded-lg pointer-events-none">
             (Showing cached spots)
+          </div>
+        )}
+        {isOnline && locations.length === 0 && offlineLocations.length === 0 && (
+          <div className="absolute inset-0 z-[500] flex items-center justify-center pointer-events-none">
+            <div className="text-center bg-white/80 dark:bg-stone-900/80 backdrop-blur-sm rounded-2xl px-8 py-6">
+              <p className="text-4xl mb-3">📍</p>
+              <p className="text-lg font-medium text-stone-600 dark:text-stone-300">No spots saved</p>
+              <p className="text-sm text-stone-400 dark:text-stone-500 mt-1">Drop a pin on the map to save a location</p>
+            </div>
           </div>
         )}
         <SpotMap
