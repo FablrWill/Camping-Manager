@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Smarter Feedback Loops
 status: executing
-last_updated: "2026-04-04T19:49:57.461Z"
+last_updated: "2026-04-04T19:50:44.555Z"
 last_activity: 2026-04-04
 progress:
   total_phases: 26
-  completed_phases: 25
+  completed_phases: 24
   total_plans: 70
-  completed_plans: 70
+  completed_plans: 68
   percent: 40
 ---
 
@@ -20,12 +20,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-01)
 
 **Core value:** Personal camping second brain — a closed-loop system that plans, executes, and learns from every trip
-**Current focus:** Phase 44 — google-maps-list-import
+**Current focus:** Phase 40 — gpx-import
 
 ## Current Position
 
-Phase: 44
-Plan: Not started
+Phase: 40 (gpx-import) — EXECUTING
+Plan: 2 of 3
 Status: Ready to execute
 Last activity: 2026-04-04
 
@@ -79,8 +79,7 @@ Progress: [████░░░░░░] 40%
 | Phase 35 P04 | 15 | 2 tasks | 4 files |
 | Phase 35 P05 | 8 | 4 tasks | 3 files |
 | Phase 38 P02 | 15 | 1 tasks | 2 files |
-| Phase 44 P01 | 241 | 2 tasks | 3 files |
-| Phase 44-google-maps-list-import P02 | 3 | 3 tasks | 2 files |
+| Phase 40-gpx-import P01 | 647 | 2 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -141,12 +140,9 @@ Recent decisions affecting current work:
 - [Phase 35]: mealId validated as required in feedback POST before other fields — primary key for upsert pattern
 - [Phase 35]: buildMealHistorySection called with global last-10 feedback query (no trip scope) for cross-trip preference carry-forward
 - [Phase 38]: aria-label regex /liked/i matches disliked — use /^liked /i with word boundary in tests
-- [Phase 44-01]: Use ES import (not require()) for fetchGmapsList in tests — Vitest ESM mode does not support require() for TypeScript modules
-- [Phase 44-01]: extractNameNear scans backward 500 chars from coordinate match; returns last double-quoted 2-80 char string; replaces escaped quotes before matching
-- [Phase 44-01]: JSON-LD fallback uses unknown type narrowing throughout — no any usage, @type check before array access
-- [Phase 44-google-maps-list-import]: Sequential for-of import loop (not Promise.all) in GmapsImportModal — prevents rate limit issues on batch location import
-- [Phase 44-google-maps-list-import]: GmapsImportModal backdrop click: closes in idle/preview/done, blocked during fetching/importing to prevent accidental data loss
-- [Phase 44-google-maps-list-import]: GmapsImportModal uses 5-state machine (idle/fetching/preview/importing/done) with sequential for-of import loop and backdrop-click protection during active operations
+- [Phase 40-gpx-import]: Direct ESM import in vitest tests — require() with @/ alias doesn't work; vitest alias only resolves ESM imports
+- [Phase 40-gpx-import]: Trail.color defaults to #22c55e (Tailwind green-500) as the default trail overlay color
+- [Phase 40-gpx-import]: Manual migration creation + migrate deploy — shadow DB validation rejects duplicate migrations in this project
 
 ### Pending Todos
 
@@ -176,13 +172,11 @@ None yet.
 | 260404-joc | Extend AgentJob with scheduled recurring jobs (scheduledFor, recurringCron), build 4 job handlers, scheduler script, IntelligenceCard dashboard widget | 2026-04-04 | 7ccf6e2 | [260404-joc-extend-agentjob-with-scheduled-recurring](./quick/260404-joc-extend-agentjob-with-scheduled-recurring/) |
 | 260404-j64 | Build shareable trip reports (S28) | 2026-04-04 | 26f743a | [260404-j64-build-shareable-trip-reports-s28](./quick/260404-j64-build-shareable-trip-reports-s28/) |
 | 260404-k4h | Add persistent chat agent memory (S33) | 2026-04-04 | 6218cb5 | [260404-k4h-add-persistent-chat-agent-memory-s33](./quick/260404-k4h-add-persistent-chat-agent-memory-s33/) |
-| 260404-k7z | Refresh and improve RAG knowledge base (S36) | 2026-04-04 | 212254c | [260404-k7z-refresh-and-improve-the-rag-knowledge-ba](./quick/260404-k7z-refresh-and-improve-the-rag-knowledge-ba/) |
-| 260404-km8 | Smart packing v2 — richer historical context for packing list generator (S35) | 2026-04-04 | 5f621a6 | [260404-km8-upgrade-the-packing-list-generator-to-us](./quick/260404-km8-upgrade-the-packing-list-generator-to-us/) |
 
 ## Session Continuity
 
-Last session: 2026-04-04T19:45:26.106Z
-Last activity: Completed S36 RAG knowledge base refresh
+Last session: 2026-04-04T19:50:44.549Z
+Last activity: Completed S31 Destination Discovery + S28 Shareable Trip Reports
 Resume file: None
 
 ## Quick Tasks Completed
