@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Plus } from 'lucide-react'
+import { Plus, UtensilsCrossed } from 'lucide-react'
 import { Button, Input, Select, Textarea, Modal, ConfirmDialog } from '@/components/ui'
 import ChatContextButton from '@/components/ChatContextButton'
 import VoiceRecordModal from './VoiceRecordModal'
@@ -26,6 +26,7 @@ interface TripData {
   permitNotes: string | null
   fallbackFor: string | null
   fallbackOrder: number | null
+  mealPlanGeneratedAt: string | null  // Phase 34: meal plan status
 }
 
 interface WeatherData {
@@ -407,6 +408,20 @@ export default function TripsClient({ initialTrips, locations, vehicles }: Trips
                       weatherError={weatherErrors[trip.id]}
                       onDebrief={setDebriefTrip}
                     />
+                    {/* Meal plan status badge — Phase 34 */}
+                    <div className="flex items-center gap-1.5 px-1 pt-1">
+                      {trip.mealPlanGeneratedAt ? (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                          <UtensilsCrossed className="h-3 w-3" />
+                          Meal plan ready
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-stone-100 px-2 py-0.5 text-xs font-medium text-stone-500 dark:bg-stone-800 dark:text-stone-400">
+                          <UtensilsCrossed className="h-3 w-3" />
+                          No meal plan
+                        </span>
+                      )}
+                    </div>
                     {/* Add Plan B/C button — only for upcoming primary trips without max fallbacks */}
                     {!trip.fallbackFor && trip._count.alternatives < 2 && new Date(trip.startDate) > new Date() && (
                       <button
@@ -430,18 +445,33 @@ export default function TripsClient({ initialTrips, locations, vehicles }: Trips
               </h2>
               <div className="space-y-3">
                 {past.map((trip) => (
-                  <TripCard
-                    key={trip.id}
-                    trip={trip}
-                    isSelected={selectedTripId === trip.id}
-                    onSelect={setSelectedTripId}
-                    onEdit={openEdit}
-                    onDelete={setConfirmDelete}
-                    weather={weatherByTrip[trip.id]}
-                    weatherLoading={weatherLoading[trip.id]}
-                    weatherError={weatherErrors[trip.id]}
-                    onDebrief={setDebriefTrip}
-                  />
+                  <div key={trip.id}>
+                    <TripCard
+                      trip={trip}
+                      isSelected={selectedTripId === trip.id}
+                      onSelect={setSelectedTripId}
+                      onEdit={openEdit}
+                      onDelete={setConfirmDelete}
+                      weather={weatherByTrip[trip.id]}
+                      weatherLoading={weatherLoading[trip.id]}
+                      weatherError={weatherErrors[trip.id]}
+                      onDebrief={setDebriefTrip}
+                    />
+                    {/* Meal plan status badge — Phase 34 */}
+                    <div className="flex items-center gap-1.5 px-1 pt-1">
+                      {trip.mealPlanGeneratedAt ? (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                          <UtensilsCrossed className="h-3 w-3" />
+                          Meal plan ready
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-stone-100 px-2 py-0.5 text-xs font-medium text-stone-500 dark:bg-stone-800 dark:text-stone-400">
+                          <UtensilsCrossed className="h-3 w-3" />
+                          No meal plan
+                        </span>
+                      )}
+                    </div>
+                  </div>
                 ))}
               </div>
             </section>

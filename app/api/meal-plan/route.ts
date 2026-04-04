@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { generateMealPlan } from '@/lib/claude'
 import { fetchWeather } from '@/lib/weather'
-import { safeJsonParse } from '@/lib/safe-json'
 
 export async function GET(request: NextRequest) {
   try {
@@ -12,16 +11,13 @@ export async function GET(request: NextRequest) {
     }
     const mealPlan = await prisma.mealPlan.findUnique({
       where: { tripId },
+      include: { meals: { orderBy: [{ day: 'asc' }, { slot: 'asc' }] } },
     })
     if (!mealPlan) {
       return NextResponse.json({ result: null, generatedAt: null })
     }
-    const parsed = safeJsonParse(mealPlan.result)
-    if (!parsed) {
-      return NextResponse.json({ error: 'Meal plan data corrupted' }, { status: 500 })
-    }
     return NextResponse.json({
-      result: parsed,
+      result: mealPlan,
       generatedAt: mealPlan.generatedAt.toISOString(),
     })
   } catch (error) {
@@ -117,11 +113,12 @@ export async function POST(request: NextRequest) {
       throw error
     }
 
-    // D-03: Regeneration replaces — upsert persists to MealPlan model
+    // D-03: Regeneration replaces — upsert persists MealPlan header only
+    // Note: Phase 34 Plan 02 will add normalized Meal row persistence
     await prisma.mealPlan.upsert({
       where: { tripId },
-      create: { tripId, result: JSON.stringify(mealPlan) },
-      update: { result: JSON.stringify(mealPlan), generatedAt: new Date() },
+      create: { tripId, generatedAt: new Date() },
+      update: { generatedAt: new Date() },
     })
 
     return NextResponse.json(mealPlan)

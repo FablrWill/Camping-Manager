@@ -362,7 +362,12 @@ Plans:
   4. Documents tab on gear detail shows all attached docs
   5. Downloaded PDFs cached in service worker for offline access
   6. `npm run build` passes
-**Plans**: 0/TBD
+**Plans**: 3 plans
+
+Plans:
+- [x] 34-01-PLAN.md — Schema migration (normalize MealPlan + create Meal table) + Zod schemas
+- [x] 34-02-PLAN.md — lib/claude.ts updates (bringingDog, regenerateMeal) + all API routes
+- [x] 34-03-PLAN.md — MealPlanClient component + TripPrepClient wiring + TripsClient badge
 
 **Parallelization notes:**
 - Wave 1 — fully parallel with Phases 26 and 27
@@ -377,7 +382,12 @@ Plans:
   3. Each task has a suggested time and can be checked off
   4. Sequence adapts to departure time (set by user on trip)
   5. `npm run build` passes
-**Plans**: 0/TBD
+**Plans**: 3 plans
+
+Plans:
+- [x] 34-01-PLAN.md — Schema migration (normalize MealPlan + create Meal table) + Zod schemas
+- [x] 34-02-PLAN.md — lib/claude.ts updates (bringingDog, regenerateMeal) + all API routes
+- [ ] 34-03-PLAN.md — MealPlanClient component + TripPrepClient wiring + TripsClient badge
 
 **Parallelization notes:**
 - Wave 1 — fully parallel with Phases 25 and 27
@@ -392,7 +402,12 @@ Plans:
   3. Message includes: destination, dates, vehicle, expected return, any notes
   4. Sends via SMS (iMessage on Mac) or email
   5. `npm run build` passes
-**Plans**: 0/TBD
+**Plans**: 3 plans
+
+Plans:
+- [x] 34-01-PLAN.md — Schema migration (normalize MealPlan + create Meal table) + Zod schemas
+- [ ] 34-02-PLAN.md — lib/claude.ts updates (bringingDog, regenerateMeal) + all API routes
+- [ ] 34-03-PLAN.md — MealPlanClient component + TripPrepClient wiring + TripsClient badge
 
 **Parallelization notes:**
 - Wave 1 — fully parallel with Phases 25 and 26
@@ -408,7 +423,12 @@ Plans:
   4. UV protection suggested for high UV index days
   5. Clothing suggestions reference actual owned gear when available
   6. `npm run build` passes
-**Plans**: 0/TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 34-01-PLAN.md — Schema migration (normalize MealPlan + create Meal table) + Zod schemas
+- [ ] 34-02-PLAN.md — lib/claude.ts updates (bringingDog, regenerateMeal) + all API routes
+- [ ] 34-03-PLAN.md — MealPlanClient component + TripPrepClient wiring + TripsClient badge
 
 **Parallelization notes:**
 - Wave 2 — can run parallel with Phase 29
@@ -478,7 +498,12 @@ Plans:
   3. Results show current price vs target price
   4. Dashboard surfaces items currently below target price
   5. `npm run build` passes
-**Plans**: 0/TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 34-01-PLAN.md — Schema migration (normalize MealPlan + create Meal table) + Zod schemas
+- [ ] 34-02-PLAN.md — lib/claude.ts updates (bringingDog, regenerateMeal) + all API routes
+- [ ] 34-03-PLAN.md — MealPlanClient component + TripPrepClient wiring + TripsClient badge
 
 **Parallelization notes:**
 - Wave 4 — depends on Phase 30 research infrastructure
@@ -496,7 +521,12 @@ Plans:
   6. Token is never returned from GET /api/ha/config
   7. Trip prep shows HA power/propane/weather snapshot when configured
   8. `npm run build` passes
-**Plans**: 0/TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 34-01-PLAN.md — Schema migration (normalize MealPlan + create Meal table) + Zod schemas
+- [ ] 34-02-PLAN.md — lib/claude.ts updates (bringingDog, regenerateMeal) + all API routes
+- [ ] 34-03-PLAN.md — MealPlanClient component + TripPrepClient wiring + TripsClient badge
 
 **Parallelization notes:**
 - Wave 5 — independent of Phases 25–32; depends on Phase 24 schema
@@ -504,7 +534,7 @@ Plans:
 ### Phase 34: Meal Planning Core
 **Goal**: AI-generated meal plans linked to trips — every meal slot for every day, based on trip duration, weather, dog status, and available cooking gear
 **Depends on**: Phase 22 (Trip model + claude.ts + TripPrepClient settled), Phase 33 (schema settled)
-**Requirements**: TBD
+**Requirements**: MEAL-01, MEAL-02, MEAL-03, MEAL-04, MEAL-05, MEAL-06, MEAL-07
 **Success Criteria** (what must be TRUE):
   1. Meal plan generates for any trip with a start/end date
   2. Plan covers every day × every slot (breakfast, lunch, dinner)
@@ -512,7 +542,13 @@ Plans:
   4. Meal plan section visible in trip prep with day-by-day layout
   5. Trip card shows meal plan status ("Meal plan ready" / "No meal plan")
   6. `npm run build` passes
-**Plans**: 0/TBD
+**Plans**: 4 plans
+
+Plans:
+- [x] 34-00-PLAN.md — Wave 0 test stubs (meal-plan-route, meal-regenerate-route, meal-plan-schema)
+- [ ] 34-01-PLAN.md — Schema migration (normalize MealPlan + create Meal table) + Zod schemas
+- [ ] 34-02-PLAN.md — lib/claude.ts updates (bringingDog, regenerateMeal) + all API routes
+- [ ] 34-03-PLAN.md — MealPlanClient component + TripPrepClient wiring + TripsClient badge
 
 **Parallelization notes:**
 - Wave 6 — depends on Phase 22 (Trip model) and Phase 33 (schema)
@@ -581,7 +617,7 @@ Plans:
 | 31. Dark Sky, Astro & Activity Gear | v3.0 | 0/TBD | Not started | - |
 | 32. Deal Monitoring | v3.0 | 0/TBD | Not started | - |
 | 33. Conversational Trip Planner | v3.0 | 4/4 | Complete    | 2026-04-03 |
-| 34. Home Assistant Integration | v3.0 | 0/TBD | Not started | - |
+| 34. Home Assistant Integration | v3.0 | 4/4 | Complete    | 2026-04-04 |
 | 35. Meal Planning Core | v3.0 | 0/TBD | Not started | - |
 | 36. Meal Planning: Shopping/Prep/Feedback | v3.0 | 0/TBD | Not started | - |
 

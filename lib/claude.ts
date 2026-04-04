@@ -1,5 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk'
-import { parseClaudeJSON, PackingListResultSchema, MealPlanResultSchema, DepartureChecklistResultSchema, DepartureChecklistResult, TripSummaryResultSchema, type TripSummaryResult, GearDocumentResultSchema, type GearDocumentResult, VehicleChecklistResultSchema, type VehicleChecklistResult } from '@/lib/parse-claude'
+import { parseClaudeJSON, PackingListResultSchema, MealPlanResultSchema, DepartureChecklistResultSchema, DepartureChecklistResult, TripSummaryResultSchema, type TripSummaryResult, GearDocumentResultSchema, type GearDocumentResult, VehicleChecklistResultSchema, type VehicleChecklistResult, NormalizedMealPlanResultSchema, type NormalizedMealPlanResult, SingleMealSchema, type SingleMeal } from '@/lib/parse-claude'
 import { CATEGORY_EMOJI, CATEGORIES } from '@/lib/gear-categories'
 
 const anthropic = new Anthropic({
@@ -27,7 +27,7 @@ export interface PackingListResult {
   tips: string[]
 }
 
-interface GearItem {
+export interface GearItem {
   id: string
   name: string
   brand: string | null
@@ -344,7 +344,8 @@ export async function generateMealPlan(params: {
     days: WeatherDay[]
     alerts: WeatherAlert[]
   }
-}): Promise<MealPlanResult> {
+  bringingDog?: boolean
+}): Promise<NormalizedMealPlanResult> {
   const {
     tripName,
     startDate,
@@ -356,6 +357,7 @@ export async function generateMealPlan(params: {
     tripNotes,
     cookingGear,
     weather,
+    bringingDog,
   } = params
 
   const weatherSection = buildWeatherSection(weather)
@@ -369,6 +371,10 @@ export async function generateMealPlan(params: {
         .join('\n')
     : ''
 
+  const dogSection = bringingDog
+    ? '\nDOG ON TRIP: Will is bringing his dog. Prefer meals that don\'t require long unattended cooking. Note dog-friendly meal timing considerations.'
+    : ''
+
   const prompt = `You are a car camping meal planner. Generate a practical, delicious meal plan for this trip.
 
 TRIP DETAILS:
@@ -380,7 +386,7 @@ ${vehicleName ? `- Vehicle: ${vehicleName}` : ''}
 ${tripNotes ? `- Notes: ${tripNotes}` : ''}
 
 ${weatherSection}
-
+${dogSection}
 COOKING EQUIPMENT (from gear inventory):
 ${cookingGearSection || 'No cooking gear in inventory — suggest simple no-cook meals and recommend basic gear to add.'}
 
@@ -395,7 +401,7 @@ The user has a vacuum sealer (with bag rolls) and sous vide machine at home. Pre
 INSTRUCTIONS:
 1. Plan breakfast, lunch, dinner, and snacks for each day.
 2. Day 1 starts with lunch or dinner (arrival day — breakfast eaten before departure). Last day ends with breakfast (pack-up day).
-3. Mark each meal as "home" prep (vacuum sealed, pre-cooked) or "camp" prep (cooked at campsite).
+3. Use "prepNotes" to describe whether prep is at home (vacuum sealed, pre-cooked) or at camp (cooked at campsite).
 4. Use the cooking equipment listed. Don't suggest gear the user doesn't own unless absolutely necessary.
 5. Adjust for weather: cold nights = hot soups and stews. Hot days = lighter meals, no-cook lunches.
 6. Include a prep timeline: what to do at home before departure (e.g., "Wednesday evening: sous vide steaks").
@@ -413,17 +419,28 @@ Respond ONLY with valid JSON matching this exact structure:
         "breakfast": null,
         "lunch": {
           "name": "Turkey & Avocado Wraps",
-          "prepType": "camp",
+          "description": "Quick no-cook wraps for arrival day",
           "prepNotes": "Assemble at camp. Keep avocado whole until ready.",
-          "ingredients": ["4 flour tortillas", "1/2 lb deli turkey", "1 avocado", "handful spinach", "mustard"],
-          "cookwareNeeded": []
+          "ingredients": [
+            {"item": "flour tortillas", "quantity": "4", "unit": "count"},
+            {"item": "deli turkey", "quantity": "0.5", "unit": "lb"},
+            {"item": "avocado", "quantity": "1", "unit": "count"}
+          ],
+          "cookInstructions": "Lay out tortilla, layer turkey and avocado, roll up.",
+          "estimatedMinutes": 5
         },
         "dinner": {
           "name": "Sous Vide Ribeye with Foil Packet Potatoes",
-          "prepType": "home",
-          "prepNotes": "Sous vide at 130°F for 2hrs at home. Vacuum seal. At camp: sear 90sec/side on cast iron. Potatoes in foil on grate.",
-          "ingredients": ["2 ribeye steaks", "1 lb baby potatoes", "butter", "garlic", "rosemary", "salt & pepper", "aluminum foil"],
-          "cookwareNeeded": ["cast iron skillet", "camp grate"]
+          "description": "Home-prepped steak with camp-grilled potatoes",
+          "prepNotes": "Sous vide at 130°F for 2hrs at home. Vacuum seal. At camp: sear 90sec/side on cast iron.",
+          "ingredients": [
+            {"item": "ribeye steaks", "quantity": "2", "unit": "count"},
+            {"item": "baby potatoes", "quantity": "1", "unit": "lb"},
+            {"item": "butter", "quantity": "2", "unit": "tbsp"},
+            {"item": "aluminum foil", "quantity": "1", "unit": "roll"}
+          ],
+          "cookInstructions": "Sear steaks 90 seconds per side on hot cast iron. Wrap potatoes in foil with butter, cook on grate 20 min.",
+          "estimatedMinutes": 25
         },
         "snacks": ["Trail mix", "Beef jerky", "Apples"]
       }
@@ -447,12 +464,10 @@ Respond ONLY with valid JSON matching this exact structure:
 Rules for the JSON:
 - Day 1 breakfast is null if trip starts with an afternoon arrival
 - Last day should only have breakfast (and maybe a departure snack)
-- "prepType" is "home" or "camp"
+- Each ingredient must be an object with "item" (name), "quantity" (amount as string), and "unit" (measurement unit, empty string if none)
 - "section" values: produce, meat, dairy, pantry, frozen, bakery, drinks, other
 - "forMeal" references which day/meal uses this item (helps while shopping)
-- "cookwareNeeded" references equipment from the gear list where possible
 - Keep meal names appetizing but concise
-- Keep ingredients as a shopping-ready list (include quantities)
 - Do NOT wrap JSON in markdown code blocks`
 
   const message = await anthropic.messages.create({
@@ -464,11 +479,83 @@ Rules for the JSON:
   const text =
     message.content[0].type === 'text' ? message.content[0].text : ''
 
-  const parseResult = parseClaudeJSON(text, MealPlanResultSchema)
+  const parseResult = parseClaudeJSON(text, NormalizedMealPlanResultSchema)
   if (!parseResult.success) {
     throw new Error(parseResult.error)
   }
 
+  return parseResult.data
+}
+
+export async function regenerateMeal(params: {
+  day: number
+  slot: string
+  tripName: string
+  startDate: string
+  endDate: string
+  locationName?: string
+  currentMealName: string
+  cookingGear: GearItem[]
+  bringingDog?: boolean
+  weather?: { days: WeatherDay[]; alerts: WeatherAlert[] }
+}): Promise<SingleMeal> {
+  const {
+    day,
+    slot,
+    tripName,
+    startDate,
+    endDate,
+    locationName,
+    currentMealName,
+    cookingGear,
+    bringingDog,
+    weather,
+  } = params
+
+  const weatherSection = buildWeatherSection(weather)
+  const cookingGearSection = cookingGear.length > 0
+    ? `COOKING GEAR:\n${cookingGear.map((g) => `- ${g.name}${g.brand ? ` (${g.brand})` : ''}`).join('\n')}`
+    : 'COOKING GEAR: Basic camp setup (no specific gear listed)'
+  const dogSection = bringingDog
+    ? '\nDOG ON TRIP: Will is bringing his dog. Prefer meals that don\'t require long unattended cooking.'
+    : ''
+
+  const response = await anthropic.messages.create({
+    model: 'claude-sonnet-4-20250514',
+    max_tokens: 1024,
+    messages: [
+      {
+        role: 'user',
+        content: `You are a camping meal planner. Generate ONE replacement ${slot} meal for Day ${day} of a camping trip.
+
+TRIP: "${tripName}" from ${startDate} to ${endDate}${locationName ? ` at ${locationName}` : ''}
+CURRENT MEAL TO REPLACE: "${currentMealName}" — generate something DIFFERENT.
+
+Car camping — full cooler available. Will has a vacuum sealer and sous vide at home for pre-trip prep. Prefer one-pot or simple multi-component meals. Minimize dishes.
+
+${cookingGearSection}
+${weatherSection}${dogSection}
+
+Return a JSON object (no markdown) with this exact shape:
+{
+  "name": "Meal Name",
+  "description": "Brief description",
+  "ingredients": [{"item": "ingredient name", "quantity": "amount", "unit": "measurement"}],
+  "cookInstructions": "Step by step cooking instructions",
+  "prepNotes": "Any pre-trip prep needed (vacuum seal, marinate, etc.)",
+  "estimatedMinutes": 20
+}
+
+Each ingredient must be an object with "item" (name), "quantity" (amount as string), and "unit" (measurement unit, empty string if none).`,
+      },
+    ],
+  })
+
+  const text = response.content[0].type === 'text' ? response.content[0].text : ''
+  const parseResult = parseClaudeJSON(text, SingleMealSchema)
+  if (!parseResult.success) {
+    throw new Error(parseResult.error)
+  }
   return parseResult.data
 }
 

@@ -108,7 +108,7 @@ export async function POST(request: NextRequest) {
         startDate: trip.startDate.toISOString().split('T')[0],
         endDate: trip.endDate.toISOString().split('T')[0],
         packingItems,
-        mealPlan: trip.mealPlan ? { result: trip.mealPlan.result } : null,
+        mealPlan: trip.mealPlan ? { result: '' } : null,
         powerBudget,
         vehicleName: trip.vehicle?.name ?? null,
         vehicleMods,
