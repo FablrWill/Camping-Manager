@@ -96,6 +96,7 @@ export interface MapLocation {
   name: string;
   latitude: number;
   longitude: number;
+  altitude?: number | null;
   type?: string | null;
   rating?: number | null;
   description?: string | null;
