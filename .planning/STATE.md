@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Smarter Feedback Loops
 status: executing
-last_updated: "2026-04-04T19:50:44.555Z"
+last_updated: "2026-04-04T19:58:28.649Z"
 last_activity: 2026-04-04
 progress:
   total_phases: 26
   completed_phases: 24
   total_plans: 70
-  completed_plans: 68
+  completed_plans: 69
   percent: 40
 ---
 
@@ -25,7 +25,7 @@ See: .planning/PROJECT.md (updated 2026-04-01)
 ## Current Position
 
 Phase: 40 (gpx-import) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 Status: Ready to execute
 Last activity: 2026-04-04
 
@@ -80,6 +80,7 @@ Progress: [████░░░░░░] 40%
 | Phase 35 P05 | 8 | 4 tasks | 3 files |
 | Phase 38 P02 | 15 | 1 tasks | 2 files |
 | Phase 40-gpx-import P01 | 647 | 2 tasks | 11 files |
+| Phase 40-gpx-import P02 | 4 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -143,6 +144,8 @@ Recent decisions affecting current work:
 - [Phase 40-gpx-import]: Direct ESM import in vitest tests — require() with @/ alias doesn't work; vitest alias only resolves ESM imports
 - [Phase 40-gpx-import]: Trail.color defaults to #22c55e (Tailwind green-500) as the default trail overlay color
 - [Phase 40-gpx-import]: Manual migration creation + migrate deploy — shadow DB validation rejects duplicate migrations in this project
+- [Phase 40-gpx-import]: Single Trail record per GPX import — all track features merged into one FeatureCollection
+- [Phase 40-gpx-import]: Trail list endpoint omits geoJson field — full record fetched via GET /api/trails/[id] only when map needs to render
 
 ### Pending Todos
 
@@ -175,7 +178,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-04T19:50:44.549Z
+Last session: 2026-04-04T19:58:28.643Z
 Last activity: Completed S31 Destination Discovery + S28 Shareable Trip Reports
 Resume file: None
 
