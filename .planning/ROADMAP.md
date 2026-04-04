@@ -9,6 +9,7 @@
 - ✅ **v3.0 Gear Intelligence + Day-Of** — Phases 25-35 (shipped 2026-04-04)
 - 🚧 **v4.0 Smarter Feedback Loops** — Phases 38+ (in progress)
   - [x] Phase 38: Post-Trip Auto-Review — structured gear/meal/spot review modal with feedback flywheel (completed 2026-04-04)
+  - [ ] Phase 40: GPX Import (trail overlays) — import AllTrails/Wikiloc GPX files, render trails as map overlays
 - 📋 **v4.0 Backlog** — Voice, social, signal map, background agent, and more — see [Backlog section](#backlog-v40) below
 
 ## Phases
@@ -669,6 +670,27 @@ Plans:
 - Plan 38-01 is Wave 1 — schema + API, no dependencies
 - Plan 38-02 is Wave 2 — depends on 38-01 (API contract)
 - Plan 38-03 is Wave 3 — depends on 38-01 (schema types) and 38-02 (modal component); has checkpoint
+
+---
+
+### Phase 40: GPX Import (Trail Overlays)
+
+**Goal**: Import GPX trail files from AllTrails/Wikiloc. Tracks persist as Trail records and render as green polyline overlays on the Spots map. Existing waypoint→Location import is preserved and extended.
+
+**Status**: 🚧 Ready to execute
+**Requirements:** GPX-01, GPX-02, GPX-03, GPX-04, GPX-05
+**Plans:** 3 plans
+
+Plans:
+- [ ] 40-P01-foundation.md — Install deps + Trail schema migration + gpx-to-geojson.ts (TDD)
+- [ ] 40-P02-api.md — Extend /api/import/gpx + new /api/trails endpoints
+- [ ] 40-P03-map-ui.md — SpotMap trail layer + SpotsClient toggle/list/delete UI
+
+**Parallelization notes:**
+- Plan 40-P01 is Wave 1 — foundation, no dependencies
+- Plan 40-P02 is Wave 2 — depends on 40-P01 (schema + lib)
+- Plan 40-P03 is Wave 3 — depends on 40-P02 (API routes); has human-verify checkpoint
+
 
 ---
 
