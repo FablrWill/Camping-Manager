@@ -1,7 +1,8 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
-import { Backpack, Car, MapPin, Tent, ChevronRight, Plus } from 'lucide-react'
+import { Backpack, Car, MapPin, Tent, ChevronRight, Plus, Tag, ChevronDown } from 'lucide-react'
 import { daysUntil } from '@/lib/trip-utils'
 import { getCategoryEmoji } from '@/lib/gear-categories'
 import AgentJobsBadge from './AgentJobsBadge'
@@ -33,17 +34,29 @@ interface UpcomingTrip {
   mealPlanStatus: string | null
 }
 
+interface ActiveDeal {
+  id: string
+  name: string
+  targetPrice: number | null
+  foundPriceRange: string | null
+  foundPriceLow: number | null
+}
+
 export default function DashboardClient({
   stats,
   recentGear,
   upcomingTrip,
   unreadJobCount,
+  activeDeals = [],
 }: {
   stats: DashboardStats
   recentGear: RecentGearItem[]
   upcomingTrip: UpcomingTrip | null
   unreadJobCount?: number
+  activeDeals?: ActiveDeal[]
 }) {
+  const [dealsOpen, setDealsOpen] = useState(false)
+
   return (
     <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
       {/* Hero */}
@@ -190,6 +203,60 @@ export default function DashboardClient({
           </div>
           <ChevronRight size={18} className="text-amber-400" />
         </Link>
+      )}
+
+      {/* Deals card — only when active deals exist */}
+      {activeDeals.length > 0 && (
+        <section className="bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800 rounded-xl overflow-hidden">
+          <button
+            onClick={() => setDealsOpen((prev) => !prev)}
+            className="w-full flex items-center justify-between px-4 py-3 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-colors"
+          >
+            <div className="flex items-center gap-2">
+              <Tag size={16} className="text-emerald-600 dark:text-emerald-400" />
+              <span className="text-sm font-semibold text-emerald-900 dark:text-emerald-200">
+                Deals ({activeDeals.length})
+              </span>
+              <span className="text-xs text-emerald-700 dark:text-emerald-400">
+                — wishlist items at your target price
+              </span>
+            </div>
+            <ChevronDown
+              size={16}
+              className={`text-emerald-500 transition-transform ${dealsOpen ? 'rotate-180' : ''}`}
+            />
+          </button>
+          {dealsOpen && (
+            <div className="divide-y divide-emerald-100 dark:divide-emerald-900 border-t border-emerald-200 dark:border-emerald-800">
+              {activeDeals.map((deal) => (
+                <Link
+                  key={deal.id}
+                  href="/gear"
+                  className="flex items-center justify-between px-4 py-3 hover:bg-emerald-100 dark:hover:bg-emerald-900/20 transition-colors"
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium text-stone-900 dark:text-stone-100 truncate">
+                      {deal.name}
+                    </p>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      {deal.foundPriceRange && (
+                        <span className="text-xs text-emerald-700 dark:text-emerald-400 font-medium">
+                          {deal.foundPriceRange}
+                        </span>
+                      )}
+                      {deal.targetPrice != null && (
+                        <span className="text-xs text-stone-500 dark:text-stone-400">
+                          target: ${deal.targetPrice.toFixed(2)}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <ChevronRight size={16} className="text-emerald-400 shrink-0 ml-2" />
+                </Link>
+              ))}
+            </div>
+          )}
+        </section>
       )}
 
       {/* Recent gear */}

@@ -36,7 +36,7 @@ function getMealPlanStatus(trip: UpcomingTripQueryResult): string | null {
 }
 
 export default async function Home() {
-  const [gearCount, wishlistCount, locationCount, photoCount, vehicleMods, recentGear, upcomingTrip, unreadJobCount] =
+  const [gearCount, wishlistCount, locationCount, photoCount, vehicleMods, recentGear, upcomingTrip, unreadJobCount, activeDeals] =
     await Promise.all([
       prisma.gearItem.count({ where: { isWishlist: false } }),
       prisma.gearItem.count({ where: { isWishlist: true } }),
@@ -59,6 +59,11 @@ export default async function Home() {
       fetchUpcomingTrip(),
       prisma.agentJob.count({
         where: { status: "done", readAt: null },
+      }),
+      prisma.gearItem.findMany({
+        where: { isWishlist: true, priceCheck: { isAtOrBelowTarget: true } },
+        include: { priceCheck: true },
+        orderBy: { updatedAt: "desc" },
       }),
     ]);
 
@@ -90,6 +95,13 @@ export default async function Home() {
         mealPlanStatus: getMealPlanStatus(upcomingTrip),
       } : null}
       unreadJobCount={unreadJobCount}
+      activeDeals={activeDeals.map((item) => ({
+        id: item.id,
+        name: item.name,
+        targetPrice: item.targetPrice,
+        foundPriceRange: item.priceCheck?.foundPriceRange ?? null,
+        foundPriceLow: item.priceCheck?.foundPriceLow ?? null,
+      }))}
     />
   );
 }
