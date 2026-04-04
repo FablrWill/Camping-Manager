@@ -77,7 +77,7 @@
 - [ ] **Phase 31: Dark Sky & Astro Info** - Bortle class, moon phase, sunrise/sunset per location and trip dates
 
 **Wave 4 — Depends on Wave 3:**
-- [ ] **Phase 32: Deal Monitoring** - Target price on wishlist items, on-demand price check via Claude, deal alerts
+- [x] **Phase 32: Deal Monitoring** - Target price on wishlist items, on-demand price check via Claude, deal alerts (completed 2026-04-04)
 
 **Wave 5 — Depends on Phase 22:**
 - [x] **Phase 34: Meal Planning Core** - AI-generated meal plans per day/slot based on trip, weather, dog status, cooking gear (completed 2026-04-04)
@@ -543,7 +543,7 @@ Plans:
   5. "Add manually" escape hatch opens the old static form
   6. Trip-creation conversations are persisted to the database
   7. `npm run build` passes
-**Plans:** 1/4 plans executed
+**Plans:** 4/4 plans complete
 
 Plans:
 - [x] 33-00-PLAN.md — Wave 0 test stubs (trip planner tools + ChatBubble extraction)
@@ -683,7 +683,7 @@ Plans:
 | 29. Vehicle Pre-Trip Checklist | v3.0 | 3/3 | Complete    | 2026-04-03 |
 | 30. Gear Product Research | v3.0 | 3/3 | Complete    | 2026-04-04 |
 | 31. Dark Sky & Astro Info | v3.0 | 0/TBD | In Progress | - |
-| 32. Deal Monitoring | v3.0 | 1/4 | In Progress|  |
+| 32. Deal Monitoring | v3.0 | 1/4 | Complete    | 2026-04-04 |
 | 33. Conversational Trip Planner | v3.0 | 4/4 | Complete    | 2026-04-03 |
 | 34. Meal Planning Core | v3.0 | 4/4 | Complete | 2026-04-04 |
 | 35. Meal Planning: Shopping List, Prep Guide & Feedback | v3.0 | TBD/TBD | Complete | 2026-04-04 |
