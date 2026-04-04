@@ -213,3 +213,54 @@ export const VehicleChecklistResultSchema = z.object({
 
 export type VehicleChecklistResult = z.infer<typeof VehicleChecklistResultSchema>;
 export type VehicleChecklistItem = z.infer<typeof VehicleChecklistItemSchema>;
+
+// --- Normalized Meal Plan Schemas (Phase 34 — structured ingredients) ---
+
+export const NormalizedIngredientSchema = z.object({
+  item: z.string(),
+  quantity: z.string(),
+  unit: z.string().optional().default(''),
+});
+
+export type NormalizedIngredient = z.infer<typeof NormalizedIngredientSchema>;
+
+export const SingleMealSchema = z.object({
+  name: z.string(),
+  description: z.string().optional(),
+  ingredients: z.array(NormalizedIngredientSchema),
+  cookInstructions: z.string().optional(),
+  prepNotes: z.string().optional(),
+  estimatedMinutes: z.number().optional(),
+});
+
+export type SingleMeal = z.infer<typeof SingleMealSchema>;
+
+const NormalizedMealPlanMealSchema = z.object({
+  name: z.string(),
+  prepNotes: z.string().optional().default(''),
+  description: z.string().optional(),
+  ingredients: z.array(NormalizedIngredientSchema),
+  cookInstructions: z.string().optional(),
+  estimatedMinutes: z.number().optional(),
+});
+
+const NormalizedMealPlanDaySchema = z.object({
+  dayNumber: z.coerce.number(),
+  dayLabel: z.string(),
+  date: z.string(),
+  meals: z.object({
+    breakfast: NormalizedMealPlanMealSchema.nullable(),
+    lunch: NormalizedMealPlanMealSchema.nullable(),
+    dinner: NormalizedMealPlanMealSchema.nullable(),
+    snacks: z.array(z.string()).default([]),
+  }),
+});
+
+export const NormalizedMealPlanResultSchema = z.object({
+  days: z.array(NormalizedMealPlanDaySchema),
+  shoppingList: z.array(ShoppingItemSchema).default([]),
+  prepTimeline: z.array(z.string()).default([]),
+  tips: z.array(z.string()).default([]),
+});
+
+export type NormalizedMealPlanResult = z.infer<typeof NormalizedMealPlanResultSchema>;
