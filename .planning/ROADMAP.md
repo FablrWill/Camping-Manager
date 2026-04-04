@@ -447,7 +447,7 @@ Plans:
   5. `npm run build` passes
 **Plans**: 3 plans
 Plans:
-- [ ] 30-01-PLAN.md — Schema, Zod types, Claude function, API route + tests
+- [x] 30-01-PLAN.md — Schema, Zod types, Claude function, API route + tests
 - [ ] 30-02-PLAN.md — GearResearchTab component + tab switcher in GearClient
 - [ ] 30-03-PLAN.md — Upgrade Opportunities section + human verify
 
@@ -578,7 +578,7 @@ Plans:
 | 27. Safety Float Plan | v3.0 | 1/1 | Complete | 2026-04-03 |
 | 28. Weather-Aware Clothing | v3.0 | 1/1 | Complete | 2026-04-03 |
 | 29. Vehicle Pre-Trip Checklist | v3.0 | 3/3 | Complete    | 2026-04-03 |
-| 30. Gear Product Research | v3.0 | 0/TBD | Not started | - |
+| 30. Gear Product Research | v3.0 | 1/3 | In Progress|  |
 | 31. Dark Sky & Astro Info | v3.0 | 0/TBD | Not started | - |
 | 32. Deal Monitoring | v3.0 | 0/TBD | Not started | - |
 | 33. Conversational Trip Planner | v3.0 | 4/4 | Complete    | 2026-04-03 |
@@ -599,7 +599,7 @@ Plans:
   5. "Add manually" escape hatch opens the old static form
   6. Trip-creation conversations are persisted to the database
   7. `npm run build` passes
-**Plans:** 4/4 plans complete
+**Plans:** 1/3 plans executed
 
 Plans:
 - [x] 33-00-PLAN.md — Wave 0 test stubs (trip planner tools + ChatBubble extraction)
