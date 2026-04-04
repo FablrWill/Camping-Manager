@@ -15,6 +15,7 @@
  *   AGENT_POLL_INTERVAL — seconds between polls (default: 30)
  */
 
+import { spawn } from 'child_process';
 import { processDealCheck, type DealCheckPayload } from '../lib/agent/jobs/deal-check';
 import { processMaintenanceDue, type MaintenanceDuePayload } from '../lib/agent/jobs/maintenance-due';
 import { processTripWeatherAlert, type TripWeatherAlertPayload } from '../lib/agent/jobs/trip-weather-alert';
@@ -235,6 +236,23 @@ const processors: Record<string, JobProcessor> = {
   trip_weather_alert: (payload) => processTripWeatherAlert(payload as TripWeatherAlertPayload),
   weekly_briefing: (payload) => processWeeklyBriefing(payload as WeeklyBriefingPayload),
   memory_refresh: (payload) => processRefreshMemory(payload as RefreshMemoryPayload),
+  corpus_refresh: (_payload: unknown) =>
+    new Promise<{ status: string }>((resolve, reject) => {
+      // Use npx tsx for Mac mini PATH safety — avoids relying on globally installed tsx
+      const child = spawn('npx', ['tsx', 'scripts/refresh-corpus.ts'], {
+        stdio: 'inherit',
+        env: process.env,
+        cwd: process.cwd(),
+      });
+      child.on('close', (code) => {
+        if (code === 0) {
+          resolve({ status: 'completed' });
+        } else {
+          reject(new Error(`refresh-corpus.ts exited with code ${String(code)}`));
+        }
+      });
+      child.on('error', reject);
+    }),
 };
 
 async function processJob(job: AgentJob): Promise<void> {

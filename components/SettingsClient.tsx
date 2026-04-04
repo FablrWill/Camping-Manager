@@ -12,6 +12,12 @@ interface MemoryEntry {
   updatedAt: string;
 }
 
+interface KnowledgeStats {
+  chunkCount: number;
+  lastRefreshed: string | null;
+  sourceCount: number;
+}
+
 export default function SettingsClient() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -22,6 +28,10 @@ export default function SettingsClient() {
   const [testingEmail, setTestingEmail] = useState(false);
   const [testEmailResult, setTestEmailResult] = useState<string | null>(null);
   const [testEmailError, setTestEmailError] = useState<string | null>(null);
+  const [knowledgeStats, setKnowledgeStats] = useState<KnowledgeStats | null>(null);
+  const [refreshingCorpus, setRefreshingCorpus] = useState(false);
+  const [refreshQueued, setRefreshQueued] = useState(false);
+  const [refreshError, setRefreshError] = useState<string | null>(null);
 
   // Memory management state
   const [memories, setMemories] = useState<MemoryEntry[]>([]);
@@ -59,6 +69,15 @@ export default function SettingsClient() {
   useEffect(() => {
     fetchMemories();
   }, [fetchMemories]);
+
+  useEffect(() => {
+    fetch('/api/knowledge/stats')
+      .then((res) => res.json())
+      .then((data: KnowledgeStats) => setKnowledgeStats(data))
+      .catch(() => {
+        // Stats load is non-critical — silently skip if unavailable
+      });
+  }, []);
 
   const handleDeleteMemory = useCallback(async (id: string) => {
     setMemoryError(null);
@@ -158,6 +177,46 @@ export default function SettingsClient() {
       setTestingEmail(false);
     }
   }, []);
+
+  const handleRefreshCorpus = useCallback(async () => {
+    setRefreshError(null);
+    setRefreshQueued(false);
+    setRefreshingCorpus(true);
+
+    try {
+      const res = await fetch('/api/agent/jobs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'corpus_refresh', payload: {} }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json() as { error?: string };
+        setRefreshError(data.error ?? 'Failed to queue refresh');
+        return;
+      }
+
+      setRefreshQueued(true);
+      setTimeout(() => setRefreshQueued(false), 2000);
+    } catch {
+      setRefreshError('Failed to queue refresh. Please try again.');
+    } finally {
+      setRefreshingCorpus(false);
+    }
+  }, []);
+
+  function formatLastRefreshed(iso: string | null): string {
+    if (!iso) return 'Never';
+    const date = new Date(iso);
+    const diff = Date.now() - date.getTime();
+    const minutes = Math.floor(diff / 60000);
+    if (minutes < 1) return 'Just now';
+    if (minutes < 60) return `${minutes}m ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h ago`;
+    const days = Math.floor(hours / 24);
+    return `${days}d ago`;
+  }
 
   if (loading) {
     return (
@@ -305,6 +364,44 @@ export default function SettingsClient() {
             ))}
           </ul>
         )}
+      </Card>
+
+      {/* Knowledge Base */}
+      <Card>
+        <p className="text-sm font-bold text-stone-900 dark:text-stone-50 mb-3">
+          Knowledge Base
+        </p>
+        <div className="space-y-3">
+          {knowledgeStats ? (
+            <p className="text-sm text-stone-600 dark:text-stone-400">
+              {knowledgeStats.chunkCount.toLocaleString()} chunk{knowledgeStats.chunkCount !== 1 ? 's' : ''} from{' '}
+              {knowledgeStats.sourceCount} source{knowledgeStats.sourceCount !== 1 ? 's' : ''}
+            </p>
+          ) : (
+            <p className="text-sm text-stone-500 dark:text-stone-500">Loading stats...</p>
+          )}
+          {knowledgeStats && (
+            <p className="text-xs text-stone-500 dark:text-stone-500">
+              Last refreshed: {formatLastRefreshed(knowledgeStats.lastRefreshed)}
+            </p>
+          )}
+          <div>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={handleRefreshCorpus}
+              loading={refreshingCorpus}
+            >
+              Refresh Now
+            </Button>
+            {refreshQueued && (
+              <p className="mt-2 text-sm text-green-600 dark:text-green-400">Refresh queued</p>
+            )}
+            {refreshError && (
+              <p className="mt-2 text-sm text-red-600 dark:text-red-400">{refreshError}</p>
+            )}
+          </div>
+        </div>
       </Card>
 
     </div>
