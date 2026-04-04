@@ -47,9 +47,15 @@ if [ ! -L "$PHOTOS_LINK" ]; then
   echo "  Photos symlinked → $DATA_DIR/photos"
 fi
 
-# 6. Restart PM2
+# 6. Restart PM2 (app + agent runner)
 echo "[6/6] Restarting PM2..."
 pm2 restart outland --update-env
+# Start agent runner if not already registered, otherwise restart
+if pm2 describe outland-agent > /dev/null 2>&1; then
+  pm2 restart outland-agent --update-env
+else
+  pm2 start ecosystem.config.js --only outland-agent --env production
+fi
 pm2 save --force
 
 echo ""

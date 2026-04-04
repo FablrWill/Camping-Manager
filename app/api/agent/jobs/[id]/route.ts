@@ -22,17 +22,37 @@ export async function GET(
   }
 }
 
-// PATCH /api/agent/jobs/[id] — mark job as read
+// PATCH /api/agent/jobs/[id] — update job (mark read, change status)
 export async function PATCH(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   try {
     const { id } = await params;
 
+    let body: Record<string, unknown> = {};
+    try { body = await request.json(); } catch { /* empty body = mark as read */ }
+
+    const data: Record<string, unknown> = {};
+
+    // Mark as read (default behavior if no body or explicit read flag)
+    if (body.read || (!body.status && Object.keys(body).length === 0)) {
+      data.readAt = new Date();
+    }
+
+    // Status transition (pending → running, etc.)
+    const validStatuses = ['pending', 'running', 'done', 'failed'];
+    if (typeof body.status === 'string' && validStatuses.includes(body.status)) {
+      data.status = body.status;
+    }
+
+    if (Object.keys(data).length === 0) {
+      return NextResponse.json({ error: 'No valid fields to update' }, { status: 400 });
+    }
+
     const job = await prisma.agentJob.update({
       where: { id },
-      data: { readAt: new Date() },
+      data,
     });
 
     return NextResponse.json(job);
