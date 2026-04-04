@@ -48,7 +48,7 @@ A self-coordinating work queue for v2.0 features. Each Claude Code session claim
 | S08 | Gear category expansion       | 23    | ✅ Done 2026-04-03 | Sonnet, normal | —          |
 | S09 | Smart inbox / intake          | 24    | ✅ Done 2026-04-03 | Sonnet, normal | S08        |
 | S10 | Home Assistant integration    | 33    | ⏸ Blocked (hardware ~mid-Apr) | Sonnet, normal | S09        |
-| S11 | Meal planning core            | 34    | ⬜ Ready  | Sonnet, normal | S07        |
+| S11 | Meal planning core            | 34    | ✅ Done 2026-04-03 | Sonnet, normal | S07        |
 | S12 | Meal planning: shopping, prep & feedback | 35 | ⬜ Ready | Sonnet, normal | S11 |
 
 **Why this order matters (conflict groups):**
