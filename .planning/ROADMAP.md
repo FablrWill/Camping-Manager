@@ -579,7 +579,7 @@ Plans:
 | 28. Weather-Aware Clothing | v3.0 | 1/1 | Complete | 2026-04-03 |
 | 29. Vehicle Pre-Trip Checklist | v3.0 | 3/3 | Complete    | 2026-04-03 |
 | 30. Gear Product Research | v3.0 | 0/TBD | Not started | - |
-| 31. Dark Sky & Astro Info | v3.0 | 2/2 | Complete   | 2026-04-04 |
+| 31. Dark Sky & Astro Info | v3.0 | 2/2 | Complete    | 2026-04-04 |
 | 32. Deal Monitoring | v3.0 | 0/TBD | Not started | - |
 | 33. Conversational Trip Planner | v3.0 | 4/4 | Complete    | 2026-04-03 |
 | 34. Home Assistant Integration | v3.0 | 0/TBD | Not started | - |
