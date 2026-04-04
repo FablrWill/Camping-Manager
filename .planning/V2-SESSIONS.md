@@ -824,6 +824,21 @@ Pull origin main, then claim S13 in .planning/V2-SESSIONS.md (mark it 🔄 In Pr
 
 ---
 
+**S28 — Shareable trip reports** *(start only after S26 is ✅ Done)*
+```
+Pull origin main, then claim S28 in .planning/V2-SESSIONS.md (mark it 🔄 In Progress, commit + push the claim). Then run /gsd:quick with this task:
+
+Build shareable trip reports:
+1. Add `shareToken String? @unique` to the Trip model in prisma/schema.prisma and run a migration
+2. Create POST /api/trips/[id]/share — generates a token using `generateSlug()` from `lib/share-location.ts` and saves it to the trip, returns `{ shareUrl }`. Create DELETE /api/trips/[id]/share — clears the token (unshares).
+3. Build a public server-rendered page at `app/trips/share/[token]/page.tsx` — no auth required, fetches trip by shareToken, shows trip name + dates + location name + journal entry (if set) + count of packed gear + meal plan summary (if set) + a link to the location on OpenStreetMap. Shows a graceful "Trip not found" message if token is missing or invalid.
+4. Add a "Share Trip" button on past trip cards in `components/TripsClient.tsx`. Opens a small sheet modal showing the share URL with a copy button and an "Unshare" option that calls DELETE.
+
+Full spec in `.planning/V2-SESSIONS.md` under S28. When done, mark S28 ✅ Done in V2-SESSIONS.md, commit, and push.
+```
+
+---
+
 ---
 
 ### S16 — UX Quick Wins
