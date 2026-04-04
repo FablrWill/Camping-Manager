@@ -5,6 +5,7 @@ import GearForm from './GearForm'
 import GearDocumentsTab from './GearDocumentsTab'
 import GearResearchCard from './GearResearchCard'
 import GearDealsTab from './GearDealsTab'
+import GearROITab from './GearROITab'
 import KitPresetsPanel from './KitPresetsPanel'
 import ChatContextButton from '@/components/ChatContextButton'
 import { CATEGORY_GROUPS, CATEGORIES, getCategoryEmoji, getCategoryLabel } from '@/lib/gear-categories'
@@ -75,7 +76,7 @@ export default function GearClient({ initialItems }: { initialItems: GearItem[] 
   const [deleteError, setDeleteError] = useState<string | null>(null)
   const [isResearching, setIsResearching] = useState(false)
   const [showKits, setShowKits] = useState(false)
-  const [detailTab, setDetailTab] = useState<'research' | 'documents' | 'deals'>('research')
+  const [detailTab, setDetailTab] = useState<'research' | 'documents' | 'deals' | 'roi'>('research')
 
   useEffect(() => {
     setIsLoading(false)
@@ -469,6 +470,17 @@ export default function GearClient({ initialItems }: { initialItems: GearItem[] 
                     Deals
                   </button>
                 )}
+                <button
+                  type="button"
+                  onClick={() => setDetailTab('roi')}
+                  className={`flex-1 py-1.5 px-2 rounded-md text-xs font-medium transition-colors ${
+                    detailTab === 'roi'
+                      ? 'bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-50 shadow-sm'
+                      : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-300'
+                  }`}
+                >
+                  ROI
+                </button>
               </div>
 
               {/* Tab content */}
@@ -501,6 +513,12 @@ export default function GearClient({ initialItems }: { initialItems: GearItem[] 
                     targetPrice: editingItem.targetPrice,
                     isWishlist: editingItem.isWishlist,
                   }}
+                />
+              )}
+              {detailTab === 'roi' && (
+                <GearROITab
+                  gearItemId={editingItem.id}
+                  gearName={editingItem.name}
                 />
               )}
             </div>
