@@ -9,6 +9,7 @@
 - ✅ **v3.0 Gear Intelligence + Day-Of** — Phases 25-35 (shipped 2026-04-04)
 - 🚧 **v4.0 Smarter Feedback Loops** — Phases 38+ (in progress)
   - [x] Phase 38: Post-Trip Auto-Review — structured gear/meal/spot review modal with feedback flywheel (completed 2026-04-04)
+  - [ ] Phase 42: Trip Cost Tracking — log expenses per trip (fuel, campsite, food, gear, permits, misc), see category subtotals and cost badge on trip cards
 - 📋 **v4.0 Backlog** — Voice, social, signal map, background agent, and more — see [Backlog section](#backlog-v40) below
 
 ## Phases
@@ -669,6 +670,26 @@ Plans:
 - Plan 38-01 is Wave 1 — schema + API, no dependencies
 - Plan 38-02 is Wave 2 — depends on 38-01 (API contract)
 - Plan 38-03 is Wave 3 — depends on 38-01 (schema types) and 38-02 (modal component); has checkpoint
+
+---
+
+
+### Phase 42: Trip Cost Tracking
+
+**Goal**: Give Will a simple way to log what a trip actually cost — fuel, campsite fees, food, gear, permits, misc — and see category subtotals plus a running total. Cost badge on trip cards surfaces spend at a glance. Helps budget future trips and understand real cost-per-adventure.
+
+**Status**: 🚧 In progress
+**Requirements:** EXP-01, EXP-02, EXP-03, EXP-04, EXP-05
+
+Plans:
+- [ ] 42-01-PLAN.md — Touch-friendly expense buttons + expense aggregate in trip API
+- [ ] 42-02-PLAN.md — Cost badge on trip cards
+
+
+
+**Parallelization notes:**
+- Plan 42-01 is Wave 1 — schema + API
+- Plan 42-02 is Wave 2 — depends on 42-01 (API contract and types)
 
 ---
 
