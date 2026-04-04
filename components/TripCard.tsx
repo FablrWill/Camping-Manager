@@ -11,6 +11,7 @@ import {
   Trash2,
   ClipboardCheck,
   CheckCircle2,
+  BookOpen,
 } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui'
@@ -48,6 +49,8 @@ interface TripData {
   fallbackOrder: number | null
   mealPlanGeneratedAt: string | null  // Phase 34: meal plan status
   reviewedAt: string | null  // Phase 38: post-trip review timestamp
+  journalEntry: string | null  // S20: Voice Ghostwriter
+  journalEntryAt: string | null  // S20: when journal was last written
 }
 
 interface WeatherData {
@@ -67,6 +70,7 @@ interface TripCardProps {
   weatherError?: string | null
   onDebrief: (trip: { id: string; name: string; locationId: string | null }) => void
   onReview: (tripId: string) => void
+  onGhostwrite: (trip: { id: string; name: string }) => void
   astro?: TripAstroData
 }
 
@@ -81,6 +85,7 @@ export default function TripCard({
   weatherError,
   onDebrief,
   onReview,
+  onGhostwrite,
   astro,
 }: TripCardProps) {
   const now = new Date().toISOString()
@@ -221,13 +226,21 @@ export default function TripCard({
 
             {/* Voice debrief button — only render for past trips */}
             {isPast && (
-              <div className="mt-2 flex items-center" onClick={(e) => e.stopPropagation()}>
+              <div className="mt-2 flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                 <VoiceDebriefButton
                   tripId={trip.id}
                   tripName={trip.name}
                   locationId={trip.location?.id ?? null}
                   onOpen={() => onDebrief({ id: trip.id, name: trip.name, locationId: trip.location?.id ?? null })}
                 />
+                <button
+                  onClick={() => onGhostwrite({ id: trip.id, name: trip.name })}
+                  aria-label="Write journal entry"
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-stone-200 bg-white px-3 py-1.5 text-sm font-medium text-stone-700 transition-colors hover:bg-stone-50 hover:border-stone-300 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-300 dark:hover:bg-stone-700"
+                >
+                  <BookOpen size={14} />
+                  {trip.journalEntry ? 'Update journal' : 'Write journal'}
+                </button>
               </div>
             )}
 
@@ -292,6 +305,24 @@ export default function TripCard({
               dateRange={formatDateRange(trip.startDate, trip.endDate)}
               bortleLink={astro?.bortleLink}
             />
+          </div>
+        )}
+
+        {/* Journal entry — S20: Voice Ghostwriter */}
+        {isPast && isSelected && trip.journalEntry && (
+          <div
+            className="mt-3 border-t border-stone-200 dark:border-stone-700 pt-3"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <BookOpen size={14} className="text-amber-600 dark:text-amber-400" />
+              <span className="text-xs font-medium text-stone-500 dark:text-stone-400 uppercase tracking-wider">
+                Journal
+              </span>
+            </div>
+            <p className="text-sm text-stone-700 dark:text-stone-300 leading-relaxed whitespace-pre-wrap">
+              {trip.journalEntry}
+            </p>
           </div>
         )}
 

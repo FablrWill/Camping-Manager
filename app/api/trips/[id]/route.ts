@@ -75,19 +75,31 @@ export async function PUT(req: NextRequest, { params }: Params) {
 export async function PATCH(req: NextRequest, { params }: Params) {
   try {
     const { id } = await params
-    const data = await req.json()
-    const departureTime = data.departureTime ? new Date(data.departureTime) : null
+    const data = await req.json() as { departureTime?: string | null; journalEntry?: string }
+    const updateData: { departureTime?: Date | null; journalEntry?: string } = {}
+
+    if ('departureTime' in data) {
+      updateData.departureTime = data.departureTime ? new Date(data.departureTime) : null
+    }
+    if ('journalEntry' in data && typeof data.journalEntry === 'string') {
+      updateData.journalEntry = data.journalEntry
+    }
+
     const trip = await prisma.trip.update({
       where: { id },
-      data: { departureTime },
+      data: updateData,
+      select: { departureTime: true, journalEntry: true },
     })
-    return NextResponse.json({ departureTime: trip.departureTime?.toISOString() ?? null })
+    return NextResponse.json({
+      departureTime: trip.departureTime?.toISOString() ?? null,
+      journalEntry: trip.journalEntry ?? null,
+    })
   } catch (error) {
     if (error instanceof Error && 'code' in error && (error as { code: string }).code === 'P2025') {
       return NextResponse.json({ error: 'Trip not found' }, { status: 404 })
     }
-    console.error('Failed to update departure time:', error)
-    return NextResponse.json({ error: 'Failed to update departure time' }, { status: 500 })
+    console.error('Failed to update trip:', error)
+    return NextResponse.json({ error: 'Failed to update trip' }, { status: 500 })
   }
 }
 

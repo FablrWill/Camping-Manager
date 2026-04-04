@@ -43,6 +43,8 @@ export default async function TripsPage() {
         updatedAt: t.updatedAt.toISOString(),
         mealPlanGeneratedAt: t.mealPlanGeneratedAt?.toISOString() ?? null,
         reviewedAt: t.reviewedAt?.toISOString() ?? null,
+        journalEntry: t.journalEntry ?? null,
+        journalEntryAt: t.journalEntryAt?.toISOString() ?? null,
       }))}
       locations={locations}
       vehicles={vehicles}

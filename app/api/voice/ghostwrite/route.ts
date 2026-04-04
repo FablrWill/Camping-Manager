@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { ghostwriteJournal } from '@/lib/voice/ghostwrite'
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/db'
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'tripId and transcription are required' }, { status: 400 })
     }
 
-    const trip = await db.trip.findUnique({
+    const trip = await prisma.trip.findUnique({
       where: { id: tripId },
       select: {
         id: true,
@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
       dates,
     })
 
-    const updated = await db.trip.update({
+    const updated = await prisma.trip.update({
       where: { id: tripId },
       data: {
         journalEntry,

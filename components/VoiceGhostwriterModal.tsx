@@ -168,18 +168,13 @@ export default function VoiceGhostwriterModal({
   async function handleSave() {
     setState('saving')
     try {
-      const res = await fetch('/api/voice/ghostwrite', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tripId, transcription: journalEntry, _saveOnly: true }),
-      })
-      // If the edited entry needs saving separately, persist it directly
-      const saveRes = await fetch(`/api/trips/${tripId}`, {
+      // Persist the (possibly edited) journal entry via PATCH
+      const res = await fetch(`/api/trips/${tripId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ journalEntry }),
       })
-      if (!saveRes.ok && !res.ok) throw new Error('Save failed')
+      if (!res.ok) throw new Error('Save failed')
       onSaved(journalEntry)
       onClose()
     } catch {

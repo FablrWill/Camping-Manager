@@ -5,6 +5,7 @@ import { Plus, UtensilsCrossed } from 'lucide-react'
 import { Button, Input, Select, Textarea, Modal, ConfirmDialog, Skeleton, EmptyState } from '@/components/ui'
 import ChatContextButton from '@/components/ChatContextButton'
 import VoiceRecordModal from './VoiceRecordModal'
+import VoiceGhostwriterModal from './VoiceGhostwriterModal'
 import TripCard from './TripCard'
 import TripReviewModal from './TripReviewModal'
 import TripPlannerSheet from './TripPlannerSheet'
@@ -34,6 +35,8 @@ interface TripData {
   fallbackOrder: number | null
   mealPlanGeneratedAt: string | null  // Phase 34: meal plan status
   reviewedAt: string | null  // Phase 38: post-trip review timestamp
+  journalEntry: string | null  // S20: Voice Ghostwriter
+  journalEntryAt: string | null  // S20: when journal was last written
 }
 
 interface WeatherData {
@@ -62,6 +65,7 @@ export default function TripsClient({ initialTrips, locations, vehicles }: Trips
   const [saving, setSaving] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
   const [debriefTrip, setDebriefTrip] = useState<{ id: string; name: string; locationId: string | null } | null>(null)
+  const [ghostwriterTrip, setGhostwriterTrip] = useState<{ id: string; name: string } | null>(null)
   const [reviewingTripId, setReviewingTripId] = useState<string | null>(null)
   const [weatherByTrip, setWeatherByTrip] = useState<Record<string, WeatherData>>({})
   const [weatherLoading, setWeatherLoading] = useState<Record<string, boolean>>({})
@@ -465,6 +469,7 @@ export default function TripsClient({ initialTrips, locations, vehicles }: Trips
                       weatherError={weatherErrors[trip.id]}
                       onDebrief={setDebriefTrip}
                       onReview={setReviewingTripId}
+                      onGhostwrite={(trip) => setGhostwriterTrip({ id: trip.id, name: trip.name })}
                       astro={astroByTrip[trip.id]}
                     />
                     {/* Meal plan status badge — Phase 34 */}
@@ -523,6 +528,7 @@ export default function TripsClient({ initialTrips, locations, vehicles }: Trips
                       weatherError={weatherErrors[trip.id]}
                       onDebrief={setDebriefTrip}
                       onReview={setReviewingTripId}
+                      onGhostwrite={(trip) => setGhostwriterTrip({ id: trip.id, name: trip.name })}
                     />
                     {/* Meal plan status badge — Phase 34 */}
                     <div className="flex items-center gap-1.5 px-1 pt-1">
@@ -558,6 +564,24 @@ export default function TripsClient({ initialTrips, locations, vehicles }: Trips
           tripName={debriefTrip.name}
           locationId={debriefTrip.locationId}
           onClose={() => setDebriefTrip(null)}
+        />
+      )}
+
+      {/* Voice Ghostwriter modal — S20 */}
+      {ghostwriterTrip && (
+        <VoiceGhostwriterModal
+          tripId={ghostwriterTrip.id}
+          tripName={ghostwriterTrip.name}
+          onClose={() => setGhostwriterTrip(null)}
+          onSaved={(journalEntry) => {
+            setTrips((prev) =>
+              prev.map((t) =>
+                t.id === ghostwriterTrip.id
+                  ? { ...t, journalEntry, journalEntryAt: new Date().toISOString() }
+                  : t
+              )
+            )
+          }}
         />
       )}
 
