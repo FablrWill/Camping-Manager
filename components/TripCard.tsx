@@ -12,6 +12,9 @@ import {
   ClipboardCheck,
   CheckCircle2,
   BookOpen,
+  Share2,
+  Copy,
+  X,
 } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui'
@@ -51,6 +54,7 @@ interface TripData {
   reviewedAt: string | null  // Phase 38: post-trip review timestamp
   journalEntry: string | null  // S20: Voice Ghostwriter
   journalEntryAt: string | null  // S20: when journal was last written
+  shareToken: string | null  // S28: public share token
 }
 
 interface WeatherData {
@@ -72,6 +76,8 @@ interface TripCardProps {
   onReview: (tripId: string) => void
   onGhostwrite: (trip: { id: string; name: string }) => void
   astro?: TripAstroData
+  onShare?: (tripId: string) => void
+  onUnshare?: (tripId: string) => void
 }
 
 export default function TripCard({
@@ -87,6 +93,8 @@ export default function TripCard({
   onReview,
   onGhostwrite,
   astro,
+  onShare,
+  onUnshare,
 }: TripCardProps) {
   const now = new Date().toISOString()
   const nights = tripNights(trip.startDate, trip.endDate)
@@ -241,6 +249,50 @@ export default function TripCard({
                   <BookOpen size={14} />
                   {trip.journalEntry ? 'Update journal' : 'Write journal'}
                 </button>
+              </div>
+            )}
+
+            {/* Share button — past trips only */}
+            {isPast && (onShare || onUnshare) && (
+              <div className="mt-2" onClick={(e) => e.stopPropagation()}>
+                {trip.shareToken ? (
+                  <div className="flex flex-col gap-1.5">
+                    <div className="flex items-center gap-1.5">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2.5 py-1 text-xs font-medium text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+                        <Share2 size={11} />
+                        Shared
+                      </span>
+                      <button
+                        onClick={() => {
+                          const url = `${window.location.origin}/trips/share/${trip.shareToken}`;
+                          navigator.clipboard.writeText(url).catch(() => undefined);
+                        }}
+                        aria-label="Copy share URL"
+                        className="inline-flex items-center gap-1 rounded-md border border-stone-200 bg-white px-2 py-1 text-xs text-stone-600 transition-colors hover:bg-stone-50 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-400 dark:hover:bg-stone-700"
+                      >
+                        <Copy size={11} />
+                        Copy link
+                      </button>
+                      <button
+                        onClick={() => onUnshare?.(trip.id)}
+                        aria-label="Unshare trip"
+                        className="inline-flex items-center gap-1 rounded-md border border-stone-200 bg-white px-2 py-1 text-xs text-stone-500 transition-colors hover:bg-stone-50 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-400 dark:hover:bg-stone-700"
+                      >
+                        <X size={11} />
+                        Unshare
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => onShare?.(trip.id)}
+                    aria-label="Share trip"
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-stone-200 bg-white px-3 py-1.5 text-sm font-medium text-stone-700 transition-colors hover:bg-stone-50 hover:border-stone-300 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-300 dark:hover:bg-stone-700"
+                  >
+                    <Share2 size={14} />
+                    Share trip
+                  </button>
+                )}
               </div>
             )}
 
