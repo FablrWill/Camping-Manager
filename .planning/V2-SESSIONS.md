@@ -57,6 +57,10 @@ A self-coordinating work queue for v2.0 features. Each Claude Code session claim
 | S17 | Nav restructure + More sheet         | —     | ✅ Done 2026-04-04        | Sonnet, normal | —          |
 | S18 | TripPrepStepper                      | —     | ✅ Done 2026-04-04        | Sonnet, normal | S16        |
 | S19 | Empty states + skeleton loaders      | —     | ✅ Done 2026-04-04        | Sonnet, normal | S16        |
+| S20 | Voice Ghostwriter                    | —     | ⬜ Ready          | Sonnet, normal | —          |
+| S21 | Gear ROI tracker                     | —     | ⬜ Ready          | Sonnet, normal | —          |
+| S22 | Seasonal spot ratings                | —     | ⬜ Ready          | Sonnet, normal | —          |
+| S23 | Fire ban + pre-trip alerts           | —     | ⬜ Ready          | Sonnet, normal | —          |
 
 **Why this order matters (conflict groups):**
 
@@ -73,6 +77,10 @@ A self-coordinating work queue for v2.0 features. Each Claude Code session claim
 - S17 touches `BottomNav.tsx`, new `components/MoreSheet.tsx` only — no conflict with S16; **S16 and S17 can run in parallel**
 - S18 touches `DashboardClient.tsx` (same as S16) and new `components/TripPrepStepper.tsx` — must wait for S16
 - S19 touches `GearClient.tsx`, `TripsClient.tsx`, `app/spots/spots-client.tsx` (same as S16), new `components/ui/Skeleton.tsx` — must wait for S16; **S18 and S19 can run in parallel after S16**
+- S20 touches new files only (`components/VoiceGhostwriterModal.tsx`, `app/api/voice/ghostwrite/route.ts`, `lib/voice/ghostwrite.ts`) — **no conflict with any other session**
+- S21 touches `GearClient.tsx` (adds ROI tab to gear detail) and new `app/api/gear/[id]/roi/route.ts` — no conflict with S20; **S20 and S21 can run in parallel**
+- S22 touches `prisma/schema.prisma` (new `SeasonalRating` model), new `app/api/locations/[id]/seasonal-ratings/route.ts`, `components/LocationForm.tsx` — **S22 must not run in parallel with any session that also touches schema.prisma**
+- S23 touches `app/api/agent-jobs/route.ts` (add fire-ban job type) and `components/TripPrepClient.tsx` (surface alert card) — no conflict with S20/S21/S22; **S20, S21, S22, S23 are all independent and can run in any order or in parallel**
 
 ---
 
@@ -977,6 +985,133 @@ Audit flagged icon-only buttons missing `aria-label`. Add `aria-label` to:
 - No new npm packages
 - Do not add loading states to the map itself — Leaflet handles its own loading
 - Depends on S16 (spots-client.tsx is also touched by S16 — must be sequential)
+
+---
+
+---
+
+### S20 — Voice Ghostwriter
+
+**What to build:** A new voice mode that interviews Will after a trip and writes a polished journal entry — not a structured debrief (that's `VoiceRecordModal`), but a freeform story. Will talks, Claude listens, then produces a readable narrative he can keep.
+
+**User story:** Will gets back from a weekend in the Smokies, still in the parking lot. He taps "Write Journal Entry", rambles for 90 seconds about the campsite, the fire, the hike. The app produces a polished 3-paragraph journal entry saved to the trip.
+
+**How it differs from VoiceRecordModal:**
+- `VoiceRecordModal` → structured extraction (gear feedback, spot ratings, what worked/didn't) → `InsightsReviewSheet` applies updates to gear/location/trip records
+- `VoiceGhostwriterModal` → freeform narrative → Claude writes a journal entry → saved as `Trip.journalEntry` (new field)
+
+**Key files:**
+- `prisma/schema.prisma` — add `journalEntry String?` and `journalEntryAt DateTime?` to `Trip` model; run migration
+- `lib/voice/ghostwrite.ts` — new function `ghostwriteJournal(transcription: string, context: { tripName, locationName, dates }): Promise<string>`. System prompt instructs Claude to write a first-person narrative journal entry (3–5 paragraphs, past tense, sensory details, Will's voice). Uses `claude-sonnet-4-6` at 2048 tokens.
+- `app/api/voice/ghostwrite/route.ts` — POST endpoint: accepts `{ tripId, transcription }`, calls `ghostwriteJournal`, persists to `Trip.journalEntry` + `journalEntryAt`, returns `{ journalEntry }`.
+- `components/VoiceGhostwriterModal.tsx` — new modal, mirrors `VoiceRecordModal` structure: record → transcribe (`/api/voice/transcribe`, same as debrief) → ghostwrite (`/api/voice/ghostwrite`) → review screen showing the written entry with Edit/Save/Discard. States: `idle | recording | transcribing | writing | review | error`.
+- `components/TripsClient.tsx` — add "Write Journal" button to trip cards (alongside the existing mic/debrief button). Conditionally show a "Journal" section in trip detail if `trip.journalEntry` is set.
+
+**Acceptance criteria:**
+- User can record voice → transcribe → produce journal entry in one flow
+- Journal entry persists to the trip and is visible in trip detail
+- Edit screen allows tweaking the text before saving
+- Works with same OPENAI_API_KEY guard as debrief (graceful error if not set)
+- Build passes, no TypeScript errors
+
+**Constraints:**
+- Reuse `/api/voice/transcribe` — do not duplicate Whisper call logic
+- Do not merge with `VoiceRecordModal` — keep them separate flows with separate entry points
+- No new npm packages
+
+---
+
+### S21 — Gear ROI Tracker
+
+**What to build:** A "ROI" tab in the gear detail view that shows cost-per-trip for each item, using `GearItem.price` as the purchase cost and `PackingItem` records to count how many trips each piece of gear has been packed for.
+
+**User story:** Will opens his $400 tent in gear detail, taps the ROI tab, and sees "Used on 4 trips — $100 per trip." He opens his $200 rain jacket: "Used on 1 trip — $200 per trip. Consider using it more." Over time this surfaces underused expensive gear.
+
+**Key files:**
+- `app/api/gear/[id]/roi/route.ts` — new GET endpoint. Queries `PackingItem` where `gearId = id` (with `packed = true` filter), counts distinct `tripId`s, calculates `costPerTrip = price / tripCount`. Returns `{ price, tripCount, costPerTrip, trips: [{ id, name, startDate }] }`. Returns `{ tripCount: 0, costPerTrip: null }` if no price set.
+- `components/GearClient.tsx` — add `'roi'` to the `detailTab` union type (currently `'research' | 'documents' | 'deals'`). Add "ROI" tab button. Render `GearROITab` component in the tab panel.
+- `components/GearROITab.tsx` — new component. Fetches from `/api/gear/[id]/roi` on mount. Shows: big cost-per-trip number (amber, `text-3xl`), trip count subtitle, a list of the trips it was packed for (name + date), and a line like "💡 Used on fewer than 3 trips — consider selling or replacing." if `tripCount < 3 && price > 100`. Empty state if no price set: "Add a purchase price to track ROI."
+
+**Acceptance criteria:**
+- ROI tab renders in gear detail for any item
+- `costPerTrip` is correct — only counts trips where the item was actually packed (`packed: true`)
+- If no price set on the item, shows a prompt to add one (not an error)
+- Trip list links are readable (name + date)
+- Build passes, no TypeScript errors
+
+**Constraints:**
+- No schema changes — uses existing `GearItem.price` and `PackingItem` records
+- No new npm packages
+- Do not modify the existing research/documents/deals tabs
+
+---
+
+### S22 — Seasonal Spot Ratings
+
+**What to build:** Let Will rate a saved location per season (Spring/Summer/Fall/Winter) with a 1–5 score and an optional note. Over time this builds a personal "best season" index for each spot, which feeds into trip recommendations.
+
+**User story:** Will visits Rough Ridge in October and thinks it's a 5/5 in fall but would be brutal in summer. He opens the location, taps "Seasonal Ratings", sets Fall: ⭐⭐⭐⭐⭐, Summer: ⭐⭐. Next time he's planning a July trip, the spot shows its summer rating prominently.
+
+**Key files:**
+- `prisma/schema.prisma` — add `SeasonalRating` model:
+  ```
+  model SeasonalRating {
+    id         String   @id @default(cuid())
+    locationId String
+    season     String   // "spring" | "summer" | "fall" | "winter"
+    rating     Int      // 1-5
+    notes      String?
+    createdAt  DateTime @default(now())
+    updatedAt  DateTime @updatedAt
+    location   Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+    @@unique([locationId, season])
+    @@index([locationId])
+  }
+  ```
+  Add `seasonalRatings SeasonalRating[]` to `Location` model. Run migration.
+- `app/api/locations/[id]/seasonal-ratings/route.ts` — GET returns all ratings for the location; POST/PUT upserts a rating for a given season (using `@@unique` constraint). Body: `{ season, rating, notes? }`.
+- `components/LocationForm.tsx` — add a "Seasonal Ratings" section below the existing signal panel (only when editing an existing location, same guard as `SignalLogPanel`). Shows a 2×2 grid of season cards (Spring 🌸 / Summer ☀️ / Fall 🍂 / Winter ❄️), each with a 1–5 star tap picker and optional notes field. Saves on change (optimistic, fire-and-forget PUT).
+- `components/SpotMap.tsx` / location popup — show the best seasonal rating badge on the location popup if any ratings exist (e.g., "🍂 Best in Fall").
+
+**Acceptance criteria:**
+- All 4 seasons can be rated independently
+- Ratings persist and reload correctly when reopening a location
+- Duplicate season ratings upsert (not create duplicate rows)
+- Location popup shows "Best in [season]" if one season has a clearly higher rating (≥4 and highest)
+- Build passes, no TypeScript errors
+
+**Constraints:**
+- Do not change the overall location form layout — add the section at the bottom
+- `@@unique([locationId, season])` enforces one rating per season per location at the DB level
+
+---
+
+### S23 — Fire Ban + Pre-Trip Alerts
+
+**What to build:** A Mac mini agent job that runs ~7 days before a trip and checks for fire restrictions, weather windows, and any other pre-departure conditions for the trip's location. Results surface as an alert card on the trip prep page.
+
+**User story:** Will has a trip to Shining Rock planned for next weekend. Seven days out, the Mac mini agent runs, finds an active fire restriction for the Pisgah National Forest area, and surfaces it on the trip prep page: "⚠️ Active fire ban — campfires prohibited. Check FS-1200-9B permit requirements."
+
+**Key files:**
+- `app/api/agent-jobs/route.ts` — add `"pre_trip_alert"` as a valid job type. The job `payload` JSON shape: `{ tripId, tripName, locationName, latitude, longitude, startDate }`.
+- `lib/agents/pre-trip-alert.ts` — new agent function `runPreTripAlert(payload)`. Uses Claude (Sonnet) with web search context to check: (1) fire restriction status for the region, (2) 7-day weather window summary, (3) any trail/road closures. Returns structured JSON: `{ alerts: [{ severity: 'warning'|'info', title, body }], checkedAt }`. Persist result to `AgentJob.result`.
+- `app/api/agent-jobs/trigger/pre-trip/route.ts` — new POST endpoint to manually trigger a pre-trip alert job for a given trip. Body: `{ tripId }`. Looks up trip + location, creates the `AgentJob` record, kicks off `runPreTripAlert` in the background (non-blocking response).
+- `components/PreTripAlertCard.tsx` — new card component. Fetches the latest `pre_trip_alert` job for the trip from `/api/agent-jobs?type=pre_trip_alert&tripId=X`. States: no-job (show "Run Pre-Trip Check" button), running/pending (spinner), done (render alert list with severity-colored badges), failed (retry button). Warning alerts: amber. Info alerts: stone.
+- `components/TripPrepClient.tsx` — add `PreTripAlertCard` as the first card in trip prep (above vehicle checklist), wired with `tripId`.
+- Mac mini runner script (`scripts/agent-runner.ts` or equivalent) — add handler for `"pre_trip_alert"` job type. The script already handles `gear_enrichment` and `deal_check` — add the new branch.
+
+**Acceptance criteria:**
+- "Run Pre-Trip Check" button triggers the job and shows a spinner
+- When complete, alert cards render with severity-appropriate styling
+- Fire restriction info is surfaced when present (Claude uses its knowledge + any available web context)
+- Job result persists — re-opening prep page shows cached result with `checkedAt` timestamp
+- Build passes, no TypeScript errors
+
+**Constraints:**
+- The agent uses Claude's built-in knowledge for fire/weather — no external scraping APIs needed
+- Non-blocking: job creation returns immediately, result polled by the client
+- Automatic scheduling (cron 7 days before trip) is out of scope for this session — manual trigger only
+- Depends on existing `AgentJob` infrastructure (S13) — do not rewrite, only extend
 
 ---
 
