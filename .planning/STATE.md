@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Smarter Feedback Loops
-status: verifying
-last_updated: "2026-04-04T19:20:48.544Z"
-last_activity: 2026-04-04 - Completed S37 trip cost tracking (phase 42)
+status: executing
+last_updated: "2026-04-04T19:42:26.523Z"
+last_activity: 2026-04-04
 progress:
   total_phases: 26
-  completed_phases: 25
-  total_plans: 69
-  completed_plans: 69
+  completed_phases: 24
+  total_plans: 70
+  completed_plans: 68
   percent: 40
 ---
 
@@ -20,14 +20,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-01)
 
 **Core value:** Personal camping second brain — a closed-loop system that plans, executes, and learns from every trip
-**Current focus:** Phase 42 — trip-cost-tracking
+**Current focus:** Phase 41 — camp-kit-presets
 
 ## Current Position
 
-Phase: 42 (trip-cost-tracking) — COMPLETE
-Plan: 2 of 2
-Status: Phase verified — all checks passed
-Last activity: 2026-04-04 - Completed S37 trip cost tracking (phase 42)
+Phase: 41 (camp-kit-presets) — EXECUTING
+Plan: 2 of 3
+Status: Ready to execute
+Last activity: 2026-04-04
 
 Progress: [████░░░░░░] 40%
 
@@ -81,6 +81,7 @@ Progress: [████░░░░░░] 40%
 | Phase 38 P02 | 15 | 1 tasks | 2 files |
 | Phase 42 P01 | 2 | 3 tasks | 2 files |
 | Phase 42 P02 | 2 | 1 tasks | 3 files |
+| Phase 41-camp-kit-presets P01 | 3 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -145,6 +146,9 @@ Recent decisions affecting current work:
 - [Phase 42]: Trip list includes expenses select amount only: enables client-side total for cost badge without separate endpoint
 - [Phase 42]: Badge uses stone/muted colors (bg-stone-100) — amber is reserved for CTA-level elements
 - [Phase 42]: Cost badge hidden when expense total is 0 — no empty-state badge clutters the trip card header
+- [Phase 41-camp-kit-presets]: extractGearIdsFromPackingList uses type predicate filter to safely narrow items with defined gearId
+- [Phase 41-camp-kit-presets]: computeGearIdsToRemove uses Set for O(n) lookup on protected IDs across remaining kits
+- [Phase 41-camp-kit-presets]: Save as Kit UI: collapsed link pattern (amber underlined) expands inline — minimal footprint
 
 ### Pending Todos
 
@@ -179,8 +183,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-04T19:20:48.539Z
-Last activity: Completed S36 RAG knowledge base refresh
+Last session: 2026-04-04T19:42:26.518Z
+Last activity: Completed phase 41 plan 01 — kit-utils + Save as Kit
 Resume file: None
 
 ## Quick Tasks Completed
