@@ -8,6 +8,7 @@ All notable changes to Outland OS are tracked here.
 
 | Session | Date | Summary |
 |---------|------|---------|
+| [50](changelog/session-50.md) | 2026-04-04 | Production Smoke Test — deployment fixes, AI working, gear seeded |
 | [49](changelog/session-49.md) | 2026-04-04 | Phase 41 Camp Kit Presets: kit-utils module, KitStackPanel multi-select, unapply route, Save as Kit, Ask Claude to review |
 | [48](changelog/session-48.md) | 2026-04-04 | S30 Road trip scenic layer: fetchScenicStops() via Overpass, ScenicStopsCard, 🏞️💧🏛️🌿 type emojis, OSM links |
 | [47](changelog/session-47.md) | 2026-04-04 | S29 Altitude awareness: getAltitudeWarning() pure function, AltitudeCard in trip prep, altitude in LocationForm + SpotMap popup |

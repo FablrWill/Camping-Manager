@@ -369,6 +369,24 @@ Claude Code sessions on the MacBook **may SSH into `lisa` to deploy migrations a
 ### The deploy script already does this correctly
 `scripts/deploy.sh` on the Mac mini runs `prisma migrate deploy` (safe). Never bypass it with manual commands unless you know exactly what you're doing.
 
+### After every build — copy static assets
+Next.js standalone output does NOT include static assets automatically. After any `npm run build` on lisa, run:
+```bash
+cp -r .next/static .next/standalone/.next/static
+cp -r public .next/standalone/public
+cp .env .next/standalone/.env
+```
+`scripts/deploy.sh` already does this. Only needed when doing a manual build.
+
+### The standalone .env is separate from the project .env
+The running app reads `~/outland/.next/standalone/.env`, NOT `~/outland/.env`. If you update API keys or env vars, update **both** files and restart PM2. The `ANTHROPIC_API_KEY` must be in the standalone `.env`.
+
+### DATABASE_URL is locked in ecosystem.config.js
+`~/.env.lisaos` (a separate project on lisa) sets `DATABASE_URL=postgresql://...` in the login shell. To prevent this from bleeding into PM2, `DATABASE_URL` is explicitly set in `ecosystem.config.js` `env_production`. Do not remove it.
+
+### All data pages must have force-dynamic
+Every page that queries the database must have `export const dynamic = 'force-dynamic'` at the top. Without it, Next.js statically renders the page at build time (with whatever data is in the DB at that moment) and serves stale HTML forever. This was added to all 12 data pages in session 50.
+
 ## v2.0 Session Queue
 
 v2.0 features are tracked in `.planning/V2-SESSIONS.md`. Each Claude Code session should:

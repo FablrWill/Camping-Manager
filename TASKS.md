@@ -1,6 +1,6 @@
 # Outland OS — Task Tracker
 
-> **Last updated:** 2026-04-04 — Project review complete. All feature milestones (v1.0–v4.0) shipped.
+> **Last updated:** 2026-04-04 — Phase 59 complete. Production smoke test passed. App working from phone via Tailscale.
 > **Current priority:** v5.0 Field Ready — harden, validate production, use the app on a real trip.
 > **North star:** `docs/USER-JOURNEY.md` — read this before building anything new.
 > **Key decision:** Stop building new features. Start using the app. Real trip feedback drives v6.0.
@@ -14,7 +14,7 @@
 | Phase | Status | Summary |
 |-------|--------|---------|
 | 58. Security Hardening | ⬜ Ready | Input validation audit, rate limiting on AI endpoints, secrets review |
-| 59. Production Smoke Test | ⬜ Ready | Verify Mac mini running latest code, walk through core loop from phone |
+| 59. Production Smoke Test | ✅ Complete | Mac mini deployed to HEAD, DB migrated + seeded, AI chat working, all pages force-dynamic |
 | 60. Photo Backup Strategy | ⬜ Ready | rsync photos to second location (external drive, iCloud, or NAS) |
 | 61. First Field Trip | ⏸ Blocked (trip date) | Use app end-to-end on a real camping trip, capture feedback |
 | 62. Post-Trip Feedback | ⏸ Blocked (trip) | Triage field notes into bugs, UX fixes, missing features, unused features |
