@@ -9,6 +9,8 @@ import {
   ChevronRight,
   Pencil,
   Trash2,
+  ClipboardCheck,
+  CheckCircle2,
 } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui'
@@ -32,8 +34,11 @@ interface TripData {
   notes: string | null
   weatherNotes: string | null
   location: { id: string; name: string; latitude: number | null; longitude: number | null } | null
+  locationId: string | null
   vehicle: { id: string; name: string } | null
   _count: { packingItems: number; photos: number; alternatives: number }
+  packingItems: Array<{ gearId: string; gear: { name: string; category: string } | null; usageStatus: string | null }>
+  mealPlan: { id: string; meals: Array<{ id: string; name: string; slot: string; day: number }> } | null
   createdAt: string
   updatedAt: string
   bringingDog: boolean
@@ -42,6 +47,7 @@ interface TripData {
   fallbackFor: string | null
   fallbackOrder: number | null
   mealPlanGeneratedAt: string | null  // Phase 34: meal plan status
+  reviewedAt: string | null  // Phase 38: post-trip review timestamp
 }
 
 interface WeatherData {
@@ -60,6 +66,7 @@ interface TripCardProps {
   weatherLoading?: boolean
   weatherError?: string | null
   onDebrief: (trip: { id: string; name: string; locationId: string | null }) => void
+  onReview: (tripId: string) => void
   astro?: TripAstroData
 }
 
@@ -73,6 +80,7 @@ export default function TripCard({
   weatherLoading,
   weatherError,
   onDebrief,
+  onReview,
   astro,
 }: TripCardProps) {
   const now = new Date().toISOString()
@@ -220,6 +228,26 @@ export default function TripCard({
                   locationId={trip.location?.id ?? null}
                   onOpen={() => onDebrief({ id: trip.id, name: trip.name, locationId: trip.location?.id ?? null })}
                 />
+              </div>
+            )}
+
+            {/* Review trip button / badge — past trips only */}
+            {isPast && (
+              <div className="mt-2" onClick={(e) => e.stopPropagation()}>
+                {trip.reviewedAt === null ? (
+                  <button
+                    onClick={() => onReview(trip.id)}
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-amber-200 bg-amber-50 px-3 py-1.5 text-sm font-medium text-amber-800 transition-colors hover:bg-amber-100 dark:border-amber-700 dark:bg-amber-900/20 dark:text-amber-300 dark:hover:bg-amber-900/40"
+                  >
+                    <ClipboardCheck size={14} />
+                    Review trip
+                  </button>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-green-100 px-2.5 py-1 text-xs font-medium text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                    <CheckCircle2 size={12} />
+                    Reviewed
+                  </span>
+                )}
               </div>
             )}
           </div>

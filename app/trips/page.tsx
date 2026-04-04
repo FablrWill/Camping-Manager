@@ -8,6 +8,19 @@ export default async function TripsPage() {
         location: { select: { id: true, name: true, latitude: true, longitude: true } },
         vehicle: { select: { id: true, name: true } },
         _count: { select: { packingItems: true, photos: true, alternatives: true } },
+        packingItems: {
+          select: {
+            gearId: true,
+            usageStatus: true,
+            gear: { select: { name: true, category: true } },
+          },
+        },
+        mealPlan: {
+          select: {
+            id: true,
+            meals: { select: { id: true, name: true, slot: true, day: true } },
+          },
+        },
       },
       orderBy: { startDate: "desc" },
     }),
@@ -29,6 +42,7 @@ export default async function TripsPage() {
         createdAt: t.createdAt.toISOString(),
         updatedAt: t.updatedAt.toISOString(),
         mealPlanGeneratedAt: t.mealPlanGeneratedAt?.toISOString() ?? null,
+        reviewedAt: t.reviewedAt?.toISOString() ?? null,
       }))}
       locations={locations}
       vehicles={vehicles}

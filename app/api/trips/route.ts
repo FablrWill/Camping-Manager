@@ -9,6 +9,19 @@ export async function GET() {
         location: { select: { id: true, name: true, latitude: true, longitude: true } },
         vehicle: { select: { id: true, name: true } },
         _count: { select: { packingItems: true, photos: true, alternatives: true } },
+        packingItems: {
+          select: {
+            gearId: true,
+            usageStatus: true,
+            gear: { select: { name: true, category: true } },
+          },
+        },
+        mealPlan: {
+          select: {
+            id: true,
+            meals: { select: { id: true, name: true, slot: true, day: true } },
+          },
+        },
       },
       orderBy: { startDate: "desc" },
     });

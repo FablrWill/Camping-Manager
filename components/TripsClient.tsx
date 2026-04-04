@@ -6,6 +6,7 @@ import { Button, Input, Select, Textarea, Modal, ConfirmDialog } from '@/compone
 import ChatContextButton from '@/components/ChatContextButton'
 import VoiceRecordModal from './VoiceRecordModal'
 import TripCard from './TripCard'
+import TripReviewModal from './TripReviewModal'
 import TripPlannerSheet from './TripPlannerSheet'
 import type { DayForecast, WeatherAlert } from '@/lib/weather'
 import { computeAstro } from '@/lib/astro'
@@ -19,8 +20,11 @@ interface TripData {
   notes: string | null
   weatherNotes: string | null
   location: { id: string; name: string; latitude: number | null; longitude: number | null } | null
+  locationId: string | null
   vehicle: { id: string; name: string } | null
   _count: { packingItems: number; photos: number; alternatives: number }
+  packingItems: Array<{ gearId: string; gear: { name: string; category: string } | null; usageStatus: string | null }>
+  mealPlan: { id: string; meals: Array<{ id: string; name: string; slot: string; day: number }> } | null
   createdAt: string
   updatedAt: string
   bringingDog: boolean
@@ -29,6 +33,7 @@ interface TripData {
   fallbackFor: string | null
   fallbackOrder: number | null
   mealPlanGeneratedAt: string | null  // Phase 34: meal plan status
+  reviewedAt: string | null  // Phase 38: post-trip review timestamp
 }
 
 interface WeatherData {
@@ -56,6 +61,7 @@ export default function TripsClient({ initialTrips, locations, vehicles }: Trips
   const [saving, setSaving] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
   const [debriefTrip, setDebriefTrip] = useState<{ id: string; name: string; locationId: string | null } | null>(null)
+  const [reviewingTripId, setReviewingTripId] = useState<string | null>(null)
   const [weatherByTrip, setWeatherByTrip] = useState<Record<string, WeatherData>>({})
   const [weatherLoading, setWeatherLoading] = useState<Record<string, boolean>>({})
   const [weatherErrors, setWeatherErrors] = useState<Record<string, string>>({})
@@ -137,7 +143,10 @@ export default function TripsClient({ initialTrips, locations, vehicles }: Trips
       })
       if (!res.ok) throw new Error('Failed to save')
       const updated = await res.json()
-      setTrips((prev) => prev.map((t) => (t.id === updated.id ? updated : t)))
+      // Merge with existing trip to preserve fields not returned by PUT (packingItems, mealPlan, reviewedAt)
+      setTrips((prev) =>
+        prev.map((t) => (t.id === updated.id ? { ...t, ...updated } : t))
+      )
       setEditingTrip(null)
     } catch {
       setError("Couldn't save — check your connection and try again.")
@@ -268,6 +277,9 @@ export default function TripsClient({ initialTrips, locations, vehicles }: Trips
           endDate: saved.endDate,
           createdAt: saved.createdAt,
           updatedAt: saved.updatedAt,
+          packingItems: saved.packingItems ?? [],
+          mealPlan: saved.mealPlan ?? null,
+          reviewedAt: saved.reviewedAt ?? null,
         },
         ...prev,
       ])
@@ -443,6 +455,7 @@ export default function TripsClient({ initialTrips, locations, vehicles }: Trips
                       weatherLoading={weatherLoading[trip.id]}
                       weatherError={weatherErrors[trip.id]}
                       onDebrief={setDebriefTrip}
+                      onReview={setReviewingTripId}
                       astro={astroByTrip[trip.id]}
                     />
                     {/* Meal plan status badge — Phase 34 */}
@@ -477,9 +490,16 @@ export default function TripsClient({ initialTrips, locations, vehicles }: Trips
           {/* Past */}
           {past.length > 0 && (
             <section>
-              <h2 className="text-sm font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider mb-3">
-                Past Trips
-              </h2>
+              <div className="flex items-center gap-3 mb-3">
+                <h2 className="text-sm font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider">
+                  Past Trips
+                </h2>
+                {past.filter((t) => !t.reviewedAt).length > 0 && (
+                  <span className="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
+                    {past.filter((t) => !t.reviewedAt).length} need{past.filter((t) => !t.reviewedAt).length === 1 ? 's' : ''} review
+                  </span>
+                )}
+              </div>
               <div className="space-y-3">
                 {past.map((trip) => (
                   <div key={trip.id}>
@@ -493,6 +513,7 @@ export default function TripsClient({ initialTrips, locations, vehicles }: Trips
                       weatherLoading={weatherLoading[trip.id]}
                       weatherError={weatherErrors[trip.id]}
                       onDebrief={setDebriefTrip}
+                      onReview={setReviewingTripId}
                     />
                     {/* Meal plan status badge — Phase 34 */}
                     <div className="flex items-center gap-1.5 px-1 pt-1">
@@ -530,6 +551,44 @@ export default function TripsClient({ initialTrips, locations, vehicles }: Trips
           onClose={() => setDebriefTrip(null)}
         />
       )}
+
+      {/* Post-trip review modal — Phase 38 */}
+      {reviewingTripId && (() => {
+        const trip = trips.find((t) => t.id === reviewingTripId)
+        if (!trip) return null
+        const packedItems = trip.packingItems.map((item) => ({
+          gearId: item.gearId,
+          name: item.gear?.name ?? 'Unknown',
+          category: item.gear?.category ?? '',
+          usageStatus: item.usageStatus,
+        }))
+        const meals = trip.mealPlan
+          ? trip.mealPlan.meals.map((m) => ({
+              mealId: m.id,
+              mealPlanId: trip.mealPlan!.id,
+              name: m.name,
+              dayLabel: `Day ${m.day} - ${m.slot}`,
+            }))
+          : []
+        return (
+          <TripReviewModal
+            tripId={trip.id}
+            tripName={trip.name}
+            packedItems={packedItems}
+            meals={meals}
+            locationId={trip.locationId}
+            locationName={trip.location?.name ?? null}
+            existingNotes={trip.notes}
+            onComplete={(reviewedAt) => {
+              setTrips((prev) =>
+                prev.map((t) => (t.id === reviewingTripId ? { ...t, reviewedAt } : t))
+              )
+              setReviewingTripId(null)
+            }}
+            onClose={() => setReviewingTripId(null)}
+          />
+        )
+      })()}
 
       {/* Edit trip modal */}
       <Modal
