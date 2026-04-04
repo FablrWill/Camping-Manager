@@ -345,6 +345,7 @@ export async function generateMealPlan(params: {
     alerts: WeatherAlert[]
   }
   bringingDog?: boolean
+  feedbackHistory?: string
 }): Promise<NormalizedMealPlanResult> {
   const {
     tripName,
@@ -358,6 +359,7 @@ export async function generateMealPlan(params: {
     cookingGear,
     weather,
     bringingDog,
+    feedbackHistory,
   } = params
 
   const weatherSection = buildWeatherSection(weather)
@@ -375,6 +377,10 @@ export async function generateMealPlan(params: {
     ? '\nDOG ON TRIP: Will is bringing his dog. Prefer meals that don\'t require long unattended cooking. Note dog-friendly meal timing considerations.'
     : ''
 
+  const feedbackSection = feedbackHistory
+    ? `\nPAST MEAL FEEDBACK:\n${feedbackHistory}\nUse this history to avoid repeating meals rated "skip", suggest fewer "ok" meals, and lean into the style of "loved" meals.\n`
+    : ''
+
   const prompt = `You are a car camping meal planner. Generate a practical, delicious meal plan for this trip.
 
 TRIP DETAILS:
@@ -386,7 +392,7 @@ ${vehicleName ? `- Vehicle: ${vehicleName}` : ''}
 ${tripNotes ? `- Notes: ${tripNotes}` : ''}
 
 ${weatherSection}
-${dogSection}
+${dogSection}${feedbackSection}
 COOKING EQUIPMENT (from gear inventory):
 ${cookingGearSection || 'No cooking gear in inventory — suggest simple no-cook meals and recommend basic gear to add.'}
 

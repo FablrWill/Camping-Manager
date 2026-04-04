@@ -49,7 +49,8 @@ A self-coordinating work queue for v2.0 features. Each Claude Code session claim
 | S09 | Smart inbox / intake          | 24    | ✅ Done 2026-04-03 | Sonnet, normal | S08        |
 | S10 | Home Assistant integration    | 33    | ⏸ Blocked (hardware ~mid-Apr) | Sonnet, normal | S09        |
 | S11 | Meal planning core            | 34    | ✅ Done 2026-04-03 | Sonnet, normal | S07        |
-| S12 | Meal planning: shopping, prep & feedback | 35 | 🔄 In Progress 2026-04-03 | Sonnet, normal | S11 |
+| S12 | Meal planning: shopping, prep & feedback | 35 | ✅ Done 2026-04-04 | Sonnet, normal | S11 |
+| S13 | Mac mini agent jobs infrastructure    | 36    | 🔄 In Progress 2026-04-04 | Sonnet, normal | —          |
 
 **Why this order matters (conflict groups):**
 
@@ -61,6 +62,7 @@ A self-coordinating work queue for v2.0 features. Each Claude Code session claim
 - S10 depends on S09 (schema settled, nav stable); touches `SettingsClient.tsx`, `DashboardClient.tsx`, `schema.prisma` — new files dominate, low conflict with prior sessions
 - S11 touches `schema.prisma`, `lib/claude.ts` (same as S07), `TripsClient.tsx` (same as S07), `TripPrepClient.tsx` (same as S07) — S10 dependency removed (meal planning doesn't need HA; was a merge-conflict precaution only, no longer relevant with sequential execution)
 - S12 touches same files as S11 plus `DashboardClient.tsx` — must wait for S11
+- S13 is mostly new files (`agent_jobs` migration, new API routes, new UI component) — no conflicts with prior sessions
 
 ---
 
@@ -576,6 +578,63 @@ Headers: Authorization: Bearer {token}
 
 ---
 
+### S13 — Mac Mini Agent Jobs Infrastructure (Phase 36)
+
+**What to build:** The plumbing that lets the Mac mini run background tasks and feed results back into the app. This is pure infrastructure — no job logic yet, just the job queue, API, and UI hooks. One job type (gear data enrichment) proves it end-to-end.
+
+**User story:** Will adds a new gear item. The app queues an enrichment job. The Mac mini picks it up, fetches product specs via Claude, and writes them back. Next time Will loads the gear page, the specs are there — no waiting, no manual lookup.
+
+**Key files:**
+- `prisma/schema.prisma` — add `AgentJob` model
+- `prisma/migrations/` — migration for the new table
+- `app/api/agent/jobs/route.ts` — GET (poll pending jobs) + POST (create job)
+- `app/api/agent/results/route.ts` — POST endpoint Mac mini writes completed results to
+- `components/AgentJobsBadge.tsx` — small badge component showing pending/new result count
+- `components/DashboardClient.tsx` — surface new results inline (deal alert, enriched data)
+- `components/GearClient.tsx` — trigger enrichment job when gear is added
+
+**Schema:**
+```prisma
+model AgentJob {
+  id          String   @id @default(cuid())
+  type        String   // "gear_enrichment" | "weather_analysis" | "deal_check" | etc.
+  status      String   @default("pending") // pending | running | done | failed
+  triggeredBy String   @default("manual") // manual | schedule
+  payload     String   // JSON input
+  result      String?  // JSON output (null until done)
+  createdAt   DateTime @default(now())
+  completedAt DateTime?
+}
+```
+
+**API contract:**
+- `GET /api/agent/jobs?status=pending` — Mac mini polls this to find work
+- `POST /api/agent/jobs` — app creates a job `{ type, payload, triggeredBy }`
+- `POST /api/agent/results` — Mac mini writes back `{ jobId, result }`, sets status=done
+
+**First job type — gear_enrichment:**
+- Triggered when a gear item is saved without a brand/notes
+- Payload: `{ gearItemId, name, category }`
+- Mac mini Claude fetches product specs, returns `{ brand, notes, weight }`
+- App writes the enriched fields back to the GearItem
+
+**Acceptance criteria:**
+- `AgentJob` table exists and migrations pass
+- App can create a pending job via POST
+- Mac mini can poll GET and get pending jobs
+- Mac mini can write results via POST, status flips to done
+- Dashboard shows a badge when there are new (done, unread) results
+- Gear enrichment job triggers on gear save and result appears in gear detail
+- `npm run build` passes
+
+**Constraints:**
+- Out of scope: the actual Mac mini runner script (that's a separate session or manual setup)
+- Out of scope: job scheduling/cron (S13 is manual/triggered only — scheduling comes later)
+- Out of scope: deal tracking, weather jobs — those are future job types that slot into this infrastructure
+- No auth on the results endpoint for now — it's LAN-only behind Tailscale, same as the app
+
+---
+
 
 
 Copy-paste one of these to begin each session. All use **claude-sonnet-4-6**, normal effort (no special flags needed).
@@ -662,6 +721,13 @@ Pull origin main, then claim S11 in .planning/V2-SESSIONS.md (mark it 🔄 In Pr
 **S12 — Meal planning: shopping, prep & feedback** *(start only after S11 is ✅ Done)*
 ```
 Pull origin main, then claim S12 in .planning/V2-SESSIONS.md (mark it 🔄 In Progress, commit + push the claim). Then run /gsd:plan-phase 27 to plan the meal shopping/prep/feedback feature — the full spec is in V2-SESSIONS.md under S12. After planning is approved, run /gsd:execute-phase 27. When done, mark S12 ✅ Done in V2-SESSIONS.md, commit, and push.
+```
+
+---
+
+**S13 — Mac mini agent jobs infrastructure**
+```
+Pull origin main, then claim S13 in .planning/V2-SESSIONS.md (mark it 🔄 In Progress, commit + push the claim). Then run /gsd:plan-phase 36 to plan the Mac mini background agent infrastructure — the full spec is in V2-SESSIONS.md under S13. After planning is approved, run /gsd:execute-phase 36. When done, mark S13 ✅ Done in V2-SESSIONS.md, commit, and push.
 ```
 
 ---

@@ -133,6 +133,7 @@ All 5 phases of v1.0 shipped. The app has: executive trip prep, NC camping knowl
 | Gear photo identification | ❌ Planned | Snap a photo → Claude identifies brand/type/specs |
 | Safety float plan | ✅ Done | Phase 7 — Claude-composed plain text email via Gmail to emergency contact |
 | Nearby trails & recreation API | ❌ Planned | OSM, NPS, Recreation.gov near a saved location |
+| Activities gear category + trip planner integration | ❌ Planned | Add `activities` category to gear (kayak, telescope, etc.). Trip planner evaluates location conditions (water access, light pollution, trails) and recommends relevant activity gear. E.g. dark sky site → suggest telescope; lake access → suggest kayak. |
 | Fuel & last stop planner | ❌ Planned | Route-aware: last gas, grocery, ice before backcountry |
 | *...and more in FEATURE-PHASES.md* | | |
 

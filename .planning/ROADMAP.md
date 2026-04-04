@@ -6,7 +6,8 @@
 - ✅ **v1.1 Close the Loop** — Phases 6-11 (shipped 2026-04-02) — [archive](milestones/v1.1-ROADMAP.md)
 - ✅ **v1.2 Ship It** — Phases 12-15 (shipped 2026-04-03)
 - ✅ **v2.0 Smarter & Sharper** — Phases 16-24 (shipped 2026-04-03)
-- 🚧 **v3.0 Gear Intelligence + Day-Of** — Phases 25-33 (in progress)
+- 🚧 **v3.0 Gear Intelligence + Day-Of** — Phases 25-35 (in progress)
+- 📋 **v4.0 Backlog** — Voice, social, signal map, background agent, and more — see [Backlog section](#backlog-v40) below
 
 ## Phases
 
@@ -71,7 +72,7 @@
 
 **Wave 3 — Depends on Wave 2:**
 - [ ] **Phase 30: Gear Product Research** - AI-powered "Research" button, best-in-class comparison, upgrade recommendations
-- [ ] **Phase 31: Dark Sky & Astro Info** - Bortle class, moon phase, sunrise/sunset per location and trip dates
+- [ ] **Phase 31: Dark Sky, Astro Info & Activity Gear Recommendations** - Bortle/moon/sunrise data + activities gear category + trip planner activity suggestions
 
 **Wave 4 — Depends on Wave 3:**
 - [ ] **Phase 32: Deal Monitoring** - Target price on wishlist items, on-demand price check via Claude, deal alerts
@@ -465,18 +466,13 @@ Plans:
   3. Research results stored and dated (staleness tracking >90 days)
   4. Dashboard or gear page surfaces top upgrade opportunities
   5. `npm run build` passes
-**Plans**: 3 plans
-
-Plans:
-- [ ] 34-01-PLAN.md — Schema migration (normalize MealPlan + create Meal table) + Zod schemas
-- [ ] 34-02-PLAN.md — lib/claude.ts updates (bringingDog, regenerateMeal) + all API routes
-- [ ] 34-03-PLAN.md — MealPlanClient component + TripPrepClient wiring + TripsClient badge
+**Plans**: 0/TBD
 
 **Parallelization notes:**
 - Wave 3 — can run parallel with Phase 31
 
-### Phase 31: Dark Sky & Astro Info
-**Goal**: Show Bortle class, moon phase, sunrise/sunset for trip locations and dates — useful for stargazing trips and photography
+### Phase 31: Dark Sky, Astro Info & Activity Gear Recommendations
+**Goal**: Show Bortle class, moon phase, sunrise/sunset per location/trip; add `activities` gear category (kayak, telescope, projector, speakers, etc.); trip planner agent infers location suitability from existing notes and surfaces owned/wishlist activity gear as accept/reject suggestions
 **Depends on**: None (independent, but lower priority)
 **Requirements**: SHOP-01, SHOP-02, SHOP-03, SHOP-04, SHOP-05, SHOP-06, PREP-01, PREP-02, PREP-03, PREP-04, FEED-01, FEED-02, FEED-03, FEED-04, DASH-01, TABS-01
 **Success Criteria** (what must be TRUE):
@@ -484,13 +480,11 @@ Plans:
   2. Moon phase displayed for each night of the trip
   3. Bortle class (light pollution) shown for trip location
   4. Data sourced from free APIs (no API key required)
-  5. `npm run build` passes
-**Plans**: 3 plans
-
-Plans:
-- [ ] 34-01-PLAN.md — Schema migration (normalize MealPlan + create Meal table) + Zod schemas
-- [ ] 34-02-PLAN.md — lib/claude.ts updates (bringingDog, regenerateMeal) + all API routes
-- [ ] 34-03-PLAN.md — MealPlanClient component + TripPrepClient wiring + TripsClient badge
+  5. `activities` category exists in `lib/gear-categories.ts` with leisure/entertainment scope
+  6. Trip planner agent suggests relevant activity gear based on inferred location conditions
+  7. Wishlist activity items surfaced as nudges ("you've been eyeing a telescope…")
+  8. `npm run build` passes
+**Plans**: 0/TBD
 
 **Parallelization notes:**
 - Wave 3 — can run parallel with Phase 30
@@ -628,11 +622,11 @@ Plans:
 | 28. Weather-Aware Clothing | v3.0 | 1/1 | Complete | 2026-04-03 |
 | 29. Vehicle Pre-Trip Checklist | v3.0 | 3/3 | Complete    | 2026-04-03 |
 | 30. Gear Product Research | v3.0 | 0/TBD | Not started | - |
-| 31. Dark Sky & Astro Info | v3.0 | 0/TBD | Not started | - |
+| 31. Dark Sky, Astro & Activity Gear | v3.0 | 0/TBD | Not started | - |
 | 32. Deal Monitoring | v3.0 | 0/TBD | Not started | - |
 | 33. Conversational Trip Planner | v3.0 | 4/4 | Complete    | 2026-04-03 |
 | 34. Home Assistant Integration | v3.0 | 4/4 | Complete    | 2026-04-04 |
-| 35. Meal Planning Core | v3.0 | 0/TBD | Not started | - |
+| 35. Meal Planning Core | v3.0 | 1/5 | In Progress|  |
 | 36. Meal Planning: Shopping/Prep/Feedback | v3.0 | 0/TBD | Not started | - |
 
 ### Phase 33: Conversational Trip Planner
@@ -648,7 +642,7 @@ Plans:
   5. "Add manually" escape hatch opens the old static form
   6. Trip-creation conversations are persisted to the database
   7. `npm run build` passes
-**Plans:** 4/4 plans complete
+**Plans:** 1/5 plans executed
 
 Plans:
 - [x] 33-00-PLAN.md — Wave 0 test stubs (trip planner tools + ChatBubble extraction)
@@ -660,6 +654,71 @@ Plans:
 - Plan 33-00 is Wave 0 — test stubs, no dependencies
 - Plans 33-01 and 33-02 are Wave 1 — parallel, depend on 33-00, no file overlap
 - Plan 33-03 is Wave 2 — depends on both 33-01 (API route) and 33-02 (ChatClient props)
+
+---
+
+## Backlog (v4.0+)
+
+Ideas captured from conversations and planning sessions that haven't been phased yet. These are real intentions, not wishlist noise — each one was explicitly discussed or directly derived from Will's use patterns.
+
+### AI & Voice
+
+| Idea | Source | Notes |
+|------|--------|-------|
+| **Voice Ghostwriter** | IDEAS.md | Talk to the agent, it interviews you and writes a polished journal entry. Voice-first. Anytime, not just drive home. |
+| **Siri/Reminders Inbox** | IDEAS.md | Read Apple Reminders, Claude triages items (gear wishlist, spots, ideas, todos) and routes them into the app. Preserve Siri capture habit. |
+| **Post-Trip Auto-Review** | IDEAS.md | After a trip ends: what did you forget, what didn't you use, rate meals/spots. Feeds packing list + meal plan history. |
+| **Agent Orchestration Layer** | IDEAS.md | Route tasks to Haiku/Sonnet/Opus by complexity. Logging + cost tracking per feature. Keeps AI costs sustainable at scale. |
+
+### Campsite & Location Intelligence
+
+| Idea | Source | Notes |
+|------|--------|-------|
+| **Personal Signal Map** | FEATURE-PHASES.md | Log cell (carrier + bars) and Starlink quality at every campsite over time. Builds a real-world signal database. |
+| **Seasonal Ratings** | FEATURE-PHASES.md | Rate a spot differently by season. A great fall spot may be terrible in summer. |
+| **GPX Import** | FEATURE-PHASES.md | Import trail routes from AllTrails/Wikiloc GPX exports. Overlay on map, attach to location. |
+| **Google Maps List Import** | FEATURE-PHASES.md | Paste a shared Google Maps list → pull all pins as draft saved locations. |
+| **Fire Ban Alerts** | IDEAS.md | Scrape/monitor fire restriction status for target regions. Alert before trip. |
+| **Wildlife & Safety Protocols** | IDEAS.md | Per-location bear country, flash flood risk, snake season warnings. |
+| **Altitude Awareness** | IDEAS.md | Flag altitude effects (cooking, sleep, hydration) for high-elevation spots. |
+| **Water Sources** | IDEAS.md | Note water availability per location (creek, spring, none). Factor into resupply planning. |
+| **Campendium / freecampsites Integration** | IDEAS.md | Pull reviews and ratings from public campsite databases for saved/searched spots. |
+
+### Mac Mini Background Agent
+
+| Idea | Source | Notes |
+|------|--------|-------|
+| **Async Worker Architecture** | IDEAS.md | Mac mini polls for jobs, executes, writes results back to app. For deals, enrichment, heavy AI, scheduled tasks. |
+| **Gear Deal Tracking** | IDEAS.md | Monitor REI/Amazon/Backcountry for price drops on wishlist items. Good first job type to prove the pattern. |
+| **Gear Maintenance Reminders** | IDEAS.md | Based on last-used date + interval. Remind to clean stove, reseal tent, charge EcoFlow. |
+| **Pre-Trip Fire/Weather Scanning** | IDEAS.md | 7 days out: fire bans, weather windows, trail conditions for planned trip locations. |
+| **Photo Enrichment Pipeline** | IDEAS.md | Batch: EXIF → GPS → reverse geocode → AI caption. Heavy, perfect for background. |
+
+### Trip Planning & Prep
+
+| Idea | Source | Notes |
+|------|--------|-------|
+| **Camp Kit Presets** | IDEAS.md | Save loadout templates (Weekend Warrior, Remote Office, Extended Stay). Generate packing from preset + trip override. |
+| **Cost Tracking** | IDEAS.md | Log gas, permits, groceries, gear per trip. Gear ROI (cost per trip used). |
+| **Road Trip Layer** | IDEAS.md | Surface scenic stops, food, rest areas, and points of interest along the route to camp. |
+| **Leave No Trace Pack-Out Checklist** | IDEAS.md | Location-specific LNT checklist before you drive away. |
+| **First Aid & Emergency Info** | IDEAS.md | Nearest hospital, ranger station, SAR contact for each location. |
+| **Permit Agent (Auto-Fill)** | IDEAS.md | Agent fills out Recreation.gov / USFS permit forms on Will's behalf. Not just storing confirmations — actually submitting. |
+
+### Gear
+
+| Idea | Source | Notes |
+|------|--------|-------|
+| **Gear Lending Tracker** | IDEAS.md | Track who borrowed what and when. |
+| **Gear ROI Tracker** | IDEAS.md | Cost per trip. Surface underused expensive gear. Help justify or regret purchases. |
+| **Telescope / Stargazing Kit** | IDEAS.md | Telescope subcategory, astro conditions forecast, observing log. Pairs with Dark Sky feature. |
+
+### Social & Sharing
+
+| Idea | Source | Notes |
+|------|--------|-------|
+| **Shareable Trip Reports** | IDEAS.md | Journal + photos + route = a shareable summary or personal archive. |
+| **Buddy Trip Mode** | IDEAS.md | Share trip with a friend, split packing list, no duplicate gear between vehicles. |
 
 ---
 *Full phase details for shipped milestones: see archives in `.planning/milestones/`*

@@ -60,7 +60,27 @@ export async function POST(
       (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
     )
 
-    // 5. Call Claude generateMealPlan with bringingDog
+    // 5. Fetch prior meal feedback from previous plans for this trip
+    const priorFeedback = await prisma.mealFeedback.findMany({
+      where: {
+        meal: {
+          mealPlan: { tripId },
+        },
+      },
+      include: { meal: { select: { name: true, slot: true } } },
+      orderBy: { createdAt: 'desc' },
+    })
+
+    let feedbackHistory: string | undefined
+    if (priorFeedback.length > 0) {
+      const lines = priorFeedback.map((fb) => {
+        const note = fb.note ? ` — "${fb.note}"` : ''
+        return `- ${fb.meal.name} (${fb.meal.slot}): ${fb.rating}${note}`
+      })
+      feedbackHistory = lines.join('\n')
+    }
+
+    // 6. Call Claude generateMealPlan with bringingDog and feedback history
     const result = await generateMealPlan({
       tripName: trip.name,
       startDate: startDate.toISOString().split('T')[0],
@@ -73,9 +93,10 @@ export async function POST(
       cookingGear: cookingGear as GearItem[],
       weather,
       bringingDog: trip.bringingDog,
+      feedbackHistory,
     })
 
-    // 6. Map Claude result to Meal rows
+    // 7. Map Claude result to Meal rows
     const mealRows: {
       day: number
       slot: string
@@ -140,7 +161,7 @@ export async function POST(
       }
     }
 
-    // 7. Persist: upsert MealPlan header, delete old meals, create new meals, update Trip
+    // 8. Persist: upsert MealPlan header, delete old meals, create new meals, update Trip
     const now = new Date()
     await prisma.$transaction(async (tx) => {
       // Upsert MealPlan header
@@ -170,11 +191,14 @@ export async function POST(
       })
     })
 
-    // 8. Fetch and return the complete plan
+    // 9. Fetch and return the complete plan
     const savedPlan = await prisma.mealPlan.findUnique({
       where: { tripId },
       include: {
-        meals: { orderBy: [{ day: 'asc' }, { slot: 'asc' }] },
+        meals: {
+          orderBy: [{ day: 'asc' }, { slot: 'asc' }],
+          include: { feedback: true },
+        },
       },
     })
 

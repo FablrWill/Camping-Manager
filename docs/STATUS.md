@@ -1,7 +1,7 @@
 # Project Status — Outland OS
 
 ## Quick Pickup
-> **Last session:** 2026-04-03 (doc sync — corrected stale status markers across TASKS.md + STATUS.md)
+> **Last session:** 2026-04-03 (Session 29 — Mac mini: AI gear ID, iMessage pipeline, Phase 14 deployment)
 > **Milestone v1.0:** ✅ Complete — all 5 phases shipped 2026-04-01
 > **Milestone v1.1:** ✅ Complete — Phases 6-11 shipped 2026-04-02
 > **Milestone v1.2:** ✅ Complete — Phases 12-15 shipped 2026-04-03
@@ -26,6 +26,7 @@
 - **Learning Loop (Phase 9)** — Post-trip gear feedback, voice debrief improvements
 - **Offline Read Path (Phase 10)** — Dual-mode components, tile prefetch, offline write queue
 - **v1.1 Polish (Phase 11)** — Final v1.1 hardening and polish
+- **Mobile data entry (Session 29)** — AI gear identification (link or photo → auto-fill form), iMessage webhook pipeline (any link/screenshot/text → classify → save to gear/locations/knowledge base)
 
 ## What's Built (v1.2)
 - **Build & Clean (Phase 12)** — Production build fixed, lint/type errors cleared, 158 tests passing, Gemini cross-AI review
@@ -63,8 +64,9 @@
 - Voice debrief end-to-end flow (needs device + mic + running server)
 - Recommendation cards in chat (needs running server + Claude API)
 - Chat streaming on mobile (needs device)
+- AI gear identification (paste Amazon link or upload screenshot on phone)
+- iMessage pipeline (requires macOS Shortcut setup — see session-29.md)
 - Conversational trip planner (Phase 33) — TripPlannerSheet + TripsClient wiring (needs running server)
-- Production deployment on Mac mini — PM2 startup + photo migration (needs Mac mini access)
 
 ## Session History
 - **Session 1** (2026-03-29) — Project kickoff, planning, docs
@@ -98,7 +100,7 @@
 - **Session 26** (2026-04-02) — Phase 10 planning revision — incorporated cross-AI review feedback.
 - **Session 27** (2026-04-02) — Phase 14 execution — PM2 config, deploy script, backup/watchdog, Mac mini setup guide.
 - **Session 28** (2026-04-03) — S01 photo bulk import: queue fix + verification (feature already shipped).
-- **Session 29** (2026-04-03) — Doc sync: reconcile STATUS/TASKS/CHANGELOG, fix ecosystem.config.js lint blocker.
+- **Session 29** (2026-04-03) — Mac mini: AI gear ID (link/photo → auto-fill), iMessage knowledge pipeline, Phase 14 production deployment (PM2, launchd, backups, .env fixed to real DB).
 
 ## Key Files
 - `TASKS.md` — What's done, what's next, where to start
