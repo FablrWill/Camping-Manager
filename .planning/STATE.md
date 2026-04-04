@@ -21,7 +21,7 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-01)
 
 **Core value:** Personal camping second brain — a closed-loop system that plans, executes, and learns from every trip
-**Current focus:** Phase 35 — meal-planning-shopping-prep-feedback
+**Current focus:** v4.0 backlog — S28 shareable trip reports in progress; S20-S27, S29-S30 complete
 
 ## Current Position
 
@@ -174,3 +174,9 @@ None yet.
 Last session: 2026-04-04
 Last activity: Completed S31 Destination Discovery + S28 Shareable Trip Reports
 Resume file: None
+
+## Quick Tasks Completed
+
+| ID | Date | Description |
+|----|------|-------------|
+| 260404-jal | 2026-04-04 | GSD artifact audit and backfill — created phase folders for S16-S30, filled gaps in phases 21/32/36/37, updated CHANGELOG/TASKS/V2-SESSIONS |
