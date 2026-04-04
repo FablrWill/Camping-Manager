@@ -264,3 +264,32 @@ export const NormalizedMealPlanResultSchema = z.object({
 });
 
 export type NormalizedMealPlanResult = z.infer<typeof NormalizedMealPlanResultSchema>;
+
+// --- Shopping List Schemas (Phase 35 — consolidated ingredient list) ---
+
+export const ShoppingListResultSchema = z.object({
+  items: z.array(z.object({
+    item: z.string(),
+    quantity: z.string(),
+    unit: z.string().default(''),
+    category: z.enum(['produce', 'protein', 'dairy', 'dry', 'frozen', 'other']).default('other'),
+  })),
+});
+
+export type ShoppingListResult = z.infer<typeof ShoppingListResultSchema>;
+
+// --- Prep Guide Schemas (Phase 35 — pre-trip and at-camp prep) ---
+
+export const PrepGuideResultSchema = z.object({
+  beforeLeave: z.array(z.object({
+    step: z.string(),
+    meals: z.array(z.string()).default([]),
+  })),
+  atCamp: z.array(z.object({
+    day: z.number(),
+    mealSlot: z.string(),
+    steps: z.array(z.string()),
+  })),
+});
+
+export type PrepGuideResult = z.infer<typeof PrepGuideResultSchema>;

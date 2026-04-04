@@ -1,5 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk'
-import { parseClaudeJSON, PackingListResultSchema, MealPlanResultSchema, DepartureChecklistResultSchema, DepartureChecklistResult, TripSummaryResultSchema, type TripSummaryResult, GearDocumentResultSchema, type GearDocumentResult, VehicleChecklistResultSchema, type VehicleChecklistResult, NormalizedMealPlanResultSchema, type NormalizedMealPlanResult, SingleMealSchema, type SingleMeal } from '@/lib/parse-claude'
+import { parseClaudeJSON, PackingListResultSchema, MealPlanResultSchema, DepartureChecklistResultSchema, DepartureChecklistResult, TripSummaryResultSchema, type TripSummaryResult, GearDocumentResultSchema, type GearDocumentResult, VehicleChecklistResultSchema, type VehicleChecklistResult, NormalizedMealPlanResultSchema, type NormalizedMealPlanResult, SingleMealSchema, type SingleMeal, ShoppingListResultSchema, type ShoppingListResult, PrepGuideResultSchema, type PrepGuideResult } from '@/lib/parse-claude'
 import { CATEGORY_EMOJI, CATEGORIES } from '@/lib/gear-categories'
 
 const anthropic = new Anthropic({
@@ -848,4 +848,120 @@ Respond ONLY with valid JSON (no markdown):
   }
 
   return parseResult.data
+}
+
+// --- Phase 35: Shopping List & Prep Guide Generation ---
+
+export async function generateShoppingList(params: {
+  tripName: string
+  meals: Array<{
+    name: string
+    ingredients: Array<{ item: string; quantity: string; unit: string }>
+  }>
+}): Promise<ShoppingListResult> {
+  const { tripName, meals } = params
+
+  const mealLines = meals.map((m) => {
+    const ings = m.ingredients
+      .map((i) => `    - ${i.quantity} ${i.unit} ${i.item}`.trim())
+      .join('\n')
+    return `  ${m.name}:\n${ings}`
+  }).join('\n')
+
+  const prompt = `You are a shopping list optimizer for car camping trips.
+
+TRIP: ${tripName}
+
+MEALS AND INGREDIENTS:
+${mealLines}
+
+INSTRUCTIONS:
+1. Consolidate duplicate ingredients across meals — if multiple meals use olive oil, combine into one entry.
+2. Sum quantities when units match and are numeric (e.g., "2 tbsp" + "1 tbsp" → "3 tbsp").
+3. Categorize each item as one of: produce, protein, dairy, dry, frozen, other.
+4. Keep item names lowercase and concise.
+5. Return ONLY valid JSON (no markdown fences).
+
+JSON format:
+{"items": [{"item": "sweet potatoes", "quantity": "2", "unit": "lbs", "category": "produce"}]}`
+
+  try {
+    const message = await anthropic.messages.create({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 2048,
+      messages: [{ role: 'user', content: prompt }],
+    })
+
+    const text = message.content[0].type === 'text' ? message.content[0].text : ''
+    const parseResult = parseClaudeJSON(text, ShoppingListResultSchema)
+    if (!parseResult.success) {
+      throw new Error(parseResult.error)
+    }
+
+    return parseResult.data
+  } catch (error) {
+    console.error('Failed to generate shopping list:', error)
+    throw error
+  }
+}
+
+export async function generatePrepGuide(params: {
+  tripName: string
+  meals: Array<{
+    day: number
+    slot: string
+    name: string
+    ingredients: Array<{ item: string; quantity: string; unit: string }>
+    cookInstructions: string | null
+    prepNotes: string | null
+  }>
+}): Promise<PrepGuideResult> {
+  const { tripName, meals } = params
+
+  const mealLines = meals.map((m) => {
+    const ings = m.ingredients.map((i) => `${i.quantity} ${i.unit} ${i.item}`.trim()).join(', ')
+    const cook = m.cookInstructions ? `\n    Cook: ${m.cookInstructions}` : ''
+    const prep = m.prepNotes ? `\n    Prep notes: ${m.prepNotes}` : ''
+    return `  Day ${m.day} ${m.slot} — ${m.name}\n    Ingredients: ${ings}${cook}${prep}`
+  }).join('\n')
+
+  const prompt = `You are a meal prep guide writer for car camping trips.
+
+CONTEXT: Car camping — full cooler available. Will has a vacuum sealer and sous vide at home for pre-trip prep. Prefer one-pot or simple multi-component meals. Minimize dishes.
+
+TRIP: ${tripName}
+
+MEALS:
+${mealLines}
+
+INSTRUCTIONS:
+1. Identify everything that can be prepared at home before leaving (vacuum-seal, marinate, sous vide, chop, pre-mix, etc.).
+2. Group "atCamp" steps by day and meal slot — only steps that must happen at camp.
+3. Steps should be concise action verbs (e.g., "Vacuum seal marinated chicken thighs").
+4. Return ONLY valid JSON (no markdown fences).
+
+JSON format:
+{
+  "beforeLeave": [{"step": "Vacuum seal marinated chicken thighs", "meals": ["Day 1 Dinner"]}],
+  "atCamp": [{"day": 1, "mealSlot": "dinner", "steps": ["Heat cast iron over fire", "Sear chicken 4 min per side"]}]
+}`
+
+  try {
+    const message = await anthropic.messages.create({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 2048,
+      messages: [{ role: 'user', content: prompt }],
+    })
+
+    const text = message.content[0].type === 'text' ? message.content[0].text : ''
+    const parseResult = parseClaudeJSON(text, PrepGuideResultSchema)
+    if (!parseResult.success) {
+      throw new Error(parseResult.error)
+    }
+
+    return parseResult.data
+  } catch (error) {
+    console.error('Failed to generate prep guide:', error)
+    throw error
+  }
 }
