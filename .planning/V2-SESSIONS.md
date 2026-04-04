@@ -65,6 +65,10 @@ A self-coordinating work queue for v2.0 features. Each Claude Code session claim
 | S24 | Siri/Reminders inbox                 | —     | ⬜ Ready          | Sonnet, normal | —          |
 | S25 | LNT pack-out checklist               | —     | ⬜ Ready          | Sonnet, normal | —          |
 | S26 | Gear lending tracker                 | —     | ⬜ Ready          | Sonnet, normal | —          |
+| S27 | Gear maintenance reminders           | —     | ⬜ Ready          | Sonnet, normal | —          |
+| S28 | Shareable trip reports               | —     | ⬜ Ready          | Sonnet, normal | —          |
+| S29 | Altitude awareness callouts          | —     | ⬜ Ready          | Sonnet, normal | —          |
+| S30 | Road trip scenic layer               | —     | ⬜ Ready          | Sonnet, normal | —          |
 
 **Why this order matters (conflict groups):**
 
@@ -88,6 +92,11 @@ A self-coordinating work queue for v2.0 features. Each Claude Code session claim
 - S24 touches `lib/intake/triage.ts`, new `lib/intake/extractors/reminders.ts`, `components/InboxClient.tsx` — no conflict with S25 or S26; **S24, S25, S26 can all run in parallel**
 - S25 touches `prisma/schema.prisma` (new `lntChecklistResult` field on Trip), new `app/api/trips/[id]/lnt/route.ts`, new `components/LNTChecklistCard.tsx`, `components/TripPrepClient.tsx` — **S25 must not run in parallel with any session that also touches schema.prisma**
 - S26 touches `prisma/schema.prisma` (new `GearLoan` model), new `app/api/gear/[id]/loans/route.ts`, new `components/GearLoanPanel.tsx`, `components/GearClient.tsx` — **S25 and S26 both touch schema.prisma; run them sequentially or accept a merge on that one file**
+- S27 touches only `components/GearClient.tsx` (new maintenance tab) and new `components/GearMaintenancePanel.tsx`, `app/api/gear/[id]/maintenance/route.ts` — **no schema change; S27 can run in parallel with S24, S29, S30**
+- S28 touches `prisma/schema.prisma` (add `shareToken` to Trip), new `app/trips/[id]/share/[token]/page.tsx`, `app/api/trips/[id]/share/route.ts` — **run after S25 or S26 to avoid schema conflict; otherwise independent**
+- S29 touches only `components/LocationForm.tsx` (altitude warning inline) and `components/TripPrepClient.tsx` (altitude callout card) — **no schema change; fully independent, can run in parallel with S24, S27, S30**
+- S30 touches `lib/overpass.ts` (new scenic query), new `components/ScenicStopsCard.tsx`, `components/TripPrepClient.tsx` (add card) — **no schema change; S30 must not run in parallel with S29 (both touch TripPrepClient); run sequentially or accept a one-line merge**
+- **Maximum parallelism right now: S24 + S27 + S29 can all run simultaneously. S30 runs after S29 merges (or in parallel accepting a small TripPrepClient conflict).**
 
 ---
 
@@ -1222,6 +1231,134 @@ Audit flagged icon-only buttons missing `aria-label`. Add `aria-label` to:
 - No new npm packages
 - No borrower contact lookup — just a plain name string
 - S25 and S26 both add to `prisma/schema.prisma` — if run in parallel, the session that finishes second must rebase/merge the migration from the first. Safer to run sequentially, or accept a one-line merge conflict on schema.prisma.
+
+---
+
+---
+
+### S27 — Gear Maintenance Reminders
+
+**What to build:** A "Maintenance" tab in gear detail that lets Will log maintenance events (cleaned, resealed, serviced, charged, inspected) and set a reminder interval. Surfaces overdue items as a badge on the gear page and as an agent job the Mac mini can ping about.
+
+**User story:** Will reseals his tent fly in March. He opens the tent in gear detail, taps "Maintenance", logs "Resealed fly" with interval "12 months". Next March, a badge appears on the gear page: "2 items due for maintenance." He taps it, sees the tent and his camp chair, handles them before the season.
+
+**No schema change needed.** Store maintenance log as a JSON blob on `GearItem.notes` extension? No — use a dedicated lightweight approach: store as an `AgentJob` with `type: "maintenance_log"` and `payload: { gearId, event, intervalDays, loggedAt }`. The Mac mini runner already queries `AgentJob` — it can surface overdue items.
+
+Actually, simpler: add two nullable fields via a **new migration** — `lastMaintenanceAt DateTime?` and `maintenanceIntervalDays Int?` on `GearItem`. Maintenance log entries go in a new `GearMaintenanceLog` model (id, gearItemId, event, loggedAt, notes). This is cleaner than blob storage and queryable.
+
+**Key files:**
+- `prisma/schema.prisma` — add `lastMaintenanceAt DateTime?` and `maintenanceIntervalDays Int?` to `GearItem`. Add new model:
+  ```
+  model GearMaintenanceLog {
+    id         String   @id @default(cuid())
+    gearItemId String
+    event      String   // "cleaned" | "resealed" | "serviced" | "charged" | "inspected" | "repaired" | other
+    notes      String?
+    loggedAt   DateTime @default(now())
+    gearItem   GearItem @relation(fields: [gearItemId], references: [id], onDelete: Cascade)
+    @@index([gearItemId])
+  }
+  ```
+  Add `maintenanceLogs GearMaintenanceLog[]` to `GearItem`. Run migration.
+- `app/api/gear/[id]/maintenance/route.ts` — GET returns all log entries + current interval settings; POST logs a new event (updates `lastMaintenanceAt` on `GearItem`); PATCH updates `maintenanceIntervalDays`.
+- `components/GearMaintenancePanel.tsx` — new component. Shows: next due date (amber if overdue, green if current), interval picker (None / 3mo / 6mo / 12mo / 24mo), "Log Maintenance" inline form (event type dropdown + optional notes), scrollable log history (event + date).
+- `components/GearClient.tsx` — add `'maintenance'` to the detailTab union. Add "Maintenance" tab button with a red dot badge if `lastMaintenanceAt + intervalDays < today`. Render `GearMaintenancePanel` in the tab panel.
+- `app/gear/page.tsx` (server component) — query for gear items where `maintenanceIntervalDays` is set and `lastMaintenanceAt + interval < now`. Pass `overdueMaintenanceCount` to `GearClient`. Show a banner: "🔧 2 items due for maintenance" at the top of the gear list.
+
+**Acceptance criteria:**
+- Can log a maintenance event and see it in history
+- Interval picker sets the reminder cadence
+- Overdue badge appears on the tab when maintenance is past due
+- Banner appears on gear page when any items are overdue
+- Build passes, no TypeScript errors
+
+**Constraints:**
+- No new npm packages
+- **S27 touches schema.prisma** — do not run in parallel with S25, S26, or S28
+
+---
+
+### S28 — Shareable Trip Reports
+
+**What to build:** A public read-only page for a trip — journal entry, key stats (dates, location, distance), gear highlights, and a map thumbnail. Will gets a shareable URL he can send to friends or save for himself.
+
+**User story:** Will finishes a 3-day trip to the Black Balsam area. He opens the trip, taps "Share Trip", gets a URL like `https://outland.local/trips/share/abc123def`. He texts it to his hiking buddy. The buddy opens it and sees Will's journal entry, the campsite name, the gear list highlights, and a map.
+
+**Key files:**
+- `prisma/schema.prisma` — add `shareToken String? @unique` to `Trip`. Run migration.
+- `app/api/trips/[id]/share/route.ts` — POST generates a `shareToken` (reuse `generateSlug()` from `lib/share-location.ts`) and saves it to the trip. Returns `{ shareUrl }`. DELETE clears the token (unshares).
+- `app/trips/share/[token]/page.tsx` — new **public** server-rendered page (no auth). Fetches trip by `shareToken`. Renders: trip name, dates, location name, journal entry (if set), gear packed count, meal plan summary (if set), and a static map image via OSM tile (or a simple lat/lon link to OpenStreetMap). Shows "This trip hasn't been shared" if token not found.
+- `components/TripsClient.tsx` — add "Share" button to past trip cards. Opens a small share sheet modal showing the URL + copy button + unshare option.
+
+**Acceptance criteria:**
+- Tapping "Share Trip" generates a URL and shows it in a copy-able sheet
+- Public page renders without authentication
+- Page shows graceful "not found" if token is invalid or cleared
+- Unshare clears the token and invalidates the URL
+- Build passes, no TypeScript errors
+
+**Constraints:**
+- No new npm packages — use `generateSlug()` from the existing `lib/share-location.ts`
+- Public page must not expose any private data beyond what's explicitly shown (no gear prices, no signal logs, no expense data)
+- **Touches schema.prisma** — run after S25/S26/S27 to avoid conflicts, or accept a merge
+
+---
+
+### S29 — Altitude Awareness Callouts
+
+**What to build:** Surface altitude information in two places: (1) a callout in `LocationForm` when a spot is above 6,000ft warning about cooking time adjustments, hydration, and sleep effects, and (2) an altitude card in trip prep when the destination is high-elevation.
+
+**User story:** Will saves a new spot at 8,400ft. The location form shows: "⛰️ High altitude — expect longer boil times, drink extra water, and allow a night to acclimatize." In trip prep, a card reminds him to bring extra fuel and adjust his backpacking stove settings.
+
+**`Location.altitude` already exists** — populated from EXIF on photo import. But it's not surfaced in the UI anywhere. This session wires it up.
+
+**Key files:**
+- `components/LocationForm.tsx` — after the coordinates fields, add an altitude display line when `altitude` is set (e.g. "📍 8,400 ft"). If altitude > 6000ft, show an inline callout panel: amber background, ⛰️ icon, 3-bullet list (cooking: add 1–2 min boil time per 1000ft above 5000ft; hydration: drink an extra litre/day; sleep: first night may feel rough, symptoms resolve by day 2). Thresholds: > 6000ft = mild callout, > 9000ft = stronger warning.
+- `lib/altitude.ts` — new small utility. `getAltitudeWarning(altitudeFt: number): { level: 'none' | 'moderate' | 'high', tips: string[] } | null`. Keeps the logic out of the component.
+- `components/TripPrepClient.tsx` — if the trip's location has altitude > 6000ft, render a compact `AltitudeCard` at the top of prep (above the PreTripAlertCard). Card shows elevation, level badge, and the 3 tips.
+- `components/AltitudeCard.tsx` — new small component. Props: `altitudeFt: number`. Uses `getAltitudeWarning()`. Renders: elevation badge (stone), tips list, a "Bring extra fuel" reminder if > 8000ft.
+- `app/api/trips/[id]/prep/route.ts` — include `location.altitude` in the prep API response so `TripPrepClient` has it without a second fetch.
+
+**Acceptance criteria:**
+- Altitude callout appears in LocationForm for any saved location above 6000ft
+- Callout does not appear below 6000ft
+- Trip prep altitude card appears when destination is high-elevation
+- `getAltitudeWarning()` unit-testable pure function
+- Build passes, no TypeScript errors
+
+**Constraints:**
+- No new npm packages
+- No schema changes — `Location.altitude` already exists
+- Altitude values in the DB are in **meters** (from EXIF) — convert to feet in `lib/altitude.ts` (`ft = meters * 3.28084`). Threshold for callout is 1828m (6000ft).
+- Do not add altitude input to LocationForm — it's derived from EXIF only, not user-entered
+
+---
+
+### S30 — Road Trip Scenic Layer
+
+**What to build:** Extend the existing last-stops card in trip prep with a "Scenic & POI" section — waterfalls, viewpoints, historic sites, and parks within 30 miles of the destination. Uses the same Overpass API already in `lib/overpass.ts`.
+
+**User story:** Will is planning a trip to Shining Rock. In trip prep, below the fuel/grocery stops, he sees: "🏞️ Nearby — Looking Glass Falls (4.2 mi), Sliding Rock (6.1 mi), Blue Ridge Parkway Overlook (8.3 mi)." He didn't know about Sliding Rock — now it's on his list.
+
+**Key files:**
+- `lib/overpass.ts` — add `fetchScenicStops(lat, lon): Promise<ScenicStop[]>`. New Overpass query targeting `tourism=viewpoint`, `tourism=waterfall`, `tourism=attraction`, `historic=*`, `leisure=nature_reserve` within 50km. Returns up to 6 results sorted by distance. New interface: `ScenicStop { name: string, type: 'viewpoint' | 'waterfall' | 'attraction' | 'historic' | 'nature', distanceMiles: number }`.
+- `app/api/trips/[id]/scenic-stops/route.ts` — new GET endpoint. Reads trip location coords, calls `fetchScenicStops`, returns the list. Returns `{ stops: [] }` if no location coords.
+- `components/ScenicStopsCard.tsx` — new card. Fetches on mount from `/api/trips/[id]/scenic-stops`. States: loading skeleton (3 rows), empty ("No scenic stops found nearby"), loaded list. Each row: emoji for type (🏞️ viewpoint, 💧 waterfall, 🏛️ historic, 🌿 nature) + name + distance. Tapping a row opens an OSM link for the location.
+- `components/TripPrepClient.tsx` — render `ScenicStopsCard` in the route/last-stops section (below the existing `LastStopsCard`, above the departure checklist).
+
+**Acceptance criteria:**
+- Scenic stops card appears in trip prep for trips with a location that has coordinates
+- Returns real OSM data (waterfalls, viewpoints, etc.) — not just fuel and grocery
+- Empty state when no POIs found nearby
+- Tapping a stop opens a map link
+- Build passes, no TypeScript errors
+
+**Constraints:**
+- No new npm packages — extends existing `lib/overpass.ts`
+- No schema changes
+- Cap results at 6 stops — Overpass can return a lot of noise, keep it scannable
+- OSM data quality varies — if a result has no name, skip it (filter in `fetchScenicStops`)
+- **S30 touches `TripPrepClient.tsx` (same as S29)** — run after S29 merges, or accept a one-section merge conflict
 
 ---
 
