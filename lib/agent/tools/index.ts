@@ -23,6 +23,8 @@ import { togglePackingItemTool, executeTogglePackingItem } from './togglePacking
 import { deleteConfirmTool, executeDeleteConfirm } from './deleteConfirm';
 // S31 destination discovery
 import { suggestDestinationTool, executeSuggestDestination } from './suggest-destination';
+// S33 persistent memory
+import { rememberTool, executeRemember } from './remember';
 
 // Legacy ALL_TOOLS export (Plan 01 pattern — kept for backward compat)
 export const ALL_TOOLS: Tool[] = [
@@ -48,6 +50,7 @@ export const AGENT_TOOLS: Tool[] = [
   deleteConfirmTool,
   recommendSpotsTool, // Phase 05 Plan 01
   suggestDestinationTool, // S31 destination discovery
+  rememberTool, // S33 persistent memory
 ];
 
 type ToolInput = Record<string, unknown>;
@@ -99,6 +102,8 @@ export async function executeAgentTool(name: string, input: ToolInput): Promise<
       return executeRecommendSpots(input as Parameters<typeof executeRecommendSpots>[0]);
     case 'suggest_destination':
       return executeSuggestDestination(input as Parameters<typeof executeSuggestDestination>[0]);
+    case 'remember':
+      return executeRemember(input as Parameters<typeof executeRemember>[0]);
     default:
       return `Error: Unknown tool: ${name}`;
   }
