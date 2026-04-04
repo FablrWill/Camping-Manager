@@ -80,6 +80,14 @@ A personal second brain for car camping — an AI-powered knowledge system that 
 - ✓ PDF download with content-type validation and local caching — Phase 25
 - ✓ GearDocumentsTab UI: find/list/add/download/delete within gear modal — Phase 25
 
+### Validated in Phase 41 (camp-kit-presets)
+
+- ✓ Pure logic kit utilities (extractGearIdsFromPackingList, computeGearIdsToRemove, buildReviewPrompt) — Phase 41
+- ✓ Save Claude-generated packing list as a reusable kit preset (D-01) — Phase 41
+- ✓ "Use Kit Presets" button surfaced in both empty and generated packing list states (D-02) — Phase 41
+- ✓ Multi-kit stacking with KitStackPanel, applied-kit chips, safe remove via computeGearIdsToRemove (D-03) — Phase 41
+- ✓ Optional "Ask Claude to review" gap analysis (500-token lightweight call, gated on applied kits) (D-04) — Phase 41
+
 ### Active
 
 None — v1.2 Ship It complete as of 2026-04-03.
@@ -103,7 +111,7 @@ None — v1.2 Ship It complete as of 2026-04-03.
 
 ## Current State
 
-Phase 34 complete (2026-04-04) — Meal Planning Core: normalized MealPlan schema (Meal rows replacing JSON blob), Claude integration with bringingDog param + per-meal regeneration, full REST API (generate/fetch/delete/regen per-meal), MealPlanClient with day-by-day collapsible UI wired into TripPrepClient, trip card status badges. Human UAT pending (34-HUMAN-UAT.md). Phase 29 also complete: Vehicle Pre-Trip Checklist.
+Phase 41 complete (2026-04-04) — Camp Kit Presets: reusable gear loadouts users can save from Claude-generated packing lists, stack with multi-select KitStackPanel, remove safely (shared items protected), and review via an optional lightweight Claude gap-analysis call. Human UAT pending (41-HUMAN-UAT.md).
 
 ## Current Milestone: ✅ v1.2 Ship It — COMPLETE (2026-04-03)
 
