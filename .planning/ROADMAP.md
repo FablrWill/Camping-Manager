@@ -677,10 +677,10 @@ Plans:
 **Goal**: Upgrade the existing kit preset system into a first-class feature — add "save packing list as template," explicit multi-kit stacking, and a Claude review step that flags trip-specific gaps on top of a preset base.
 
 **Status**: 🔲 Not started
-**Plans:** 3 plans
+**Plans:** 1/3 plans executed
 
 Plans:
-- [ ] 41-01-PLAN.md — Save-from-packing-list flow + preset picker discoverability
+- [x] 41-01-PLAN.md — Save-from-packing-list flow + preset picker discoverability
 - [ ] 41-02-PLAN.md — Multi-kit stacking UI (applied kits list + remove)
 - [ ] 41-03-PLAN.md — Claude augmentation step ("Ask Claude to review" after applying presets)
 

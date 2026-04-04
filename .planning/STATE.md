@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Smarter Feedback Loops
 status: executing
-last_updated: "2026-04-04T19:25:00.815Z"
-last_activity: "2026-04-04 - Completed quick task 260404-k4h: Add persistent chat agent memory (S33)"
+last_updated: "2026-04-04T19:42:26.523Z"
+last_activity: 2026-04-04
 progress:
   total_phases: 26
   completed_phases: 24
-  total_plans: 67
-  completed_plans: 67
+  total_plans: 70
+  completed_plans: 68
   percent: 40
 ---
 
@@ -20,14 +20,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-01)
 
 **Core value:** Personal camping second brain — a closed-loop system that plans, executes, and learns from every trip
-**Current focus:** v4.0 backlog — S28 shareable trip reports in progress; S20-S27, S29-S30 complete
+**Current focus:** Phase 41 — camp-kit-presets
 
 ## Current Position
 
-Phase: 35
-Plan: Not started
+Phase: 41 (camp-kit-presets) — EXECUTING
+Plan: 2 of 3
 Status: Ready to execute
-Last activity: 2026-04-04 - Completed quick task 260404-k4h: Add persistent chat agent memory (S33)
+Last activity: 2026-04-04
 
 Progress: [████░░░░░░] 40%
 
@@ -79,6 +79,7 @@ Progress: [████░░░░░░] 40%
 | Phase 35 P04 | 15 | 2 tasks | 4 files |
 | Phase 35 P05 | 8 | 4 tasks | 3 files |
 | Phase 38 P02 | 15 | 1 tasks | 2 files |
+| Phase 41-camp-kit-presets P01 | 3 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -139,6 +140,9 @@ Recent decisions affecting current work:
 - [Phase 35]: mealId validated as required in feedback POST before other fields — primary key for upsert pattern
 - [Phase 35]: buildMealHistorySection called with global last-10 feedback query (no trip scope) for cross-trip preference carry-forward
 - [Phase 38]: aria-label regex /liked/i matches disliked — use /^liked /i with word boundary in tests
+- [Phase 41-camp-kit-presets]: extractGearIdsFromPackingList uses type predicate filter to safely narrow items with defined gearId
+- [Phase 41-camp-kit-presets]: computeGearIdsToRemove uses Set for O(n) lookup on protected IDs across remaining kits
+- [Phase 41-camp-kit-presets]: Save as Kit UI: collapsed link pattern (amber underlined) expands inline — minimal footprint
 
 ### Pending Todos
 
@@ -171,9 +175,9 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-04T19:25:00.809Z
+Last session: 2026-04-04T19:42:26.518Z
 Last activity: Completed S31 Destination Discovery + S28 Shareable Trip Reports
-Resume file: .planning/phases/41-camp-kit-presets/41-UI-SPEC.md
+Resume file: None
 
 ## Quick Tasks Completed
 
