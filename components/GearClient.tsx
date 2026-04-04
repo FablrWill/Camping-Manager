@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react'
 import GearForm from './GearForm'
 import GearDocumentsTab from './GearDocumentsTab'
 import GearResearchCard from './GearResearchCard'
+import KitPresetsPanel from './KitPresetsPanel'
 import ChatContextButton from '@/components/ChatContextButton'
 import { CATEGORY_GROUPS, CATEGORIES, getCategoryEmoji, getCategoryLabel } from '@/lib/gear-categories'
 
@@ -68,6 +69,7 @@ export default function GearClient({ initialItems }: { initialItems: GearItem[] 
   const [isDeleting, setIsDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState<string | null>(null)
   const [isResearching, setIsResearching] = useState(false)
+  const [showKits, setShowKits] = useState(false)
 
   // Filter items
   const filtered = useMemo(() => {
@@ -199,12 +201,20 @@ export default function GearClient({ initialItems }: { initialItems: GearItem[] 
         <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-50 tracking-tight">
           {showWishlist ? 'Wish List' : 'My Gear'}
         </h1>
-        <button
-          onClick={openAdd}
-          className="bg-amber-600 hover:bg-amber-700 dark:bg-amber-500 dark:hover:bg-amber-400 text-white dark:text-stone-900 px-4 py-2 rounded-lg font-medium transition-colors"
-        >
-          + Add {showWishlist ? 'Wish' : 'Gear'}
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setShowKits(true)}
+            className="border border-stone-300 dark:border-stone-600 text-stone-700 dark:text-stone-300 px-3 py-2 rounded-lg font-medium text-sm hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors"
+          >
+            Kits
+          </button>
+          <button
+            onClick={openAdd}
+            className="bg-amber-600 hover:bg-amber-700 dark:bg-amber-500 dark:hover:bg-amber-400 text-white dark:text-stone-900 px-4 py-2 rounded-lg font-medium transition-colors"
+          >
+            + Add {showWishlist ? 'Wish' : 'Gear'}
+          </button>
+        </div>
       </div>
 
       {/* Owned / Wishlist toggle */}
@@ -460,6 +470,19 @@ export default function GearClient({ initialItems }: { initialItems: GearItem[] 
             </div>
           </div>
         </div>
+      )}
+
+      {/* Kit Presets Panel */}
+      {showKits && (
+        <KitPresetsPanel
+          allGear={items.filter((i) => !i.isWishlist).map((i) => ({
+            id: i.id,
+            name: i.name,
+            category: i.category,
+            brand: i.brand,
+          }))}
+          onClose={() => setShowKits(false)}
+        />
       )}
     </div>
   )

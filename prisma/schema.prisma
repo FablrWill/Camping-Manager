@@ -417,6 +417,17 @@ model AgentJob {
   @@index([createdAt])
 }
 
+// --- Camp Kit Presets ---
+
+model KitPreset {
+  id          String   @id @default(cuid())
+  name        String   // "Weekend Warrior", "Remote Office", "Extended Stay"
+  description String?
+  gearIds     String   // JSON array of gear item IDs
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
 // --- Phase 25: Gear Docs & Manual Finder ---
 
 model GearDocument {

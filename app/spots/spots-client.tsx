@@ -42,6 +42,9 @@ export default function SpotsClient({
   const [locations, setLocations] = useState(initialLocations);
   const [offlineLocations, setOfflineLocations] = useState<MapLocation[]>([]);
   const [showUpload, setShowUpload] = useState(false);
+  const [showGpxImport, setShowGpxImport] = useState(false);
+  const [gpxImporting, setGpxImporting] = useState(false);
+  const [gpxMessage, setGpxMessage] = useState<string | null>(null);
   const [photos, setPhotos] = useState(initialPhotos);
   const [darkMode, setDarkMode] = useState(false);
 
@@ -106,6 +109,44 @@ export default function SpotsClient({
   const toggleLayer = (key: keyof Layers) => {
     setLayers((prev) => ({ ...prev, [key]: !prev[key] }));
   };
+
+  async function handleGpxFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setGpxImporting(true);
+    setGpxMessage(null);
+    try {
+      const gpxText = await file.text();
+      const res = await fetch('/api/import/gpx', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ gpx: gpxText, createLocations: true }),
+      });
+      if (!res.ok) throw new Error('Import failed');
+      const data = await res.json() as {
+        locationsCreated: number;
+        summary: { waypointCount: number; trackCount: number; totalTrackPoints: number };
+      };
+      const parts: string[] = [];
+      if (data.locationsCreated > 0) parts.push(`${data.locationsCreated} location${data.locationsCreated !== 1 ? 's' : ''} added`);
+      if (data.summary.trackCount > 0) parts.push(`${data.summary.trackCount} track${data.summary.trackCount !== 1 ? 's' : ''} (${data.summary.totalTrackPoints} points)`);
+      if (data.summary.waypointCount > 0 && data.locationsCreated === 0) parts.push(`${data.summary.waypointCount} waypoint${data.summary.waypointCount !== 1 ? 's' : ''} (all already exist)`);
+      setGpxMessage(parts.join(', ') || 'No data found in GPX file');
+      // Refresh locations if any were created
+      if (data.locationsCreated > 0) {
+        const locRes = await fetch('/api/locations');
+        if (locRes.ok) {
+          const locs = await locRes.json();
+          setLocations(locs.filter((l: MapLocation) => l.latitude != null && l.longitude != null));
+        }
+      }
+    } catch {
+      setGpxMessage('Failed to import GPX file');
+    } finally {
+      setGpxImporting(false);
+      e.target.value = '';
+    }
+  }
 
   // Fetch timeline data
   const fetchTimeline = useCallback(async (date?: string) => {
@@ -301,7 +342,13 @@ export default function SpotsClient({
           )}
           <ShareLocationButton />
           <button
-            onClick={() => setShowUpload(!showUpload)}
+            onClick={() => { setShowGpxImport(!showGpxImport); setShowUpload(false) }}
+            className="px-3 py-1.5 border border-stone-300 dark:border-stone-600 text-stone-700 dark:text-stone-300 text-sm font-medium rounded-lg hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors"
+          >
+            GPX
+          </button>
+          <button
+            onClick={() => { setShowUpload(!showUpload); setShowGpxImport(false) }}
             className="px-3 py-1.5 bg-amber-600 text-white text-sm font-medium rounded-lg hover:bg-amber-700 transition-colors"
           >
             + Add Photos
@@ -319,6 +366,33 @@ export default function SpotsClient({
           <span>📷 {daySummary.photos} photos</span>
           {daySummary.activeMinutes > 0 && (
             <span>⏰ {Math.floor(daySummary.activeMinutes / 60)}h {daySummary.activeMinutes % 60}min</span>
+          )}
+        </div>
+      )}
+
+      {/* GPX Import panel */}
+      {showGpxImport && (
+        <div className="mx-2 mt-2 p-3 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg">
+          <p className="text-sm font-medium text-stone-700 dark:text-stone-300 mb-2">
+            Import GPX File
+          </p>
+          <p className="text-xs text-stone-500 dark:text-stone-400 mb-2">
+            Import trail routes from AllTrails, Wikiloc, or any GPS app. Waypoints become saved locations.
+          </p>
+          <label className="block">
+            <input
+              type="file"
+              accept=".gpx,application/gpx+xml"
+              onChange={handleGpxFile}
+              disabled={gpxImporting}
+              className="block w-full text-sm text-stone-500 dark:text-stone-400 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-amber-50 dark:file:bg-amber-900/30 file:text-amber-700 dark:file:text-amber-400 hover:file:bg-amber-100 dark:hover:file:bg-amber-900/50 file:cursor-pointer disabled:opacity-50"
+            />
+          </label>
+          {gpxImporting && (
+            <p className="text-xs text-amber-600 dark:text-amber-400 mt-2 animate-pulse">Importing...</p>
+          )}
+          {gpxMessage && (
+            <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-2 font-medium">{gpxMessage}</p>
           )}
         </div>
       )}

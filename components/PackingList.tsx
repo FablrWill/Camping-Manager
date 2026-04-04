@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Loader2, RotateCcw, Plus, X, Check } from 'lucide-react'
+import { Loader2, RotateCcw, Plus, X, Check, Package } from 'lucide-react'
 import type { PackingListResult } from '@/lib/claude'
 import { Button, ConfirmDialog } from '@/components/ui'
 
@@ -37,6 +37,10 @@ export default function PackingList({ tripId, tripName, offlineData }: PackingLi
   const [addingTo, setAddingTo] = useState<string | null>(null)
   const [newItemName, setNewItemName] = useState('')
   const [showRegenerateConfirm, setShowRegenerateConfirm] = useState(false)
+  const [showKitPicker, setShowKitPicker] = useState(false)
+  const [kits, setKits] = useState<Array<{ id: string; name: string; gearIds: string }>>([])
+  const [applyingKit, setApplyingKit] = useState<string | null>(null)
+  const [kitMessage, setKitMessage] = useState<string | null>(null)
 
   // Load saved packing list on mount
   useEffect(() => {
@@ -109,6 +113,40 @@ export default function PackingList({ tripId, tripName, offlineData }: PackingLi
       setGenerating(false)
     }
   }, [tripId])
+
+  async function handleShowKitPicker() {
+    setShowKitPicker(true)
+    setKitMessage(null)
+    try {
+      const res = await fetch('/api/kits')
+      if (res.ok) {
+        const data = await res.json() as Array<{ id: string; name: string; gearIds: string }>
+        setKits(data)
+      }
+    } catch {
+      // non-fatal
+    }
+  }
+
+  async function handleApplyKit(kitId: string) {
+    setApplyingKit(kitId)
+    setKitMessage(null)
+    try {
+      const res = await fetch(`/api/kits/${kitId}/apply`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tripId }),
+      })
+      if (res.ok) {
+        const data = await res.json() as { added: number; skipped: number }
+        setKitMessage(`Added ${data.added} item${data.added !== 1 ? 's' : ''}${data.skipped > 0 ? ` (${data.skipped} already packed)` : ''}`)
+      }
+    } catch {
+      setKitMessage('Failed to apply kit')
+    } finally {
+      setApplyingKit(null)
+    }
+  }
 
   async function togglePacked(key: string, gearId: string | undefined, newChecked: boolean) {
     setChecked(prev => ({ ...prev, [key]: newChecked }))
@@ -189,9 +227,15 @@ export default function PackingList({ tripId, tripName, offlineData }: PackingLi
           </div>
           {!offlineData && (
             <div className="flex flex-col items-end gap-2">
-              <Button variant="primary" size="sm" onClick={handleGenerate} loading={generating}>
-                Generate Packing List
-              </Button>
+              <div className="flex gap-2">
+                <Button variant="secondary" size="sm" onClick={handleShowKitPicker}>
+                  <Package size={14} className="mr-1" />
+                  Apply Kit
+                </Button>
+                <Button variant="primary" size="sm" onClick={handleGenerate} loading={generating}>
+                  Generate Packing List
+                </Button>
+              </div>
               {error && (
                 <p className="text-xs text-red-600 dark:text-red-400 text-right max-w-[200px]">
                   {error}
@@ -208,6 +252,50 @@ export default function PackingList({ tripId, tripName, offlineData }: PackingLi
             </div>
           )}
         </div>
+        {/* Kit picker dropdown */}
+        {showKitPicker && (
+          <div className="mt-3 border-t border-amber-200 dark:border-amber-700 pt-3">
+            {kits.length === 0 ? (
+              <p className="text-xs text-stone-500 dark:text-stone-400">
+                No kits saved yet. Create one from the Gear page.
+              </p>
+            ) : (
+              <div className="space-y-1.5">
+                <p className="text-xs font-medium text-stone-600 dark:text-stone-400 mb-1">Choose a kit:</p>
+                {kits.map((kit) => {
+                  const count = (JSON.parse(kit.gearIds) as string[]).length
+                  return (
+                    <button
+                      key={kit.id}
+                      onClick={() => void handleApplyKit(kit.id)}
+                      disabled={applyingKit !== null}
+                      className="w-full text-left px-3 py-2 rounded-lg border border-stone-200 dark:border-stone-700 hover:bg-white dark:hover:bg-stone-800 transition-colors disabled:opacity-50"
+                    >
+                      <span className="text-sm font-medium text-stone-800 dark:text-stone-200">
+                        {kit.name}
+                      </span>
+                      <span className="text-xs text-stone-400 dark:text-stone-500 ml-2">
+                        {count} item{count !== 1 ? 's' : ''}
+                      </span>
+                      {applyingKit === kit.id && (
+                        <Loader2 size={12} className="inline ml-2 animate-spin text-amber-500" />
+                      )}
+                    </button>
+                  )
+                })}
+              </div>
+            )}
+            {kitMessage && (
+              <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-2 font-medium">{kitMessage}</p>
+            )}
+            <button
+              onClick={() => setShowKitPicker(false)}
+              className="text-xs text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 mt-2"
+            >
+              Close
+            </button>
+          </div>
+        )}
       </div>
     )
   }
