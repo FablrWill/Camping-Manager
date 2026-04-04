@@ -6,7 +6,7 @@
 - ✅ **v1.1 Close the Loop** — Phases 6-11 (shipped 2026-04-02) — [archive](milestones/v1.1-ROADMAP.md)
 - ✅ **v1.2 Ship It** — Phases 12-15 (shipped 2026-04-03)
 - ✅ **v2.0 Smarter & Sharper** — Phases 16-24 (shipped 2026-04-03)
-- 🚧 **v3.0 Gear Intelligence + Day-Of** — Phases 25-35 (in progress)
+- ✅ **v3.0 Gear Intelligence + Day-Of** — Phases 25-35 (shipped 2026-04-04)
 - 📋 **v4.0 Backlog** — Voice, social, signal map, background agent, and more — see [Backlog section](#backlog-v40) below
 
 ## Phases
@@ -57,21 +57,21 @@
 - [x] **Phase 23: Gear Category Expansion** - Expand from 7 to 15 categories with visual grouping, add tech gear fields (completed 2026-04-03)
 - [x] **Phase 24: Smart Inbox / Universal Intake** - Single intake endpoint + inbox UI for phone share-to-app workflow (completed 2026-04-03)
 
-### 🚧 v3.0 Gear Intelligence + Day-Of (In Progress)
+### ✅ v3.0 Gear Intelligence + Day-Of (Shipped 2026-04-04)
 
 **Milestone Goal:** Make gear smarter (docs, research, deals, weather-aware clothing) and nail the departure morning experience (sequenced checklist, vehicle prep, safety contact).
 
 **Wave 1 — Parallel (no dependencies):**
-- [ ] **Phase 25: Gear Docs & Manual Finder** - GearDocument model, Claude-powered manual search, PDF download + offline caching
-- [ ] **Phase 26: Trip Day Sequencer** - Time-ordered departure checklist pulling from packing/meals/power/route
-- [ ] **Phase 27: Safety Float Plan** - SMS/email trip summary to emergency contact before departure
+- [x] **Phase 25: Gear Docs & Manual Finder** - GearDocument model, Claude-powered manual search, PDF download + offline caching (completed 2026-04-03)
+- [x] **Phase 26: Trip Day Sequencer** - Time-ordered departure checklist pulling from packing/meals/power/route (completed 2026-04-03)
+- [x] **Phase 27: Safety Float Plan** - SMS/email trip summary to emergency contact before departure (completed 2026-04-03)
 
 **Wave 2 — Depends on Wave 1:**
-- [ ] **Phase 28: Weather-Aware Clothing** - Rain/cold/UV-driven clothing suggestions in packing lists, clothing subcategories
+- [x] **Phase 28: Weather-Aware Clothing** - Rain/cold/UV-driven clothing suggestions in packing lists, clothing subcategories (completed 2026-04-03)
 - [x] **Phase 29: Vehicle Pre-Trip Checklist** - Tire pressure, oil, coolant, terrain-aware checks paired with Day Sequencer (completed 2026-04-03)
 
 **Wave 3 — Depends on Wave 2:**
-- [ ] **Phase 30: Gear Product Research** - AI-powered "Research" button, best-in-class comparison, upgrade recommendations
+- [x] **Phase 30: Gear Product Research** - AI-powered "Research" button, best-in-class comparison, upgrade recommendations (completed 2026-04-04)
 - [x] **Phase 31: Dark Sky, Astro Info & Activity Gear Recommendations** - Bortle/moon/sunrise data + activities gear category + trip planner activity suggestions (completed 2026-04-04)
 
 **Wave 4 — Depends on Wave 3:**
@@ -614,13 +614,13 @@ Plans:
 | 27. Safety Float Plan | v3.0 | 1/1 | Complete | 2026-04-03 |
 | 28. Weather-Aware Clothing | v3.0 | 1/1 | Complete | 2026-04-03 |
 | 29. Vehicle Pre-Trip Checklist | v3.0 | 3/3 | Complete    | 2026-04-03 |
-| 30. Gear Product Research | v3.0 | 0/TBD | Not started | - |
-| 31. Dark Sky, Astro & Activity Gear | v3.0 | 0/TBD | Not started | - |
+| 30. Gear Product Research | v3.0 | 1/1 | Complete | 2026-04-04 |
+| 31. Dark Sky, Astro & Activity Gear | v3.0 | 1/1 | Complete | 2026-04-04 |
 | 32. Deal Monitoring | v3.0 | 4/4 | Complete    | 2026-04-04 |
 | 33. Conversational Trip Planner | v3.0 | 4/4 | Complete    | 2026-04-03 |
 | 34. Home Assistant Integration | v3.0 | 4/4 | Complete    | 2026-04-04 |
 | 35. Meal Planning Core | v3.0 | 6/6 | Complete    | 2026-04-04 |
-| 36. Meal Planning: Shopping/Prep/Feedback | v3.0 | 0/TBD | Not started | - |
+| 36. Meal Planning: Shopping/Prep/Feedback | v3.0 | 1/1 | Complete | 2026-04-04 |
 
 ### Phase 33: Conversational Trip Planner
 
