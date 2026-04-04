@@ -103,7 +103,7 @@ None — v1.2 Ship It complete as of 2026-04-03.
 
 ## Current State
 
-Phase 29 complete (2026-04-03) — Vehicle Pre-Trip Checklist: Claude-generated checklist in trip prep, check-off persistence via PATCH route + prisma.$transaction, VehicleChecklistCard wired as 6th PREP_SECTIONS entry. Human UAT pending (29-HUMAN-UAT.md). Phase 27 also complete: float plan email refactored to plain-text template.
+Phase 31 complete (2026-04-04) — Dark Sky Astro Info: suncalc-powered moon phase computation (24 tests), AstroCard with per-night moon emoji/stars badge/Bortle deep-link, integrated below WeatherCard in TripCard. Human UAT pending (31-HUMAN-UAT.md). Phase 29 also complete: Vehicle Pre-Trip Checklist (29-HUMAN-UAT.md pending).
 
 ## Current Milestone: ✅ v1.2 Ship It — COMPLETE (2026-04-03)
 
@@ -192,4 +192,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-03 after Phase 29 complete — Vehicle Pre-Trip Checklist feature shipped*
+*Last updated: 2026-04-04 after Phase 31 complete — Dark Sky Astro Info shipped*
