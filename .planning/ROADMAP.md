@@ -505,7 +505,7 @@ Plans:
 ### Phase 34: Meal Planning Core
 **Goal**: AI-generated meal plans linked to trips — every meal slot for every day, based on trip duration, weather, dog status, and available cooking gear
 **Depends on**: Phase 22 (Trip model + claude.ts + TripPrepClient settled), Phase 33 (schema settled)
-**Requirements**: TBD
+**Requirements**: MEAL-01, MEAL-02, MEAL-03, MEAL-04, MEAL-05, MEAL-06
 **Success Criteria** (what must be TRUE):
   1. Meal plan generates for any trip with a start/end date
   2. Plan covers every day × every slot (breakfast, lunch, dinner)
@@ -513,7 +513,11 @@ Plans:
   4. Meal plan section visible in trip prep with day-by-day layout
   5. Trip card shows meal plan status ("Meal plan ready" / "No meal plan")
   6. `npm run build` passes
-**Plans**: 0/TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 34-01-PLAN.md — Claude prompt enrichment (dog + meal prep) + trip card meal plan badge
+- [ ] 34-02-PLAN.md — Per-meal regeneration PATCH API + MealPlan UI
 
 **Parallelization notes:**
 - Wave 6 — depends on Phase 22 (Trip model) and Phase 33 (schema)
@@ -583,7 +587,7 @@ Plans:
 | 32. Deal Monitoring | v3.0 | 0/TBD | Not started | - |
 | 33. Conversational Trip Planner | v3.0 | 4/4 | Complete    | 2026-04-04 |
 | 34. Home Assistant Integration | v3.0 | 0/TBD | Not started | - |
-| 35. Meal Planning Core | v3.0 | 0/TBD | Not started | - |
+| 35. Meal Planning Core | v3.0 | 0/2 | In progress | - |
 | 36. Meal Planning: Shopping/Prep/Feedback | v3.0 | 0/TBD | Not started | - |
 
 ### Phase 33: Conversational Trip Planner
