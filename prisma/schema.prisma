@@ -339,6 +339,19 @@ model TripFeedback {
   @@index([tripId])
 }
 
+// --- Medications (global profile, reused across all trips) ---
+
+model Medication {
+  id           String   @id @default(cuid())
+  name         String
+  dosesPerDay  Float                     // e.g., 2 = twice daily
+  unitsPerDose Float    @default(1)      // e.g., 1 pill per dose
+  unit         String   @default("pill") // pill, tablet, ml, etc.
+  isForDog     Boolean  @default(false)  // true = dog's medication
+  notes        String?
+  createdAt    DateTime @default(now())
+}
+
 // --- Phase 7: Day-of Execution Models ---
 
 model DepartureChecklist {
