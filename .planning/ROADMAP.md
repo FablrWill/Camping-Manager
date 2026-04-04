@@ -354,7 +354,7 @@ Plans:
 ### Phase 25: Gear Docs & Manual Finder
 **Goal**: Every gear item can have attached documents (manuals, warranties, support links) that Claude finds automatically and are cached for offline access
 **Depends on**: Phase 23 (expanded categories with modelNumber field)
-**Requirements**: TBD
+**Requirements**: SC-1, SC-2, SC-3, SC-4, SC-5
 **Success Criteria** (what must be TRUE):
   1. GearDocument model exists with type (manual_pdf, support_link, warranty, product_page), url, localPath, title
   2. "Find Manual" button on gear detail calls Claude to search for manufacturer support page + PDF
@@ -445,7 +445,11 @@ Plans:
   3. Research results stored and dated (staleness tracking >90 days)
   4. Dashboard or gear page surfaces top upgrade opportunities
   5. `npm run build` passes
-**Plans**: 0/TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 30-01-PLAN.md — Schema, Zod types, Claude function, API route + tests
+- [ ] 30-02-PLAN.md — GearResearchTab component + tab switcher in GearClient
+- [ ] 30-03-PLAN.md — Upgrade Opportunities section + human verify
 
 **Parallelization notes:**
 - Wave 3 — can run parallel with Phase 31
