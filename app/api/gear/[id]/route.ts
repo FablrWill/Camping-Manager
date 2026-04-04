@@ -58,6 +58,7 @@ export async function PUT(
         hasBattery: body.hasBattery ?? false,
         modelNumber: body.modelNumber || null,
         connectivity: body.connectivity || null,
+        targetPrice: safeParseFloat(body.targetPrice),
       },
     })
 

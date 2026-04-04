@@ -23,6 +23,7 @@ interface GearItem {
   hasBattery: boolean
   modelNumber: string | null
   connectivity: string | null
+  targetPrice: number | null
 }
 
 interface ConditionOption {
@@ -73,6 +74,7 @@ export default function GearForm({
       hasBattery: form.get('hasBattery') === 'on',
       modelNumber: form.get('modelNumber') as string || null,
       connectivity: form.get('connectivity') as string || null,
+      targetPrice: item?.isWishlist ? safeParseFloat(form.get('targetPrice')) : null,
     }
 
     try {
@@ -208,6 +210,28 @@ export default function GearForm({
               />
             </div>
           </div>
+
+          {/* Target price — wishlist items only */}
+          {item?.isWishlist && (
+            <div>
+              <label htmlFor="gear-targetPrice" className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
+                Target price ($)
+              </label>
+              <input
+                id="gear-targetPrice"
+                name="targetPrice"
+                type="number"
+                step="0.01"
+                min="0"
+                defaultValue={item?.targetPrice ?? ''}
+                placeholder="e.g. 89"
+                className="w-full px-3 py-2.5 rounded-lg border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-400 dark:focus:ring-amber-500"
+              />
+              <p className="text-xs text-stone-400 dark:text-stone-500 mt-1">
+                Get alerted when Claude finds this item at or below your target price
+              </p>
+            </div>
+          )}
 
           {/* Power fields: wattage + hours/day */}
           <div className="grid grid-cols-2 gap-3">
