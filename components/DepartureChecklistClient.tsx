@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, CheckCircle } from 'lucide-react'
+import { ArrowLeft, CheckCircle, Pencil } from 'lucide-react'
 import { Button, ConfirmDialog, EmptyState, PageHeader } from '@/components/ui'
 import DepartureChecklistItem from '@/components/DepartureChecklistItem'
 import LeavingNowButton from '@/components/LeavingNowButton'
@@ -19,6 +19,7 @@ interface DepartureChecklistClientProps {
   endDate: string
   emergencyContactName: string | null
   emergencyContactEmail: string | null
+  departureTime: string | null
   offlineData?: DepartureChecklistResult
   tripCoords?: { lat: number; lon: number }
 }
@@ -36,10 +37,17 @@ export default function DepartureChecklistClient({
   endDate,
   emergencyContactName: tripEmergencyContactName,
   emergencyContactEmail: tripEmergencyContactEmail,
+  departureTime: initialDepartureTime,
   offlineData,
   tripCoords,
 }: DepartureChecklistClientProps) {
   const isOnline = useOnlineStatus()
+
+  // Departure time state
+  const [departureTime, setDepartureTime] = useState<string | null>(initialDepartureTime)
+  const [editingDepartureTime, setEditingDepartureTime] = useState(false)
+  const [departureTimeError, setDepartureTimeError] = useState<string | null>(null)
+
   const [offlineChecklist, setOfflineChecklist] = useState<DepartureChecklistResult | null>(null)
   const [checklist, setChecklist] = useState<DepartureChecklistResult | null>(null)
   const [checklistId, setChecklistId] = useState<string | null>(null)
@@ -124,6 +132,39 @@ export default function DepartureChecklistClient({
     }
     loadSettings()
   }, [tripEmergencyContactEmail])
+
+  const handleDepartureTimeSave = useCallback(async (isoString: string | null) => {
+    setDepartureTimeError(null)
+    try {
+      const res = await fetch(`/api/trips/${tripId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ departureTime: isoString }),
+      })
+      if (!res.ok) throw new Error('Failed to save')
+      const data = await res.json()
+      setDepartureTime(data.departureTime)
+      setEditingDepartureTime(false)
+    } catch {
+      setDepartureTimeError("Couldn't save departure time — tap to retry.")
+    }
+  }, [tripId])
+
+  // Departure time display helpers
+  const formattedDepartureTime = departureTime
+    ? new Date(departureTime).toLocaleDateString('en-US', {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true,
+      })
+    : null
+
+  const datetimeLocalValue = departureTime
+    ? new Date(departureTime).toISOString().slice(0, 16)
+    : ''
 
   const handleGenerate = useCallback(async () => {
     setGenerating(true)
@@ -257,6 +298,59 @@ export default function DepartureChecklistClient({
 
       {/* Page header */}
       <PageHeader title={tripName} subtitle={dateRange} />
+
+      {/* Departure time row — per D-01, D-02 */}
+      <div className="flex items-center gap-2 flex-wrap min-h-[44px] px-4">
+        <span className="text-sm text-stone-500 dark:text-stone-400">Departure time:</span>
+        {!editingDepartureTime && departureTime ? (
+          <>
+            <span className="text-sm font-bold text-stone-900 dark:text-stone-100">
+              {formattedDepartureTime}
+            </span>
+            <button
+              onClick={() => setEditingDepartureTime(true)}
+              className="p-1 text-stone-400 dark:text-stone-500"
+              disabled={!isOnline}
+            >
+              <Pencil size={14} />
+            </button>
+          </>
+        ) : !editingDepartureTime && !departureTime ? (
+          <>
+            <span className="text-sm text-amber-600 dark:text-amber-400">
+              Not set — times will be relative
+            </span>
+            <input
+              type="datetime-local"
+              value=""
+              onChange={(e) => {
+                if (e.target.value) handleDepartureTimeSave(new Date(e.target.value).toISOString())
+              }}
+              className="text-sm px-3 py-2 rounded-lg border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-amber-400 dark:focus:ring-amber-500 focus:border-transparent"
+              disabled={!isOnline}
+            />
+          </>
+        ) : (
+          <input
+            type="datetime-local"
+            defaultValue={datetimeLocalValue}
+            onBlur={(e) => {
+              if (e.target.value) {
+                handleDepartureTimeSave(new Date(e.target.value).toISOString())
+              } else {
+                handleDepartureTimeSave(null)
+              }
+            }}
+            autoFocus
+            className="text-sm px-3 py-2 rounded-lg border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-amber-400 dark:focus:ring-amber-500 focus:border-transparent"
+          />
+        )}
+      </div>
+      {departureTimeError && (
+        <p className="text-sm text-red-600 dark:text-red-400 px-4">
+          {departureTimeError}
+        </p>
+      )}
 
       {/* Leaving Now — cache trip data for offline */}
       <LeavingNowButton

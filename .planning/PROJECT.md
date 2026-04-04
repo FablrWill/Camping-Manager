@@ -72,6 +72,14 @@ A personal second brain for car camping — an AI-powered knowledge system that 
 - ✓ Post-trip AI summary (what to drop, what was missing, location rating) — v1.1
 - ✓ Voice debrief with automatic gear/location updates — v1.1
 
+### Validated in Phase 25 (gear-docs-manual-finder)
+
+- ✓ GearDocument model with cascade delete and indexed gearItemId — Phase 25
+- ✓ Migration: manualUrl data preserved → GearDocument rows, column dropped — Phase 25
+- ✓ Claude-powered manual finder (no auto-save, user confirms) — Phase 25
+- ✓ PDF download with content-type validation and local caching — Phase 25
+- ✓ GearDocumentsTab UI: find/list/add/download/delete within gear modal — Phase 25
+
 ### Active
 
 None — v1.2 Ship It complete as of 2026-04-03.
@@ -95,7 +103,7 @@ None — v1.2 Ship It complete as of 2026-04-03.
 
 ## Current State
 
-Phase 22 complete (2026-04-03) — Plan A/B/C fallback chain shipped: DB schema, API routes, TripCard badges, TripsClient create flow, and trip prep Fallback Plans card with weather comparison.
+Phase 34 complete (2026-04-04) — Meal Planning Core: normalized MealPlan schema (Meal rows replacing JSON blob), Claude integration with bringingDog param + per-meal regeneration, full REST API (generate/fetch/delete/regen per-meal), MealPlanClient with day-by-day collapsible UI wired into TripPrepClient, trip card status badges. Human UAT pending (34-HUMAN-UAT.md). Phase 29 also complete: Vehicle Pre-Trip Checklist.
 
 ## Current Milestone: ✅ v1.2 Ship It — COMPLETE (2026-04-03)
 
@@ -184,4 +192,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-03 after Phase 22 complete — Plan A/B/C fallback chain*
+*Last updated: 2026-04-04 after Phase 34 complete — Meal Planning Core shipped*

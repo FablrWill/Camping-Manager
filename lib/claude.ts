@@ -1,10 +1,14 @@
 import Anthropic from '@anthropic-ai/sdk'
-import { parseClaudeJSON, PackingListResultSchema, MealPlanResultSchema, DepartureChecklistResultSchema, DepartureChecklistResult, FloatPlanEmailSchema, FloatPlanEmail, TripSummaryResultSchema, type TripSummaryResult } from '@/lib/parse-claude'
+import { parseClaudeJSON, PackingListResultSchema, MealPlanResultSchema, DepartureChecklistResultSchema, DepartureChecklistResult, TripSummaryResultSchema, type TripSummaryResult, GearDocumentResultSchema, type GearDocumentResult, VehicleChecklistResultSchema, type VehicleChecklistResult, NormalizedMealPlanResultSchema, type NormalizedMealPlanResult, SingleMealSchema, type SingleMeal } from '@/lib/parse-claude'
 import { CATEGORY_EMOJI, CATEGORIES } from '@/lib/gear-categories'
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 })
+
+const RAIN_THRESHOLD_PERCENT = 40
+const COLD_THRESHOLD_F = 50
+const UV_THRESHOLD_INDEX = 6
 
 export interface PackingListItem {
   name: string
@@ -23,7 +27,7 @@ export interface PackingListResult {
   tips: string[]
 }
 
-interface GearItem {
+export interface GearItem {
   id: string
   name: string
   brand: string | null
@@ -142,16 +146,55 @@ export interface MealPlanResult {
   tips: string[]
 }
 
-function buildWeatherSection(weather?: { days: WeatherDay[]; alerts: WeatherAlert[] }): string {
+export function buildWeatherSection(weather?: { days: WeatherDay[]; alerts: WeatherAlert[] }): string {
   if (!weather) return 'WEATHER: Not available — plan for variable conditions.'
   return `WEATHER FORECAST:
 ${weather.days
   .map(
     (d) =>
-      `${d.dayLabel} ${d.date}: ${d.weatherLabel}, High ${d.highF}°F / Low ${d.lowF}°F, ${d.precipProbability}% rain, Wind ${d.windMaxMph} mph`
+      `${d.dayLabel} ${d.date}: ${d.weatherLabel}, High ${d.highF}°F / Low ${d.lowF}°F, ${d.precipProbability}% rain, Wind ${d.windMaxMph} mph, UV ${d.uvIndexMax}`
   )
   .join('\n')}
 ${weather.alerts.length > 0 ? `\nALERTS:\n${weather.alerts.map((a) => `- [${a.severity.toUpperCase()}] ${a.message}`).join('\n')}` : ''}`
+}
+
+export function buildClothingGuidance(
+  weather: { days: WeatherDay[]; alerts: WeatherAlert[] } | undefined,
+  clothingItems: GearItem[]
+): string {
+  if (!weather || weather.days.length === 0) return ''
+
+  const needsRainGear = weather.days.some((d) => d.precipProbability >= RAIN_THRESHOLD_PERCENT)
+  const needsColdLayers = weather.days.some((d) => d.lowF <= COLD_THRESHOLD_F)
+  const needsUVProtection = weather.days.some((d) => d.uvIndexMax >= UV_THRESHOLD_INDEX)
+
+  if (!needsRainGear && !needsColdLayers && !needsUVProtection) return ''
+
+  const spotlight =
+    clothingItems.length > 0
+      ? `Clothing in inventory: ${clothingItems
+          .map((i) => `${i.name}${i.brand ? ` (${i.brand})` : ''} [id:${i.id}]`)
+          .join(', ')}.`
+      : ''
+
+  const directives: string[] = []
+
+  if (needsRainGear) {
+    const line = `- Rain Gear: Rain is forecast. Include waterproof layers and rain gear.`
+    directives.push(spotlight ? `${line} ${spotlight} Prioritize these in the Rain Gear section.` : line)
+  }
+
+  if (needsColdLayers) {
+    const line = `- Layers: Cold overnight temps expected. Include warm base and mid layers.`
+    directives.push(spotlight ? `${line} ${spotlight} Prioritize these in the Layers section.` : line)
+  }
+
+  if (needsUVProtection) {
+    const line = `- Sun Protection: High UV index forecast. Include sun hat, sunscreen, and UV-protective clothing.`
+    directives.push(spotlight ? `${line} ${spotlight} Prioritize these in the Sun Protection section.` : line)
+  }
+
+  return `CLOTHING GUIDANCE:\n${directives.join('\n')}`
 }
 
 export async function generatePackingList(params: {
@@ -204,6 +247,8 @@ export async function generatePackingList(params: {
 
   const weatherSection = buildWeatherSection(weather)
   const feedbackSection = buildFeedbackSection(feedbackContext)
+  const clothingItems = gearInventory.filter((g) => g.category === 'clothing')
+  const clothingGuidance = buildClothingGuidance(weather, clothingItems)
 
   const dogSection = bringingDog
     ? `\nDOG CONTEXT:\nWill is bringing his dog on this trip. Add a "Dog" section to the packing list with essential dog gear: food + collapsible bowl, water bowl, leash + backup leash, poop bags (2x expected amount), dog-specific first aid supplies (tweezers for ticks, wound spray). Note any dog-friendly considerations for the destination.\n`
@@ -219,7 +264,7 @@ ${vehicleName ? `- Vehicle: ${vehicleName}` : ''}
 ${tripNotes ? `- Notes: ${tripNotes}` : ''}
 
 ${weatherSection}
-${dogSection}
+${clothingGuidance ? `\n${clothingGuidance}\n` : ''}${dogSection}
 GEAR INVENTORY (items the user owns):
 ${gearSection || 'No gear in inventory yet.'}
 
@@ -229,7 +274,7 @@ INSTRUCTIONS:
 1. Build the packing list primarily from the user's gear inventory. Reference items by their [id:xxx] tag.
 2. Add essential items NOT in the inventory (like food cooler, firewood, water, toiletries, etc.) — mark these as not from inventory.
 3. Skip items marked [BROKEN].
-4. Adjust for weather: if rain is forecast, include rain gear. If cold, prioritize warm layers. If hot/high UV, include sun protection.
+4. Follow the CLOTHING GUIDANCE block above for specific weather-driven clothing directives. Organize clothing items into the sub-sections specified (Rain Gear, Layers, Sun Protection). If no CLOTHING GUIDANCE block is present, suggest comfortable layers for variable conditions.
 5. Adjust for trip duration: longer trips need more consumables.
 6. Categories: ${CATEGORIES.map((c) => c.value).join(', ')}.
 7. Include 2-3 brief, specific tips based on the weather and trip details (e.g., "Charge the EcoFlow fully — limited solar expected with cloud cover Saturday").
@@ -299,7 +344,8 @@ export async function generateMealPlan(params: {
     days: WeatherDay[]
     alerts: WeatherAlert[]
   }
-}): Promise<MealPlanResult> {
+  bringingDog?: boolean
+}): Promise<NormalizedMealPlanResult> {
   const {
     tripName,
     startDate,
@@ -311,6 +357,7 @@ export async function generateMealPlan(params: {
     tripNotes,
     cookingGear,
     weather,
+    bringingDog,
   } = params
 
   const weatherSection = buildWeatherSection(weather)
@@ -324,6 +371,10 @@ export async function generateMealPlan(params: {
         .join('\n')
     : ''
 
+  const dogSection = bringingDog
+    ? '\nDOG ON TRIP: Will is bringing his dog. Prefer meals that don\'t require long unattended cooking. Note dog-friendly meal timing considerations.'
+    : ''
+
   const prompt = `You are a car camping meal planner. Generate a practical, delicious meal plan for this trip.
 
 TRIP DETAILS:
@@ -335,7 +386,7 @@ ${vehicleName ? `- Vehicle: ${vehicleName}` : ''}
 ${tripNotes ? `- Notes: ${tripNotes}` : ''}
 
 ${weatherSection}
-
+${dogSection}
 COOKING EQUIPMENT (from gear inventory):
 ${cookingGearSection || 'No cooking gear in inventory — suggest simple no-cook meals and recommend basic gear to add.'}
 
@@ -350,7 +401,7 @@ The user has a vacuum sealer (with bag rolls) and sous vide machine at home. Pre
 INSTRUCTIONS:
 1. Plan breakfast, lunch, dinner, and snacks for each day.
 2. Day 1 starts with lunch or dinner (arrival day — breakfast eaten before departure). Last day ends with breakfast (pack-up day).
-3. Mark each meal as "home" prep (vacuum sealed, pre-cooked) or "camp" prep (cooked at campsite).
+3. Use "prepNotes" to describe whether prep is at home (vacuum sealed, pre-cooked) or at camp (cooked at campsite).
 4. Use the cooking equipment listed. Don't suggest gear the user doesn't own unless absolutely necessary.
 5. Adjust for weather: cold nights = hot soups and stews. Hot days = lighter meals, no-cook lunches.
 6. Include a prep timeline: what to do at home before departure (e.g., "Wednesday evening: sous vide steaks").
@@ -368,17 +419,28 @@ Respond ONLY with valid JSON matching this exact structure:
         "breakfast": null,
         "lunch": {
           "name": "Turkey & Avocado Wraps",
-          "prepType": "camp",
+          "description": "Quick no-cook wraps for arrival day",
           "prepNotes": "Assemble at camp. Keep avocado whole until ready.",
-          "ingredients": ["4 flour tortillas", "1/2 lb deli turkey", "1 avocado", "handful spinach", "mustard"],
-          "cookwareNeeded": []
+          "ingredients": [
+            {"item": "flour tortillas", "quantity": "4", "unit": "count"},
+            {"item": "deli turkey", "quantity": "0.5", "unit": "lb"},
+            {"item": "avocado", "quantity": "1", "unit": "count"}
+          ],
+          "cookInstructions": "Lay out tortilla, layer turkey and avocado, roll up.",
+          "estimatedMinutes": 5
         },
         "dinner": {
           "name": "Sous Vide Ribeye with Foil Packet Potatoes",
-          "prepType": "home",
-          "prepNotes": "Sous vide at 130°F for 2hrs at home. Vacuum seal. At camp: sear 90sec/side on cast iron. Potatoes in foil on grate.",
-          "ingredients": ["2 ribeye steaks", "1 lb baby potatoes", "butter", "garlic", "rosemary", "salt & pepper", "aluminum foil"],
-          "cookwareNeeded": ["cast iron skillet", "camp grate"]
+          "description": "Home-prepped steak with camp-grilled potatoes",
+          "prepNotes": "Sous vide at 130°F for 2hrs at home. Vacuum seal. At camp: sear 90sec/side on cast iron.",
+          "ingredients": [
+            {"item": "ribeye steaks", "quantity": "2", "unit": "count"},
+            {"item": "baby potatoes", "quantity": "1", "unit": "lb"},
+            {"item": "butter", "quantity": "2", "unit": "tbsp"},
+            {"item": "aluminum foil", "quantity": "1", "unit": "roll"}
+          ],
+          "cookInstructions": "Sear steaks 90 seconds per side on hot cast iron. Wrap potatoes in foil with butter, cook on grate 20 min.",
+          "estimatedMinutes": 25
         },
         "snacks": ["Trail mix", "Beef jerky", "Apples"]
       }
@@ -402,12 +464,10 @@ Respond ONLY with valid JSON matching this exact structure:
 Rules for the JSON:
 - Day 1 breakfast is null if trip starts with an afternoon arrival
 - Last day should only have breakfast (and maybe a departure snack)
-- "prepType" is "home" or "camp"
+- Each ingredient must be an object with "item" (name), "quantity" (amount as string), and "unit" (measurement unit, empty string if none)
 - "section" values: produce, meat, dairy, pantry, frozen, bakery, drinks, other
 - "forMeal" references which day/meal uses this item (helps while shopping)
-- "cookwareNeeded" references equipment from the gear list where possible
 - Keep meal names appetizing but concise
-- Keep ingredients as a shopping-ready list (include quantities)
 - Do NOT wrap JSON in markdown code blocks`
 
   const message = await anthropic.messages.create({
@@ -419,11 +479,83 @@ Rules for the JSON:
   const text =
     message.content[0].type === 'text' ? message.content[0].text : ''
 
-  const parseResult = parseClaudeJSON(text, MealPlanResultSchema)
+  const parseResult = parseClaudeJSON(text, NormalizedMealPlanResultSchema)
   if (!parseResult.success) {
     throw new Error(parseResult.error)
   }
 
+  return parseResult.data
+}
+
+export async function regenerateMeal(params: {
+  day: number
+  slot: string
+  tripName: string
+  startDate: string
+  endDate: string
+  locationName?: string
+  currentMealName: string
+  cookingGear: GearItem[]
+  bringingDog?: boolean
+  weather?: { days: WeatherDay[]; alerts: WeatherAlert[] }
+}): Promise<SingleMeal> {
+  const {
+    day,
+    slot,
+    tripName,
+    startDate,
+    endDate,
+    locationName,
+    currentMealName,
+    cookingGear,
+    bringingDog,
+    weather,
+  } = params
+
+  const weatherSection = buildWeatherSection(weather)
+  const cookingGearSection = cookingGear.length > 0
+    ? `COOKING GEAR:\n${cookingGear.map((g) => `- ${g.name}${g.brand ? ` (${g.brand})` : ''}`).join('\n')}`
+    : 'COOKING GEAR: Basic camp setup (no specific gear listed)'
+  const dogSection = bringingDog
+    ? '\nDOG ON TRIP: Will is bringing his dog. Prefer meals that don\'t require long unattended cooking.'
+    : ''
+
+  const response = await anthropic.messages.create({
+    model: 'claude-sonnet-4-20250514',
+    max_tokens: 1024,
+    messages: [
+      {
+        role: 'user',
+        content: `You are a camping meal planner. Generate ONE replacement ${slot} meal for Day ${day} of a camping trip.
+
+TRIP: "${tripName}" from ${startDate} to ${endDate}${locationName ? ` at ${locationName}` : ''}
+CURRENT MEAL TO REPLACE: "${currentMealName}" — generate something DIFFERENT.
+
+Car camping — full cooler available. Will has a vacuum sealer and sous vide at home for pre-trip prep. Prefer one-pot or simple multi-component meals. Minimize dishes.
+
+${cookingGearSection}
+${weatherSection}${dogSection}
+
+Return a JSON object (no markdown) with this exact shape:
+{
+  "name": "Meal Name",
+  "description": "Brief description",
+  "ingredients": [{"item": "ingredient name", "quantity": "amount", "unit": "measurement"}],
+  "cookInstructions": "Step by step cooking instructions",
+  "prepNotes": "Any pre-trip prep needed (vacuum seal, marinate, etc.)",
+  "estimatedMinutes": 20
+}
+
+Each ingredient must be an object with "item" (name), "quantity" (amount as string), and "unit" (measurement unit, empty string if none).`,
+      },
+    ],
+  })
+
+  const text = response.content[0].type === 'text' ? response.content[0].text : ''
+  const parseResult = parseClaudeJSON(text, SingleMealSchema)
+  if (!parseResult.success) {
+    throw new Error(parseResult.error)
+  }
   return parseResult.data
 }
 
@@ -438,6 +570,8 @@ export async function generateDepartureChecklist(params: {
   vehicleMods: Array<{ name: string; description: string | null }>
   weatherNotes: string | null
   tripNotes: string | null
+  departureTime: string | null
+  lastStopNames: string[]
 }): Promise<DepartureChecklistResult> {
   const {
     tripName,
@@ -450,6 +584,8 @@ export async function generateDepartureChecklist(params: {
     vehicleMods,
     weatherNotes,
     tripNotes,
+    departureTime,
+    lastStopNames,
   } = params
 
   const unpackedItems = packingItems.filter((i) => !i.packed)
@@ -491,15 +627,27 @@ ${powerBudget ? `POWER BUDGET: A power budget exists. Include device charging an
 
 ${weatherNotes ? `WEATHER NOTES: ${weatherNotes}` : ''}
 
+${departureTime
+  ? `DEPARTURE TIME: ${departureTime}
+For each task, include a "suggestedTime" field with an absolute clock time (e.g. "9:00 PM Thu", "6:30 AM", "7:00 AM -- depart") anchored to this departure time. Night-before tasks get the prior evening. Day-of tasks get morning times. Final task is the departure time itself.`
+  : `DEPARTURE TIME: Not set. Use suggestedTime: null for all items. Use slot label names as the only time reference (e.g. "Night Before", "Morning Of").`
+}
+
+${lastStopNames.length > 0
+  ? `LAST STOPS BEFORE DESTINATION (include a reminder task for the nearest stop): ${lastStopNames.join(', ')}`
+  : ''
+}
+
 INSTRUCTIONS:
 1. Organize checklist into 2-5 time-ordered slots (e.g. "Night Before - Pack Vehicle", "Morning of Departure - Kitchen & Cooler", "Before Driving - Final Safety Checks"). Choose slot names and count based on trip complexity.
 2. For each vehicle mod, generate at least one specific check item (e.g. "Check roof rack straps are tight", "Verify tire pressure is correct").
 3. For any UNPACKED items listed above, include them as checklist items with isUnpackedWarning=true.
 4. Add weather-aware tips if weather notes are provided (e.g. "Rain expected — pack tarps in easy-access spot").
-5. Include meal prep items if a meal plan exists (e.g. "Pack cooler with vacuum-sealed meals").
-6. Include power-related items if a power budget exists (e.g. "Charge all devices fully", "Pack solar panel cable in accessible location").
+5. If a meal plan exists, include ONE phase-level reminder: "Prep meals (see meal plan)". Only add extra meal tasks for time-sensitive items you spot (e.g. "Marinate meat tonight").
+6. If a power budget exists, include "Charge EcoFlow to 100%". If current battery percentage is given, add context: "Currently at X% -- needs ~Yh to full."
 7. Generate a unique ID for each item using format "chk-{slot_index}-{item_index}" (0-based).
 8. Keep item text concise and action-oriented (verb-first: "Check", "Pack", "Verify", "Load").
+9. Every item MUST include "suggestedTime" — either a clock time string or null.
 
 Respond ONLY with valid JSON matching this exact structure:
 {
@@ -507,8 +655,8 @@ Respond ONLY with valid JSON matching this exact structure:
     {
       "label": "Night Before - Pack Vehicle",
       "items": [
-        { "id": "chk-0-0", "text": "Pack sleeping bags and sleep system", "checked": false, "isUnpackedWarning": false },
-        { "id": "chk-0-1", "text": "Load camp chairs and table", "checked": false, "isUnpackedWarning": true }
+        { "id": "chk-0-0", "text": "Pack sleeping bags and sleep system", "checked": false, "isUnpackedWarning": false, "suggestedTime": "9:00 PM Thu" },
+        { "id": "chk-0-1", "text": "Load camp chairs and table", "checked": false, "isUnpackedWarning": true, "suggestedTime": "9:30 PM Thu" }
       ]
     }
   ]
@@ -529,95 +677,6 @@ Rules:
     message.content[0].type === 'text' ? message.content[0].text : ''
 
   const parseResult = parseClaudeJSON(text, DepartureChecklistResultSchema)
-  if (!parseResult.success) {
-    throw new Error(parseResult.error)
-  }
-
-  return parseResult.data
-}
-
-export async function composeFloatPlanEmail(params: {
-  tripName: string
-  startDate: string
-  endDate: string
-  destinationName: string | null
-  destinationLat: number | null
-  destinationLon: number | null
-  packedGearSummary: string
-  vehicleName: string | null
-  weatherNotes: string | null
-  tripNotes: string | null
-  emergencyContactName: string
-  checklistStatus: string
-}): Promise<FloatPlanEmail> {
-  const {
-    tripName,
-    startDate,
-    endDate,
-    destinationName,
-    destinationLat,
-    destinationLon,
-    packedGearSummary,
-    vehicleName,
-    weatherNotes,
-    tripNotes,
-    emergencyContactName,
-    checklistStatus,
-  } = params
-
-  const mapsLinkNote =
-    destinationLat !== null && destinationLon !== null
-      ? `A Google Maps link for the destination will be appended by the sender after this email is composed.`
-      : ''
-
-  const userMessage = `Write a safety float plan email for this car camping trip.
-
-TRIP DETAILS:
-- Trip Name: ${tripName}
-- Start Date: ${startDate}
-- End Date: ${endDate}
-${destinationName ? `- Destination: ${destinationName}` : '- Destination: Not specified'}
-${vehicleName ? `- Vehicle: ${vehicleName}` : ''}
-${weatherNotes ? `- Weather Notes: ${weatherNotes}` : ''}
-${tripNotes ? `- Trip Notes: ${tripNotes}` : ''}
-
-PACKED GEAR SUMMARY:
-${packedGearSummary || 'No packed gear recorded.'}
-
-DEPARTURE CHECKLIST STATUS:
-${checklistStatus}
-
-EMERGENCY CONTACT (recipient):
-${emergencyContactName}
-
-${mapsLinkNote}
-
-INSTRUCTIONS:
-- Write the email body as a message to the emergency contact (address them by name: ${emergencyContactName})
-- Include: trip name, dates, destination, a brief summary of packed gear, the departure checklist status (${checklistStatus}), and when to expect my return
-- End with: "Reply to this email if you need to reach me."
-- Keep it friendly and readable for a non-camper
-- Use blank lines for paragraph breaks
-- PLAIN TEXT ONLY — no markdown, no bullet characters like -, *, #, no HTML
-
-Return valid JSON in this exact format:
-{
-  "subject": "Float Plan: ${tripName} — ${startDate} to ${endDate}",
-  "body": "The full plain text email body here"
-}`
-
-  const message = await anthropic.messages.create({
-    model: 'claude-sonnet-4-20250514',
-    max_tokens: 1500,
-    system:
-      'You are writing a safety float plan email for a car camping trip. Write in natural, readable prose that a non-camper emergency contact can understand. Be concise but include all essential safety information. Adapt tone to trip context (solo vs. group, weather concerns, remote vs. developed campground). Write PLAIN TEXT only -- no markdown, no HTML tags. Use blank lines for paragraph breaks. The email will be sent as plain text.',
-    messages: [{ role: 'user', content: userMessage }],
-  })
-
-  const text =
-    message.content[0].type === 'text' ? message.content[0].text : ''
-
-  const parseResult = parseClaudeJSON(text, FloatPlanEmailSchema)
   if (!parseResult.success) {
     throw new Error(parseResult.error)
   }
@@ -671,4 +730,116 @@ Return ONLY valid JSON, no markdown.`
     throw new Error(parsed.error)
   }
   return parsed.data
+}
+
+export async function findGearManual(params: {
+  name: string;
+  brand: string | null;
+  modelNumber: string | null;
+  category: string;
+}): Promise<GearDocumentResult> {
+  const { name, brand, modelNumber, category } = params;
+  const prompt = `You are a product manual research assistant.
+Given gear details, return the most likely manufacturer support page URL and PDF manual URL.
+
+GEAR:
+- Name: ${name}
+- Brand: ${brand || 'Unknown'}
+- Model Number: ${modelNumber || 'Unknown'}
+- Category: ${category}
+
+INSTRUCTIONS:
+1. Generate the most likely URL for the manufacturer's support/product page for this exact model.
+2. If the brand typically hosts PDF manuals (e.g. MSR, GSI, Black Diamond, Garmin, Goal Zero), generate the likely PDF URL.
+3. For each URL, provide a confidence level: "high" (you know this brand's URL pattern well) or "low" (guessing).
+4. Generate a descriptive title for each document (e.g. "MSR Hubba Hubba NX Owner's Manual").
+5. Only include URLs you believe are real. If you cannot determine a likely URL, return an empty documents array.
+
+Respond ONLY with valid JSON (no markdown code blocks):
+{
+  "documents": [
+    {
+      "type": "support_link" | "manual_pdf" | "product_page",
+      "url": "https://...",
+      "title": "Brand Model Document Title",
+      "confidence": "high" | "low"
+    }
+  ]
+}`;
+
+  const message = await anthropic.messages.create({
+    model: 'claude-sonnet-4-20250514',
+    max_tokens: 1500,
+    messages: [{ role: 'user', content: prompt }],
+  });
+  const text = message.content[0].type === 'text' ? message.content[0].text : '';
+  const parseResult = parseClaudeJSON(text, GearDocumentResultSchema);
+  if (!parseResult.success) {
+    throw new Error(parseResult.error);
+  }
+  return parseResult.data;
+}
+
+export async function generateVehicleChecklist(params: {
+  vehicleYear: number | null
+  vehicleMake: string | null
+  vehicleModel: string | null
+  drivetrain: string | null
+  groundClearance: number | null
+  tripDays: number
+  destinationName: string | null
+  roadCondition: string | null
+  clearanceNeeded: string | null
+}): Promise<VehicleChecklistResult> {
+  const {
+    vehicleYear,
+    vehicleMake,
+    vehicleModel,
+    drivetrain,
+    groundClearance,
+    tripDays,
+    destinationName,
+    roadCondition,
+    clearanceNeeded,
+  } = params
+
+  const prompt = `You are a vehicle pre-trip inspection assistant for car camping.
+Generate a practical, action-oriented pre-trip checklist specific to this vehicle and trip.
+
+VEHICLE:
+- Year/Make/Model: ${vehicleYear ?? 'Unknown'} ${vehicleMake ?? ''} ${vehicleModel ?? ''}
+- Drivetrain: ${drivetrain ?? 'Unknown'}
+- Ground Clearance: ${groundClearance != null ? `${groundClearance}"` : 'Unknown'}
+
+TRIP CONTEXT:
+- Duration: ${tripDays} day${tripDays !== 1 ? 's' : ''}
+${destinationName ? `- Destination: ${destinationName}` : ''}
+${roadCondition ? `- Road Condition: ${roadCondition}` : ''}
+${clearanceNeeded ? `- Clearance Needed: ${clearanceNeeded}` : ''}
+
+INSTRUCTIONS:
+1. Generate 8-15 practical checklist items for this specific vehicle.
+2. Each item should be action-oriented (verb-first: "Check", "Verify", "Inflate", "Top off").
+3. Cover: tires, fluids (oil, coolant, washer fluid), lights, battery, emergency kit, cargo security.
+4. If road condition indicates dirt/off-road, include items for that (skid plate check, recovery gear, etc.).
+5. Generate a unique ID for each item using format "vc-{index}" (0-based).
+6. All items start with checked: false.
+
+Respond ONLY with valid JSON (no markdown):
+{"items": [{"id": "vc-0", "text": "Check tire pressure (front/rear)", "checked": false}]}`
+
+  const message = await anthropic.messages.create({
+    model: 'claude-sonnet-4-20250514',
+    max_tokens: 1024,
+    messages: [{ role: 'user', content: prompt }],
+  })
+
+  const text = message.content[0].type === 'text' ? message.content[0].text : ''
+
+  const parseResult = parseClaudeJSON(text, VehicleChecklistResultSchema)
+  if (!parseResult.success) {
+    throw new Error(parseResult.error)
+  }
+
+  return parseResult.data
 }

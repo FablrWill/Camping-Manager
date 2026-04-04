@@ -6,8 +6,9 @@ import { ArrowLeft } from 'lucide-react'
 import TripPrepSection from '@/components/TripPrepSection'
 import WeatherCard from '@/components/WeatherCard'
 import PackingList from '@/components/PackingList'
-import MealPlan from '@/components/MealPlan'
+import MealPlanClient from '@/components/MealPlanClient'
 import PowerBudget from '@/components/PowerBudget'
+import VehicleChecklistCard from '@/components/VehicleChecklistCard'
 import { PREP_SECTIONS, PrepState, PrepSection } from '@/lib/prep-sections'
 import { formatDateRange, daysUntil, tripNights } from '@/lib/trip-utils'
 import type { DayForecast, WeatherAlert } from '@/lib/weather'
@@ -310,6 +311,16 @@ export default function TripPrepClient({ trip }: TripPrepClientProps) {
               }
             }
 
+            if (config.key === 'vehicle-check') {
+              if (!trip.vehicle) {
+                status = 'not_started'
+                summary = 'No vehicle assigned'
+              } else {
+                status = 'not_started'
+                summary = 'Not generated'
+              }
+            }
+
             const defaultExpanded = getDefaultExpanded(prepState.sections, config.key)
 
             return (
@@ -349,10 +360,9 @@ export default function TripPrepClient({ trip }: TripPrepClientProps) {
                 )}
 
                 {config.key === 'meals' && (
-                  <MealPlan
+                  <MealPlanClient
                     tripId={trip.id}
                     tripName={trip.name}
-                    offlineData={!isOnline && offlineSnapshot?.mealPlan ? offlineSnapshot.mealPlan as import('@/lib/claude').MealPlanResult : undefined}
                   />
                 )}
 
@@ -394,6 +404,13 @@ export default function TripPrepClient({ trip }: TripPrepClientProps) {
                       </p>
                     )}
                   </div>
+                )}
+
+                {config.key === 'vehicle-check' && (
+                  <VehicleChecklistCard
+                    tripId={trip.id}
+                    hasVehicle={!!trip.vehicle}
+                  />
                 )}
               </TripPrepSection>
 

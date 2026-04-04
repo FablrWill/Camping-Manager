@@ -1,11 +1,12 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Plus } from 'lucide-react'
+import { useState, useEffect, useCallback } from 'react'
+import { Plus, UtensilsCrossed } from 'lucide-react'
 import { Button, Input, Select, Textarea, Modal, ConfirmDialog } from '@/components/ui'
 import ChatContextButton from '@/components/ChatContextButton'
 import VoiceRecordModal from './VoiceRecordModal'
 import TripCard from './TripCard'
+import TripPlannerSheet from './TripPlannerSheet'
 import type { DayForecast, WeatherAlert } from '@/lib/weather'
 
 interface TripData {
@@ -25,6 +26,7 @@ interface TripData {
   permitNotes: string | null
   fallbackFor: string | null
   fallbackOrder: number | null
+  mealPlanGeneratedAt: string | null  // Phase 34: meal plan status
 }
 
 interface WeatherData {
@@ -48,6 +50,7 @@ export default function TripsClient({ initialTrips, locations, vehicles }: Trips
   const [trips, setTrips] = useState(initialTrips)
   const [selectedTripId, setSelectedTripId] = useState<string | null>(null)
   const [showForm, setShowForm] = useState(false)
+  const [showPlannerSheet, setShowPlannerSheet] = useState(false)
   const [saving, setSaving] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
   const [debriefTrip, setDebriefTrip] = useState<{ id: string; name: string; locationId: string | null } | null>(null)
@@ -102,6 +105,11 @@ export default function TripsClient({ initialTrips, locations, vehicles }: Trips
     setFallbackOrder(nextOrder)
     setShowForm(true)
   }
+
+  const handleAddManually = useCallback(() => {
+    setShowPlannerSheet(false)
+    setShowForm(true)
+  }, [])
 
   async function handleEditSave(e: React.FormEvent) {
     e.preventDefault()
@@ -255,7 +263,7 @@ export default function TripsClient({ initialTrips, locations, vehicles }: Trips
         </h1>
         <Button
           variant="primary"
-          onClick={() => setShowForm(!showForm)}
+          onClick={() => setShowPlannerSheet(true)}
           icon={<Plus size={16} />}
         >
           Plan Trip
@@ -371,7 +379,7 @@ export default function TripsClient({ initialTrips, locations, vehicles }: Trips
           </p>
           <p className="text-sm text-stone-400 dark:text-stone-500 mt-1">
             <button
-              onClick={() => setShowForm(true)}
+              onClick={() => setShowPlannerSheet(true)}
               className="text-amber-600 dark:text-amber-500 hover:text-amber-700 dark:hover:text-amber-400 font-medium"
             >
               Plan your first trip
@@ -400,6 +408,20 @@ export default function TripsClient({ initialTrips, locations, vehicles }: Trips
                       weatherError={weatherErrors[trip.id]}
                       onDebrief={setDebriefTrip}
                     />
+                    {/* Meal plan status badge — Phase 34 */}
+                    <div className="flex items-center gap-1.5 px-1 pt-1">
+                      {trip.mealPlanGeneratedAt ? (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                          <UtensilsCrossed className="h-3 w-3" />
+                          Meal plan ready
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-stone-100 px-2 py-0.5 text-xs font-medium text-stone-500 dark:bg-stone-800 dark:text-stone-400">
+                          <UtensilsCrossed className="h-3 w-3" />
+                          No meal plan
+                        </span>
+                      )}
+                    </div>
                     {/* Add Plan B/C button — only for upcoming primary trips without max fallbacks */}
                     {!trip.fallbackFor && trip._count.alternatives < 2 && new Date(trip.startDate) > new Date() && (
                       <button
@@ -423,18 +445,33 @@ export default function TripsClient({ initialTrips, locations, vehicles }: Trips
               </h2>
               <div className="space-y-3">
                 {past.map((trip) => (
-                  <TripCard
-                    key={trip.id}
-                    trip={trip}
-                    isSelected={selectedTripId === trip.id}
-                    onSelect={setSelectedTripId}
-                    onEdit={openEdit}
-                    onDelete={setConfirmDelete}
-                    weather={weatherByTrip[trip.id]}
-                    weatherLoading={weatherLoading[trip.id]}
-                    weatherError={weatherErrors[trip.id]}
-                    onDebrief={setDebriefTrip}
-                  />
+                  <div key={trip.id}>
+                    <TripCard
+                      trip={trip}
+                      isSelected={selectedTripId === trip.id}
+                      onSelect={setSelectedTripId}
+                      onEdit={openEdit}
+                      onDelete={setConfirmDelete}
+                      weather={weatherByTrip[trip.id]}
+                      weatherLoading={weatherLoading[trip.id]}
+                      weatherError={weatherErrors[trip.id]}
+                      onDebrief={setDebriefTrip}
+                    />
+                    {/* Meal plan status badge — Phase 34 */}
+                    <div className="flex items-center gap-1.5 px-1 pt-1">
+                      {trip.mealPlanGeneratedAt ? (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                          <UtensilsCrossed className="h-3 w-3" />
+                          Meal plan ready
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-stone-100 px-2 py-0.5 text-xs font-medium text-stone-500 dark:bg-stone-800 dark:text-stone-400">
+                          <UtensilsCrossed className="h-3 w-3" />
+                          No meal plan
+                        </span>
+                      )}
+                    </div>
+                  </div>
                 ))}
               </div>
             </section>
@@ -585,6 +622,13 @@ export default function TripsClient({ initialTrips, locations, vehicles }: Trips
         confirmLabel="Delete"
         confirmVariant="danger"
         loading={isDeleting}
+      />
+
+      {/* Conversational trip planner sheet */}
+      <TripPlannerSheet
+        open={showPlannerSheet}
+        onClose={() => setShowPlannerSheet(false)}
+        onAddManually={handleAddManually}
       />
     </div>
   )

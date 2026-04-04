@@ -1,21 +1,53 @@
 # Outland OS — Task Tracker
 
-> **Last updated:** 2026-04-02 (Phase 12 complete — build fixed, lint/types clean, tests all passing, Gemini review done)
+> **Last updated:** 2026-04-03 (v2.0 complete; v3.0 Waves 1-2 done — Phases 25-29 + 33 complete; next: 30, 31, S11)
 > **Start here** if you're picking up after a break.
 > **North star:** `docs/USER-JOURNEY.md` — read this before building anything new.
 
 ---
 
-## 🏁 Milestone v1.2 — Ship It (In Progress)
+## 🏁 Milestone v1.2 — Ship It (Complete 2026-04-03)
 
 | Phase | Status | Summary |
 |-------|--------|---------|
-| 12. Fix Build & Clean House | ✅ Complete | Build fixed (serverExternalPackages), lint/type errors resolved, test stubs implemented (95 tests passing), Gemini cross-AI review completed |
-| 13. Address Review Findings | ○ Not started | Act on actionable Gemini feedback before shipping to production |
-| 14. Production Deployment | ○ Not started | Configure Mac mini with PM2, persistent data, backups, deploy script |
-| 15. Remote Access & Go Live | ○ Not started | Tailscale mesh VPN, HTTPS, PWA verification from phone |
+| 12. Fix Build & Clean House | ✅ Complete | Build fixed (serverExternalPackages), lint/type errors resolved, test stubs implemented, Gemini cross-AI review completed |
+| 13. Address Review Findings | ✅ Complete | Path traversal + XSS security fixes, JSON.parse hardening, input validation hardening |
+| 14. Production Deployment | ✅ Complete | PM2 config, deploy script, backup/watchdog crons, Mac mini setup guide |
+| 15. Remote Access & Go Live | ✅ Complete | Tailscale VPN, HTTPS, PWA verification from phone |
 
-**Next:** `/gsd:execute-phase 13` — address Gemini review findings
+---
+
+## 🏁 Milestone v2.0 — Smarter & Sharper (Complete 2026-04-03)
+
+| Phase | Status | Summary |
+|-------|--------|---------|
+| 16. Photo Auto-Import | ✅ Complete | Bulk photo import with EXIF GPS extraction |
+| 17. Feedback-Driven Packing | ✅ Complete | Packing lists personalized by post-trip gear feedback history |
+| 18. Fuel & Last Stop Planner | ✅ Complete | Pre-trip fuel/grocery/hardware stop cards via Overpass API |
+| 19. Dog-Aware Trip Planning | ✅ Complete | Dog toggle on trips, dog gear section, dog-friendly notes |
+| 20. Live Location Sharing | ✅ Complete | Shareable public URL showing last known GPS location |
+| 21. Permit & Reservation | ✅ Complete | Store Recreation.gov confirmations with trip, surface reminders |
+| 22. Plan A/B/C Fallback Chain | ✅ Complete | fallbackFor/fallbackOrder schema, alternatives API, TripCard badges, TripsClient Add Plan B, TripPrepClient fallback card |
+| 23. Gear Category Expansion | ✅ Complete | Expanded to 15 categories with visual grouping, tech gear fields |
+| 24. Smart Inbox / Universal Intake | ✅ Complete | Single intake endpoint + inbox UI for phone share-to-app workflow |
+
+---
+
+## 🏁 Milestone v3.0 — Gear Intelligence + Day-Of (In Progress)
+
+| Phase | Status | Summary |
+|-------|--------|---------|
+| 25. Gear Docs & Manual Finder | ✅ Complete | GearDocument model, Claude-powered manual finder, PDF download, GearDocumentsTab UI |
+| 26. Trip Day Sequencer | ✅ Complete | departureTime schema, departure checklist with time-anchored suggestions, DepartureChecklistClient |
+| 27. Safety Float Plan | ✅ Complete | Deterministic plain-text float plan email via float-plan API route (no AI token cost) |
+| 28. Weather-Aware Clothing | ✅ Complete | buildClothingGuidance() in lib/claude.ts, UV forecast, injected into packing list prompt |
+| 29. Vehicle Pre-Trip Checklist | 🔄 In Progress | Plan 01 done (schema + TDD tests), Plan 02 partially done, Plan 03 not started |
+| 30. Product Research Agent | ○ Not started | See `.planning/ROADMAP.md` |
+| 31. Astro Conditions | ○ Not started | See `.planning/ROADMAP.md` |
+| 32. Deals & Restocks | ○ Not started | See `.planning/ROADMAP.md` |
+| 33. Conversational Trip Planner | ✅ Complete | TripPlannerSheet full-screen chat + TripsClient wiring; UAT deferred |
+
+**Next:** Continue Phase 29 (Vehicle Pre-Trip Checklist, Plans 02–03) or pick up Phases 30–32
 
 ---
 
@@ -25,17 +57,15 @@ All 5 phases of v1.0 shipped. The app has: executive trip prep, NC camping knowl
 
 ## Milestone v1.1 — Close the Loop
 
-**Status:** Phase 10 planned and reviewed. Ready to execute.
+**Status:** ✅ Complete 2026-04-02
 
 | Phase | Status | Summary |
 |-------|--------|---------|
 | 6. Stabilization | ✅ Complete | AI output persistence, CRUD gaps fixed, design system migration, packing list fixes |
 | 7. Day-Of Execution | ✅ Complete | Departure checklist + float plan email, settings page, Nodemailer Gmail integration |
 | 8. PWA and Offline | ✅ Complete | Installable PWA, service worker, offline banner, "Leaving Now" trip caching, passive map tile caching |
-| 9. Learning Loop | ○ Not started | Post-trip gear usage tracking, Claude debrief, voice writeback |
-| 10. Offline Read Path | 📋 Planned | 4 plans, 3 waves — dual-mode components, tile prefetch, offline write queue, Phase 8 docs |
-
-**Status:** v1.1 shipped 2026-04-02. See v1.2 section above for current work.
+| 9. Learning Loop | ✅ Complete | Voice debrief, Whisper transcription, Claude insight extraction, TripFeedback model, post-trip review UI |
+| 10. Offline Read Path | ✅ Complete | Dual-mode components, tile prefetch, offline write queue |
 
 ---
 
@@ -103,6 +133,7 @@ All 5 phases of v1.0 shipped. The app has: executive trip prep, NC camping knowl
 | Gear photo identification | ❌ Planned | Snap a photo → Claude identifies brand/type/specs |
 | Safety float plan | ✅ Done | Phase 7 — Claude-composed plain text email via Gmail to emergency contact |
 | Nearby trails & recreation API | ❌ Planned | OSM, NPS, Recreation.gov near a saved location |
+| Activities gear category + trip planner integration | ❌ Planned | Add `activities` category to gear (kayak, telescope, etc.). Trip planner evaluates location conditions (water access, light pollution, trails) and recommends relevant activity gear. E.g. dark sky site → suggest telescope; lake access → suggest kayak. |
 | Fuel & last stop planner | ❌ Planned | Route-aware: last gas, grocery, ice before backcountry |
 | *...and more in FEATURE-PHASES.md* | | |
 
@@ -124,7 +155,7 @@ All 5 phases of v1.0 shipped. The app has: executive trip prep, NC camping knowl
 |-------|----------|-------|
 | Dashboard trips stat hardcoded to 0 | Low | `DashboardClient.tsx:163` — needs `tripCount` from server props |
 | Packing item checkbox uses `update` not `upsert` | Medium | `api/packing-list/items/route.ts:16` — will 404 if PackingItem rows don't exist yet. Should upsert on `(tripId, gearId)` |
-| No per-trip update/delete route | Medium | `app/api/trips/[id]/route.ts` doesn't exist — can't edit or delete a trip |
+| ~~No per-trip update/delete route~~ | ~~Medium~~ | ✅ Fixed in Phase 22 — `app/api/trips/[id]/route.ts` has full GET/PUT/PATCH/DELETE |
 | Missing `placeholder.jpg` in public/ | Low | `api/import/photos/route.ts:87` references `/photos/placeholder.jpg` — broken images for imported photos without files |
 | Prep power section uses heuristic, not computed budget | Low | Prep API power status doesn't call `calculatePowerBudget` — can misrepresent readiness |
 

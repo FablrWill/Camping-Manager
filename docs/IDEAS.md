@@ -218,6 +218,66 @@ This is the "killer feature" — the thing that makes Outland OS more than an in
 
 ---
 
+### Mac Mini Background Agent — Async Worker Architecture
+**Added:** 2026-04-03
+**Context:** Will wants to structure the project so Claude Code running on the Mac mini can handle slow, expensive, or bandwidth-heavy tasks and feed results back into the app. Phone + Starlink are constrained; Mac mini has uncapped connection and is always-on.
+
+**Core idea:** Mac mini as a background worker. It polls for pending jobs, executes them, and writes results back to the app database. Phone just surfaces the results.
+
+**Task categories:**
+
+*Scheduled / Proactive*
+- Pre-trip weather window analysis (7 days out, flag bad windows before you commit)
+- Fire restriction / campfire ban scraping for target regions
+- Gear maintenance reminders (based on last-used date + interval)
+- Trail condition reports for saved spots
+
+*Wishlist & Deal Tracking*
+- Monitor REI, Amazon, Backcountry for price drops on wishlist items
+- Alert when a specific item hits a threshold price
+- Scrape gear clearance sections for categories Will cares about
+
+*Data Enrichment (triggered by user action on phone)*
+- Auto-fetch product manual + specs when gear is added
+- Pull campsite reviews, cell coverage data, elevation for saved spots
+- AI photo analysis: what gear is visible, what location does this look like
+
+*Heavy AI / Long-running*
+- Full trip itinerary generation (weather + gear + meals + spots in one pass)
+- Gear loadout optimization for a specific trip type
+- "What am I missing?" analysis against upcoming trip conditions
+
+*Data Processing*
+- Google Takeout batch imports (already heavy — perfect for background)
+- Photo enrichment pipeline: EXIF → GPS → reverse geocode → AI caption
+- Bulk gear audit: flag items not used in 2+ years
+
+*Future: HA Integration*
+- When the campsite server arrives, Mac mini orchestrates the bridge between it and the app
+
+**How results flow back (simplest first):**
+
+Option A — Direct SQLite writes (start here): Mac mini writes directly to the shared db. App reads on next load or poll. Zero new infrastructure, works via SSH today.
+
+Option B — API POST: Mac mini POSTs to `POST /api/agent/results`. Cleaner separation, survives db location changes.
+
+Option C — File drop: Mac mini writes JSON to a watched directory. App ingests on schedule. Most flexible, overkill for now.
+
+**Proposed schema:**
+```
+agent_jobs
+  id, type, status (pending/running/done/failed),
+  payload (input JSON), result (output JSON),
+  triggered_by (manual/schedule),
+  created_at, completed_at
+```
+
+App shows pending indicator when a job is queued, surfaces results inline (deal alert, weather warning, enriched data), badge for new agent results.
+
+**Good first job type to build:** Gear deal tracking on wishlist items — self-contained, high value, proves the pattern end to end.
+
+---
+
 ### Siri/Reminders Inbox — "Capture on the Road"
 **Added:** 2026-03-30
 **Context:** Will uses Siri via CarPlay while driving to dump random thoughts, feature ideas, gear todos, and trip notes into Apple Reminders. It's a fast, zero-friction capture habit — not what Reminders was designed for, but it works. The problem is those items pile up unorganized and nothing gets done with them.

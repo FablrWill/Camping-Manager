@@ -38,6 +38,7 @@ interface TripData {
   permitNotes: string | null
   fallbackFor: string | null
   fallbackOrder: number | null
+  mealPlanGeneratedAt: string | null  // Phase 34: meal plan status
 }
 
 interface WeatherData {

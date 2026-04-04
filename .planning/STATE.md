@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.2
-milestone_name: Ship It
+milestone: v3.0
+milestone_name: Gear Intelligence + Day-Of
 status: executing
-stopped_at: Completed 22-02-PLAN.md — Phase 22 Plan B/C fallback chain UI
-last_updated: "2026-04-03T16:23:33.804Z"
-last_activity: 2026-04-03
+stopped_at: Completed 34-03-PLAN.md
+last_updated: "2026-04-04T01:37:04.515Z"
+last_activity: 2026-04-04
 progress:
-  total_phases: 23
-  completed_phases: 21
-  total_plans: 70
-  completed_plans: 65
+  total_phases: 24
+  completed_phases: 19
+  total_plans: 52
+  completed_plans: 51
   percent: 40
 ---
 
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-01)
 
 **Core value:** Personal camping second brain — a closed-loop system that plans, executes, and learns from every trip
-**Current focus:** Phase 24 — smart-inbox-universal-intake
+**Current focus:** Phase 34 — meal-planning-core
 
 ## Current Position
 
-Phase: 23
+Phase: 35
 Plan: Not started
 Status: Ready to execute
-Last activity: 2026-04-03
+Last activity: 2026-04-04
 
 Progress: [████░░░░░░] 40%
 
@@ -68,6 +68,14 @@ Progress: [████░░░░░░] 40%
 | Phase 20-live-location-sharing P01 | 383 | 2 tasks | 6 files |
 | Phase 20-live-location-sharing P02 | 203 | 4 tasks | 9 files |
 | Phase 22-plan-fallback-chain P02 | 15 | 2 tasks | 3 files |
+| Phase 33-conversational-trip-planner P00 | 5 | 1 tasks | 2 files |
+| Phase 33-conversational-trip-planner P01 | 4 | 2 tasks | 5 files |
+| Phase 33-conversational-trip-planner P03 | 20 | 2 tasks | 2 files |
+| Phase 29 P01 | 214 | 2 tasks | 5 files |
+| Phase 34-meal-planning-core P00 | 69 | 1 tasks | 3 files |
+| Phase 34 P01 | 5 | 2 tasks | 5 files |
+| Phase 34 P02 | 3 | 2 tasks | 4 files |
+| Phase 34 P03 | 12 | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -107,10 +115,29 @@ Recent decisions affecting current work:
 - [Phase 20-live-location-sharing]: ssr:false dynamic import must live in Client Component, not Server Component — Next.js App Router constraint; extracted to share-page-client.tsx
 - [Phase 20-live-location-sharing]: Bare layout.tsx at /share renders <html> directly — fully bypasses AppShell so family sees clean map-only page with no nav chrome
 - [Phase 22-plan-fallback-chain]: Add Plan B/C button placed in TripsClient (not TripCard) to keep TripCard interface minimal
+- [Phase 33-conversational-trip-planner]: Use require() inside test bodies for TDD RED stubs — files compile before source modules exist, tests fail at runtime with MODULE_NOT_FOUND
+- [Phase 33-conversational-trip-planner]: trip-planner route separate from /api/chat with focused 4-tool set and no memory extraction
+- [Phase 33-conversational-trip-planner]: agent presents trip_summary JSON card and waits for confirm — client handles trip creation (avoids Pitfall 3)
+- [Phase 33-conversational-trip-planner]: TripPlannerSheet uses initialMessages to seed agent greeting client-side — no API call needed for first message
+- [Phase 33-conversational-trip-planner]: Human UAT checkpoint approved with testing deferred to 33-HUMAN-UAT.md
+- [Phase 29]: VehicleChecklistItem has id, text, checked only — no isUnpackedWarning or suggestedTime (simpler than DepartureChecklist)
+- [Phase 29]: Route tests use require() inside test bodies so vite does not fail at compile time when source files do not exist yet
+- [Phase 29]: Migration created manually and applied via prisma migrate deploy due to non-interactive agent environment
+- [Phase 34-meal-planning-core]: Use it.todo() for Wave 0 stubs — pending not failing; route imports commented until Plan 02 creates files
+- [Phase 34]: Applied MealPlan normalization migration manually via better-sqlite3 — FTS triggers block prisma migrate deploy
+- [Phase 34]: meal-plan route upserts header only after schema normalization — Plan 02 adds Meal row persistence
+- [Phase 34]: generateMealPlan() returns NormalizedMealPlanResult — legacy MealPlanResult interfaces preserved for backward compat
+- [Phase 34]: POST /generate persists Meal rows in prisma.$transaction with atomic Trip.mealPlanGeneratedAt update
+- [Phase 34]: MealPlanClient renders day-by-day collapsible meals with per-meal PATCH regeneration; old MealPlan component replaced in TripPrepClient
+- [Phase 34]: Meal plan status badge (ready/none) shown per trip in TripsClient using mealPlanGeneratedAt field
 
 ### Pending Todos
 
 None yet.
+
+### Roadmap Evolution
+
+- Phase 33 added: Conversational Trip Planner — replace Create Trip form with multi-turn Claude agent chat (dynamic questions, tool use, trip creation)
 
 ### Blockers/Concerns
 
@@ -120,6 +147,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-03T16:14:32.321Z
-Stopped at: Completed 22-02-PLAN.md — Phase 22 Plan B/C fallback chain UI
+Last session: 2026-04-04T01:27:45.753Z
+Stopped at: Completed 34-03-PLAN.md
 Resume file: None

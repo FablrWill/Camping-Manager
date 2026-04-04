@@ -96,6 +96,7 @@ const DepartureChecklistItemSchema = z.object({
   text: z.string(),
   checked: z.boolean().default(false),
   isUnpackedWarning: z.boolean().default(false),
+  suggestedTime: z.string().nullable().optional(),
 });
 
 const DepartureChecklistSlotSchema = z.object({
@@ -110,15 +111,6 @@ export const DepartureChecklistResultSchema = z.object({
 export type DepartureChecklistResult = z.infer<typeof DepartureChecklistResultSchema>;
 export type DepartureChecklistItem = z.infer<typeof DepartureChecklistItemSchema>;
 export type DepartureChecklistSlot = z.infer<typeof DepartureChecklistSlotSchema>;
-
-// --- Float Plan Email Schema ---
-
-export const FloatPlanEmailSchema = z.object({
-  subject: z.string(),
-  body: z.string(),
-});
-
-export type FloatPlanEmail = z.infer<typeof FloatPlanEmailSchema>;
 
 // --- Trip Summary Schema (Phase 9 - LEARN-02) ---
 
@@ -193,3 +185,82 @@ export const TextClassificationSchema = z.object({
   extractedData: z.record(z.string(), z.unknown()).optional(),
 });
 export type TextClassification = z.infer<typeof TextClassificationSchema>;
+
+// --- Gear Document Schemas (matches GearDocument model) ---
+
+export const GearDocumentResultSchema = z.object({
+  documents: z.array(z.object({
+    type: z.enum(['manual_pdf', 'support_link', 'warranty', 'product_page']),
+    url: z.string().url(),
+    title: z.string(),
+    confidence: z.enum(['high', 'low']).optional(),
+  })),
+});
+
+export type GearDocumentResult = z.infer<typeof GearDocumentResultSchema>;
+
+// --- Vehicle Checklist Schemas (Phase 29) ---
+
+const VehicleChecklistItemSchema = z.object({
+  id: z.string(),
+  text: z.string(),
+  checked: z.boolean().default(false),
+});
+
+export const VehicleChecklistResultSchema = z.object({
+  items: z.array(VehicleChecklistItemSchema),
+});
+
+export type VehicleChecklistResult = z.infer<typeof VehicleChecklistResultSchema>;
+export type VehicleChecklistItem = z.infer<typeof VehicleChecklistItemSchema>;
+
+// --- Normalized Meal Plan Schemas (Phase 34 — structured ingredients) ---
+
+export const NormalizedIngredientSchema = z.object({
+  item: z.string(),
+  quantity: z.string(),
+  unit: z.string().optional().default(''),
+});
+
+export type NormalizedIngredient = z.infer<typeof NormalizedIngredientSchema>;
+
+export const SingleMealSchema = z.object({
+  name: z.string(),
+  description: z.string().optional(),
+  ingredients: z.array(NormalizedIngredientSchema),
+  cookInstructions: z.string().optional(),
+  prepNotes: z.string().optional(),
+  estimatedMinutes: z.number().optional(),
+});
+
+export type SingleMeal = z.infer<typeof SingleMealSchema>;
+
+const NormalizedMealPlanMealSchema = z.object({
+  name: z.string(),
+  prepNotes: z.string().optional().default(''),
+  description: z.string().optional(),
+  ingredients: z.array(NormalizedIngredientSchema),
+  cookInstructions: z.string().optional(),
+  estimatedMinutes: z.number().optional(),
+});
+
+const NormalizedMealPlanDaySchema = z.object({
+  dayNumber: z.coerce.number(),
+  dayLabel: z.string(),
+  date: z.string(),
+  meals: z.object({
+    breakfast: NormalizedMealPlanMealSchema.nullable(),
+    lunch: NormalizedMealPlanMealSchema.nullable(),
+    dinner: NormalizedMealPlanMealSchema.nullable(),
+    snacks: z.array(z.string()).default([]),
+  }),
+});
+
+export const NormalizedMealPlanResultSchema = z.object({
+  days: z.array(NormalizedMealPlanDaySchema),
+  shoppingList: z.array(ShoppingItemSchema).default([]),
+  prepTimeline: z.array(z.string()).default([]),
+  tips: z.array(z.string()).default([]),
+});
+
+export type NormalizedMealPlanResult = z.infer<typeof NormalizedMealPlanResultSchema>;

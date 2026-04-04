@@ -20,6 +20,8 @@ interface GearItem {
   wattage: number | null
   hoursPerDay: number | null
   hasBattery: boolean
+  modelNumber: string | null
+  connectivity: string | null
 }
 
 interface CategoryOption {
@@ -40,6 +42,7 @@ interface GearFormProps {
   onSave: (data: Record<string, unknown>) => Promise<void>
   onDelete?: () => void
   onClose: () => void
+  extraContent?: React.ReactNode
 }
 
 async function resizeImageToBase64(
@@ -72,6 +75,7 @@ export default function GearForm({
   onSave,
   onDelete,
   onClose,
+  extraContent,
 }: GearFormProps) {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -90,6 +94,8 @@ export default function GearForm({
   const [storageLocation, setStorageLocation] = useState(item?.storageLocation ?? '')
   const [purchaseUrl, setPurchaseUrl] = useState(item?.purchaseUrl ?? '')
   const [notes, setNotes] = useState(item?.notes ?? '')
+  const [modelNumber, setModelNumber] = useState(item?.modelNumber ?? '')
+  const [connectivity, setConnectivity] = useState(item?.connectivity ?? '')
 
   // AI identification state
   const [identifyTab, setIdentifyTab] = useState<'url' | 'photo'>('url')
@@ -179,6 +185,8 @@ export default function GearForm({
       wattage: safeParseFloat(wattage),
       hoursPerDay: safeParseFloat(hoursPerDay),
       hasBattery,
+      modelNumber: modelNumber || null,
+      connectivity: connectivity || null,
     }
 
     try {
@@ -524,6 +532,42 @@ export default function GearForm({
               className="w-full px-3 py-2.5 rounded-lg border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-400 dark:focus:ring-amber-500 resize-none"
             />
           </div>
+
+          {/* Tech Details */}
+          <div className="border-t border-stone-200 dark:border-stone-700 pt-4 mt-4">
+            <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Tech Details (optional)</h3>
+            <div className="space-y-3">
+              <div>
+                <label htmlFor="gear-modelNumber" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Model Number
+                </label>
+                <input
+                  id="gear-modelNumber"
+                  type="text"
+                  value={modelNumber}
+                  onChange={(e) => setModelNumber(e.target.value)}
+                  placeholder="e.g. ESP32-WROOM-32"
+                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-400 dark:focus:ring-amber-500"
+                />
+              </div>
+              <div>
+                <label htmlFor="gear-connectivity" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Connectivity
+                </label>
+                <input
+                  id="gear-connectivity"
+                  type="text"
+                  value={connectivity}
+                  onChange={(e) => setConnectivity(e.target.value)}
+                  placeholder="e.g. WiFi, Bluetooth"
+                  className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-400 dark:focus:ring-amber-500"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Extra content slot (e.g. GearDocumentsTab) */}
+          {extraContent}
 
           {/* Error */}
           {error && (
