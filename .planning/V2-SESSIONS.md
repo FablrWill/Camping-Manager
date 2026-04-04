@@ -51,6 +51,7 @@ A self-coordinating work queue for v2.0 features. Each Claude Code session claim
 | S11 | Meal planning core            | 34    | ✅ Done 2026-04-03 | Sonnet, normal | S07        |
 | S12 | Meal planning: shopping, prep & feedback | 35 | ✅ Done 2026-04-04 | Sonnet, normal | S11 |
 | S13 | Mac mini agent jobs infrastructure    | 36    | ✅ Done 2026-04-04 | Sonnet, normal | —          |
+| S14 | Gear product research                | 30    | 🔄 In Progress 2026-04-04 | Opus, normal | —          |
 
 **Why this order matters (conflict groups):**
 
@@ -635,7 +636,65 @@ model AgentJob {
 
 ---
 
+### S14 — Gear Product Research (Phase 30)
 
+**What to build:** An AI-powered "Research" button on gear items that calls Claude to find best-in-class alternatives, compare specs, and store results. Results are dated so Will can see when research is stale (>90 days). Dashboard surfaces top upgrade opportunities from wishlist.
+
+**User story:** Will opens his headlamp in gear detail and taps "Research". Claude searches for the top 3 headlamps in that category, compares lumens/weight/price, and shows "Your Petzl Actik Core vs. alternatives". The result is saved and shown next time without re-running.
+
+**Key files:**
+- `prisma/schema.prisma` — add `researchResult` (JSON), `researchedAt` (DateTime) fields to GearItem
+- `app/api/gear/[id]/research/route.ts` — new POST endpoint that calls Claude to research alternatives
+- `lib/claude.ts` — new `researchGearItem()` function with structured output
+- `components/GearResearchCard.tsx` — new component showing research results (alternatives table, pros/cons)
+- `components/GearClient.tsx` — add "Research" button in gear detail, show GearResearchCard when results exist
+- `components/DashboardClient.tsx` — optional: surface "N items have upgrade suggestions" callout
+
+**Schema changes:**
+```prisma
+// Add to existing GearItem model:
+researchResult   String?   // JSON: { alternatives: [{ name, brand, price, weight, pros, cons }], summary }
+researchedAt     DateTime? // when research was last run — stale after 90 days
+```
+
+**API contract:**
+- `POST /api/gear/[id]/research` — triggers Claude research, stores result on GearItem, returns updated item
+  - Claude prompt: given item name, brand, category, price, weight — find 3 best alternatives, compare, recommend
+  - Returns structured JSON with alternatives array and summary text
+
+**Research result shape:**
+```typescript
+interface GearResearch {
+  alternatives: {
+    name: string
+    brand: string
+    price: string      // "$XX" or "unknown"
+    weight: string     // "X.X oz" or "unknown"
+    pros: string[]
+    cons: string[]
+    url?: string       // product page if found
+  }[]
+  summary: string      // "Your X is solid for the price. The Y is lighter but $30 more..."
+  recommendation: 'keep' | 'consider_upgrade' | 'upgrade'
+}
+```
+
+**Acceptance criteria:**
+- GearItem has researchResult and researchedAt fields, migration passes
+- "Research" button appears on gear detail for owned (non-wishlist) items
+- Clicking it calls Claude, shows loading state, stores result
+- Result displays as a card with alternatives table and summary
+- Stale indicator shows when research is >90 days old with "Re-research" option
+- Wishlist items show "Research" too (helps with purchase decisions)
+- `npm run build` passes
+
+**Constraints:**
+- Out of scope: deal price tracking (that's Phase 32)
+- Out of scope: auto-research via agent jobs (could add later as a job type, but this is on-demand only)
+- Out of scope: actual purchase links or affiliate tracking
+- Claude may not find real prices — result should handle "unknown" gracefully
+
+---
 
 Copy-paste one of these to begin each session. All use **claude-sonnet-4-6**, normal effort (no special flags needed).
 
