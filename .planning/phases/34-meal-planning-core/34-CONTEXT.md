@@ -1,75 +1,42 @@
 # Phase 34: Meal Planning Core - Context
 
-**Gathered:** 2026-04-03
+**Gathered:** 2026-04-04
 **Status:** Ready for planning
-**Source:** PRD Express Path (.planning/V2-SESSIONS.md#S11) + direct spec from user
 
 <domain>
 ## Phase Boundary
 
-Build a normalized meal planning system linked to trips. Given a trip, Claude generates a full meal plan — every meal slot for every day — based on trip duration, headcount, destination/weather, dog status, and available cooking gear. Individual meals can be regenerated without replacing the whole plan.
-
-**Out of scope (S12):** shopping list, prep guide, feedback UI, headcount field on Trip, dietary restrictions/preferences field.
-
-**Key prior art:** Significant meal plan infrastructure already exists:
-- `generateMealPlan()` in `lib/claude.ts` — comprehensive, includes weather, cooking gear, pre-trip prep instructions (but lacks `bringingDog` param and `regenerateMeal()`)
-- `MealPlan` model in schema uses JSON blob (`result` field) — needs migration to normalized `Meal` rows
-- `MealPlan.tsx` component (474 lines) — renders from JSON blob, already wired into TripPrepClient `meals` tab
-- `app/api/meal-plan/route.ts` — GET/POST with `?tripId=` query param (not per-trip RESTful)
-- `Trip.mealPlanGeneratedAt` — already on Trip model for status tracking
-- `Trip.bringingDog` — already on Trip model, needs to flow into meal generation
+Extend the existing meal plan system with three additions: (1) individual meal slot regeneration — tap a specific meal to regenerate just that one without replacing the whole plan; (2) trip card compact status indicator showing whether a meal plan exists; (3) dog and meal-prep context in the Claude prompt when relevant. The core generation, day×slot layout, shopping list, prep timeline, and whole-plan regeneration already exist and are not being redesigned.
 
 </domain>
 
 <decisions>
 ## Implementation Decisions
 
-### Schema Migration
-- Add `Meal` model with normalized rows: `id, mealPlanId, day (1-based int), slot (breakfast/lunch/dinner/snack), name, description, ingredients (JSON array of {item, quantity, unit}), cookInstructions, prepNotes, estimatedMinutes`
-- Update `MealPlan` model: keep `id, tripId (@unique), generatedAt`; add `notes String?`; **remove `result` JSON blob** and `cachedAt`
-- Existing MealPlan rows (if any) will be cleared — personal project, no prod data migration needed
-- Write a Prisma migration for both changes
+### Individual meal regeneration — UX
+- **D-01:** Trigger lives in the expanded meal view — tap a meal row to expand it, then a small "↻ Regenerate this meal" button appears in the expanded detail. No always-visible icon on collapsed rows.
+- **D-02:** While regenerating, the specific meal slot shows a spinner/skeleton. Other meals stay visible and interactive — no whole-plan lock.
+- **D-03:** Skip ConfirmDialog for per-meal regen — low stakes (only one meal replaced). Show inline "Meal updated" feedback instead of a confirm prompt.
 
-### API Routes (new per-trip RESTful structure)
-- `GET  /api/trips/[id]/meal-plan` — fetch plan with all Meal rows
-- `DELETE /api/trips/[id]/meal-plan` — clear plan (delete MealPlan + cascade Meals)
-- `POST /api/trips/[id]/meal-plan/generate` — call Claude, persist MealPlan + Meal rows, return full plan; also update `Trip.mealPlanGeneratedAt`
-- `PATCH /api/trips/[id]/meal-plan/meals/[mealId]` — regenerate single meal via `regenerateMeal()`, update the Meal row in DB
-- `DELETE /api/trips/[id]/meal-plan/meals/[mealId]` — delete single meal
+### Individual meal regeneration — API
+- **D-04:** New PATCH endpoint on `/api/meal-plan` — accepts `{ tripId, day: number, mealType: 'breakfast' | 'lunch' | 'dinner' }`. Returns the updated single meal. Planner decides whether to regenerate via Claude mini-call or full prompt with instruction to update one slot.
+- **D-05:** After per-meal regen, update only the target slot in the stored JSON blob (upsert the MealPlan row with the modified result). Shopping list and prep timeline can regenerate with the whole plan regen — per-meal regen only updates the meal itself.
 
-### lib/claude.ts Functions
-- Update `generateMealPlan()` to accept `bringingDog?: boolean` param and inject into prompt
-- Add `regenerateMeal()` function: takes meal context (day, slot, trip details) and generates one replacement meal
-- The Claude prompt for meal generation already has vacuum sealer / sous vide constraints — keep and don't change
-- Snack slot is optional per spec ("snack optional")
+### Dog awareness in meal planning
+- **D-06:** Pass `bringingDog: boolean` from trip to `generateMealPlan()` params. When true, add a context note to the Claude prompt: "A dog is coming on this trip." Claude naturally avoids heavy use of foods toxic to dogs (onions, garlic, chocolate) and may suggest dog-friendly snack ideas. No separate dog shopping list section.
 
-### MealPlanClient.tsx (new component)
-- NEW file: `components/MealPlanClient.tsx`
-- Replaces/supersedes existing `MealPlan.tsx` for the meals tab in TripPrepClient
-- Days as collapsible sections (day number + date as header)
-- Meal cards: name, prepType (home/camp), prepNotes, ingredients list, cook instructions
-- "Generate Plan" button (when no plan exists)
-- "Regenerate All" button (when plan exists)
-- Per-meal "↺ Regenerate" button on each meal card
-- Loading state during generation/regeneration
-- Error state inline (no alert())
-- Existing `MealPlan.tsx` can be kept or removed — TripPrepClient will use MealPlanClient
+### Meal prep context in prompt
+- **D-07:** Add to the Claude meal plan prompt: Will does pre-trip meal prep at home using a vacuum sealer and sous vide. This enriches the existing `prepType: 'home'` vs `'at camp'` distinction — Claude can suggest vacuum-sealed sous vide meals for home prep days.
 
-### TripPrepClient wiring
-- Update the `meals` section to render `<MealPlanClient tripId={trip.id} tripName={trip.name} />` instead of `<MealPlan ...>`
-- Use new per-trip API routes (`/api/trips/${id}/meal-plan`)
-
-### TripsClient status indicator
-- Trip cards currently have no meal plan status display
-- Add "Meal plan ready" / "No meal plan" badge/indicator on each trip card
-- Data: use `trip.mealPlanGeneratedAt` (already on Trip model) — null = no plan
+### Trip card status badge
+- **D-08:** Add "🍽️ Meal plan ready" to the stats row on the collapsed TripCard — same row as "backpack N packed" / "camera N photos". Only show when a meal plan exists; no "No meal plan" text (silence = no plan, consistent with packing items behavior).
+- **D-09:** Trip query (in `app/trips/page.tsx`) needs `include: { mealPlan: { select: { id: true } } }` added to fetch plan existence without loading the full JSON blob. Pass `hasMealPlan: boolean` (derived from `!!trip.mealPlan`) down to TripCard.
 
 ### Claude's Discretion
-- Component structure within MealPlanClient (how many sub-components to extract)
-- Exact Tailwind styling for meal cards (follow existing TripPrepClient patterns)
-- Whether to keep or delete the old `MealPlan.tsx` (can keep for now)
-- Error message copy
-- Exact behavior when regenerating a single meal while another regeneration is in flight (disable button)
+- Exact Claude prompt wording for dog context and meal prep context
+- Icon choice for meal plan status in stats row (🍽️ or alternative)
+- How to display "Meal updated" inline feedback after per-meal regen (toast, brief text flash, etc.)
+- Whether per-meal regen updates shopping list/prepTimeline or leaves them stale until whole regen
 
 </decisions>
 
@@ -78,63 +45,62 @@ Build a normalized meal planning system linked to trips. Given a trip, Claude ge
 
 **Downstream agents MUST read these before planning or implementing.**
 
-### Spec
-- `.planning/V2-SESSIONS.md` lines 467–515 — Full S11 spec (data models, key files, Claude prompt context, acceptance criteria, constraints)
+### Existing meal plan implementation
+- `app/api/meal-plan/route.ts` — Current GET + POST meal plan API; upsert pattern, weather integration, cooking gear filtering
+- `components/MealPlan.tsx` — Full meal plan component; expand/collapse meal rows, shopping list, prep timeline, ConfirmDialog pattern
+- `lib/claude.ts` (lines 116–160, 333–490) — `MealPlanResult` type definition and `generateMealPlan()` function signature
+- `lib/parse-claude.ts` — `MealPlanResultSchema` (Zod) and `parseClaudeJSON` utility
 
-### Schema (source of truth)
-- `prisma/schema.prisma` — Current MealPlan model (JSON blob, needs migration to normalized rows) + Trip model (bringingDog, mealPlanGeneratedAt fields)
+### Trip card and data
+- `components/TripCard.tsx` — Collapsed card layout; stats row (lines 175–192); existing `bringingDog` usage (line 106); MealPlan embed in expanded view (line 276)
+- `app/trips/page.tsx` — Trip query with `include` and `_count`; where to add `mealPlan: { select: { id: true } }`
 
-### Existing meal plan code (must read before modifying)
-- `lib/claude.ts` lines 116–480 — MealPlanMeal, MealPlanDay, MealPlanResult interfaces + generateMealPlan() implementation
-- `app/api/meal-plan/route.ts` — Existing GET/POST route (will be superseded by per-trip routes)
-- `components/MealPlan.tsx` — Existing 474-line component (will be superseded by MealPlanClient.tsx)
-
-### Components to update
-- `components/TripPrepClient.tsx` — meals section currently renders `<MealPlan>`, needs to render `<MealPlanClient>`
-- `components/TripsClient.tsx` — trip cards need meal plan status indicator
-
-### Patterns to follow
-- `app/api/trips/[id]/vehicle-checklist/route.ts` (or similar per-trip routes) — follow same per-trip RESTful pattern
-- `components/VehicleChecklistCard.tsx` — similar generate/regenerate UX pattern if exists
+### Prior phase decisions (carry forward)
+- `STATE.md` → Phase 06-stabilization: `MealPlan uses @unique on tripId (one per trip)`; `parseClaudeJSON<T> uses Zod .safeParse() returning discriminated union`; `AI results persist on generation and load on component mount`; `Both PackingList and MealPlan guard regenerate with ConfirmDialog — first-time generation skips confirm`
+- `STATE.md` → Phase 06-stabilization: `TripCard extracted to standalone file — PackingList/MealPlan child state no longer destroyed on parent re-render`
 
 </canonical_refs>
+
+<code_context>
+## Existing Code Insights
+
+### Reusable Assets
+- `MealPlan.tsx` expand/collapse pattern: `expandedMeal` state tracks which meal is open by key `day{N}-{mealType}` — per-meal regen button can live in the expanded detail block
+- `ConfirmDialog` component: already used in MealPlan.tsx — skip for per-meal regen per D-03
+- `Button` with `loading` prop: already used throughout — spinner state for per-meal regen
+- `parseClaudeJSON<MealPlanResultSchema>`: use for any Claude response in the PATCH handler
+
+### Established Patterns
+- Fire-and-forget AI save: user sees AI result immediately; DB write failure doesn't block UI (from Phase 06)
+- `safeJsonParse` for reading stored JSON blobs — use when loading MealPlan.result from DB
+- State-based inline errors, no `alert()` — per CLAUDE.md conventions
+
+### Integration Points
+- PATCH `/api/meal-plan` is a new route handler needed alongside existing GET/POST in `app/api/meal-plan/route.ts`
+- `generateMealPlan()` in `lib/claude.ts` needs `bringingDog` and `mealPrepContext` params added
+- `TripCard` props interface needs `hasMealPlan: boolean` added
+- `app/trips/page.tsx` query needs `mealPlan: { select: { id: true } }` in the include block
+
+</code_context>
 
 <specifics>
 ## Specific Ideas
 
-### Claude prompt constraints (locked — from spec)
-```
-"Car camping — full cooler available. Will has a vacuum sealer and sous vide at home for pre-trip prep. Prefer one-pot or simple multi-component meals. Minimize dishes."
-```
-
-### Meal slot coverage
-- Day 1: starts with lunch or dinner (arrival day — no breakfast)
-- Middle days: breakfast, lunch, dinner
-- Last day: breakfast only (pack-up day)
-- Snacks: optional per day
-
-### bringingDog in meal context
-- If `trip.bringingDog` is true, Claude should note dog-friendly meal timing (meals that don't require long unattended cooking while managing a dog)
-
-### Individual meal regeneration prompt
-- Must include: day number, slot, trip context (name, dates, destination), cooking gear, weather (if available), and the current meal name/description (for contrast/variety)
+- Will does pre-trip meal prep at home: vacuum sealer + sous vide. Claude should know this so home-prep meals are genuinely home-prep style (not just "make sandwiches at home").
+- Dog context note in prompt should be minimal — just tell Claude the dog is coming; let Claude decide how to handle it rather than over-specifying.
 
 </specifics>
 
 <deferred>
 ## Deferred Ideas
 
-- Shopping list (S12)
-- Prep guide (S12)
-- Feedback/rating UI (S12)
-- Headcount field on Trip model (future session)
-- Dietary restrictions / preferences field (future — feedback history in S12)
-- Offline snapshot for meal plan (existing `cachedAt` field being removed — can add back later)
-- Headcount > 1 (assume 1 for now per spec)
+- Per-meal regen also updating shopping list / prep timeline — complex; defer to whole-plan regen for those sections
+- Dog food/treats as a dedicated shopping list section — Will handles dog logistics separately
+- Snacks individual regeneration — only breakfast/lunch/dinner get per-meal regen; snacks are a flat list
 
 </deferred>
 
 ---
 
 *Phase: 34-meal-planning-core*
-*Context gathered: 2026-04-03 via PRD Express Path (V2-SESSIONS.md#S11)*
+*Context gathered: 2026-04-04*

@@ -1,88 +1,47 @@
 ---
+plan: 34-01
 phase: 34-meal-planning-core
-plan: "01"
-subsystem: database/validation
-tags: [prisma, schema, zod, meal-planning, sqlite]
-dependency_graph:
-  requires: ["34-00"]
-  provides: ["Meal table in SQLite", "normalized MealPlan schema", "NormalizedIngredientSchema", "SingleMealSchema", "NormalizedMealPlanResultSchema"]
-  affects: ["app/api/meal-plan/route.ts", "app/api/departure-checklist/route.ts"]
-tech_stack:
-  added: []
-  patterns: ["SQLite table recreation (no DROP COLUMN)", "Prisma migrate resolve --applied for manual migrations"]
-key_files:
-  created:
-    - prisma/migrations/20260403140000_normalize_meal_plan/migration.sql
-  modified:
-    - prisma/schema.prisma
-    - lib/parse-claude.ts
-    - app/api/meal-plan/route.ts
-    - app/api/departure-checklist/route.ts
-decisions:
-  - "Applied migration manually via better-sqlite3 (FTS triggers block Prisma migrate deploy on this DB)"
-  - "Drop FTS triggers temporarily during DDL, recreate after — triggers reference knowledge_chunks_fts which does not exist yet"
-  - "meal-plan route upsert stores only header row (no result blob) — Plan 02 adds normalized Meal row persistence"
-  - "departure-checklist passes empty string for mealPlan.result since Meal data is now in separate rows"
-metrics:
-  duration_minutes: 5
-  completed_date: "2026-04-03"
-  tasks_completed: 2
-  files_modified: 4
-  files_created: 1
-requirements_satisfied:
-  - MEAL-01
-  - MEAL-07
+status: complete
+completed: 2026-04-04
+self_check: PASSED
 ---
 
-# Phase 34 Plan 01: Normalize MealPlan Schema + Zod Schemas Summary
+# Plan 34-01: Dog-aware meal planning + meal plan status badge
 
-Normalized MealPlan schema from JSON blob to individual Meal rows with structured ingredient support; added Zod validation schemas for the normalized shape.
+## What Was Built
 
-## Tasks Completed
+- **`lib/claude.ts`**: Added `bringingDog?: boolean` to `generateMealPlan` params. When true, injects a `DOG ON TRIP:` section into the Claude prompt advising it to avoid foods toxic to dogs (onions, garlic, grapes, chocolate, xylitol) and suggesting a dog-friendly snack tip.
+- **`app/api/meal-plan/route.ts`**: POST handler now passes `bringingDog: trip.bringingDog` to `generateMealPlan`. Added imports for `anthropic`, `parseClaudeJSON`, `MealPlanMealSchema`, and `MealPlanResult` (needed for plan 34-02 PATCH handler in same file).
+- **`app/trips/page.tsx`**: Added `mealPlan: { select: { id: true } }` to trip query include. Added `hasMealPlan: !!t.mealPlan` to serialization map.
+- **`components/TripCard.tsx`**: Added `hasMealPlan: boolean` to `TripData` interface. Added `🍽️ Meal plan` badge in the collapsed stats row — only visible when a plan exists; silence = no plan.
+- **`components/TripsClient.tsx`**: Added `hasMealPlan: boolean` to the local `TripData` interface to keep types in sync.
 
-| # | Task | Commit | Files |
-|---|------|--------|-------|
-| 1 | Schema migration — normalize MealPlan + Meal table | bc70cb1 | prisma/schema.prisma, migration.sql |
-| 2 | Add normalized Zod schemas + fix schema-breaking references | b808f9d | lib/parse-claude.ts, route.ts files |
+## Commits
 
-## Decisions Made
+- `d7cebbf` feat(34-01): add bringingDog to generateMealPlan and pass from meal-plan route
+- `f78f845` feat(34-01): add hasMealPlan badge to TripCard and mealPlan include to trips query
 
-1. **Migration applied manually**: `prisma migrate deploy` fails because FTS triggers (`knowledge_chunks_fts_insert`, etc.) reference `knowledge_chunks_fts` table which doesn't exist. Used better-sqlite3 to drop triggers, apply DDL, recreate triggers, then `prisma migrate resolve --applied` to mark migration done.
+## Key Files
 
-2. **meal-plan route stores header only**: The existing `app/api/meal-plan/route.ts` used `result` JSON blob on MealPlan. Since that field is removed, the route now upserts only the MealPlan header row. Plan 02 will add the full normalized Meal row persistence.
+key-files.created: []
+key-files.modified:
+  - lib/claude.ts
+  - app/api/meal-plan/route.ts
+  - app/trips/page.tsx
+  - components/TripCard.tsx
+  - components/TripsClient.tsx
 
-3. **departure-checklist uses empty string fallback**: The departure-checklist route was passing `trip.mealPlan.result` (a string) to `generateDepartureChecklist`. Now passes empty string since the meal plan content lives in normalized Meal rows that Plan 02 will wire up.
+## Deviations
 
-## Deviations from Plan
+None. Implemented exactly per plan spec.
 
-### Auto-fixed Issues
+## Self-Check
 
-**1. [Rule 1 - Bug] Fixed TypeScript errors from removed MealPlan.result field**
-- **Found during:** Task 2 TypeScript check
-- **Issue:** `app/api/meal-plan/route.ts` referenced `mealPlan.result` (upsert create/update and GET response) which no longer exists on the MealPlan type after schema normalization.
-- **Fix:** Updated GET to include Meal rows in response, updated upsert to store header only (no `result` field), removed unused `safeJsonParse` import.
-- **Files modified:** `app/api/meal-plan/route.ts`
-- **Commit:** b808f9d
-
-**2. [Rule 1 - Bug] Fixed TypeScript error in departure-checklist route**
-- **Found during:** Task 2 TypeScript check
-- **Issue:** `app/api/departure-checklist/route.ts` accessed `trip.mealPlan.result` which no longer exists on MealPlan type.
-- **Fix:** Changed to pass empty string `{ result: '' }` (satisfies the `{ result: string } | null` parameter type; Plan 02 will update this with real meal summary).
-- **Files modified:** `app/api/departure-checklist/route.ts`
-- **Commit:** b808f9d
-
-## Known Stubs
-
-- `app/api/meal-plan/route.ts` POST: upserts only MealPlan header, no Meal rows written yet — Plan 02 adds full normalized persistence.
-- `app/api/departure-checklist/route.ts`: passes `{ result: '' }` for mealPlan context — Plan 02 will provide meal summary string.
-
-## Self-Check: PASSED
-
-Files exist:
-- prisma/migrations/20260403140000_normalize_meal_plan/migration.sql ✓
-- prisma/schema.prisma (contains `model Meal`) ✓
-- lib/parse-claude.ts (contains NormalizedIngredientSchema, SingleMealSchema) ✓
-
-Commits exist:
-- bc70cb1 ✓
-- b808f9d ✓
+- [x] `generateMealPlan` accepts `bringingDog?: boolean`
+- [x] Claude prompt includes `DOG ON TRIP:` conditional section with toxic food list
+- [x] Meal plan route passes `bringingDog: trip.bringingDog` to generateMealPlan
+- [x] `app/trips/page.tsx` queries `mealPlan: { select: { id: true } }`
+- [x] `hasMealPlan: !!t.mealPlan` in serialization map
+- [x] `TripData.hasMealPlan: boolean` in TripCard and TripsClient
+- [x] Meal plan badge renders in stats row when `trip.hasMealPlan` is true
+- [x] No type errors introduced (pre-existing test error unrelated)

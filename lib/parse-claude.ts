@@ -52,7 +52,7 @@ export type PackingListResult = z.infer<typeof PackingListResultSchema>;
 
 // --- Meal Plan Schemas (matches lib/claude.ts MealPlanResult interface) ---
 
-const MealPlanMealSchema = z.object({
+export const MealPlanMealSchema = z.object({
   name: z.string(),
   prepType: z.string(), // "home" | "camp"
   prepNotes: z.string(),
