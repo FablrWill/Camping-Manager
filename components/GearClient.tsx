@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import GearForm from './GearForm'
 import GearDocumentsTab from './GearDocumentsTab'
 import GearResearchCard from './GearResearchCard'
@@ -8,7 +8,7 @@ import GearDealsTab from './GearDealsTab'
 import KitPresetsPanel from './KitPresetsPanel'
 import ChatContextButton from '@/components/ChatContextButton'
 import { CATEGORY_GROUPS, CATEGORIES, getCategoryEmoji, getCategoryLabel } from '@/lib/gear-categories'
-import { FilterChip } from '@/components/ui'
+import { FilterChip, Skeleton, EmptyState } from '@/components/ui'
 
 interface GearItem {
   id: string
@@ -64,6 +64,7 @@ function getConditionColor(condition: string | null): string {
 
 export default function GearClient({ initialItems }: { initialItems: GearItem[] }) {
   const [items, setItems] = useState<GearItem[]>(initialItems)
+  const [isLoading, setIsLoading] = useState(true)
   const [activeCategory, setActiveCategory] = useState<string | null>(null)
   const [showWishlist, setShowWishlist] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
@@ -75,6 +76,10 @@ export default function GearClient({ initialItems }: { initialItems: GearItem[] 
   const [isResearching, setIsResearching] = useState(false)
   const [showKits, setShowKits] = useState(false)
   const [detailTab, setDetailTab] = useState<'research' | 'documents' | 'deals'>('research')
+
+  useEffect(() => {
+    setIsLoading(false)
+  }, [])
 
   // Filter items
   const filtered = useMemo(() => {
@@ -291,27 +296,33 @@ export default function GearClient({ initialItems }: { initialItems: GearItem[] 
       </div>
 
       {/* Gear list grouped by category */}
-      {grouped.length === 0 ? (
-        <div className="text-center py-16">
-          <p className="text-4xl mb-3">{showWishlist ? '🎁' : '🎒'}</p>
-          <p className="text-lg font-medium text-stone-400 dark:text-stone-500">
-            {searchQuery
-              ? 'No items match your search'
-              : showWishlist
-                ? 'Your wish list is empty'
-                : 'No gear yet'}
-          </p>
-          <p className="text-sm mt-1">
-            {!searchQuery && (
-              <button
-                onClick={openAdd}
-                className="text-amber-600 hover:text-amber-700 dark:text-amber-500 dark:hover:text-amber-400 font-medium"
-              >
-                Add your first {showWishlist ? 'wish list item' : 'piece of gear'}
-              </button>
-            )}
-          </p>
+      {isLoading ? (
+        <div className="space-y-2">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-700 p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-4 w-2/5" />
+                  <Skeleton className="h-3 w-1/4" />
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
+      ) : grouped.length === 0 ? (
+        searchQuery ? (
+          <EmptyState
+            emoji={showWishlist ? '🎁' : '🎒'}
+            title="No items match your search"
+          />
+        ) : (
+          <EmptyState
+            emoji={showWishlist ? '🎁' : '🎒'}
+            title={showWishlist ? 'Your wish list is empty' : 'No gear yet'}
+            description={showWishlist ? 'Add items you want to buy' : 'Add your first item to get started'}
+            action={{ label: `+ Add ${showWishlist ? 'Wish Item' : 'Gear'}`, onClick: openAdd }}
+          />
+        )
       ) : (
         <div className="space-y-6">
           {grouped.map(([category, categoryItems]) => (

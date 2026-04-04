@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { Plus, UtensilsCrossed } from 'lucide-react'
-import { Button, Input, Select, Textarea, Modal, ConfirmDialog } from '@/components/ui'
+import { Button, Input, Select, Textarea, Modal, ConfirmDialog, Skeleton, EmptyState } from '@/components/ui'
 import ChatContextButton from '@/components/ChatContextButton'
 import VoiceRecordModal from './VoiceRecordModal'
 import TripCard from './TripCard'
@@ -55,6 +55,7 @@ void (null as unknown as TripCategory)
 
 export default function TripsClient({ initialTrips, locations, vehicles }: TripsClientProps) {
   const [trips, setTrips] = useState(initialTrips)
+  const [isLoading, setIsLoading] = useState(true)
   const [selectedTripId, setSelectedTripId] = useState<string | null>(null)
   const [showForm, setShowForm] = useState(false)
   const [showPlannerSheet, setShowPlannerSheet] = useState(false)
@@ -90,6 +91,10 @@ export default function TripsClient({ initialTrips, locations, vehicles }: Trips
   const [fallbackForTripId, setFallbackForTripId] = useState<string | null>(null)
   const [fallbackForTripName, setFallbackForTripName] = useState<string | null>(null)
   const [fallbackOrder, setFallbackOrder] = useState<number | null>(null)
+
+  useEffect(() => {
+    setIsLoading(false)
+  }, [])
 
   function openEdit(trip: TripData) {
     setEditingTrip(trip)
@@ -419,21 +424,25 @@ export default function TripsClient({ initialTrips, locations, vehicles }: Trips
       )}
 
       {/* Trips list */}
-      {trips.length === 0 && !showForm ? (
-        <div className="text-center py-16">
-          <p className="text-4xl mb-3">🏕️</p>
-          <p className="text-lg font-medium text-stone-400 dark:text-stone-500">
-            No trips planned yet
-          </p>
-          <p className="text-sm text-stone-400 dark:text-stone-500 mt-1">
-            <button
-              onClick={() => setShowPlannerSheet(true)}
-              className="text-amber-600 dark:text-amber-500 hover:text-amber-700 dark:hover:text-amber-400 font-medium"
-            >
-              Plan your first trip
-            </button>
-          </p>
+      {isLoading ? (
+        <div className="space-y-3">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-700 p-4">
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-1/3" />
+                <Skeleton className="h-3 w-1/2" />
+                <Skeleton className="h-3 w-1/4" />
+              </div>
+            </div>
+          ))}
         </div>
+      ) : trips.length === 0 && !showForm ? (
+        <EmptyState
+          emoji="🏕️"
+          title="No trips yet"
+          description="Plan your first adventure"
+          action={{ label: '+ New Trip', onClick: () => setShowPlannerSheet(true) }}
+        />
       ) : (
         <>
           {/* Upcoming */}
