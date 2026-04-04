@@ -29,12 +29,28 @@ model GearItem {
   researchResult  String?   // JSON: { alternatives: [...], summary, recommendation }
   researchedAt    DateTime? // when research was last run — stale after 90 days
   targetPrice     Float?    // Phase 32: deal monitoring target price
+  lastMaintenanceAt     DateTime? // S27: last time maintenance was logged
+  maintenanceIntervalDays Int?    // S27: reminder interval in days (null = no reminder)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  packingItems PackingItem[]
-  documents    GearDocument[]
-  priceCheck   GearPriceCheck?
+  packingItems     PackingItem[]
+  documents        GearDocument[]
+  priceCheck       GearPriceCheck?
+  maintenanceLogs  GearMaintenanceLog[]
+}
+
+// --- S27: Gear Maintenance Reminders ---
+
+model GearMaintenanceLog {
+  id         String   @id @default(cuid())
+  gearItemId String
+  event      String   // "cleaned" | "resealed" | "serviced" | "charged" | "inspected" | "repaired" | "other"
+  notes      String?
+  loggedAt   DateTime @default(now())
+  gearItem   GearItem @relation(fields: [gearItemId], references: [id], onDelete: Cascade)
+
+  @@index([gearItemId])
 }
 
 // --- Phase 32: Deal Monitoring ---
