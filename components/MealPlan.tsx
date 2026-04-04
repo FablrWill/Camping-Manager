@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { Loader2, RotateCcw, ChevronDown, Check } from 'lucide-react'
-import type { MealPlanResult, ShoppingItem } from '@/lib/claude'
+import type { MealPlanResult, ShoppingItem, MealPlanMeal } from '@/lib/claude'
 import { Button, ConfirmDialog } from '@/components/ui'
 
 const STORE_SECTIONS = [
@@ -45,6 +45,8 @@ export default function MealPlan({ tripId, tripName, offlineData }: MealPlanProp
   const [showShopping, setShowShopping] = useState(false)
   const [showPrepTimeline, setShowPrepTimeline] = useState(false)
   const [showRegenerateConfirm, setShowRegenerateConfirm] = useState(false)
+  const [regeneratingMeal, setRegeneratingMeal] = useState<string | null>(null)
+  const [mealUpdated, setMealUpdated] = useState<string | null>(null)
 
   // Load saved meal plan on mount
   useEffect(() => {
@@ -99,6 +101,46 @@ export default function MealPlan({ tripId, tripName, offlineData }: MealPlanProp
       setError("Couldn't generate -- Claude returned an unexpected response. Tap Retry to try again.")
     } finally {
       setGenerating(false)
+    }
+  }, [tripId])
+
+  const handleRegenMeal = useCallback(async (dayNumber: number, mealType: 'breakfast' | 'lunch' | 'dinner') => {
+    const mealKey = `day${dayNumber}-${mealType}`
+    setRegeneratingMeal(mealKey)
+    setMealUpdated(null)
+    setError(null)
+
+    try {
+      const res = await fetch('/api/meal-plan', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tripId, day: dayNumber, mealType }),
+      })
+      if (!res.ok) {
+        const data = await res.json()
+        setError(data.error || 'Failed to regenerate meal')
+        return
+      }
+      const newMeal = await res.json() as MealPlanMeal
+
+      setMealPlan((prev) => {
+        if (!prev) return prev
+        return {
+          ...prev,
+          days: prev.days.map((d) =>
+            d.dayNumber === dayNumber
+              ? { ...d, meals: { ...d.meals, [mealType]: newMeal } }
+              : d
+          ),
+        }
+      })
+
+      setMealUpdated(mealKey)
+      setTimeout(() => setMealUpdated(null), 2000)
+    } catch {
+      setError('Failed to regenerate meal')
+    } finally {
+      setRegeneratingMeal(null)
     }
   }, [tripId])
 
@@ -278,9 +320,13 @@ export default function MealPlan({ tripId, tripName, offlineData }: MealPlanProp
                         <span className="text-[10px] font-semibold text-stone-400 dark:text-stone-500 uppercase tracking-wider w-16 shrink-0">
                           {mealType}
                         </span>
-                        <span className="text-sm font-medium text-stone-900 dark:text-stone-100 truncate">
-                          {meal.name}
-                        </span>
+                        {regeneratingMeal === mealKey ? (
+                          <span className="animate-pulse bg-stone-200 dark:bg-stone-700 rounded h-4 w-32 inline-block" />
+                        ) : (
+                          <span className="text-sm font-medium text-stone-900 dark:text-stone-100 truncate">
+                            {meal.name}
+                          </span>
+                        )}
                       </div>
                       <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium shrink-0 ml-2 ${
                         meal.prepType === 'home'
@@ -308,6 +354,34 @@ export default function MealPlan({ tripId, tripName, offlineData }: MealPlanProp
                           <p className="text-[10px] text-stone-400 dark:text-stone-500 mt-1.5">
                             Gear: {meal.cookwareNeeded.join(', ')}
                           </p>
+                        )}
+                        {/* Per-meal regenerate — only in online mode */}
+                        {!offlineData && (
+                          <div className="mt-3 flex items-center gap-2">
+                            {regeneratingMeal === mealKey ? (
+                              <span className="flex items-center gap-1.5 text-xs text-stone-400 dark:text-stone-500">
+                                <Loader2 size={12} className="animate-spin" />
+                                Regenerating...
+                              </span>
+                            ) : mealUpdated === mealKey ? (
+                              <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+                                Meal updated
+                              </span>
+                            ) : (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleRegenMeal(day.dayNumber, mealType)
+                                }}
+                                icon={<RotateCcw size={11} />}
+                                className="!text-xs !text-stone-400 dark:!text-stone-500 hover:!text-amber-600 dark:hover:!text-amber-400"
+                              >
+                                Regenerate this meal
+                              </Button>
+                            )}
+                          </div>
                         )}
                       </div>
                     )}
