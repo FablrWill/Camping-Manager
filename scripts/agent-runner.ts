@@ -19,6 +19,7 @@ import { processDealCheck, type DealCheckPayload } from '../lib/agent/jobs/deal-
 import { processMaintenanceDue, type MaintenanceDuePayload } from '../lib/agent/jobs/maintenance-due';
 import { processTripWeatherAlert, type TripWeatherAlertPayload } from '../lib/agent/jobs/trip-weather-alert';
 import { processWeeklyBriefing, type WeeklyBriefingPayload } from '../lib/agent/jobs/weekly-briefing';
+import { processRefreshMemory, type RefreshMemoryPayload } from '../lib/agent/jobs/refresh-memory';
 
 const BASE_URL = process.env.AGENT_BASE_URL || 'http://localhost:3000';
 const POLL_INTERVAL = Number(process.env.AGENT_POLL_INTERVAL || '30') * 1000;
@@ -233,6 +234,7 @@ const processors: Record<string, JobProcessor> = {
   maintenance_due: (payload) => processMaintenanceDue(payload as MaintenanceDuePayload),
   trip_weather_alert: (payload) => processTripWeatherAlert(payload as TripWeatherAlertPayload),
   weekly_briefing: (payload) => processWeeklyBriefing(payload as WeeklyBriefingPayload),
+  memory_refresh: (payload) => processRefreshMemory(payload as RefreshMemoryPayload),
 };
 
 async function processJob(job: AgentJob): Promise<void> {
