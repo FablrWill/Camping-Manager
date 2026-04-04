@@ -453,14 +453,18 @@ Plans:
 ### Phase 31: Dark Sky & Astro Info
 **Goal**: Show Bortle class, moon phase, sunrise/sunset for trip locations and dates — useful for stargazing trips and photography
 **Depends on**: None (independent, but lower priority)
-**Requirements**: TBD
+**Requirements**: ASTRO-01, ASTRO-02, ASTRO-03, ASTRO-04, ASTRO-05
 **Success Criteria** (what must be TRUE):
   1. Trip prep shows sunrise/sunset times for trip dates
   2. Moon phase displayed for each night of the trip
   3. Bortle class (light pollution) shown for trip location
   4. Data sourced from free APIs (no API key required)
   5. `npm run build` passes
-**Plans**: 0/TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 31-01-PLAN.md — TDD astro library (suncalc install, tests, lib/astro.ts)
+- [ ] 31-02-PLAN.md — AstroCard component + TripCard/TripsClient integration
 
 **Parallelization notes:**
 - Wave 3 — can run parallel with Phase 30
