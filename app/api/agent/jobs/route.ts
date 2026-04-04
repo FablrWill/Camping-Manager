@@ -10,11 +10,21 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     const where: Record<string, unknown> = {};
 
+    const type = searchParams.get('type');
+    const tripId = searchParams.get('tripId');
+
     if (status) {
       where.status = status;
     }
     if (unread === 'true') {
       where.readAt = null;
+    }
+    if (type) {
+      where.type = type;
+    }
+    // tripId filter: match against payload JSON string containing the tripId
+    if (tripId) {
+      where.payload = { contains: tripId };
     }
 
     const jobs = await prisma.agentJob.findMany({

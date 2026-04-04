@@ -4,6 +4,7 @@ import { useState, useEffect, Fragment } from 'react'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import TripPrepStepper from '@/components/TripPrepStepper'
+import PreTripAlertCard from '@/components/PreTripAlertCard'
 import TripPrepSection from '@/components/TripPrepSection'
 import WeatherCard from '@/components/WeatherCard'
 import PackingList from '@/components/PackingList'
@@ -271,6 +272,9 @@ export default function TripPrepClient({ trip, tripPrepStatus }: TripPrepClientP
           { label: 'Departure', complete: tripPrepStatus.departure },
         ]}
       />
+
+      {/* Pre-trip alert check — first card in prep */}
+      <PreTripAlertCard tripId={trip.id} />
 
       {/* Error state */}
       {error && (

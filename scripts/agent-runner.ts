@@ -47,6 +47,26 @@ interface GearEnrichmentResult {
   notes: string | null;
 }
 
+interface PreTripAlertPayload {
+  tripId: string;
+  tripName: string;
+  locationName: string;
+  latitude: number;
+  longitude: number;
+  startDate: string;
+}
+
+interface PreTripAlert {
+  severity: 'warning' | 'info';
+  title: string;
+  body: string;
+}
+
+interface PreTripAlertResult {
+  alerts: PreTripAlert[];
+  checkedAt: string;
+}
+
 // ─── API helpers ─────────────────────────────────────────────────────
 
 async function fetchPendingJobs(): Promise<AgentJob[]> {
@@ -147,12 +167,62 @@ Be factual. If you're not confident about a field, use null. Do not guess weight
   };
 }
 
+async function processPreTripAlert(payload: PreTripAlertPayload): Promise<PreTripAlertResult> {
+  const prompt = `You are a knowledgeable outdoor safety assistant helping a car camper prepare for a trip.
+
+TRIP DETAILS:
+- Destination: ${payload.locationName}
+- Coordinates: ${payload.latitude.toFixed(4)}, ${payload.longitude.toFixed(4)}
+- Start date: ${payload.startDate}
+
+Check for the following conditions and return a JSON array of alerts:
+
+1. **Fire restrictions** — Is there an active fire ban, Stage 1 or Stage 2 fire restriction, or campfire prohibition in this region? Check based on the location's state/national forest/district.
+2. **Weather window** — Based on typical/historical conditions for this region and date, summarize any notable weather risks (e.g., monsoon season, spring snow, extreme heat, freeze risk at night).
+3. **Road/trail closures** — Are there any known seasonal road closures, permit requirements, or access restrictions for this area?
+
+Return ONLY valid JSON (no markdown, no explanation):
+{
+  "alerts": [
+    {
+      "severity": "warning",
+      "title": "Short title (max 60 chars)",
+      "body": "Detailed explanation with actionable advice (1-2 sentences)"
+    }
+  ]
+}
+
+Rules:
+- severity "warning" = something that requires action or may affect the trip significantly
+- severity "info" = useful context that doesn't require action
+- If no issues found for a category, omit it from the array
+- If the location is vague or coordinates are imprecise, note that uncertainty in the body
+- Include at least one entry (even if just a general season/conditions note)
+- Maximum 5 alerts total`;
+
+  const text = await callClaude(prompt, 1024);
+  const cleaned = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+  const parsed = JSON.parse(cleaned) as { alerts: PreTripAlert[] };
+
+  return {
+    alerts: Array.isArray(parsed.alerts)
+      ? parsed.alerts.map((a) => ({
+          severity: (a.severity === 'warning' ? 'warning' : 'info') as 'warning' | 'info',
+          title: String(a.title ?? ''),
+          body: String(a.body ?? ''),
+        }))
+      : [],
+    checkedAt: new Date().toISOString(),
+  };
+}
+
 // ─── Job dispatch ────────────────────────────────────────────────────
 
 type JobProcessor = (payload: unknown) => Promise<unknown>;
 
 const processors: Record<string, JobProcessor> = {
   gear_enrichment: (payload) => processGearEnrichment(payload as GearEnrichmentPayload),
+  pre_trip_alert: (payload) => processPreTripAlert(payload as PreTripAlertPayload),
 };
 
 async function processJob(job: AgentJob): Promise<void> {
