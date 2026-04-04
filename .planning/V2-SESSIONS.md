@@ -57,10 +57,14 @@ A self-coordinating work queue for v2.0 features. Each Claude Code session claim
 | S17 | Nav restructure + More sheet         | —     | ✅ Done 2026-04-04        | Sonnet, normal | —          |
 | S18 | TripPrepStepper                      | —     | ✅ Done 2026-04-04        | Sonnet, normal | S16        |
 | S19 | Empty states + skeleton loaders      | —     | ✅ Done 2026-04-04        | Sonnet, normal | S16        |
-| S20 | Voice Ghostwriter                    | —     | 🔄 In Progress 2026-04-04 | Sonnet, normal | —          |
+
+| S20 | Voice Ghostwriter                    | —     | ✅ Done 2026-04-04        | Sonnet, normal | —          |
 | S21 | Gear ROI tracker                     | —     | ✅ Done 2026-04-04        | Sonnet, normal | —          |
 | S22 | Seasonal spot ratings                | —     | ✅ Done 2026-04-04        | Sonnet, normal | —          |
 | S23 | Fire ban + pre-trip alerts           | —     | ✅ Done 2026-04-04        | Sonnet, normal | —          |
+| S24 | Siri/Reminders inbox                 | —     | ⬜ Ready          | Sonnet, normal | —          |
+| S25 | LNT pack-out checklist               | —     | ⬜ Ready          | Sonnet, normal | —          |
+| S26 | Gear lending tracker                 | —     | ⬜ Ready          | Sonnet, normal | —          |
 
 **Why this order matters (conflict groups):**
 
@@ -81,6 +85,9 @@ A self-coordinating work queue for v2.0 features. Each Claude Code session claim
 - S21 touches `GearClient.tsx` (adds ROI tab to gear detail) and new `app/api/gear/[id]/roi/route.ts` — no conflict with S20; **S20 and S21 can run in parallel**
 - S22 touches `prisma/schema.prisma` (new `SeasonalRating` model), new `app/api/locations/[id]/seasonal-ratings/route.ts`, `components/LocationForm.tsx` — **S22 must not run in parallel with any session that also touches schema.prisma**
 - S23 touches `app/api/agent-jobs/route.ts` (add fire-ban job type) and `components/TripPrepClient.tsx` (surface alert card) — no conflict with S20/S21/S22; **S20, S21, S22, S23 are all independent and can run in any order or in parallel**
+- S24 touches `lib/intake/triage.ts`, new `lib/intake/extractors/reminders.ts`, `components/InboxClient.tsx` — no conflict with S25 or S26; **S24, S25, S26 can all run in parallel**
+- S25 touches `prisma/schema.prisma` (new `lntChecklistResult` field on Trip), new `app/api/trips/[id]/lnt/route.ts`, new `components/LNTChecklistCard.tsx`, `components/TripPrepClient.tsx` — **S25 must not run in parallel with any session that also touches schema.prisma**
+- S26 touches `prisma/schema.prisma` (new `GearLoan` model), new `app/api/gear/[id]/loans/route.ts`, new `components/GearLoanPanel.tsx`, `components/GearClient.tsx` — **S25 and S26 both touch schema.prisma; run them sequentially or accept a merge on that one file**
 
 ---
 
@@ -1112,6 +1119,109 @@ Audit flagged icon-only buttons missing `aria-label`. Add `aria-label` to:
 - Non-blocking: job creation returns immediately, result polled by the client
 - Automatic scheduling (cron 7 days before trip) is out of scope for this session — manual trigger only
 - Depends on existing `AgentJob` infrastructure (S13) — do not rewrite, only extend
+
+---
+
+---
+
+### S24 — Siri/Reminders Inbox
+
+**What to build:** An iOS Shortcut that reads unprocessed Apple Reminders from a designated list ("Outland Inbox") and POSTs each one to the existing `/api/intake` endpoint. Claude triages them (gear, location, tip, etc.) and they land in the Inbox just like share-sheet captures. Will can say "Hey Siri, add to Outland" while driving and it routes into the app automatically.
+
+**User story:** Will is driving and says "Hey Siri, remind me in Outland to look at the MSR Whisperlite stove." It lands in the Reminders list. That night the Shortcut runs, sends it to `/api/intake`, Claude classifies it as `gear`, and it appears in the Inbox as a gear draft ready to accept or discard.
+
+**Why the intake endpoint is already perfect for this:** `POST /api/intake` accepts `text`, classifies via Claude, creates an `InboxItem`, and surfaces it in `InboxClient`. The Siri Reminders flow just needs a new delivery mechanism — no new backend logic needed.
+
+**Key files:**
+- `lib/intake/extractors/reminders.ts` — new extractor specifically for Reminders-style plain text (short, imperative, often missing context). Adds a hint to the triage prompt: "This came from a voice Reminder — it may be terse. Infer gear/location intent liberally."
+- `lib/intake/triage.ts` — add a `sourceHint?: 'reminder'` param; when present, use the reminders extractor's enriched prompt instead of the default classify-text path.
+- `app/api/intake/route.ts` — accept an optional `sourceHint` field in the form data and pass it through to `triageInput`.
+- `docs/SIRI-SHORTCUT-SETUP.md` — new doc explaining: (1) create an Apple Reminders list called "Outland Inbox", (2) install the Shortcut (link or manual steps), (3) Shortcut logic: Get Reminders from "Outland Inbox" where completed=false → for each, POST to `http://[mac-mini-tailscale-ip]/api/intake` with `text` + `sourceHint=reminder` → mark Reminder complete. Include the Shortcut JSON/URL to import.
+
+**Acceptance criteria:**
+- Shortcut doc exists and is accurate enough to follow
+- A Reminder posted via the Shortcut appears in the Inbox as a triaged item
+- `sourceHint=reminder` adjusts the triage prompt (less strict about terse/vague text)
+- Existing share-sheet intake flow unchanged
+- Build passes, no TypeScript errors
+
+**Constraints:**
+- No new npm packages
+- Shortcut calls the Mac mini directly over Tailscale — no new public endpoint needed
+- The Shortcut itself is documented, not committed as code (Apple Shortcuts aren't text files)
+- Do not add a new intake route — reuse `/api/intake` with the sourceHint param
+
+---
+
+### S25 — LNT Pack-Out Checklist
+
+**What to build:** A Leave No Trace checklist that appears in trip prep and again as the final step before Will drives away from camp. It's location-aware (bear country, fire rings, etc.) and Claude-generated based on the trip's location type and notes.
+
+**User story:** Will is breaking down camp at Shining Rock Wilderness. He opens the app, taps "Pack-Out Checklist", and sees 8 items: "Pack out all food scraps", "Scatter grey water 200ft from water source", "Drown and disperse campfire ash", etc. He checks each one. The app won't let him mark departure complete until LNT is checked off.
+
+**Key files:**
+- `prisma/schema.prisma` — add `lntChecklistResult String?` and `lntChecklistGeneratedAt DateTime?` to `Trip` model. Run migration. Same JSON-blob pattern as `packingListResult` and `vehicleChecklistResult`.
+- `lib/claude.ts` — add `generateLNTChecklist(params: { locationName, locationType, locationNotes, tripNotes })`. Prompt: generate a concise location-specific LNT checklist (5–10 items). Use `claude-haiku-4-5` (fast, cheap — this is deterministic, not creative). Returns `{ items: [{ id, text, checked }] }`.
+- `app/api/trips/[id]/lnt/route.ts` — GET retrieves stored blob; POST generates via Claude and persists; PATCH `/[tripId]/check` toggles item checked state. Same pattern as `/api/vehicle-checklist`.
+- `components/LNTChecklistCard.tsx` — new card. States: no-checklist (generate button), loading skeleton, loaded list with progress bar + checkboxes, error + retry. Amber progress bar, green checkmark on completion ("Camp left clean ✓"). Fire-and-forget PATCH on checkbox tap.
+- `lib/prep-sections.ts` — add `lnt` as the 7th PREP_SECTIONS entry: `{ key: 'lnt', label: 'Pack Out', emoji: '🌿' }`.
+- `components/TripPrepClient.tsx` — render `LNTChecklistCard` in the `lnt` section block.
+
+**Acceptance criteria:**
+- "Pack Out" section appears in trip prep
+- Generate button calls Claude and renders a location-specific checklist
+- Checkboxes persist via PATCH
+- Progress bar fills as items are checked
+- Build passes, no TypeScript errors
+
+**Constraints:**
+- Use `claude-haiku-4-5` not Sonnet — this is a short deterministic list, not a creative task
+- No new npm packages
+- Do not add a departure gate (blocking departure until LNT is complete) in this session — that's a follow-on
+
+---
+
+### S26 — Gear Lending Tracker
+
+**What to build:** Track which gear items Will has lent to friends, when, and whether they've been returned. Surfaces as a "Loans" tab in gear detail and a "Currently Out" section on the Gear page.
+
+**User story:** Will lends his Jetboil to his friend Marcus before a solo trip. He opens the Jetboil in gear detail, taps "Loans", adds "Marcus — lent 2026-04-10". Two weeks later, Marcus returns it. Will marks it returned. If he forgets, the gear page shows a "1 item out on loan" banner.
+
+**Key files:**
+- `prisma/schema.prisma` — add `GearLoan` model:
+  ```
+  model GearLoan {
+    id          String    @id @default(cuid())
+    gearItemId  String
+    borrowerName String
+    lentAt      DateTime  @default(now())
+    returnedAt  DateTime?
+    notes       String?
+    createdAt   DateTime  @default(now())
+
+    gearItem GearItem @relation(fields: [gearItemId], references: [id], onDelete: Cascade)
+    @@index([gearItemId])
+    @@index([returnedAt])
+  }
+  ```
+  Add `loans GearLoan[]` to `GearItem`. Run migration.
+- `app/api/gear/[id]/loans/route.ts` — GET lists all loans for the item; POST creates a new loan. Body: `{ borrowerName, lentAt?, notes? }`.
+- `app/api/gear/[id]/loans/[loanId]/route.ts` — PATCH to mark returned (`returnedAt = now()`); DELETE to remove a loan record.
+- `components/GearLoanPanel.tsx` — new component. Lists active loans (no `returnedAt`) and past loans (collapsible). "Add Loan" inline form: borrower name + optional date + notes. "Mark Returned" button on active loans. Past loans show the return date.
+- `components/GearClient.tsx` — add `'loans'` to the `detailTab` union (`'research' | 'documents' | 'deals' | 'roi' | 'loans'`). Add "Loans" tab button. Render `GearLoanPanel` in the tab panel. Add a small badge on the tab if any active loans exist.
+- `app/api/gear/route.ts` (or `app/page.tsx` / `app/gear/page.tsx`) — include a count of items with active loans in the gear page server fetch. Pass to `GearClient` as `activeLoanCount`. Show a `"1 item currently on loan"` banner at the top of the gear list when `activeLoanCount > 0`.
+
+**Acceptance criteria:**
+- Loans tab visible in gear detail
+- Can add a loan with borrower name and see it listed
+- "Mark Returned" button works and moves the loan to history
+- "Currently on loan" banner appears on gear page when any items are out
+- Build passes, no TypeScript errors
+
+**Constraints:**
+- No new npm packages
+- No borrower contact lookup — just a plain name string
+- S25 and S26 both add to `prisma/schema.prisma` — if run in parallel, the session that finishes second must rebase/merge the migration from the first. Safer to run sequentially, or accept a one-line merge conflict on schema.prisma.
 
 ---
 

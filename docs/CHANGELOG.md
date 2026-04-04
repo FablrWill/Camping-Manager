@@ -8,6 +8,7 @@ All notable changes to Outland OS are tracked here.
 
 | Session | Date | Summary |
 |---------|------|---------|
+| [37b](changelog/session-37b.md) | 2026-04-04 | S20 Voice Ghostwriter: record trip monologue → Claude writes journal entry → saved to trip |
 | [37](changelog/session-37.md) | 2026-04-04 | S22 Seasonal spot ratings: SeasonalRating model, 2×2 star pickers in LocationForm, Best in [season] popup badge |
 | [36b](changelog/session-36b.md) | 2026-04-04 | S17 Nav restructure: 5-tab BottomNav + MoreSheet (Chat, Inbox, Vehicle, Settings) |
 | [35](changelog/session-35.md) | 2026-04-04 | Phase 32 deal monitoring: targetPrice field, Claude price check, GearDealsTab, dashboard deals card |
