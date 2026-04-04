@@ -3,11 +3,11 @@ gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Gear Intelligence + Day-Of
 status: executing
-stopped_at: Completed 30-03-PLAN.md
-last_updated: "2026-04-04T04:08:36.631Z"
+stopped_at: Phase 37 UI-SPEC approved
+last_updated: "2026-04-04T04:47:00.271Z"
 last_activity: 2026-04-04
 progress:
-  total_phases: 24
+  total_phases: 26
   completed_phases: 19
   total_plans: 51
   completed_plans: 50
@@ -21,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-01)
 
 **Core value:** Personal camping second brain — a closed-loop system that plans, executes, and learns from every trip
-**Current focus:** Phase 31 — dark-sky-astro-info
+**Current focus:** Multiple parallel sessions active
 
 ## Current Position
 
-Phase: 33
+Phase: 31, 36 (parallel)
 Plan: Not started
-Status: Ready to execute
+Status: In Progress — Phase 31 (Dark Sky, thirsty-hawking) + Phase 36 (Mac Mini Agent Jobs, Mac mini executing)
 Last activity: 2026-04-04
 
 Progress: [████░░░░░░] 40%
@@ -134,7 +134,9 @@ None yet.
 
 ### Roadmap Evolution
 
-- Phase 33 added: Conversational Trip Planner — replace Create Trip form with multi-turn Claude agent chat (dynamic questions, tool use, trip creation)
+- Phase 33 added: Conversational Trip Planner — replace Create Trip form with multi-turn Claude agent chat (dynamic questions, tool use, trip creation) — COMPLETE
+- Phase numbering corrected: HA Integration is Phase 36 (independent, not yet started), Meal Planning Core is Phase 34 (complete), Meal Planning Shopping is Phase 35 (in progress)
+- Phase 34 (Meal Planning Core) completed in worktree vibrant-lumiere — 2026-04-04
 
 ### Blockers/Concerns
 
@@ -144,6 +146,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-04T04:00:00.000Z
-Stopped at: Completed 30-03-PLAN.md
-Resume file: None
+Last session: 2026-04-04T04:47:00.266Z
+Stopped at: Phase 37 UI-SPEC approved
+Resume file: .planning/phases/37-home-assistant-integration/37-UI-SPEC.md
