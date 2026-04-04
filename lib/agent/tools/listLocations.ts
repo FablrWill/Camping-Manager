@@ -35,6 +35,8 @@ export async function executeListLocations(input: { type?: string; minRating?: n
         rating: true,
         cellSignal: true,
         notes: true,
+        description: true,
+        waterAccess: true,
         latitude: true,
         longitude: true,
       },

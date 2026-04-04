@@ -29,6 +29,7 @@ export const PREP_SECTIONS: SectionConfig[] = [
   { key: 'packing', label: 'Packing List', emoji: '\u{1F392}' },
   { key: 'meals', label: 'Meal Plan', emoji: '\u{1F373}' },
   { key: 'power', label: 'Power Budget', emoji: '\u{1F50B}' },
+  { key: 'dark-sky', label: 'Dark Sky', emoji: '\u{1F30C}' },
   { key: 'departure', label: 'Departure', emoji: '\u{1F4CB}' },
   { key: 'vehicle-check', label: 'Vehicle Check', emoji: '\u{1F699}' },
 ]
