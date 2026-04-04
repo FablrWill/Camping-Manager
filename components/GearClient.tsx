@@ -356,6 +356,7 @@ export default function GearClient({ initialItems }: { initialItems: GearItem[] 
       {showForm && (
         <GearForm
           item={editingItem}
+          categories={CATEGORIES}
           conditions={CONDITIONS}
           onSave={handleSave}
           onDelete={editingItem ? () => setDeletingItem(editingItem) : undefined}
