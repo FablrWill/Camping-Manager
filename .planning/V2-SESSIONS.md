@@ -78,8 +78,11 @@ A self-coordinating work queue for v2.0 features. Each Claude Code session claim
 | S36 | Knowledge base refresh               | —     | ✅ Done 2026-04-04 | Sonnet, normal | —          |
 | S37 | Personal signal map (39) + Trip cost tracking (42) | 39,42 | ✅ Done 2026-04-04 | Sonnet, normal | —          |
 | S38 | Google Maps list import              | 44    | ✅ Done 2026-04-04 | Sonnet, normal | —          |
-| S39 | Security & hardening                 | 58    | ⬜ Ready | Sonnet, normal | S38        |
-| S10 | Home Assistant integration           | 33    | ⏸ Blocked (~mid-Apr hardware) | Sonnet, normal | S09 |
+| — | **v5.0 "Field Ready" — harden, validate, go camping** | — | — | — | — |
+| S39 | Production smoke test                | 59    | ⬜ Ready | Sonnet, quick  | —          |
+| S40 | Security & hardening                 | 58    | ⬜ Ready | Sonnet, normal | S39        |
+| S41 | Photo backup strategy                | 60    | ⬜ Ready | Sonnet, quick  | —          |
+| S42 | First field trip feedback             | 61-62 | ⏸ Blocked (trip date) | — | S39, S40, S41 |
 
 **Why this order matters (conflict groups):**
 

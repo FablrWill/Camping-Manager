@@ -7,9 +7,14 @@
 - ✅ **v1.2 Ship It** — Phases 12-15 (shipped 2026-04-03)
 - ✅ **v2.0 Smarter & Sharper** — Phases 16-24 (shipped 2026-04-03)
 - ✅ **v3.0 Gear Intelligence + Day-Of** — Phases 25-35 (shipped 2026-04-04)
-- 🚧 **v4.0 Smarter Feedback Loops** — Phases 38+ (in progress)
-  - [x] Phase 38: Post-Trip Auto-Review — structured gear/meal/spot review modal with feedback flywheel (completed 2026-04-04)
-- 📋 **v4.0 Backlog** — Voice, social, signal map, background agent, and more — see [Backlog section](#backlog-v40) below
+- ✅ **v4.0 Smarter Feedback Loops** — Phases 36-44 + S16-S38 (shipped 2026-04-04)
+- 🚧 **v5.0 Field Ready** — Hardening, production validation, first real trip (in progress)
+  - [ ] Security hardening — input validation audit, rate limiting, secrets review
+  - [ ] Production smoke test — verify Mac mini is running latest code, all features accessible from phone
+  - [ ] Photo backup strategy — protect photo files beyond SQLite backups
+  - [ ] First field trip — use app end-to-end, capture feedback
+  - [ ] Post-trip fixes — prioritize based on real-world usage
+- ⏸ **v6.0 (after field testing)** — Home Assistant integration, features driven by real trip feedback
 
 ## Phases
 
@@ -130,16 +135,12 @@ Plans:
   3. PM2 automatically restarts the app after a crash or Mac mini reboot
   4. A single deploy command (script) pulls latest code, builds, and restarts the service
   5. Daily SQLite backups run automatically via cron
-**Plans**: 3 plans
+**Plans**: 3/3 plans complete
 
 Plans:
-- [ ] 22-01-PLAN.md — Schema migration + API routes (fallback fields, self-relation, alternatives endpoint)
-- [x] 22-02-PLAN.md — TripCard badges + TripsClient Add Plan B flow
-- [ ] 22-03-PLAN.md — TripPrepClient Fallback Plans card with weather comparison
-
-**Parallelization notes:**
-- Plan 22-01 is Wave 1 — schema and API must exist before UI can consume
-- Plans 22-02 and 22-03 are Wave 2 — parallel, no file overlap
+- [x] 14-01-PLAN.md — Mac mini setup (PM2, data paths, DATABASE_URL)
+- [x] 14-02-PLAN.md — Deploy script + backup cron
+- [x] 14-03-PLAN.md — Verification + production smoke test
 
 **Parallelization notes:**
 - DEPLOY-01/DEPLOY-02/DEPLOY-03 (standalone config, data paths, DATABASE_URL) are sequential setup
@@ -177,16 +178,10 @@ Plans:
   3. Progress indicator shows "Importing N of M..." during batch
   4. Individual file failures don't abort the batch — errors collected and shown at end
   5. Imported photos with GPS EXIF appear as pins on the Spots map
-**Plans**: 3 plans
+**Plans**: 1/1 plans complete
 
 Plans:
-- [ ] 22-01-PLAN.md — Schema migration + API routes (fallback fields, self-relation, alternatives endpoint)
-- [ ] 22-02-PLAN.md — TripCard badges + TripsClient Add Plan B flow
-- [ ] 22-03-PLAN.md — TripPrepClient Fallback Plans card with weather comparison
-
-**Parallelization notes:**
-- Plan 22-01 is Wave 1 — schema and API must exist before UI can consume
-- Plans 22-02 and 22-03 are Wave 2 — parallel, no file overlap
+- [x] 16-01-PLAN.md — Bulk photo import with EXIF GPS extraction
 
 ### Phase 17: Feedback-Driven Packing
 **Goal**: Packing lists are personalized by post-trip gear feedback history, so Claude accounts for items Will consistently skips or forgets
@@ -196,16 +191,11 @@ Plans:
   1. If no trip history, packing list generates identically to current behavior
   2. If history exists, Claude prompt includes gear feedback summary (verifiable in logs)
   3. Packing list output includes at least one feedback-informed note when history available
-**Plans**: 3 plans
+**Plans**: 2/2 plans complete
 
 Plans:
-- [ ] 22-01-PLAN.md — Schema migration + API routes (fallback fields, self-relation, alternatives endpoint)
-- [ ] 22-02-PLAN.md — TripCard badges + TripsClient Add Plan B flow
-- [ ] 22-03-PLAN.md — TripPrepClient Fallback Plans card with weather comparison
-
-**Parallelization notes:**
-- Plan 22-01 is Wave 1 — schema and API must exist before UI can consume
-- Plans 22-02 and 22-03 are Wave 2 — parallel, no file overlap
+- [x] 17-01-PLAN.md — Feedback history query + Claude prompt conditioning
+- [x] 17-02-PLAN.md — Packing list feedback-driven notes UI
 
 ### Phase 18: Fuel & Last Stop Planner
 **Goal**: Trip prep shows the last gas station, grocery, and hardware store before the campsite, so Will can stock up before services run out
@@ -217,16 +207,11 @@ Plans:
   3. Loading state shown while fetching Overpass API results
   4. If no results within 50km, shows "None found nearby — plan ahead"
   5. Uses trip's existing `latitude`/`longitude` fields — no new data entry required
-**Plans**: 3 plans
+**Plans**: 2/2 plans complete
 
 Plans:
-- [ ] 22-01-PLAN.md — Schema migration + API routes (fallback fields, self-relation, alternatives endpoint)
-- [ ] 22-02-PLAN.md — TripCard badges + TripsClient Add Plan B flow
-- [ ] 22-03-PLAN.md — TripPrepClient Fallback Plans card with weather comparison
-
-**Parallelization notes:**
-- Plan 22-01 is Wave 1 — schema and API must exist before UI can consume
-- Plans 22-02 and 22-03 are Wave 2 — parallel, no file overlap
+- [x] 18-01-PLAN.md — Overpass API integration + last-stop endpoint
+- [x] 18-02-PLAN.md — FuelLastStopCard UI in trip prep
 
 ### Phase 19: Dog-Aware Trip Planning
 **Goal**: Trips can be marked "bringing dog" and the packing list automatically includes a Dog section with essential gear and dog-friendly destination notes
@@ -258,16 +243,11 @@ Plans:
   3. Page works without auth (public route, no login required)
   4. Will can update his location (replaces previous — only most recent stored)
   5. Will can "stop sharing" (deletes the SharedLocation record)
-**Plans**: 3 plans
+**Plans**: 2/2 plans complete
 
 Plans:
-- [ ] 22-01-PLAN.md — Schema migration + API routes (fallback fields, self-relation, alternatives endpoint)
-- [ ] 22-02-PLAN.md — TripCard badges + TripsClient Add Plan B flow
-- [ ] 22-03-PLAN.md — TripPrepClient Fallback Plans card with weather comparison
-
-**Parallelization notes:**
-- Plan 22-01 is Wave 1 — schema and API must exist before UI can consume
-- Plans 22-02 and 22-03 are Wave 2 — parallel, no file overlap
+- [x] 20-01-PLAN.md — SharedLocation model + API routes + ShareLocationButton
+- [x] 20-02-PLAN.md — Public share page with Leaflet map
 
 ### Phase 21: Permit & Reservation
 **Goal**: Will can store Recreation.gov confirmation URLs and notes with a trip, surfacing booking details in trip prep
@@ -278,16 +258,10 @@ Plans:
   2. Trip prep shows "Permits & Reservations" card with permit info + "View Booking" link
   3. Trip card shows 📋 indicator when permitUrl is set
   4. No Recreation.gov API — manual paste only
-**Plans**: 3 plans
+**Plans**: 1/1 plans complete
 
 Plans:
-- [ ] 22-01-PLAN.md — Schema migration + API routes (fallback fields, self-relation, alternatives endpoint)
-- [ ] 22-02-PLAN.md — TripCard badges + TripsClient Add Plan B flow
-- [ ] 22-03-PLAN.md — TripPrepClient Fallback Plans card with weather comparison
-
-**Parallelization notes:**
-- Plan 22-01 is Wave 1 — schema and API must exist before UI can consume
-- Plans 22-02 and 22-03 are Wave 2 — parallel, no file overlap
+- [x] 21-PLAN.md — permitUrl/permitNotes fields + trip prep card
 
 ### Phase 22: Plan A/B/C Fallback Chain
 **Goal**: Will can link fallback trips to a primary trip and compare them side-by-side in trip prep, so he can pick the right destination on the day based on weather
@@ -343,16 +317,12 @@ Plans:
   3. Inbox page shows pending items with accept/edit/reject actions
   4. Accept creates real entity (gear item, location, etc.) from AI suggestion
   5. `npm run build` passes
-**Plans**: 3 plans
+**Plans**: 3/3 plans complete
 
 Plans:
-- [ ] 22-01-PLAN.md — Schema migration + API routes (fallback fields, self-relation, alternatives endpoint)
-- [ ] 22-02-PLAN.md — TripCard badges + TripsClient Add Plan B flow
-- [ ] 22-03-PLAN.md — TripPrepClient Fallback Plans card with weather comparison
-
-**Parallelization notes:**
-- Plan 22-01 is Wave 1 — schema and API must exist before UI can consume
-- Plans 22-02 and 22-03 are Wave 2 — parallel, no file overlap
+- [x] 24-01-PLAN.md — InboxItem model + intake endpoint + AI triage
+- [x] 24-02-PLAN.md — Inbox page UI with accept/edit/reject actions
+- [x] 24-03-PLAN.md — Entity creation from accepted items
 
 ### Phase 25: Gear Docs & Manual Finder
 **Goal**: Every gear item can have attached documents (manuals, warranties, support links) that Claude finds automatically and are cached for offline access
@@ -365,12 +335,12 @@ Plans:
   4. Documents tab on gear detail shows all attached docs
   5. Downloaded PDFs cached in service worker for offline access
   6. `npm run build` passes
-**Plans**: 3 plans
+**Plans**: 3/3 plans complete
 
 Plans:
-- [x] 34-01-PLAN.md — Schema migration (normalize MealPlan + create Meal table) + Zod schemas
-- [x] 34-02-PLAN.md — lib/claude.ts updates (bringingDog, regenerateMeal) + all API routes
-- [x] 34-03-PLAN.md — MealPlanClient component + TripPrepClient wiring + TripsClient badge
+- [x] 25-01-PLAN.md — GearDocument model + Claude manual finder
+- [x] 25-02-PLAN.md — PDF download + offline caching
+- [x] 25-03-PLAN.md — GearDocumentsTab UI
 
 **Parallelization notes:**
 - Wave 1 — fully parallel with Phases 26 and 27
@@ -385,12 +355,12 @@ Plans:
   3. Each task has a suggested time and can be checked off
   4. Sequence adapts to departure time (set by user on trip)
   5. `npm run build` passes
-**Plans**: 3 plans
+**Plans**: 3/3 plans complete
 
 Plans:
-- [x] 34-01-PLAN.md — Schema migration (normalize MealPlan + create Meal table) + Zod schemas
-- [x] 34-02-PLAN.md — lib/claude.ts updates (bringingDog, regenerateMeal) + all API routes
-- [ ] 34-03-PLAN.md — MealPlanClient component + TripPrepClient wiring + TripsClient badge
+- [x] 26-P01-PLAN.md — departureTime schema + time-anchored checklist generation
+- [x] 26-P02-PLAN.md — DepartureChecklistClient component
+- [x] 26-P03-PLAN.md — TripPrepClient integration
 
 **Parallelization notes:**
 - Wave 1 — fully parallel with Phases 25 and 27
@@ -405,12 +375,10 @@ Plans:
   3. Message includes: destination, dates, vehicle, expected return, any notes
   4. Sends via SMS (iMessage on Mac) or email
   5. `npm run build` passes
-**Plans**: 3 plans
+**Plans**: 1/1 plans complete
 
 Plans:
-- [x] 34-01-PLAN.md — Schema migration (normalize MealPlan + create Meal table) + Zod schemas
-- [ ] 34-02-PLAN.md — lib/claude.ts updates (bringingDog, regenerateMeal) + all API routes
-- [ ] 34-03-PLAN.md — MealPlanClient component + TripPrepClient wiring + TripsClient badge
+- [x] 27-01-PLAN.md — Deterministic plain-text float plan email
 
 **Parallelization notes:**
 - Wave 1 — fully parallel with Phases 25 and 26
@@ -426,12 +394,10 @@ Plans:
   4. UV protection suggested for high UV index days
   5. Clothing suggestions reference actual owned gear when available
   6. `npm run build` passes
-**Plans**: 3 plans
+**Plans**: 1/1 plans complete
 
 Plans:
-- [ ] 34-01-PLAN.md — Schema migration (normalize MealPlan + create Meal table) + Zod schemas
-- [ ] 34-02-PLAN.md — lib/claude.ts updates (bringingDog, regenerateMeal) + all API routes
-- [ ] 34-03-PLAN.md — MealPlanClient component + TripPrepClient wiring + TripsClient badge
+- [x] 28-01-PLAN.md — buildClothingGuidance() + UV forecast + packing list injection
 
 **Parallelization notes:**
 - Wave 2 — can run parallel with Phase 29
@@ -501,19 +467,21 @@ Plans:
   3. Results show current price vs target price
   4. Dashboard surfaces items currently below target price
   5. `npm run build` passes
-**Plans**: 3 plans
+**Plans**: 4/4 plans complete
 
 Plans:
-- [ ] 34-01-PLAN.md — Schema migration (normalize MealPlan + create Meal table) + Zod schemas
-- [ ] 34-02-PLAN.md — lib/claude.ts updates (bringingDog, regenerateMeal) + all API routes
-- [ ] 34-03-PLAN.md — MealPlanClient component + TripPrepClient wiring + TripsClient badge
+- [x] 32-01-PLAN.md — targetPrice schema field + price check API
+- [x] 32-02-PLAN.md — GearDealsTab UI + Claude price comparison
+- [x] 32-03-PLAN.md — Dashboard deals card
+- [x] 32-04-PLAN.md — Deal alert agent job
 
 **Parallelization notes:**
 - Wave 4 — depends on Phase 30 research infrastructure
 
-### Phase 33: Home Assistant Integration
+### Phase 37: Home Assistant Integration
 **Goal**: Connect Outland OS to a campsite Home Assistant instance so Will can see live sensor data (battery, propane, weather, vehicle, dog GPS) on the dashboard and trip prep pages
 **Depends on**: Phase 24 (schema stable, nav settled)
+**Status**: Blocked — HA hardware in Durham, Will picking up ~mid-April 2026
 **Requirements**: TBD
 **Success Criteria** (what must be TRUE):
   1. Settings page has HA config section with URL, token (write-only), and "Test Connection" button
@@ -524,15 +492,7 @@ Plans:
   6. Token is never returned from GET /api/ha/config
   7. Trip prep shows HA power/propane/weather snapshot when configured
   8. `npm run build` passes
-**Plans**: 3 plans
-
-Plans:
-- [ ] 34-01-PLAN.md — Schema migration (normalize MealPlan + create Meal table) + Zod schemas
-- [ ] 34-02-PLAN.md — lib/claude.ts updates (bringingDog, regenerateMeal) + all API routes
-- [ ] 34-03-PLAN.md — MealPlanClient component + TripPrepClient wiring + TripsClient badge
-
-**Parallelization notes:**
-- Wave 5 — independent of Phases 25–32; depends on Phase 24 schema
+**Plans**: 0/TBD — blocked on hardware
 
 ### Phase 34: Meal Planning Core
 **Goal**: AI-generated meal plans linked to trips — every meal slot for every day, based on trip duration, weather, dog status, and available cooking gear
@@ -620,9 +580,16 @@ Plans:
 | 31. Dark Sky, Astro & Activity Gear | v3.0 | 1/1 | Complete | 2026-04-04 |
 | 32. Deal Monitoring | v3.0 | 4/4 | Complete    | 2026-04-04 |
 | 33. Conversational Trip Planner | v3.0 | 4/4 | Complete    | 2026-04-03 |
-| 34. Home Assistant Integration | v3.0 | 4/4 | Complete    | 2026-04-04 |
-| 35. Meal Planning Core | v3.0 | 6/6 | Complete    | 2026-04-04 |
-| 36. Meal Planning: Shopping/Prep/Feedback | v3.0 | 1/1 | Complete | 2026-04-04 |
+| 34. Meal Planning Core | v3.0 | 4/4 | Complete | 2026-04-04 |
+| 35. Meal Planning: Shopping/Prep/Feedback | v3.0 | 6/6 | Complete | 2026-04-04 |
+| 36. Agent Jobs Infrastructure | v3.0 | 1/1 | Complete | 2026-04-04 |
+| 37. Home Assistant Integration | — | 0/TBD | Blocked (hardware) | — |
+| 38. Post-Trip Auto-Review | v4.0 | 3/3 | Complete | 2026-04-04 |
+| 39. Personal Signal Map | v4.0 | 2/2 | Complete | 2026-04-04 |
+| 40. GPX Import | v4.0 | 3/3 | Complete | 2026-04-04 |
+| 41. Camp Kit Presets | v4.0 | 3/3 | Complete | 2026-04-04 |
+| 42. Trip Cost Tracking | v4.0 | 2/2 | Complete | 2026-04-04 |
+| 44. Google Maps List Import | v4.0 | 2/2 | Complete | 2026-04-04 |
 
 ### Phase 33: Conversational Trip Planner
 
@@ -656,14 +623,14 @@ Plans:
 
 **Goal**: After a trip ends, give Will a structured low-friction way to log what worked and what didn't — gear used/forgotten/unused, meal ratings, spot rating, and free-form notes. Data feeds Phase 17 packing personalization and Phase 35 meal feedback loop.
 
-**Status**: 🚧 In progress
+**Status**: ✅ Complete
 **Requirements:** REV-01, REV-02, REV-03, REV-04, REV-05, REV-06, REV-07, REV-08
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 
 Plans:
 - [x] 38-01-PLAN.md — Schema migration (Trip.reviewedAt) + POST /api/trips/[id]/review batch endpoint
 - [x] 38-02-PLAN.md — TripReviewModal multi-step component (Gear → Meals → Spot+Notes)
-- [ ] 38-03-PLAN.md — TripsClient integration (Review button, Reviewed badge, review-needed count)
+- [x] 38-03-PLAN.md — TripsClient integration (Review button, Reviewed badge, review-needed count)
 
 **Parallelization notes:**
 - Plan 38-01 is Wave 1 — schema + API, no dependencies
@@ -676,7 +643,7 @@ Plans:
 
 **Goal**: Upgrade the existing kit preset system into a first-class feature — add "save packing list as template," explicit multi-kit stacking, and a Claude review step that flags trip-specific gaps on top of a preset base.
 
-**Status**: 🔲 Not started
+**Status**: ✅ Complete
 **Plans:** 3/3 plans complete
 
 Plans:
@@ -691,24 +658,8 @@ Plans:
 
 ---
 
-**Goal**: Surface signal quality data visually on the spots map. Overlay colored signal badges on location markers, add a "Signal" layer toggle, and add signal filter chips so Will can see at a glance which campsites have good connectivity before a trip.
-
-**Status**: 🔄 In progress (S37)
-**Session**: S37
-
-**What to build:**
-- `lib/signal-summary.ts` — aggregate SignalLog entries per location into a summary (bestCellBars, bestCellType, bestStarlinkQuality, readingCount); falls back to Location.cellSignal/starlinkSignal if no logs
-- `GET /api/locations/signal-summary` — returns Record<locationId, SignalSummary> for all locations in one request
-- `components/SignalBadge.tsx` — color-coded pill badge (green/yellow/red/gray) showing signal tier
-- Update `components/SpotMap.tsx` — add `signal` to Layers, accept `signalSummaries` prop, render colored DivIcon dots on markers when signal layer is active
-- Update `app/spots/spots-client.tsx` — fetch signal summaries on mount, add "Signal" layer toggle, add signal filter chips (All / Good / No signal / Unknown)
-
-**No schema changes** — SignalLog model and signal API already exist.
-
-**Parallelization notes:**
-- Single-wave — all changes are independent. Can be executed in one pass.
-- Touches `SpotMap.tsx` and `spots-client.tsx` — do not run in parallel with sessions that touch these files.
-
+### Phase 39: Personal Signal Map
+**Status**: ✅ Complete (2026-04-04)
 **Plans:** 2/2 plans complete
 
 Plans:
@@ -717,11 +668,71 @@ Plans:
 
 ---
 
-### Phase 02: Executive Trip Prep
-**Status**: ✅ Complete (2026-03-30) — See [v1.0 archive](milestones/v1.0-ROADMAP.md)
+## v5.0 Field Ready
 
-### Phase 03: Knowledge Base
-**Status**: ✅ Complete (2026-03-31) — See [v1.0 archive](milestones/v1.0-ROADMAP.md)
+**Milestone Goal:** Harden the app for real-world use, verify production deployment, and use Outland OS on an actual camping trip. Let field experience — not feature brainstorming — drive what comes next.
+
+### Phase 58: Security Hardening
+**Goal**: Audit all 101 API routes for input validation gaps, add rate limiting, review secrets management, and ensure the Mac mini server is safe to run on a network
+**Depends on**: None
+**Status**: Ready
+**Success Criteria** (what must be TRUE):
+  1. All API routes validate input with Zod schemas (no raw `req.body` pass-through)
+  2. Rate limiting on AI-calling endpoints (Claude API costs real money)
+  3. No hardcoded secrets in source — all via .env
+  4. Path traversal guards on all file operations
+  5. `npm run build` passes
+
+### Phase 59: Production Smoke Test
+**Goal**: Verify Mac mini is running latest code and every major feature works from Will's phone
+**Depends on**: Phase 58
+**Status**: Ready
+**Success Criteria** (what must be TRUE):
+  1. `ssh lisa` confirms PM2 is running, app responds on Tailscale HTTPS
+  2. All migrations applied (`prisma migrate deploy` — never reset)
+  3. Walk through core loop on phone: create trip → packing list → meal plan → departure checklist
+  4. Offline mode works (airplane mode on phone, app loads from cache)
+  5. Photo upload from phone camera works
+  6. Chat agent responds
+
+### Phase 60: Photo Backup Strategy
+**Goal**: Protect uploaded photos beyond SQLite backups — photos in `public/photos/` are not covered by the daily DB backup cron
+**Depends on**: None
+**Status**: Ready
+**Success Criteria** (what must be TRUE):
+  1. rsync or similar copies `public/photos/` to a second location (external drive, iCloud, or NAS)
+  2. Backup runs daily alongside existing SQLite backup cron
+  3. Documented in Mac mini setup guide
+
+### Phase 61: First Field Trip
+**Goal**: Use Outland OS end-to-end on a real camping trip and capture detailed feedback
+**Depends on**: Phases 58-60
+**Status**: Blocked (waiting for trip date)
+**Success Criteria** (what must be TRUE):
+  1. Trip created via conversational planner
+  2. Packing list generated and used for packing
+  3. Meal plan + shopping list used for grocery run
+  4. Departure checklist used morning-of
+  5. Photos taken and imported at camp or after
+  6. Post-trip review completed in app
+  7. Field notes captured: what worked, what was clunky, what was never touched
+
+### Phase 62: Post-Trip Feedback Session
+**Goal**: Use field trip feedback to prioritize the next round of development
+**Depends on**: Phase 61
+**Status**: Blocked (waiting for trip)
+**Success Criteria** (what must be TRUE):
+  1. Field notes triaged into: bugs, UX fixes, missing features, unused features
+  2. Unused features evaluated — remove or simplify?
+  3. Next milestone (v6.0) scoped based on real usage patterns
+  4. TASKS.md updated with prioritized work
+
+---
+
+### Archived Phase References
+
+See [v1.0 archive](milestones/v1.0-ROADMAP.md) for Phases 2-5.
+See v1.1, v1.2, v2.0 details above for Phases 6-24.
 
 ### Phase 04: Chat Agent
 **Status**: ✅ Complete (2026-03-31) — See [v1.0 archive](milestones/v1.0-ROADMAP.md)

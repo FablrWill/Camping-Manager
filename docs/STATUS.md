@@ -1,13 +1,14 @@
 # Project Status — Outland OS
 
 ## Quick Pickup
-> **Last session:** 2026-04-04 (Session 38 — S25 LNT Pack-Out Checklist)
+> **Last session:** 2026-04-04 (multiple parallel sessions — S16-S39)
 > **Milestone v1.0:** ✅ Complete — all 5 phases shipped 2026-04-01
 > **Milestone v1.1:** ✅ Complete — Phases 6-11 shipped 2026-04-02
 > **Milestone v1.2:** ✅ Complete — Phases 12-15 shipped 2026-04-03
-> **Milestone v2.0:** ✅ Complete — all phases 16-24 shipped 2026-04-03 including Phase 22 (Plan A/B/C)
-> **Milestone v3.0:** 🚧 In progress — Phases 25-28 + 33 complete; Phase 29 (vehicle checklist) in progress; Phases 30-32 not started
-> **Next step:** Finish Phase 29 (Vehicle Pre-Trip Checklist, Plan 03 UI), then Phases 30-32
+> **Milestone v2.0:** ✅ Complete — Phases 16-24 shipped 2026-04-03
+> **Milestone v3.0:** ✅ Complete — Phases 25-35 shipped 2026-04-04
+> **Milestone v4.0:** ✅ Nearly complete — Phases 38-44 + S16-S38 shipped 2026-04-04; S39 (security) ready
+> **Next step:** S39 Security & hardening, then S10 HA integration (blocked on hardware ~mid-April)
 > **App name:** Outland OS
 > **Task tracker:** See `TASKS.md` in project root — start there.
 > **North star:** See `docs/USER-JOURNEY.md` — defines what to build and why.
@@ -45,25 +46,50 @@
 - **Gear Category Expansion (Phase 23)** — 15 categories, tech gear fields
 - **Smart Inbox (Phase 24)** — Intake endpoint + inbox UI for phone share-to-app
 
-## What's Built (v3.0 — in progress)
+## What's Built (v3.0 — ✅ Complete)
 - **Gear Docs & Manual Finder (Phase 25)** — GearDocument model, Claude-powered manual finder, PDF download
 - **Trip Day Sequencer (Phase 26)** — departureTime schema, time-anchored departure checklist
 - **Safety Float Plan (Phase 27)** — Deterministic plain-text float plan email (no AI cost)
 - **Weather-Aware Clothing (Phase 28)** — buildClothingGuidance(), UV forecast, injected into packing list
-- **Vehicle Pre-Trip Checklist (Phase 29)** — 🔄 In progress (Plans 01-02 done, Plan 03 UI checkpoint running)
-- **Conversational Trip Planner (Phase 33)** — TripPlannerSheet full-screen chat + TripsClient wiring; UAT deferred
+- **Vehicle Pre-Trip Checklist (Phase 29)** — Schema + Zod, Claude generation, VehicleChecklistCard
+- **Gear Product Research (Phase 30)** — Claude "Research" button, alternatives comparison, recommendation badges
+- **Dark Sky, Astro & Activities (Phase 31)** — Activities gear category, moon phase, Bortle estimation, trip planner activity recommendations
+- **Deal Monitoring (Phase 32)** — targetPrice field, Claude price check, GearDealsTab, dashboard deals card
+- **Conversational Trip Planner (Phase 33)** — TripPlannerSheet full-screen chat + TripsClient wiring
 - **Meal Planning Core (Phase 34)** — Claude-generated meal plans, MealPlan/Meal models, trip integration
 - **Meal Planning Shopping/Prep/Feedback (Phase 35)** — Shopping list, prep guide, meal feedback
-- **Agent Jobs Infrastructure (Phase 36)** — AgentJob queue, polling API, results endpoint, dashboard badge, gear enrichment trigger
-- **Gear Product Research (Phase 30)** — Claude-powered "Research" button on gear items, alternatives comparison, recommendation badges
-- **Dark Sky, Astro & Activities (Phase 31)** — Activities gear category, moon phase calculator, Bortle estimation, dark sky trip prep section, astro API, trip planner activity recommendations
-- **Phase 32** — Not yet started (deal monitoring, deprioritized)
+
+## What's Built (v4.0 — nearly complete)
+- **Agent Jobs Infrastructure (Phase 36)** — AgentJob queue, polling API, results endpoint, dashboard badge
+- **Post-Trip Auto-Review (Phase 38)** — Structured gear/meal/spot review modal with feedback flywheel
+- **Personal Signal Map (Phase 39)** — Cell signal logging, signal-filtered map view
+- **GPX Import (Phase 40)** — Trail model, GPX parser, map overlay
+- **Camp Kit Presets (Phase 41)** — Save-from-packing-list, multi-kit stacking, Claude review
+- **Trip Cost Tracking (Phase 42)** — Expense model, per-trip cost badges
+- **Google Maps List Import (Phase 44)** — Paste shared list URL, pull pins into app
+- **UX Quick Wins (S16-S19)** — FilterChip, nav restructure, TripPrepStepper, empty states
+- **Voice Ghostwriter (S20)** — Record monologue, Claude writes journal entry
+- **Gear ROI Tracker (S21)** — Cost-per-trip grade, ROI tab
+- **Seasonal Spot Ratings (S22)** — 2x2 star pickers, "Best in Season" badge
+- **Fire Ban + Alerts (S23)** — Pre-trip alert card, season awareness
+- **Siri/Reminders Inbox (S24)** — sourceHint routing, reminders extractor
+- **LNT Checklist (S25)** — Haiku-generated LNT checklist
+- **Gear Lending Tracker (S26)** — GearLoan model, CRUD, active loans banner
+- **Gear Maintenance (S27)** — GearMaintenanceLog, overdue badges
+- **Shareable Trip Reports (S28)** — shareToken, public read-only trip page
+- **Altitude Awareness (S29)** — AltitudeCard in trip prep
+- **Road Trip Scenic Layer (S30)** — ScenicStopsCard via Overpass
+- **Destination Discovery (S31)** — AI-powered destination suggestions
+- **Scheduled Intelligence (S32)** — Recurring agent jobs
+- **Chat Agent Memory (S33)** — Persistent conversation context
+- **Trip Intelligence Report (S34)** — AI trip analysis
+- **Smart Packing v2 (S35)** — Upgraded packing list generator
+- **Knowledge Base Refresh (S36)** — RAG corpus update
 
 ## Known Blockers
-- **HA hardware** — In Durham. Will picking up ~mid-April 2026. Blocks HA bridge feature (S10) only.
+- **HA hardware** — In Durham. Will picking up ~mid-April 2026. Blocks S10 (HA integration) only.
 - **OpenAI API key** — Needed for voice debrief (Whisper). Add `OPENAI_API_KEY` to `.env` when ready.
 - **Gmail App Password** — Needed for float plan email. Add `GMAIL_USER` + `GMAIL_APP_PASSWORD` to `.env`.
-- **S10/S11/S12** — Meal planning (S11) and shopping/prep (S12) blocked on S10 (HA integration), which needs hardware.
 
 ## Outstanding UAT (human testing needed)
 - Voice debrief end-to-end flow (needs device + mic + running server)
@@ -112,6 +138,13 @@
 - **Session 33** (2026-04-04) — S15 Mac mini agent runner script, kit presets, GPX import.
 - **Session 34** (2026-04-04) — Phase 31: dark sky, astro info, activities gear category, moon phase, Bortle estimation, trip planner activity recommendations.
 - **Session 37** (2026-04-04) — S20 Voice Ghostwriter: record trip monologue → Claude writes journal entry → saved to trip, edit/save flow in TripCard.
+
+## What's Next (v5.0 — Field Ready)
+- **Production Smoke Test (S39)** — verify Mac mini is up, walk through core loop from phone
+- **Security Hardening (S40)** — input validation audit, rate limiting on AI endpoints, secrets review
+- **Photo Backup (S41)** — rsync photos to second location alongside daily DB backup
+- **First Field Trip (S42)** — use the app end-to-end on a real camping trip, capture feedback
+- **Post-Trip Session** — triage field notes, scope v6.0 based on real usage
 
 ## Key Files
 - `TASKS.md` — What's done, what's next, where to start

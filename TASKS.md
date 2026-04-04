@@ -1,8 +1,30 @@
 # Outland OS — Task Tracker
 
-> **Last updated:** 2026-04-04 (S20-S30 complete; Milestone v4.0 nearly complete; S28 shareable trip reports in progress)
-> **Start here** if you're picking up after a break.
+> **Last updated:** 2026-04-04 — Project review complete. All feature milestones (v1.0–v4.0) shipped.
+> **Current priority:** v5.0 Field Ready — harden, validate production, use the app on a real trip.
 > **North star:** `docs/USER-JOURNEY.md` — read this before building anything new.
+> **Key decision:** Stop building new features. Start using the app. Real trip feedback drives v6.0.
+
+---
+
+## 🚧 Milestone v5.0 — Field Ready (In Progress)
+
+**Goal:** Harden security, verify production deployment on Mac mini, and use the app on a real camping trip. No new features until real-world feedback is collected.
+
+| Phase | Status | Summary |
+|-------|--------|---------|
+| 58. Security Hardening | ⬜ Ready | Input validation audit, rate limiting on AI endpoints, secrets review |
+| 59. Production Smoke Test | ⬜ Ready | Verify Mac mini running latest code, walk through core loop from phone |
+| 60. Photo Backup Strategy | ⬜ Ready | rsync photos to second location (external drive, iCloud, or NAS) |
+| 61. First Field Trip | ⏸ Blocked (trip date) | Use app end-to-end on a real camping trip, capture feedback |
+| 62. Post-Trip Feedback | ⏸ Blocked (trip) | Triage field notes into bugs, UX fixes, missing features, unused features |
+
+**Recommended session order:**
+1. Phase 59 first — verify Mac mini is up and accessible (Sonnet, quick)
+2. Phase 58 — security hardening (Sonnet, normal)
+3. Phase 60 — photo backup (Sonnet, quick)
+4. Phase 61 — go camping
+5. Phase 62 — come back and plan v6.0
 
 ---
 
@@ -65,7 +87,7 @@
 | S25. LNT Checklist | ✅ Complete | Haiku-generated LNT checklist, persistent checkboxes, amber/green progress bar |
 | S26. Gear Lending Tracker | ✅ Complete | GearLoan model, CRUD API, GearLoanPanel, active loans banner |
 | S27. Gear Maintenance Reminders | ✅ Complete | GearMaintenanceLog model, maintenance log API, overdue badge + banner |
-| S28. Shareable Trip Reports | 🔄 In Progress | shareToken on Trip, public read-only trip report page |
+| S28. Shareable Trip Reports | ✅ Complete | shareToken on Trip, public read-only trip report page |
 | S29. Altitude Awareness | ✅ Complete | getAltitudeWarning() pure function, AltitudeCard in trip prep, altitude in SpotMap |
 | S30. Road Trip Scenic Layer | ✅ Complete | fetchScenicStops() via Overpass, ScenicStopsCard in trip prep |
 
@@ -124,10 +146,10 @@ All 5 phases of v1.0 shipped. The app has: executive trip prep, NC camping knowl
 | **Location save/edit with pin drop** | ✅ Done | Click map → slide-up form → CRUD API. Edit via popup button. visitedAt date/time field. |
 | **Trip planning page** | ✅ Done | **Built Session 6:** Create trips with date range, location, vehicle. Upcoming/past sections, countdown, active trip ribbon. |
 | **Auto-tag photos to trips/locations** | ❌ Ready | Match via GPS proximity + timestamp overlap |
-| Personal signal map | ❌ Planned | Log cell + Starlink quality per spot over time |
-| Seasonal ratings | ❌ Planned | Rate spots differently by time of year |
-| GPX import | ❌ Planned | Import trails from AllTrails/Wikiloc exports |
-| Google Maps list import | ❌ Planned | Paste a shared list URL, pull pins into the app |
+| Personal signal map | ✅ Done | Phase 39 — Cell signal logging, signal-filtered map view |
+| Seasonal ratings | ✅ Done | S22 — SeasonalRating model, 2x2 star pickers, "Best in Season" badge |
+| GPX import | ✅ Done | Phase 40 — Trail model, GPX parser, map overlay |
+| Google Maps list import | ✅ Done | Phase 44 — Paste shared list URL, pull pins into app |
 
 ---
 
@@ -152,9 +174,9 @@ All 5 phases of v1.0 shipped. The app has: executive trip prep, NC camping knowl
 | NC camping knowledge base (RAG) | ✅ Done | Session 17 — 237 chunks from 7 research files + external sources. Hybrid search (FTS5 + vec0/RRF). voyage-3-lite 512-dim embeddings. PDF + web parsers. POST /api/knowledge/search endpoint. |
 | Gear photo identification | ❌ Planned | Snap a photo → Claude identifies brand/type/specs |
 | Safety float plan | ✅ Done | Phase 7 — Claude-composed plain text email via Gmail to emergency contact |
-| Nearby trails & recreation API | ❌ Planned | OSM, NPS, Recreation.gov near a saved location |
-| Activities gear category + trip planner integration | ❌ Planned | Add `activities` category to gear (kayak, telescope, etc.). Trip planner evaluates location conditions (water access, light pollution, trails) and recommends relevant activity gear. E.g. dark sky site → suggest telescope; lake access → suggest kayak. |
-| Fuel & last stop planner | ❌ Planned | Route-aware: last gas, grocery, ice before backcountry |
+| Nearby trails & recreation API | ✅ Done | Phase 40 — GPX trail import + map overlay; Overpass API for scenic stops |
+| Activities gear category + trip planner integration | ✅ Done | Phase 31 — Activities gear category, trip planner activity recommendations, dark sky/astro info |
+| Fuel & last stop planner | ✅ Done | Phase 18 — Pre-trip fuel/grocery/hardware stop cards via Overpass API |
 | *...and more in FEATURE-PHASES.md* | | |
 
 ---

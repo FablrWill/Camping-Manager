@@ -14,18 +14,18 @@ A personal second brain for car camping — an AI-powered knowledge system that 
 - **Vehicle:** 2025 Hyundai Santa Fe Hybrid (car camping, not overlanding)
 - **Power:** EcoFlow portable power station + solar panels
 - **Upcoming:** Getting a dog soon — will need pet-aware trip planning
-- **Sessions completed:** 25+ (foundation → intelligence → stabilization → offline → learning loop → polish)
+- **Sessions completed:** 50+ across 58 phases (v1.0 → v4.0, shipped 2026-03-29 to 2026-04-04)
 - **Dev setup:** MacBook for development, Mac mini at home for production hosting
-- **Production target:** Mac mini (always-on) — Node.js 20 LTS + PM2 + Tailscale, no Docker
+- **Production:** Mac mini (always-on) — Node.js 20 LTS + PM2 + Tailscale, deployed and live
 - **Remote access:** Tailscale mesh VPN (private, encrypted, no public exposure)
-- **Codebase:** 149 TS/TSX files, ~18K LOC app code, 190 test files (~38K LOC tests)
+- **Codebase:** 303 TS/TSX files, ~41K LOC app code, 950+ test files
 
 ## Tech Stack
 
 - **Framework:** Next.js 16 (App Router) — mobile-first responsive
 - **Language:** TypeScript throughout
 - **Styling:** Tailwind CSS + CSS custom properties design system
-- **Database:** SQLite via Prisma ORM (13 models including MealPlan, TripFeedback, DepartureChecklist, FloatPlanLog, Settings)
+- **Database:** SQLite via Prisma ORM (36 models — gear, trips, meals, locations, trails, photos, agent jobs, inbox, expenses, and more)
 - **Maps:** Leaflet + OpenStreetMap (free, no API key)
 - **AI:** Claude API (Anthropic SDK) — packing lists, meal plans, departure checklists, float plans, trip summaries, chat agent
 - **Search:** Hybrid RAG — FTS5 + vec0 via Reciprocal Rank Fusion
@@ -103,11 +103,13 @@ None — v1.2 Ship It complete as of 2026-04-03.
 
 ## Current State
 
-Phase 39 complete (2026-04-04) — Personal Signal Map: signal summary aggregation library (`lib/signal-summary.ts`) with tier logic (Good/Poor/None/Unknown), GET `/api/locations/signal-summary` endpoint, colored signal dots on SpotMap markers, "Signal" layer toggle (off by default), and filter chips for connectivity quality. 15 unit tests passing.
+All major feature development complete through v4.0 (2026-04-04). 58 phases shipped across 5 milestones. 101 API routes, 36 database models, 72 feature components. App is live on Mac mini, accessible from Will's phone via Tailscale.
 
-## Current Milestone: ✅ v1.2 Ship It — COMPLETE (2026-04-03)
+**Current focus:** Hardening, field testing, and real-world validation. No new features until the app is used on an actual camping trip.
 
-**Shipped:** Outland OS is live on the Mac mini, accessible from Will's iPhone anywhere via Tailscale HTTPS, installable as a PWA, and verified working offline.
+## Current Milestone: v5.0 Field Ready
+
+**Goal:** Harden security, validate the app on a real trip, and let real-world feedback drive the next round of development. Stop building features; start using the tool.
 
 ### Out of Scope
 
@@ -125,20 +127,39 @@ Phase 39 complete (2026-04-04) — Personal Signal Map: signal summary aggregati
 - Nginx / reverse proxy — Tailscale provides encrypted access directly, no proxy needed
 - CI/CD pipeline — single developer, deploy via git pull + pm2 restart
 
-## Future (v2.0+)
+## Future
 
-- [x] Feedback-driven packing improvement — Validated in Phase 17 (infrastructure complete; improves automatically as trip history accumulates)
+### v5.0 Priorities (next)
+- [ ] Security hardening — input validation audit, rate limiting, secrets management
+- [ ] Photo backup strategy — rsync photos to external drive or cloud (not just SQLite backups)
+- [ ] Field test trip — use app end-to-end on a real camping trip, capture what works and what doesn't
+- [ ] Post-trip feedback session — prioritize fixes and UX improvements from real usage
+- [ ] Home Assistant integration — blocked on hardware (~mid-April 2026)
+
+### Completed (v2.0–v4.0)
+- [x] Feedback-driven packing — Phase 17
+- [x] Dog-aware trip planning — Phase 19
+- [x] Plan A/B/C fallback chain — Phase 22
+- [x] Fuel & last stop planner — Phase 18
+- [x] Permit & reservation awareness — Phase 21
+- [x] Live location sharing — Phase 20
+- [x] GPX trail import — Phase 40
+- [x] Nearby trails & scenic stops — Phase 40 + S30
+- [x] Photo auto-import (bulk from camera roll) — Phase 16
+- [x] Google Maps list import — Phase 44
+- [x] Meal planning with shopping list + feedback — Phases 34-35
+- [x] Gear research, deals, ROI tracking — Phases 30-32, S21
+- [x] Post-trip auto-review — Phase 38
+- [x] Voice ghostwriter — S20
+- [x] Camp kit presets — Phase 41
+- [x] Trip cost tracking — Phase 42
+- [x] Conversational trip planner — Phase 33
+
+### Deferred
 - [ ] Dead man's switch safety check-in (needs persistent server infrastructure)
-- [ ] Dog-aware trip planning (waiting for dog arrival + needs assessment)
-- [ ] Knowledge base expansion (2500+ chunks)
-- [ ] Deploy to Vercel (if Mac mini hosting proves insufficient)
-- [ ] Smart campsite / Home Assistant bridge (blocked on hardware)
-- [x] Plan A/B/C fallback chain for trip planning — Validated in Phase 22
-- [ ] Photo auto-import from iCloud/Google Photos
-- [ ] Nearby trails & recreation API
-- [ ] Fuel & last stop planner
-- [ ] Permit & reservation awareness
-- [ ] Live location sharing — shareable public map link
+- [ ] Knowledge base expansion (2500+ chunks — needs real trip data first)
+- [ ] Deploy to Vercel (Mac mini hosting working well, no need yet)
+- [ ] Photo auto-tagging to trips/locations (GPS proximity + timestamp matching)
 
 ## Key Decisions
 
@@ -160,10 +181,11 @@ Phase 39 complete (2026-04-04) — Personal Signal Map: signal summary aggregati
 | Path guard before fs ops | Resolve + startsWith check prevents path traversal on imagePath | ✓ Validated Phase 13 |
 | Plain text float plan email | HTML rendering varies across email clients; text is universal | ✓ Validated v1.1 |
 | Settings singleton via hardcoded id | Enforces one row, upsert always targets same record | ✓ Validated v1.1 |
-| Mac mini self-hosting over Vercel | Free, SQLite stays local, photos on disk, no cloud costs | — Pending v1.2 |
-| No Docker | Single app, single user, native deps on Apple Silicon, Docker adds complexity with no benefit | — Pending v1.2 |
-| Tailscale over Cloudflare Tunnel | Private mesh VPN, no public exposure, simpler for single-user | — Pending v1.2 |
-| PM2 over systemd/launchd scripts | Auto-restart, log rotation, boot persistence, ecosystem config | — Pending v1.2 |
+| Mac mini self-hosting over Vercel | Free, SQLite stays local, photos on disk, no cloud costs | ✓ Validated v1.2 |
+| No Docker | Single app, single user, native deps on Apple Silicon, Docker adds complexity with no benefit | ✓ Validated v1.2 |
+| Tailscale over Cloudflare Tunnel | Private mesh VPN, no public exposure, simpler for single-user | ✓ Validated v1.2 |
+| PM2 over systemd/launchd scripts | Auto-restart, log rotation, boot persistence, ecosystem config | ✓ Validated v1.2 |
+| Stop building, start using | 57+ features built without a field test; real trip feedback > hypothetical features | ✓ Decision v5.0 |
 
 ## Constraints
 
@@ -192,4 +214,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-04 after Phase 39 complete — Personal Signal Map shipped*
+*Last updated: 2026-04-04 — Project review: all feature milestones (v1.0–v4.0) complete, pivoting to hardening + field testing*

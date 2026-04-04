@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v4.0
-milestone_name: Smarter Feedback Loops
-status: verifying
-last_updated: "2026-04-04T20:02:11.808Z"
+milestone: v5.0
+milestone_name: Field Ready
+status: planning
+last_updated: "2026-04-04"
 last_activity: 2026-04-04
 progress:
-  total_phases: 27
-  completed_phases: 26
-  total_plans: 72
-  completed_plans: 72
-  percent: 40
+  total_phases: 5
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -20,16 +20,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-01)
 
 **Core value:** Personal camping second brain — a closed-loop system that plans, executes, and learns from every trip
-**Current focus:** Phase 41 — camp-kit-presets
+**Current focus:** v5.0 Field Ready — hardening, production validation, first real camping trip
 
 ## Current Position
 
-Phase: 42
+Phase: 58 (Security Hardening)
 Plan: Not started
-Status: Phase complete — ready for verification
+Status: Feature development complete (v1.0–v4.0). Pivoting to hardening + field testing.
 Last activity: 2026-04-04
 
-Progress: [████░░░░░░] 40%
+Progress: [██████████] v1.0–v4.0 complete | [░░░░░░░░░░] v5.0 starting
 
 ## Performance Metrics
 
@@ -179,31 +179,24 @@ None yet.
 
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
-| 260404-jnc | Build S31 Destination Discovery feature for Outland OS | 2026-04-04 | 4110aac | [260404-jnc-build-s31-destination-discovery-feature-](./quick/260404-jnc-build-s31-destination-discovery-feature-/) |
-| 260404-jo3 | Trip intelligence report | 2026-04-04 | 8f10ef9 | [260404-jo3-trip-intelligence-report](.planning/quick/260404-jo3-trip-intelligence-report/) |
+| 260404-jnc | Build S31 Destination Discovery feature | 2026-04-04 | 4110aac | [260404-jnc](./quick/260404-jnc-build-s31-destination-discovery-feature-/) |
+| 260404-jo3 | Trip intelligence report | 2026-04-04 | 8f10ef9 | [260404-jo3](./quick/260404-jo3-trip-intelligence-report/) |
+| 260404-joc | Extend AgentJob with scheduled recurring jobs | 2026-04-04 | 7ccf6e2 | [260404-joc](./quick/260404-joc-extend-agentjob-with-scheduled-recurring/) |
+| 260404-j64 | Build shareable trip reports (S28) | 2026-04-04 | 26f743a | [260404-j64](./quick/260404-j64-build-shareable-trip-reports-s28/) |
+| 260404-k4h | Add persistent chat agent memory (S33) | 2026-04-04 | 6218cb5 | [260404-k4h](./quick/260404-k4h-add-persistent-chat-agent-memory-s33/) |
+| 260404-km8 | Upgrade packing list generator | 2026-04-04 | — | [260404-km8](./quick/260404-km8-upgrade-the-packing-list-generator-to-us/) |
+| 260404-k7z | Refresh knowledge base RAG corpus | 2026-04-04 | — | [260404-k7z](./quick/260404-k7z-refresh-and-improve-the-rag-knowledge-ba/) |
+| 260404-jal | GSD artifact audit and backfill | 2026-04-04 | — | [260404-jal](./quick/260404-jal-gsd-artifact-audit-and-backfill-for-full/) |
 
 ### Blockers/Concerns
 
-- Serwist/Turbopack: if manual sw.js fails App Router URL pattern validation in spike, fall back to Serwist with --webpack flag
-- Voice debrief extraction schema needs a prompt engineering spike before Phase 9 UI is built
-- iOS 7-day storage clearing: surface snapshot age clearly in the UI (Phase 8)
-
-### Quick Tasks Completed
-
-| # | Description | Date | Commit | Directory |
-|---|-------------|------|--------|-----------|
-| 260404-joc | Extend AgentJob with scheduled recurring jobs (scheduledFor, recurringCron), build 4 job handlers, scheduler script, IntelligenceCard dashboard widget | 2026-04-04 | 7ccf6e2 | [260404-joc-extend-agentjob-with-scheduled-recurring](./quick/260404-joc-extend-agentjob-with-scheduled-recurring/) |
-| 260404-j64 | Build shareable trip reports (S28) | 2026-04-04 | 26f743a | [260404-j64-build-shareable-trip-reports-s28](./quick/260404-j64-build-shareable-trip-reports-s28/) |
-| 260404-k4h | Add persistent chat agent memory (S33) | 2026-04-04 | 6218cb5 | [260404-k4h-add-persistent-chat-agent-memory-s33](./quick/260404-k4h-add-persistent-chat-agent-memory-s33/) |
+- **HA hardware** — In Durham, Will picking up ~mid-April 2026. Blocks S10 (HA integration) only.
+- iOS 7-day storage clearing: surface snapshot age clearly in the UI
 
 ## Session Continuity
 
-Last session: 2026-04-04T19:58:02.063Z
-Last activity: Completed phase 41 plan 01 — kit-utils + Save as Kit
+Last session: 2026-04-04
+Last activity: Project review — all feature milestones complete, roadmap reset to v5.0 Field Ready
 Resume file: None
+Next action: Phase 58 (Security Hardening) or Phase 59 (Production Smoke Test)
 
-## Quick Tasks Completed
-
-| ID | Date | Description |
-|----|------|-------------|
-| 260404-jal | 2026-04-04 | GSD artifact audit and backfill — created phase folders for S16-S30, filled gaps in phases 21/32/36/37, updated CHANGELOG/TASKS/V2-SESSIONS |
