@@ -6,7 +6,7 @@
 - ✅ **v1.1 Close the Loop** — Phases 6-11 (shipped 2026-04-02) — [archive](milestones/v1.1-ROADMAP.md)
 - ✅ **v1.2 Ship It** — Phases 12-15 (shipped 2026-04-03)
 - ✅ **v2.0 Smarter & Sharper** — Phases 16-24 (shipped 2026-04-03)
-- 🚧 **v3.0 Gear Intelligence + Day-Of** — Phases 25-33 (in progress)
+- 🚧 **v3.0 Gear Intelligence + Day-Of** — Phases 25-37 (in progress)
 
 ## Phases
 
@@ -60,21 +60,36 @@
 
 **Milestone Goal:** Make gear smarter (docs, research, deals, weather-aware clothing) and nail the departure morning experience (sequenced checklist, vehicle prep, safety contact).
 
+**Wave 0 — Independent (ran in parallel with Waves 1–4):**
+- [x] **Phase 33: Conversational Trip Planner** - Replace static trip form with multi-turn Claude agent chat (completed 2026-04-03)
+
 **Wave 1 — Parallel (no dependencies):**
-- [ ] **Phase 25: Gear Docs & Manual Finder** - GearDocument model, Claude-powered manual search, PDF download + offline caching
-- [ ] **Phase 26: Trip Day Sequencer** - Time-ordered departure checklist pulling from packing/meals/power/route
-- [ ] **Phase 27: Safety Float Plan** - SMS/email trip summary to emergency contact before departure
+- [x] **Phase 25: Gear Docs & Manual Finder** - GearDocument model, Claude-powered manual search, PDF download + offline caching (completed 2026-04-03)
+- [x] **Phase 26: Trip Day Sequencer** - Time-ordered departure checklist pulling from packing/meals/power/route (completed 2026-04-03)
+- [x] **Phase 27: Safety Float Plan** - SMS/email trip summary to emergency contact before departure (completed 2026-04-03)
 
 **Wave 2 — Depends on Wave 1:**
-- [ ] **Phase 28: Weather-Aware Clothing** - Rain/cold/UV-driven clothing suggestions in packing lists, clothing subcategories
+- [x] **Phase 28: Weather-Aware Clothing** - Rain/cold/UV-driven clothing suggestions in packing lists, clothing subcategories (completed 2026-04-03)
 - [x] **Phase 29: Vehicle Pre-Trip Checklist** - Tire pressure, oil, coolant, terrain-aware checks paired with Day Sequencer (completed 2026-04-03)
 
 **Wave 3 — Depends on Wave 2:**
-- [x] **Phase 30: Gear Product Research** - AI-powered "Research" button, best-in-class comparison, upgrade recommendations (completed 2026-04-03)
+- [x] **Phase 30: Gear Product Research** - AI-powered "Research" button, best-in-class comparison, upgrade recommendations (completed 2026-04-04)
 - [ ] **Phase 31: Dark Sky & Astro Info** - Bortle class, moon phase, sunrise/sunset per location and trip dates
 
 **Wave 4 — Depends on Wave 3:**
 - [ ] **Phase 32: Deal Monitoring** - Target price on wishlist items, on-demand price check via Claude, deal alerts
+
+**Wave 5 — Depends on Phase 22:**
+- [x] **Phase 34: Meal Planning Core** - AI-generated meal plans per day/slot based on trip, weather, dog status, cooking gear (completed 2026-04-04)
+
+**Wave 6 — Depends on Phase 34:**
+- [x] **Phase 35: Meal Planning: Shopping List, Prep Guide & Feedback** - Consolidated shopping list, pre-trip prep guide, post-trip meal ratings (completed 2026-04-04)
+
+**Wave 7 — Independent (Mac mini):**
+- [ ] **Phase 36: Mac Mini Agent Jobs Infrastructure** - Job queue API + polling pattern so Mac mini can run background agent work (gear enrichment, deals, etc.)
+
+**Wave 8 — Blocked until HA hardware available (~mid-April 2026):**
+- [ ] **Phase 37: Home Assistant Integration** - Live campsite sensor data (battery, propane, weather, dog GPS) on dashboard and trip prep
 
 ## Phase Details
 
@@ -362,7 +377,12 @@ Plans:
   4. Documents tab on gear detail shows all attached docs
   5. Downloaded PDFs cached in service worker for offline access
   6. `npm run build` passes
-**Plans**: 0/TBD
+**Plans**: 4 plans
+Plans:
+- [ ] 37-01-PLAN.md — Schema migration + HA types + Settings API
+- [ ] 37-02-PLAN.md — HA proxy API routes (test, entities, states)
+- [ ] 37-03-PLAN.md — Settings UI (config section + entity picker)
+- [ ] 37-04-PLAN.md — Dashboard card + /campsite route + trip prep snapshot
 
 **Parallelization notes:**
 - Wave 1 — fully parallel with Phases 26 and 27
@@ -370,14 +390,19 @@ Plans:
 ### Phase 26: Trip Day Sequencer
 **Goal**: Time-ordered departure checklist for the morning of a trip, pulling tasks from packing list, meal plan, power budget, and route — the ADHD-friendly "just follow the list" screen
 **Depends on**: None (uses existing trip prep data)
-**Requirements**: TBD
+**Requirements**: [HA-01, HA-02, HA-03, HA-04, HA-05, HA-06, HA-07, HA-08, HA-09, HA-10, HA-11]
 **Success Criteria** (what must be TRUE):
   1. Trip prep has a "Departure Day" section with time-sequenced tasks
   2. Tasks are generated from existing trip data (packing status, meal prep steps, power charge needs, drive time)
   3. Each task has a suggested time and can be checked off
   4. Sequence adapts to departure time (set by user on trip)
   5. `npm run build` passes
-**Plans**: 0/TBD
+**Plans**: 4 plans
+Plans:
+- [ ] 37-01-PLAN.md — Schema migration + HA types + Settings API
+- [ ] 37-02-PLAN.md — HA proxy API routes (test, entities, states)
+- [ ] 37-03-PLAN.md — Settings UI (config section + entity picker)
+- [ ] 37-04-PLAN.md — Dashboard card + /campsite route + trip prep snapshot
 
 **Parallelization notes:**
 - Wave 1 — fully parallel with Phases 25 and 27
@@ -385,14 +410,19 @@ Plans:
 ### Phase 27: Safety Float Plan
 **Goal**: Send a trip summary (dates, location, vehicle, expected return) to an emergency contact before departure
 **Depends on**: None
-**Requirements**: TBD
+**Requirements**: [HA-01, HA-02, HA-03, HA-04, HA-05, HA-06, HA-07, HA-08, HA-09, HA-10, HA-11]
 **Success Criteria** (what must be TRUE):
   1. User can set an emergency contact (name, phone/email) in settings
   2. "Send Float Plan" button on trip prep generates a summary message
   3. Message includes: destination, dates, vehicle, expected return, any notes
   4. Sends via SMS (iMessage on Mac) or email
   5. `npm run build` passes
-**Plans**: 0/TBD
+**Plans**: 4 plans
+Plans:
+- [ ] 37-01-PLAN.md — Schema migration + HA types + Settings API
+- [ ] 37-02-PLAN.md — HA proxy API routes (test, entities, states)
+- [ ] 37-03-PLAN.md — Settings UI (config section + entity picker)
+- [ ] 37-04-PLAN.md — Dashboard card + /campsite route + trip prep snapshot
 
 **Parallelization notes:**
 - Wave 1 — fully parallel with Phases 25 and 26
@@ -400,7 +430,7 @@ Plans:
 ### Phase 28: Weather-Aware Clothing
 **Goal**: Packing lists include weather-driven clothing suggestions — rain gear for rain, cold layers for low temps, UV protection for high UV
 **Depends on**: Phase 23 (clothing category exists)
-**Requirements**: TBD
+**Requirements**: [HA-01, HA-02, HA-03, HA-04, HA-05, HA-06, HA-07, HA-08, HA-09, HA-10, HA-11]
 **Success Criteria** (what must be TRUE):
   1. Claude packing prompt includes specific clothing guidance based on weather forecast
   2. Rain gear suggested when forecast shows precipitation
@@ -408,7 +438,12 @@ Plans:
   4. UV protection suggested for high UV index days
   5. Clothing suggestions reference actual owned gear when available
   6. `npm run build` passes
-**Plans**: 0/TBD
+**Plans**: 4 plans
+Plans:
+- [ ] 37-01-PLAN.md — Schema migration + HA types + Settings API
+- [ ] 37-02-PLAN.md — HA proxy API routes (test, entities, states)
+- [ ] 37-03-PLAN.md — Settings UI (config section + entity picker)
+- [ ] 37-04-PLAN.md — Dashboard card + /campsite route + trip prep snapshot
 
 **Parallelization notes:**
 - Wave 2 — can run parallel with Phase 29
@@ -438,7 +473,7 @@ Plans:
 ### Phase 30: Gear Product Research
 **Goal**: AI-powered "Research" button on gear items that finds best-in-class alternatives, compares to current item, and surfaces upgrade recommendations
 **Depends on**: Phase 25 (GearDocument model for storing research)
-**Requirements**: TBD
+**Requirements**: [HA-01, HA-02, HA-03, HA-04, HA-05, HA-06, HA-07, HA-08, HA-09, HA-10, HA-11]
 **Success Criteria** (what must be TRUE):
   1. "Research" button on gear detail triggers Claude research
   2. Results show top alternatives with pros/cons vs current item
@@ -457,14 +492,19 @@ Plans:
 ### Phase 31: Dark Sky & Astro Info
 **Goal**: Show Bortle class, moon phase, sunrise/sunset for trip locations and dates — useful for stargazing trips and photography
 **Depends on**: None (independent, but lower priority)
-**Requirements**: TBD
+**Requirements**: [HA-01, HA-02, HA-03, HA-04, HA-05, HA-06, HA-07, HA-08, HA-09, HA-10, HA-11]
 **Success Criteria** (what must be TRUE):
   1. Trip prep shows sunrise/sunset times for trip dates
   2. Moon phase displayed for each night of the trip
   3. Bortle class (light pollution) shown for trip location
   4. Data sourced from free APIs (no API key required)
   5. `npm run build` passes
-**Plans**: 0/TBD
+**Plans**: 4 plans
+Plans:
+- [ ] 37-01-PLAN.md — Schema migration + HA types + Settings API
+- [ ] 37-02-PLAN.md — HA proxy API routes (test, entities, states)
+- [ ] 37-03-PLAN.md — Settings UI (config section + entity picker)
+- [ ] 37-04-PLAN.md — Dashboard card + /campsite route + trip prep snapshot
 
 **Parallelization notes:**
 - Wave 3 — can run parallel with Phase 30
@@ -472,22 +512,110 @@ Plans:
 ### Phase 32: Deal Monitoring
 **Goal**: Set target prices on wishlist gear items, check prices on demand via Claude, surface deals
 **Depends on**: Phase 30 (research model for storing price data)
-**Requirements**: TBD
+**Requirements**: [HA-01, HA-02, HA-03, HA-04, HA-05, HA-06, HA-07, HA-08, HA-09, HA-10, HA-11]
 **Success Criteria** (what must be TRUE):
   1. Wishlist gear items have optional targetPrice field
   2. "Check Price" button triggers Claude to search current prices
   3. Results show current price vs target price
   4. Dashboard surfaces items currently below target price
   5. `npm run build` passes
-**Plans**: 0/TBD
+**Plans**: 4 plans
+Plans:
+- [ ] 37-01-PLAN.md — Schema migration + HA types + Settings API
+- [ ] 37-02-PLAN.md — HA proxy API routes (test, entities, states)
+- [ ] 37-03-PLAN.md — Settings UI (config section + entity picker)
+- [ ] 37-04-PLAN.md — Dashboard card + /campsite route + trip prep snapshot
 
 **Parallelization notes:**
 - Wave 4 — depends on Phase 30 research infrastructure
 
-### Phase 33: Home Assistant Integration
+### Phase 33: Conversational Trip Planner
+
+**Goal:** Replace the static "Create Trip" form with a multi-turn Claude agent chat that asks dynamic questions, calls gear/weather/web tools, and creates the trip when ready. Chat is the primary creation path; existing edit form stays for post-creation edits. "Add manually" escape hatch preserved.
+**Requirements**: TRIP-CHAT-01, TRIP-CHAT-02, TRIP-CHAT-03, TRIP-CHAT-04, TRIP-CHAT-05, TRIP-CHAT-06, TRIP-CHAT-07, TRIP-CHAT-08, TRIP-CHAT-09
+**Depends on:** Phase 24
+**Success Criteria** (what must be TRUE):
+  1. "Plan Trip" button opens a full-screen chat sheet with a conversational agent
+  2. Agent asks dynamic questions and uses tools (gear, weather, locations, web search)
+  3. Agent presents a summary card with "Create Trip" button when enough info is collected
+  4. Confirming creates the trip and navigates to /trips/[id]/prep
+  5. "Add manually" escape hatch opens the old static form
+  6. Trip-creation conversations are persisted to the database
+  7. `npm run build` passes
+**Plans:** 4/4 plans complete
+
+Plans:
+- [x] 33-00-PLAN.md — Wave 0 test stubs (trip planner tools + ChatBubble extraction)
+- [x] 33-01-PLAN.md — Trip planner API route + system prompt + web search tool + tool registry
+- [x] 33-02-PLAN.md — ChatClient + ChatBubble modifications (apiEndpoint, fullHeight, trip_summary card)
+- [x] 33-03-PLAN.md — TripPlannerSheet component + TripsClient integration
+
+**Parallelization notes:**
+- Wave 0 — independent, ran in parallel with Waves 1–4
+- Plan 33-00 is Wave 0 — test stubs, no dependencies
+- Plans 33-01 and 33-02 are Wave 1 — parallel, depend on 33-00, no file overlap
+- Plan 33-03 is Wave 2 — depends on both 33-01 (API route) and 33-02 (ChatClient props)
+
+### Phase 34: Meal Planning Core
+**Goal**: AI-generated meal plans linked to trips — every meal slot for every day, based on trip duration, weather, dog status, and available cooking gear
+**Depends on**: Phase 22 (Trip model + claude.ts + TripPrepClient settled)
+**Requirements**: [HA-01, HA-02, HA-03, HA-04, HA-05, HA-06, HA-07, HA-08, HA-09, HA-10, HA-11]
+**Success Criteria** (what must be TRUE):
+  1. Meal plan generates for any trip with a start/end date
+  2. Plan covers every day × every slot (breakfast, lunch, dinner)
+  3. Individual meals can be regenerated without replacing the whole plan
+  4. Meal plan section visible in trip prep with day-by-day layout
+  5. Trip card shows meal plan status ("Meal plan ready" / "No meal plan")
+  6. `npm run build` passes
+**Plans**: 4/4 plans complete
+
+**Parallelization notes:**
+- Wave 5 — depends on Phase 22 (Trip model)
+
+### Phase 35: Meal Planning: Shopping List, Prep Guide & Feedback
+**Goal**: Extend meal planning with a consolidated shopping list, pre-trip prep guide, and post-trip feedback loop that improves future meal plans
+**Depends on**: Phase 34 (MealPlan + Meal models in place)
+**Requirements**: [HA-01, HA-02, HA-03, HA-04, HA-05, HA-06, HA-07, HA-08, HA-09, HA-10, HA-11]
+**Success Criteria** (what must be TRUE):
+  1. "Shopping List" tab shows consolidated ingredient list across all meals, grouped by category
+  2. Quantities are summed across recipes (e.g., 3 meals needing olive oil → 1 combined entry)
+  3. Pre-trip prep guide lists everything that can be made at home before the trip
+  4. Post-trip meal feedback lets Will rate each meal (loved / ok / skip) with a note
+  5. Feedback is surfaced to Claude on the next meal plan generation
+  6. Dashboard shows meal feedback prompt after a trip ends
+  7. `npm run build` passes
+**Plans**: TBD/TBD plans complete
+
+**Parallelization notes:**
+- Wave 6 — depends on Phase 34 meal plan core
+
+### Phase 36: Mac Mini Agent Jobs Infrastructure
+**Goal**: Job queue API + polling pattern so the Mac mini can claim, execute, and write back results for background agent work (gear enrichment, price checks, deal monitoring)
+**Depends on**: Phase 24 (schema stable)
+**Requirements**: TBD
+**Success Criteria** (what must be TRUE):
+  1. AgentJob model in schema (type, payload, status, result, triggeredBy)
+  2. GET /api/agent/jobs?status=pending — Mac mini polls for work
+  3. POST /api/agent/jobs — app creates a job
+  4. POST /api/agent/results — Mac mini writes result, flips status to done
+  5. Gear save auto-queues a gear_enrichment job
+  6. Dashboard badge shows unread result count
+  7. `npm run build` passes
+**Plans**: 4 plans
+Plans:
+- [ ] 37-01-PLAN.md — Schema migration + HA types + Settings API
+- [ ] 37-02-PLAN.md — HA proxy API routes (test, entities, states)
+- [ ] 37-03-PLAN.md — Settings UI (config section + entity picker)
+- [ ] 37-04-PLAN.md — Dashboard card + /campsite route + trip prep snapshot
+
+**Parallelization notes:**
+- Wave 7 — independent; runs on Mac mini
+
+### Phase 37: Home Assistant Integration
 **Goal**: Connect Outland OS to a campsite Home Assistant instance so Will can see live sensor data (battery, propane, weather, vehicle, dog GPS) on the dashboard and trip prep pages
 **Depends on**: Phase 24 (schema stable, nav settled)
-**Requirements**: TBD
+**Requirements**: [HA-01, HA-02, HA-03, HA-04, HA-05, HA-06, HA-07, HA-08, HA-09, HA-10, HA-11]
+**Blocked**: HA hardware not available until ~mid-April 2026
 **Success Criteria** (what must be TRUE):
   1. Settings page has HA config section with URL, token (write-only), and "Test Connection" button
   2. Test Connection calls HA REST API and shows success ("Connected — N entities found") or error
@@ -497,55 +625,29 @@ Plans:
   6. Token is never returned from GET /api/ha/config
   7. Trip prep shows HA power/propane/weather snapshot when configured
   8. `npm run build` passes
-**Plans**: 0/TBD
+**Plans**: 4 plans
+Plans:
+- [ ] 37-01-PLAN.md — Schema migration + HA types + Settings API
+- [ ] 37-02-PLAN.md — HA proxy API routes (test, entities, states)
+- [ ] 37-03-PLAN.md — Settings UI (config section + entity picker)
+- [ ] 37-04-PLAN.md — Dashboard card + /campsite route + trip prep snapshot
 
 **Parallelization notes:**
-- Wave 5 — independent of Phases 25–32; depends on Phase 24 schema
-
-### Phase 34: Meal Planning Core
-**Goal**: AI-generated meal plans linked to trips — every meal slot for every day, based on trip duration, weather, dog status, and available cooking gear
-**Depends on**: Phase 22 (Trip model + claude.ts + TripPrepClient settled), Phase 33 (schema settled)
-**Requirements**: TBD
-**Success Criteria** (what must be TRUE):
-  1. Meal plan generates for any trip with a start/end date
-  2. Plan covers every day × every slot (breakfast, lunch, dinner)
-  3. Individual meals can be regenerated without replacing the whole plan
-  4. Meal plan section visible in trip prep with day-by-day layout
-  5. Trip card shows meal plan status ("Meal plan ready" / "No meal plan")
-  6. `npm run build` passes
-**Plans**: 0/TBD
-
-**Parallelization notes:**
-- Wave 6 — depends on Phase 22 (Trip model) and Phase 33 (schema)
-
-### Phase 35: Meal Planning: Shopping List, Prep Guide & Feedback
-**Goal**: Extend meal planning with a consolidated shopping list, pre-trip prep guide, and post-trip feedback loop that improves future meal plans
-**Depends on**: Phase 34 (MealPlan + Meal models in place)
-**Requirements**: TBD
-**Success Criteria** (what must be TRUE):
-  1. "Shopping List" tab shows consolidated ingredient list across all meals, grouped by category
-  2. Quantities are summed across recipes (e.g., 3 meals needing olive oil → 1 combined entry)
-  3. Pre-trip prep guide lists everything that can be made at home before the trip
-  4. Post-trip meal feedback lets Will rate each meal (loved / ok / skip) with a note
-  5. Feedback is surfaced to Claude on the next meal plan generation
-  6. Dashboard shows meal feedback prompt after a trip ends
-  7. `npm run build` passes
-**Plans**: 0/TBD
-
-**Parallelization notes:**
-- Wave 7 — depends on Phase 34 meal plan core
+- Wave 8 — blocked on hardware; independent once unblocked
 
 ## Progress
 
 **Execution Order:**
 - v1.0-v2.0: Phases 1-24 (complete)
-- v3.0 Wave 1: Phases 25, 26, 27 (parallel)
-- v3.0 Wave 2: Phases 28, 29 (parallel)
+- v3.0 Wave 0: Phase 33 (Conversational Trip Planner — independent, complete)
+- v3.0 Wave 1: Phases 25, 26, 27 (parallel, complete)
+- v3.0 Wave 2: Phases 28, 29 (parallel, complete)
 - v3.0 Wave 3: Phases 30, 31 (parallel)
 - v3.0 Wave 4: Phase 32
-- v3.0 Wave 5: Phase 33 (HA Integration — independent)
-- v3.0 Wave 6: Phase 34 (Meal Planning Core — depends on 22, 33)
-- v3.0 Wave 7: Phase 35 (Meal Planning: Shopping/Prep/Feedback — depends on 34)
+- v3.0 Wave 5: Phase 34 (Meal Planning Core — depends on 22)
+- v3.0 Wave 6: Phase 35 (Meal Planning: Shopping/Prep/Feedback — depends on 34, complete)
+- v3.0 Wave 7: Phase 36 (Mac Mini Agent Jobs Infrastructure — independent, Mac mini)
+- v3.0 Wave 8: Phase 37 (HA Integration — blocked until hardware ~mid-April)
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -579,38 +681,13 @@ Plans:
 | 28. Weather-Aware Clothing | v3.0 | 1/1 | Complete | 2026-04-03 |
 | 29. Vehicle Pre-Trip Checklist | v3.0 | 3/3 | Complete    | 2026-04-03 |
 | 30. Gear Product Research | v3.0 | 3/3 | Complete    | 2026-04-04 |
-| 31. Dark Sky & Astro Info | v3.0 | 0/TBD | Not started | - |
+| 31. Dark Sky & Astro Info | v3.0 | 0/TBD | In Progress | - |
 | 32. Deal Monitoring | v3.0 | 0/TBD | Not started | - |
 | 33. Conversational Trip Planner | v3.0 | 4/4 | Complete    | 2026-04-03 |
-| 34. Home Assistant Integration | v3.0 | 0/TBD | Not started | - |
-| 35. Meal Planning Core | v3.0 | 0/TBD | Not started | - |
-| 36. Meal Planning: Shopping/Prep/Feedback | v3.0 | 0/TBD | Not started | - |
-
-### Phase 33: Conversational Trip Planner
-
-**Goal:** Replace the static "Create Trip" form with a multi-turn Claude agent chat that asks dynamic questions, calls gear/weather/web tools, and creates the trip when ready. Chat is the primary creation path; existing edit form stays for post-creation edits. "Add manually" escape hatch preserved.
-**Requirements**: TRIP-CHAT-01, TRIP-CHAT-02, TRIP-CHAT-03, TRIP-CHAT-04, TRIP-CHAT-05, TRIP-CHAT-06, TRIP-CHAT-07, TRIP-CHAT-08, TRIP-CHAT-09
-**Depends on:** Phase 24
-**Success Criteria** (what must be TRUE):
-  1. "Plan Trip" button opens a full-screen chat sheet with a conversational agent
-  2. Agent asks dynamic questions and uses tools (gear, weather, locations, web search)
-  3. Agent presents a summary card with "Create Trip" button when enough info is collected
-  4. Confirming creates the trip and navigates to /trips/[id]/prep
-  5. "Add manually" escape hatch opens the old static form
-  6. Trip-creation conversations are persisted to the database
-  7. `npm run build` passes
-**Plans:** 3/3 plans complete
-
-Plans:
-- [x] 33-00-PLAN.md — Wave 0 test stubs (trip planner tools + ChatBubble extraction)
-- [x] 33-01-PLAN.md — Trip planner API route + system prompt + web search tool + tool registry
-- [x] 33-02-PLAN.md — ChatClient + ChatBubble modifications (apiEndpoint, fullHeight, trip_summary card)
-- [x] 33-03-PLAN.md — TripPlannerSheet component + TripsClient integration
-
-**Parallelization notes:**
-- Plan 33-00 is Wave 0 — test stubs, no dependencies
-- Plans 33-01 and 33-02 are Wave 1 — parallel, depend on 33-00, no file overlap
-- Plan 33-03 is Wave 2 — depends on both 33-01 (API route) and 33-02 (ChatClient props)
+| 34. Meal Planning Core | v3.0 | 4/4 | Complete | 2026-04-04 |
+| 35. Meal Planning: Shopping List, Prep Guide & Feedback | v3.0 | TBD/TBD | Complete | 2026-04-04 |
+| 36. Mac Mini Agent Jobs Infrastructure | v3.0 | 0/TBD | In Progress | - |
+| 37. Home Assistant Integration | v3.0 | 0/4 | Planned | - |
 
 ---
 *Full phase details for shipped milestones: see archives in `.planning/milestones/`*
