@@ -624,7 +624,7 @@ Plans:
 | 31. Dark Sky & Astro Info | v3.0 | 0/TBD | Not started | - |
 | 32. Deal Monitoring | v3.0 | 0/TBD | Not started | - |
 | 33. Conversational Trip Planner | v3.0 | 4/4 | Complete    | 2026-04-03 |
-| 34. Home Assistant Integration | v3.0 | 4/4 | Complete   | 2026-04-04 |
+| 34. Home Assistant Integration | v3.0 | 4/4 | Complete    | 2026-04-04 |
 | 35. Meal Planning Core | v3.0 | 0/TBD | Not started | - |
 | 36. Meal Planning: Shopping/Prep/Feedback | v3.0 | 0/TBD | Not started | - |
 
