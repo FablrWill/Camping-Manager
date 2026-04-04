@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback } from 'react'
 import { Loader2, RotateCcw, Plus, X, Check, Package } from 'lucide-react'
 import type { PackingListResult } from '@/lib/claude'
 import { Button, ConfirmDialog } from '@/components/ui'
+import { extractGearIdsFromPackingList, computeGearIdsToRemove } from '@/lib/kit-utils'
+import KitStackPanel from './KitStackPanel'
 
 interface PackingListProps {
   tripId: string
@@ -37,10 +39,16 @@ export default function PackingList({ tripId, tripName, offlineData }: PackingLi
   const [addingTo, setAddingTo] = useState<string | null>(null)
   const [newItemName, setNewItemName] = useState('')
   const [showRegenerateConfirm, setShowRegenerateConfirm] = useState(false)
-  const [showKitPicker, setShowKitPicker] = useState(false)
-  const [kits, setKits] = useState<Array<{ id: string; name: string; gearIds: string }>>([])
-  const [applyingKit, setApplyingKit] = useState<string | null>(null)
-  const [kitMessage, setKitMessage] = useState<string | null>(null)
+  const [showKitPanel, setShowKitPanel] = useState(false)
+  const [appliedKits, setAppliedKits] = useState<Array<{ id: string; name: string; gearIds: string[] }>>([])
+  const [removingKitId, setRemovingKitId] = useState<string | null>(null)
+  const [reviewResult, setReviewResult] = useState<string | null>(null)
+  const [reviewing, setReviewing] = useState(false)
+  const [reviewError, setReviewError] = useState<string | null>(null)
+  const [showSaveAsKit, setShowSaveAsKit] = useState(false)
+  const [saveKitName, setSaveKitName] = useState('')
+  const [savingKit, setSavingKit] = useState(false)
+  const [saveKitMessage, setSaveKitMessage] = useState<string | null>(null)
 
   // Load saved packing list on mount
   useEffect(() => {
@@ -114,37 +122,90 @@ export default function PackingList({ tripId, tripName, offlineData }: PackingLi
     }
   }, [tripId])
 
-  async function handleShowKitPicker() {
-    setShowKitPicker(true)
-    setKitMessage(null)
+  async function handleRemoveKit(kitToRemove: { id: string; name: string; gearIds: string[] }) {
+    setRemovingKitId(kitToRemove.id)
     try {
-      const res = await fetch('/api/kits')
-      if (res.ok) {
-        const data = await res.json() as Array<{ id: string; name: string; gearIds: string }>
-        setKits(data)
+      const remainingKits = appliedKits.filter(k => k.id !== kitToRemove.id)
+      const gearIdsToRemove = computeGearIdsToRemove(
+        kitToRemove.gearIds,
+        remainingKits.map(k => k.gearIds)
+      )
+      if (gearIdsToRemove.length > 0) {
+        const res = await fetch(`/api/kits/${kitToRemove.id}/unapply`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tripId, gearIdsToRemove }),
+        })
+        if (!res.ok) {
+          setError("Couldn't remove kit. Refresh and try again.")
+          return
+        }
       }
+      setAppliedKits(prev => prev.filter(k => k.id !== kitToRemove.id))
+      setReviewResult(null)
+      setReviewError(null)
     } catch {
-      // non-fatal
+      setError("Couldn't remove kit. Refresh and try again.")
+    } finally {
+      setRemovingKitId(null)
     }
   }
 
-  async function handleApplyKit(kitId: string) {
-    setApplyingKit(kitId)
-    setKitMessage(null)
+  async function handleSaveAsKit() {
+    if (!saveKitName.trim() || !packingList) return
+    setSavingKit(true)
+    setSaveKitMessage(null)
     try {
-      const res = await fetch(`/api/kits/${kitId}/apply`, {
+      const gearIds = extractGearIdsFromPackingList(packingList)
+      if (gearIds.length === 0) {
+        setSaveKitMessage('No inventory items to save')
+        return
+      }
+      const res = await fetch('/api/kits', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tripId }),
+        body: JSON.stringify({ name: saveKitName.trim(), gearIds }),
       })
       if (res.ok) {
-        const data = await res.json() as { added: number; skipped: number }
-        setKitMessage(`Added ${data.added} item${data.added !== 1 ? 's' : ''}${data.skipped > 0 ? ` (${data.skipped} already packed)` : ''}`)
+        setSaveKitMessage(`Kit saved as "${saveKitName.trim()}"`)
+        setSaveKitName('')
+        setShowSaveAsKit(false)
+      } else {
+        setSaveKitMessage("Couldn't save kit — try again.")
       }
     } catch {
-      setKitMessage('Failed to apply kit')
+      setSaveKitMessage("Couldn't save kit — try again.")
     } finally {
-      setApplyingKit(null)
+      setSavingKit(false)
+    }
+  }
+
+  async function handleReview() {
+    setReviewing(true)
+    setReviewError(null)
+    setReviewResult(null)
+    try {
+      const res = await fetch('/api/kits/review', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tripId,
+          appliedKits: appliedKits.map(k => ({
+            name: k.name,
+            gearIds: k.gearIds,
+          })),
+        }),
+      })
+      if (res.ok) {
+        const data = await res.json() as { review: string }
+        setReviewResult(data.review)
+      } else {
+        setReviewError('Review unavailable. Check your connection or try again.')
+      }
+    } catch {
+      setReviewError('Review unavailable. Check your connection or try again.')
+    } finally {
+      setReviewing(false)
     }
   }
 
@@ -228,9 +289,9 @@ export default function PackingList({ tripId, tripName, offlineData }: PackingLi
           {!offlineData && (
             <div className="flex flex-col items-end gap-2">
               <div className="flex gap-2">
-                <Button variant="secondary" size="sm" onClick={handleShowKitPicker}>
+                <Button variant="secondary" size="sm" onClick={() => setShowKitPanel(true)}>
                   <Package size={14} className="mr-1" />
-                  Apply Kit
+                  Use Kit Presets
                 </Button>
                 <Button variant="primary" size="sm" onClick={handleGenerate} loading={generating}>
                   Generate Packing List
@@ -252,49 +313,79 @@ export default function PackingList({ tripId, tripName, offlineData }: PackingLi
             </div>
           )}
         </div>
-        {/* Kit picker dropdown */}
-        {showKitPicker && (
-          <div className="mt-3 border-t border-amber-200 dark:border-amber-700 pt-3">
-            {kits.length === 0 ? (
-              <p className="text-xs text-stone-500 dark:text-stone-400">
-                No kits saved yet. Create one from the Gear page.
-              </p>
-            ) : (
-              <div className="space-y-1.5">
-                <p className="text-xs font-medium text-stone-600 dark:text-stone-400 mb-1">Choose a kit:</p>
-                {kits.map((kit) => {
-                  const count = (JSON.parse(kit.gearIds) as string[]).length
-                  return (
-                    <button
-                      key={kit.id}
-                      onClick={() => void handleApplyKit(kit.id)}
-                      disabled={applyingKit !== null}
-                      className="w-full text-left px-3 py-2 rounded-lg border border-stone-200 dark:border-stone-700 hover:bg-white dark:hover:bg-stone-800 transition-colors disabled:opacity-50"
-                    >
-                      <span className="text-sm font-medium text-stone-800 dark:text-stone-200">
-                        {kit.name}
-                      </span>
-                      <span className="text-xs text-stone-400 dark:text-stone-500 ml-2">
-                        {count} item{count !== 1 ? 's' : ''}
-                      </span>
-                      {applyingKit === kit.id && (
-                        <Loader2 size={12} className="inline ml-2 animate-spin text-amber-500" />
-                      )}
-                    </button>
-                  )
-                })}
+        {/* Applied kits chip tracker */}
+        {appliedKits.length > 0 && (
+          <div className="flex flex-wrap gap-2 items-center mt-3">
+            <span className="text-xs text-stone-500 dark:text-stone-400 font-semibold">Applied:</span>
+            {appliedKits.map(kit => (
+              <span
+                key={kit.id}
+                className="bg-stone-100 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-800 dark:text-stone-200 rounded-full px-3 py-1 text-sm flex items-center gap-1.5"
+              >
+                {kit.name}
+                <button
+                  onClick={() => void handleRemoveKit(kit)}
+                  disabled={removingKitId !== null}
+                  aria-label={`Remove ${kit.name}`}
+                  className="text-stone-400 hover:text-red-500 dark:hover:text-red-400 transition-colors disabled:opacity-50"
+                >
+                  {removingKitId === kit.id ? (
+                    <Loader2 size={12} className="animate-spin" />
+                  ) : (
+                    <X size={12} />
+                  )}
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
+        {/* Ask Claude to review — per D-04, appears only after kits applied */}
+        {appliedKits.length > 0 && !offlineData && (
+          <div className="mt-3">
+            <button
+              onClick={() => void handleReview()}
+              disabled={reviewing}
+              className="border border-amber-500 dark:border-amber-400 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/30 rounded-xl px-4 py-2.5 font-semibold text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+            >
+              {reviewing && <Loader2 size={16} className="animate-spin mr-2" />}
+              {reviewing ? 'Reviewing...' : 'Ask Claude to review'}
+            </button>
+
+            {reviewError && (
+              <p className="text-sm text-red-600 dark:text-red-400 mt-2">{reviewError}</p>
+            )}
+
+            {reviewResult && (
+              <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4 mt-3">
+                <ul className="list-disc list-inside space-y-1 text-sm text-stone-800 dark:text-stone-100">
+                  {reviewResult
+                    .split('\n')
+                    .filter(line => line.trim())
+                    .map((line, i) => (
+                      <li key={i}>{line.replace(/^[-*•]\s*/, '')}</li>
+                    ))}
+                </ul>
               </div>
             )}
-            {kitMessage && (
-              <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-2 font-medium">{kitMessage}</p>
-            )}
-            <button
-              onClick={() => setShowKitPicker(false)}
-              className="text-xs text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 mt-2"
-            >
-              Close
-            </button>
           </div>
+        )}
+
+        {/* KitStackPanel */}
+        {showKitPanel && (
+          <KitStackPanel
+            tripId={tripId}
+            onClose={() => setShowKitPanel(false)}
+            onApplied={(kits) => {
+              setAppliedKits(prev => {
+                const existingIds = new Set(prev.map(k => k.id))
+                const newKits = kits.filter(k => !existingIds.has(k.id))
+                return [...prev, ...newKits]
+              })
+              setShowKitPanel(false)
+              setReviewResult(null)
+              setReviewError(null)
+            }}
+          />
         )}
       </div>
     )
@@ -341,17 +432,81 @@ export default function PackingList({ tripId, tripName, offlineData }: PackingLi
               (Offline — read only)
             </span>
           ) : (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => packingList ? setShowRegenerateConfirm(true) : handleGenerate()}
-              loading={generating}
-              icon={!generating ? <RotateCcw size={12} /> : undefined}
-            >
-              Regenerate
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="secondary" size="sm" onClick={() => setShowKitPanel(true)}>
+                <Package size={14} className="mr-1" />
+                Use Kit Presets
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => packingList ? setShowRegenerateConfirm(true) : handleGenerate()}
+                loading={generating}
+                icon={!generating ? <RotateCcw size={12} /> : undefined}
+              >
+                Regenerate
+              </Button>
+            </div>
           )}
         </div>
+
+        {/* Applied kits chip tracker */}
+        {appliedKits.length > 0 && (
+          <div className="flex flex-wrap gap-2 items-center mt-1 mb-2">
+            <span className="text-xs text-stone-500 dark:text-stone-400 font-semibold">Applied:</span>
+            {appliedKits.map(kit => (
+              <span
+                key={kit.id}
+                className="bg-stone-100 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-800 dark:text-stone-200 rounded-full px-3 py-1 text-sm flex items-center gap-1.5"
+              >
+                {kit.name}
+                <button
+                  onClick={() => void handleRemoveKit(kit)}
+                  disabled={removingKitId !== null}
+                  aria-label={`Remove ${kit.name}`}
+                  className="text-stone-400 hover:text-red-500 dark:hover:text-red-400 transition-colors disabled:opacity-50"
+                >
+                  {removingKitId === kit.id ? (
+                    <Loader2 size={12} className="animate-spin" />
+                  ) : (
+                    <X size={12} />
+                  )}
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* Ask Claude to review — per D-04, appears only after kits applied */}
+        {appliedKits.length > 0 && !offlineData && (
+          <div className="mt-2">
+            <button
+              onClick={() => void handleReview()}
+              disabled={reviewing}
+              className="border border-amber-500 dark:border-amber-400 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/30 rounded-xl px-4 py-2.5 font-semibold text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+            >
+              {reviewing && <Loader2 size={16} className="animate-spin mr-2" />}
+              {reviewing ? 'Reviewing...' : 'Ask Claude to review'}
+            </button>
+
+            {reviewError && (
+              <p className="text-sm text-red-600 dark:text-red-400 mt-2">{reviewError}</p>
+            )}
+
+            {reviewResult && (
+              <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4 mt-3">
+                <ul className="list-disc list-inside space-y-1 text-sm text-stone-800 dark:text-stone-100">
+                  {reviewResult
+                    .split('\n')
+                    .filter(line => line.trim())
+                    .map((line, i) => (
+                      <li key={i}>{line.replace(/^[-*•]\s*/, '')}</li>
+                    ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Metadata line */}
         {generatedAt && (
@@ -538,6 +693,65 @@ export default function PackingList({ tripId, tripName, offlineData }: PackingLi
           ✦ Generated by Claude · Edit freely
         </p>
       </div>
+
+      {/* Save as Kit — per D-01 */}
+      {packingList && !offlineData && (
+        <div className="p-4 border-t border-stone-100 dark:border-stone-800">
+          {!showSaveAsKit ? (
+            <button
+              onClick={() => setShowSaveAsKit(true)}
+              className="text-sm text-amber-700 dark:text-amber-400 underline"
+            >
+              Save as kit preset
+            </button>
+          ) : (
+            <div className="space-y-2">
+              <p className="text-sm font-semibold text-stone-700 dark:text-stone-300">
+                Save this list as a kit preset
+              </p>
+              <p className="text-xs text-stone-500 dark:text-stone-400">
+                Saves {extractGearIdsFromPackingList(packingList).length} gear items from your inventory
+              </p>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={saveKitName}
+                  onChange={(e) => setSaveKitName(e.target.value)}
+                  placeholder="Kit name, e.g. Weekend Warrior"
+                  className="flex-1 px-3 py-2.5 rounded-lg border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800 text-sm text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-amber-400"
+                  onKeyDown={(e) => { if (e.key === 'Enter') void handleSaveAsKit() }}
+                />
+                <Button variant="primary" size="sm" onClick={() => void handleSaveAsKit()} loading={savingKit}>
+                  Save as Kit
+                </Button>
+              </div>
+            </div>
+          )}
+          {saveKitMessage && (
+            <p className={`text-xs mt-2 font-medium ${saveKitMessage.startsWith('Kit saved') ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
+              {saveKitMessage}
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* KitStackPanel */}
+      {showKitPanel && (
+        <KitStackPanel
+          tripId={tripId}
+          onClose={() => setShowKitPanel(false)}
+          onApplied={(kits) => {
+            setAppliedKits(prev => {
+              const existingIds = new Set(prev.map(k => k.id))
+              const newKits = kits.filter(k => !existingIds.has(k.id))
+              return [...prev, ...newKits]
+            })
+            setShowKitPanel(false)
+            setReviewResult(null)
+            setReviewError(null)
+          }}
+        />
+      )}
 
       <ConfirmDialog
         open={showRegenerateConfirm}

@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Smarter Feedback Loops
-status: executing
-last_updated: "2026-04-04T20:30:00.000Z"
-last_activity: 2026-04-04 - Full-project cross-AI review (Gemini + Codex); Phase 58 Security & Hardening added as S39
+status: verifying
+last_updated: "2026-04-04T20:02:11.808Z"
+last_activity: 2026-04-04
 progress:
-  total_phases: 26
-  completed_phases: 24
-  total_plans: 70
-  completed_plans: 69
+  total_phases: 27
+  completed_phases: 26
+  total_plans: 72
+  completed_plans: 72
   percent: 40
 ---
 
@@ -20,13 +20,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-01)
 
 **Core value:** Personal camping second brain — a closed-loop system that plans, executes, and learns from every trip
-**Current focus:** Phase 40 — gpx-import
+**Current focus:** Phase 41 — camp-kit-presets
 
 ## Current Position
 
-Phase: 40 (gpx-import) — EXECUTING
-Plan: 3 of 3
-Status: Ready to execute
+Phase: 42
+Plan: Not started
+Status: Phase complete — ready for verification
 Last activity: 2026-04-04
 
 Progress: [████░░░░░░] 40%
@@ -85,8 +85,9 @@ Progress: [████░░░░░░] 40%
 | Phase 40-gpx-import P02 | 4 | 2 tasks | 3 files |
 | Phase 42 P01 | 2 | 3 tasks | 2 files |
 | Phase 42 P02 | 2 | 1 tasks | 3 files |
-| Phase 44 P01 | 241 | 2 tasks | 3 files |
-| Phase 44-google-maps-list-import P02 | 3 | 3 tasks | 2 files |
+| Phase 41-camp-kit-presets P01 | 3 | 2 tasks | 3 files |
+| Phase 41-camp-kit-presets P02 | 8 | 2 tasks | 3 files |
+| Phase 41-camp-kit-presets P03 | 4 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -158,12 +159,13 @@ Recent decisions affecting current work:
 - [Phase 42]: Trip list includes expenses select amount only: enables client-side total for cost badge without separate endpoint
 - [Phase 42]: Badge uses stone/muted colors (bg-stone-100) — amber is reserved for CTA-level elements
 - [Phase 42]: Cost badge hidden when expense total is 0 — no empty-state badge clutters the trip card header
-- [Phase 44-01]: Use ES import (not require()) for fetchGmapsList in tests — Vitest ESM mode does not support require() for TypeScript modules
-- [Phase 44-01]: extractNameNear scans backward 500 chars from coordinate match; returns last double-quoted 2-80 char string; replaces escaped quotes before matching
-- [Phase 44-01]: JSON-LD fallback uses unknown type narrowing throughout — no any usage, @type check before array access
-- [Phase 44-google-maps-list-import]: Sequential for-of import loop (not Promise.all) in GmapsImportModal — prevents rate limit issues on batch location import
-- [Phase 44-google-maps-list-import]: GmapsImportModal backdrop click: closes in idle/preview/done, blocked during fetching/importing to prevent accidental data loss
-- [Phase 44-google-maps-list-import]: GmapsImportModal uses 5-state machine (idle/fetching/preview/importing/done) with sequential for-of import loop and backdrop-click protection during active operations
+- [Phase 41-camp-kit-presets]: extractGearIdsFromPackingList uses type predicate filter to safely narrow items with defined gearId
+- [Phase 41-camp-kit-presets]: computeGearIdsToRemove uses Set for O(n) lookup on protected IDs across remaining kits
+- [Phase 41-camp-kit-presets]: Save as Kit UI: collapsed link pattern (amber underlined) expands inline — minimal footprint
+- [Phase 41-camp-kit-presets]: KitStackPanel closes on backdrop click via e.target === e.currentTarget check
+- [Phase 41-camp-kit-presets]: handleRemoveKit skips unapply API call when gearIdsToRemove is empty — avoids unnecessary network requests for fully-shared kits
+- [Phase 41-camp-kit-presets]: Review route resolves gearIds to gear names before building Claude prompt — keeps prompts human-readable (Pitfall 4)
+- [Phase 41-camp-kit-presets]: Ask Claude to review button visible only when appliedKits.length > 0 — kits bypass Claude by default, review is opt-in (D-04)
 
 ### Pending Todos
 
@@ -196,8 +198,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-04T19:58:28.643Z
-Last activity: Phase 40 — GPX foundation + API layer complete (P01+P02); P03 map UI pending human UAT
+Last session: 2026-04-04T19:58:02.063Z
+Last activity: Completed phase 41 plan 01 — kit-utils + Save as Kit
 Resume file: None
 
 ## Quick Tasks Completed
