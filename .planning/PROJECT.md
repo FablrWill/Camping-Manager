@@ -80,6 +80,14 @@ A personal second brain for car camping — an AI-powered knowledge system that 
 - ✓ PDF download with content-type validation and local caching — Phase 25
 - ✓ GearDocumentsTab UI: find/list/add/download/delete within gear modal — Phase 25
 
+### Validated in Phase 34 (meal-planning-core)
+
+- ✓ generateMealPlan accepts bringingDog — dog-safe food guidance injected when true — Phase 34
+- ✓ Meal prep context (vacuum sealer, sous vide) present in Claude prompt — Phase 34
+- ✓ PATCH /api/meal-plan regenerates a single meal slot without touching shopping list or prep timeline — Phase 34
+- ✓ MealPlan.tsx per-meal regen: expand slot → "Regenerate this meal" button → spinner → "Meal updated" inline feedback — Phase 34
+- ✓ TripCard shows 🍽️ Meal plan badge in stats row when a plan exists; silent when absent — Phase 34
+
 ### Active
 
 None — v1.2 Ship It complete as of 2026-04-03.
@@ -103,7 +111,7 @@ None — v1.2 Ship It complete as of 2026-04-03.
 
 ## Current State
 
-Phase 33 complete (2026-04-04) — Conversational Trip Planner: "Plan Trip" button opens a full-screen chat sheet powered by /api/trip-planner; dedicated 4-tool agent (gear, weather, locations, web search); ChatBubble renders trip_summary card with amber "Create Trip" button; creation navigates to /trips/[id]/prep. Phase 31 also complete: Dark Sky Astro Info (AstroCard, moon phase, Bortle deep-link). Human UAT approved for both.
+Phase 34 complete (2026-04-04) — Meal Planning Core: generateMealPlan now accepts bringingDog (dog-safe food guidance injected into Claude prompt), per-meal regeneration via PATCH /api/meal-plan updates only the target slot, and TripCard shows a 🍽️ Meal plan badge in the stats row when a plan exists. Phase 33 also complete: Conversational Trip Planner. Human UAT approved for both.
 
 ## Current Milestone: ✅ v1.2 Ship It — COMPLETE (2026-04-03)
 
