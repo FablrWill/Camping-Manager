@@ -31,6 +31,7 @@ model GearItem {
 
   packingItems PackingItem[]
   documents    GearDocument[]
+  research     GearResearch?
 }
 
 model Vehicle {
@@ -382,4 +383,17 @@ model GearDocument {
   gearItem GearItem @relation(fields: [gearItemId], references: [id], onDelete: Cascade)
 
   @@index([gearItemId])
+}
+
+// --- Phase 30: Gear Product Research ---
+
+model GearResearch {
+  id           String   @id @default(cuid())
+  gearItemId   String   @unique
+  result       String   // JSON blob of GearResearchResult
+  verdict      String   // "Worth upgrading" | "Keep what you have" | "Only if budget allows"
+  researchedAt DateTime @default(now())
+  createdAt    DateTime @default(now())
+
+  gearItem GearItem @relation(fields: [gearItemId], references: [id], onDelete: Cascade)
 }

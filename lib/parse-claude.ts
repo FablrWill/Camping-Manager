@@ -213,3 +213,24 @@ export const VehicleChecklistResultSchema = z.object({
 
 export type VehicleChecklistResult = z.infer<typeof VehicleChecklistResultSchema>;
 export type VehicleChecklistItem = z.infer<typeof VehicleChecklistItemSchema>;
+
+// --- Gear Research Schemas (Phase 30 — matches lib/claude.ts GearResearchResult) ---
+
+const GearResearchAlternativeSchema = z.object({
+  name: z.string(),
+  brand: z.string().optional(),
+  priceRange: z.string(),
+  pros: z.array(z.string()),
+  cons: z.array(z.string()),
+  reason: z.string(),
+});
+
+export const GearResearchResultSchema = z.object({
+  verdict: z.enum(['Worth upgrading', 'Keep what you have', 'Only if budget allows']),
+  alternatives: z.array(GearResearchAlternativeSchema).max(3),
+  summary: z.string(),
+  priceDisclaimer: z.string(),
+});
+
+export type GearResearchResult = z.infer<typeof GearResearchResultSchema>;
+export type GearResearchAlternative = z.infer<typeof GearResearchAlternativeSchema>;
