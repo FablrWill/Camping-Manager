@@ -1,7 +1,7 @@
 # Project Status — Outland OS
 
 ## Quick Pickup
-> **Last session:** 2026-04-01 (Session 23)
+> **Last session:** 2026-04-03 (Session 29)
 > **Milestone v1.0:** Complete — all 5 phases shipped
 > **Milestone v1.1:** In progress — Phase 6 complete, Phase 7 UI-SPEC approved
 > **Next step:** `/gsd:plan-phase 7` — create execution plans for departure checklist + float plan
@@ -18,6 +18,7 @@
 
 ## What's Built (v1.1 — in progress)
 - **Stabilization (Phase 6)** — AI output persistence, missing CRUD, design system migration, packing list fixes, TripCard extraction, ConfirmDialogs
+- **Mobile data entry (Session 29)** — AI gear identification (link or photo → auto-fill form), iMessage webhook pipeline (any link/screenshot/text → classify → save to gear/locations/knowledge base)
 
 ## Current Phase: 7 — Day-Of Execution
 - **Status:** UI-SPEC approved, ready for planning
@@ -37,6 +38,8 @@
 - Voice debrief end-to-end flow (needs device + mic + running server)
 - Recommendation cards in chat (needs running server + Claude API)
 - Chat streaming on mobile (needs device)
+- AI gear identification (paste Amazon link or upload screenshot on phone)
+- iMessage pipeline (requires macOS Shortcut setup — see session-29.md)
 
 ## Session History
 - **Session 1** (2026-03-29) — Project kickoff, planning, docs
@@ -65,6 +68,7 @@
 - **Session 21** (2026-04-01) — Phase 6 full planning pipeline — discuss, research, UI-SPEC, plans, cross-AI review.
 - **Session 22** (2026-04-01) — Phase 6 gap closure execution — packing-list persistence, TripCard extraction, ConfirmDialogs.
 - **Session 23** (2026-04-01) — Phase 7 UI design contract — departure checklist, float plan, settings page.
+- **Session 29** (2026-04-03) — Mobile gear entry via AI (link/photo → auto-fill Add Gear form). iMessage webhook pipeline: any link, screenshot, or text → classified → gear saved to wishlist / location saved to Spots / article ingested into knowledge base. Voyage AI key configured.
 
 ## Key Files
 - `TASKS.md` — What's done, what's next, where to start
