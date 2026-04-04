@@ -21,6 +21,8 @@ import { listLocationsTool, executeListLocations } from './listLocations';
 import { getWeatherTool, executeGetWeather } from './getWeather';
 import { togglePackingItemTool, executeTogglePackingItem } from './togglePackingItem';
 import { deleteConfirmTool, executeDeleteConfirm } from './deleteConfirm';
+// S31 destination discovery
+import { suggestDestinationTool, executeSuggestDestination } from './suggest-destination';
 
 // Legacy ALL_TOOLS export (Plan 01 pattern — kept for backward compat)
 export const ALL_TOOLS: Tool[] = [
@@ -45,6 +47,7 @@ export const AGENT_TOOLS: Tool[] = [
   togglePackingItemTool,
   deleteConfirmTool,
   recommendSpotsTool, // Phase 05 Plan 01
+  suggestDestinationTool, // S31 destination discovery
 ];
 
 type ToolInput = Record<string, unknown>;
@@ -94,6 +97,8 @@ export async function executeAgentTool(name: string, input: ToolInput): Promise<
       return executeDeleteConfirm(input as Parameters<typeof executeDeleteConfirm>[0]);
     case 'recommend_spots':
       return executeRecommendSpots(input as Parameters<typeof executeRecommendSpots>[0]);
+    case 'suggest_destination':
+      return executeSuggestDestination(input as Parameters<typeof executeSuggestDestination>[0]);
     default:
       return `Error: Unknown tool: ${name}`;
   }
