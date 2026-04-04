@@ -8,6 +8,7 @@ import GearDealsTab from './GearDealsTab'
 import KitPresetsPanel from './KitPresetsPanel'
 import ChatContextButton from '@/components/ChatContextButton'
 import { CATEGORY_GROUPS, CATEGORIES, getCategoryEmoji, getCategoryLabel } from '@/lib/gear-categories'
+import { FilterChip } from '@/components/ui'
 
 interface GearItem {
   id: string
@@ -257,19 +258,16 @@ export default function GearClient({ initialItems }: { initialItems: GearItem[] 
 
       {/* Category filter chips — grouped */}
       <div className="mb-6">
-        <button
-          onClick={() => setActiveCategory(null)}
-          className={`mb-2 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-            !activeCategory
-              ? 'bg-stone-800 text-white dark:bg-stone-200 dark:text-stone-900'
-              : 'bg-stone-200 text-stone-600 hover:bg-stone-300 dark:bg-stone-700 dark:text-stone-400 dark:hover:bg-stone-600'
-          }`}
-        >
-          All
-        </button>
+        <div className="mb-2">
+          <FilterChip
+            label="All"
+            active={!activeCategory}
+            onClick={() => setActiveCategory(null)}
+          />
+        </div>
         {CATEGORY_GROUPS.map((group) => (
           <div key={group.name} className="mb-2">
-            <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wide">
+            <div className="text-xs font-medium text-stone-500 dark:text-stone-400 mb-1 uppercase tracking-wide">
               {group.name}
             </div>
             <div className="flex flex-wrap gap-1">
@@ -279,17 +277,12 @@ export default function GearClient({ initialItems }: { initialItems: GearItem[] 
                 ).length
                 if (count === 0) return null
                 return (
-                  <button
+                  <FilterChip
                     key={cat.value}
+                    label={`${cat.emoji} ${cat.label} (${count})`}
+                    active={activeCategory === cat.value}
                     onClick={() => setActiveCategory(activeCategory === cat.value ? null : cat.value)}
-                    className={`px-2 py-1 rounded-full text-xs font-medium transition-colors ${
-                      activeCategory === cat.value
-                        ? 'bg-blue-500 text-white'
-                        : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
-                    }`}
-                  >
-                    {cat.emoji} {cat.label} ({count})
-                  </button>
+                  />
                 )
               })}
             </div>
