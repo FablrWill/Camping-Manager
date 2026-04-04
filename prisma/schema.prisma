@@ -91,8 +91,28 @@ model Location {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  trips  Trip[]
-  photos Photo[]
+  trips      Trip[]
+  photos     Photo[]
+  signalLogs SignalLog[]
+}
+
+model SignalLog {
+  id              String   @id @default(cuid())
+  locationId      String
+  location        Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  carrier         String?   // "Verizon", "T-Mobile", "AT&T"
+  cellBars        Int?      // 0-4 signal bars
+  cellType        String?   // "none", "3G", "LTE", "5G"
+  signalStrength  Int?      // raw dBm from HA Companion (e.g. -85)
+  starlinkQuality String?   // "none", "weak", "moderate", "strong", "excellent"
+  speedDown       Float?    // Mbps download
+  speedUp         Float?    // Mbps upload
+  notes           String?
+  loggedAt        DateTime  @default(now())
+  createdAt       DateTime  @default(now())
+
+  @@index([locationId])
+  @@index([loggedAt])
 }
 
 model Photo {
@@ -213,6 +233,7 @@ model Trip {
   tripFeedbacks      TripFeedback[]
   departureChecklist DepartureChecklist?
   floatPlanLogs      FloatPlanLog[]
+  expenses           TripExpense[]
 
   // Fallback chain self-relation (Phase 22)
   primaryTrip  Trip?   @relation("FallbackChain", fields: [fallbackFor], references: [id], onDelete: NoAction, onUpdate: NoAction)
@@ -455,4 +476,21 @@ model GearDocument {
   gearItem GearItem @relation(fields: [gearItemId], references: [id], onDelete: Cascade)
 
   @@index([gearItemId])
+}
+
+// --- Trip Cost Tracking ---
+
+model TripExpense {
+  id          String    @id @default(cuid())
+  tripId      String
+  category    String    // "gas", "permits", "groceries", "food", "gear", "campsite", "other"
+  description String
+  amount      Float
+  paidAt      DateTime?
+  notes       String?
+  createdAt   DateTime  @default(now())
+
+  trip Trip @relation(fields: [tripId], references: [id], onDelete: Cascade)
+
+  @@index([tripId])
 }
