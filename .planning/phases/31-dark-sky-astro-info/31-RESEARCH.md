@@ -186,7 +186,7 @@ Alternatively, add moon phase icons directly to the per-day weather rows in `Wea
 | Req | Behavior | Test Type | Command |
 |---|---|---|---|
 | REQ-1 | Sunrise/sunset display for trip dates | Unit — `computeAstro()` returns correct sunrise/sunset given dates | `npx vitest run tests/astro.test.ts` |
-| REQ-2 | Moon phase per night | Unit — phase value + label for known dates (e.g., 2024-01-11 known full moon) | `npx vitest run tests/astro.test.ts` |
+| REQ-2 | Moon phase per night | Unit — phase value + label for known dates (2024-01-11 new moon, 2024-01-25 full moon) | `npx vitest run tests/astro.test.ts` |
 | REQ-3 | Bortle class shown | Unit — returns value or placeholder string | `npx vitest run tests/astro.test.ts` |
 | REQ-4 | Free APIs only | Build check — no new env vars required | `npm run build` |
 | REQ-5 | Build passes | Build | `npm run build` |
@@ -197,9 +197,12 @@ Alternatively, add moon phase icons directly to the per-day weather rows in `Wea
 
 ### Known test dates for moon phase validation
 
-- 2024-01-11: Full moon (fraction ~1.0, phase ~0.5)
-- 2024-01-18: Last quarter (phase ~0.75)
-- 2024-01-25: New moon (fraction ~0, phase ~0)
+> **Correction (2026-04-04):** Original research had Jan 11/25 reversed. Verified
+> via Python ephemeris (synodic reference Jan 6, 2000) and confirmed by Codex review.
+
+- 2024-01-11: **New moon** (phase ~0.005, fraction ~0.0003) — goodForStars=true
+- 2024-01-18: First Quarter (phase ~0.24, fraction ~0.48)
+- 2024-01-25: **Full moon** (phase ~0.48, fraction ~0.996) — goodForStars=false
 
 ---
 
@@ -265,12 +268,14 @@ function getMoonPhaseEmoji(phase: number): string {
   return '🌘'
 }
 
-// For each night of a trip:
-const date = new Date('2024-01-11T00:00:00')
+// For each night of a trip — use UTC noon for timezone stability:
+const date = new Date('2024-01-11T12:00:00Z')  // UTC noon avoids DST/timezone drift
 const { phase, fraction } = SunCalc.getMoonIllumination(date)
-const label = getMoonPhaseLabel(phase)  // "Full Moon"
-const emoji = getMoonPhaseEmoji(phase)  // "🌕"
-const goodForStars = fraction < 0.25   // true when <25% illuminated
+const label = getMoonPhaseLabel(phase)  // "New Moon" (Jan 11 2024 is new moon)
+const emoji = getMoonPhaseEmoji(phase)  // "🌑"
+const goodForStars = fraction < 0.25   // true (fraction ~0.0003)
+
+// 2024-01-25 = Full Moon: phase ~0.48, fraction ~0.996, goodForStars=false
 ```
 
 ### Bortle placeholder with deep link
