@@ -223,6 +223,7 @@ model Trip {
   locationId  String?
   vehicleId   String?
   notes       String?
+  reviewedAt  DateTime? // Phase 38: set when post-trip review is submitted
   weatherNotes String?
   currentBatteryPct  Float?    // last known EcoFlow battery %, entered during live mode
   batteryUpdatedAt   DateTime? // when currentBatteryPct was last set
