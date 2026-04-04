@@ -521,13 +521,14 @@ Plans:
   5. `npm run build` passes
 **Plans**: 4 plans
 Plans:
-- [ ] 37-01-PLAN.md — Schema migration + HA types + Settings API
-- [ ] 37-02-PLAN.md — HA proxy API routes (test, entities, states)
-- [ ] 37-03-PLAN.md — Settings UI (config section + entity picker)
-- [ ] 37-04-PLAN.md — Dashboard card + /campsite route + trip prep snapshot
+- [ ] 32-01-PLAN.md — Schema migration + Zod schema + Claude function + API route
+- [ ] 32-02-PLAN.md — GearForm targetPrice field + PUT route update
+- [ ] 32-03-PLAN.md — GearDealsTab component + GearClient integration + deal badges
+- [ ] 32-04-PLAN.md — Dashboard collapsible Deals card
 
 **Parallelization notes:**
-- Wave 4 — depends on Phase 30 research infrastructure
+- Wave 1: Plans 01 + 02 (parallel, no shared files)
+- Wave 2: Plans 03 + 04 (parallel, 03 depends on 01+02, 04 depends on 01)
 
 ### Phase 33: Conversational Trip Planner
 
