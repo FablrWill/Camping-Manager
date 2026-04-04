@@ -42,6 +42,9 @@ export default function PackingList({ tripId, tripName, offlineData }: PackingLi
   const [showKitPanel, setShowKitPanel] = useState(false)
   const [appliedKits, setAppliedKits] = useState<Array<{ id: string; name: string; gearIds: string[] }>>([])
   const [removingKitId, setRemovingKitId] = useState<string | null>(null)
+  const [reviewResult, setReviewResult] = useState<string | null>(null)
+  const [reviewing, setReviewing] = useState(false)
+  const [reviewError, setReviewError] = useState<string | null>(null)
   const [showSaveAsKit, setShowSaveAsKit] = useState(false)
   const [saveKitName, setSaveKitName] = useState('')
   const [savingKit, setSavingKit] = useState(false)
@@ -139,6 +142,8 @@ export default function PackingList({ tripId, tripName, offlineData }: PackingLi
         }
       }
       setAppliedKits(prev => prev.filter(k => k.id !== kitToRemove.id))
+      setReviewResult(null)
+      setReviewError(null)
     } catch {
       setError("Couldn't remove kit. Refresh and try again.")
     } finally {
@@ -172,6 +177,35 @@ export default function PackingList({ tripId, tripName, offlineData }: PackingLi
       setSaveKitMessage("Couldn't save kit — try again.")
     } finally {
       setSavingKit(false)
+    }
+  }
+
+  async function handleReview() {
+    setReviewing(true)
+    setReviewError(null)
+    setReviewResult(null)
+    try {
+      const res = await fetch('/api/kits/review', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tripId,
+          appliedKits: appliedKits.map(k => ({
+            name: k.name,
+            gearIds: k.gearIds,
+          })),
+        }),
+      })
+      if (res.ok) {
+        const data = await res.json() as { review: string }
+        setReviewResult(data.review)
+      } else {
+        setReviewError('Review unavailable. Check your connection or try again.')
+      }
+    } catch {
+      setReviewError('Review unavailable. Check your connection or try again.')
+    } finally {
+      setReviewing(false)
     }
   }
 
@@ -305,6 +339,37 @@ export default function PackingList({ tripId, tripName, offlineData }: PackingLi
             ))}
           </div>
         )}
+        {/* Ask Claude to review — per D-04, appears only after kits applied */}
+        {appliedKits.length > 0 && !offlineData && (
+          <div className="mt-3">
+            <button
+              onClick={() => void handleReview()}
+              disabled={reviewing}
+              className="border border-amber-500 dark:border-amber-400 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/30 rounded-xl px-4 py-2.5 font-semibold text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+            >
+              {reviewing && <Loader2 size={16} className="animate-spin mr-2" />}
+              {reviewing ? 'Reviewing...' : 'Ask Claude to review'}
+            </button>
+
+            {reviewError && (
+              <p className="text-sm text-red-600 dark:text-red-400 mt-2">{reviewError}</p>
+            )}
+
+            {reviewResult && (
+              <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4 mt-3">
+                <ul className="list-disc list-inside space-y-1 text-sm text-stone-800 dark:text-stone-100">
+                  {reviewResult
+                    .split('\n')
+                    .filter(line => line.trim())
+                    .map((line, i) => (
+                      <li key={i}>{line.replace(/^[-*•]\s*/, '')}</li>
+                    ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* KitStackPanel */}
         {showKitPanel && (
           <KitStackPanel
@@ -317,6 +382,8 @@ export default function PackingList({ tripId, tripName, offlineData }: PackingLi
                 return [...prev, ...newKits]
               })
               setShowKitPanel(false)
+              setReviewResult(null)
+              setReviewError(null)
             }}
           />
         )}
@@ -407,6 +474,37 @@ export default function PackingList({ tripId, tripName, offlineData }: PackingLi
                 </button>
               </span>
             ))}
+          </div>
+        )}
+
+        {/* Ask Claude to review — per D-04, appears only after kits applied */}
+        {appliedKits.length > 0 && !offlineData && (
+          <div className="mt-2">
+            <button
+              onClick={() => void handleReview()}
+              disabled={reviewing}
+              className="border border-amber-500 dark:border-amber-400 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/30 rounded-xl px-4 py-2.5 font-semibold text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+            >
+              {reviewing && <Loader2 size={16} className="animate-spin mr-2" />}
+              {reviewing ? 'Reviewing...' : 'Ask Claude to review'}
+            </button>
+
+            {reviewError && (
+              <p className="text-sm text-red-600 dark:text-red-400 mt-2">{reviewError}</p>
+            )}
+
+            {reviewResult && (
+              <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4 mt-3">
+                <ul className="list-disc list-inside space-y-1 text-sm text-stone-800 dark:text-stone-100">
+                  {reviewResult
+                    .split('\n')
+                    .filter(line => line.trim())
+                    .map((line, i) => (
+                      <li key={i}>{line.replace(/^[-*•]\s*/, '')}</li>
+                    ))}
+                </ul>
+              </div>
+            )}
           </div>
         )}
 
@@ -649,6 +747,8 @@ export default function PackingList({ tripId, tripName, offlineData }: PackingLi
               return [...prev, ...newKits]
             })
             setShowKitPanel(false)
+            setReviewResult(null)
+            setReviewError(null)
           }}
         />
       )}
