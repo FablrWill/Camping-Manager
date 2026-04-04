@@ -76,7 +76,8 @@ A self-coordinating work queue for v2.0 features. Each Claude Code session claim
 | S34 | Trip intelligence report             | —     | ✅ Done 2026-04-04 | Sonnet, normal | —          |
 | S35 | Smart packing v2                     | —     | ✅ Done 2026-04-04 | Sonnet, normal | —          |
 | S36 | Knowledge base refresh               | —     | ✅ Done 2026-04-04 | Sonnet, normal | —          |
-| S37 | Google Maps list import              | 44    | ✅ Done 2026-04-04 | Sonnet, normal | —          |
+| S37 | Personal signal map (39) + Trip cost tracking (42) | 39,42 | ✅ Done 2026-04-04 | Sonnet, normal | —          |
+| S38 | Google Maps list import              | 44    | ✅ Done 2026-04-04 | Sonnet, normal | —          |
 | S10 | Home Assistant integration           | 33    | ⏸ Blocked (~mid-Apr hardware) | Sonnet, normal | S09 |
 
 **Why this order matters (conflict groups):**
@@ -1731,24 +1732,32 @@ git checkout main && git merge - && git push origin main
 
 ---
 
-### S37 — Google Maps List Import
+### S37a — Personal Signal Map (Phase 39) ✅ Done 2026-04-04
 
-**What to build:** Let Will paste a shared Google Maps list URL (e.g., `https://maps.app.goo.gl/...` or `https://www.google.com/maps/...`). The server fetches and scrapes the page HTML, extracts place names, addresses, and coordinates from the embedded JSON-LD / `window.__PWA_INITIAL_STATE__` data, and returns a list of draft Location previews. Will reviews the list and taps "Import selected" to save them as Locations. Scraping only — no Google Maps API key required.
+**What to build:** Surface signal quality visually on the spots map. Overlay colored signal badges on location markers, add a "Signal" layer toggle, and add a signal filter chip so Will can see at a glance which campsites have good connectivity.
 
-**User story:** Will has a saved Google Maps list called "NC Camping Spots" with 12 places. He opens the Import modal, pastes the share URL, taps Fetch, and sees a preview list: "Rough Ridge Parking Area — 36.0871, -81.8765 · Linville Gorge Wilderness — 35.9443, -81.9231 …". He checks all 12, taps Import, and they show up on his Spots map.
+**Acceptance criteria:** (all met)
+- Toggling "Signal" layer shows colored dot badges on all location markers that have signal data
+- Signal filter chips correctly show/hide locations by connectivity bucket
+- Signal API endpoint returns summaries for all locations in one request
 
-**Key files:**
-- `lib/gmaps-import.ts` — `fetchGmapsList(url: string): Promise<GmapsPlace[]>`. Uses `fetch()` to GET the share URL (following redirects), parses the HTML response. Extracts place data from: (1) `<script type="application/ld+json">` blocks (ItemList schema), (2) the serialized `window.APP_INITIALIZATION_STATE` / `__PWA_INITIAL_STATE__` JSON blob embedded in `<script>` tags — look for lat/lng arrays near place names. Returns `GmapsPlace[]`: `{ name: string; address: string | null; lat: number | null; lng: number | null }`. If parsing yields 0 results, throw a descriptive error so the UI can surface it. No npm scraping packages — use native `fetch` + string/regex parsing on the raw HTML.
-- `app/api/import/gmaps-list/route.ts` — `POST { url: string }`. Validates URL starts with `https://maps.app.goo.gl` or `https://www.google.com/maps`. Calls `fetchGmapsList(url)`. Returns `{ places: GmapsPlace[] }`. Standard try-catch error handling with `console.error` + JSON error response.
-- `components/GmapsImportModal.tsx` — new client component. State machine: `idle → fetching → preview → importing → done`. UI: (1) idle — text input for URL + "Fetch" button; (2) fetching — spinner; (3) preview — checklist of scraped places with name, address, lat/lng badge; "Select all / None" toggle; "Import N selected" button; (4) importing — progress indicator; (5) done — "N locations added" + close button. On import, fires `POST /api/locations` for each checked place (sequentially, not Promise.all, to avoid race conditions). No new npm packages.
-- `components/SpotMap.tsx` or wherever the import entry point lives — add an "Import from Google Maps" button/menu item that opens `GmapsImportModal`. After the modal closes with new locations, re-fetch the locations list.
+**Constraints:**
+- No new npm packages
+- No schema changes
+- Do not break existing layer toggles (photos, spots, path, places, heatmap)
 
-**Acceptance criteria:**
-- Pasting a valid Google Maps share URL and tapping Fetch returns ≥1 place preview
-- Each place shows name and coordinates (address optional — some map pins may not have one)
-- Unchecking a place excludes it from the import
-- Imported locations appear on the Spots map immediately after modal closes
-- If the URL is invalid or scraping yields 0 results, the UI shows a clear error message (not a crash)
+---
+
+### S37b — Trip Cost Tracking (Phase 42) ✅ Done 2026-04-04
+
+### S38 — Google Maps List Import
+
+**Acceptance criteria:** (all met)
+- TripExpense model migrated, no data loss
+- Can add and delete expenses via UI
+- Category subtotals and total render correctly
+- Cost badge shows on trip cards when expenses exist (hidden when none)
+- All amounts stored in cents, displayed as dollars with 2 decimal places
 - Build passes, no TypeScript errors
 
 **Constraints:**

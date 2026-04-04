@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import dynamic from "next/dynamic";
 import PhotoUpload from "@/components/PhotoUpload";
 import LocationForm from "@/components/LocationForm";
@@ -17,6 +17,8 @@ import type {
 } from "@/components/SpotMap";
 import ShareLocationButton from "@/components/ShareLocationButton";
 import GmapsImportModal from "@/components/GmapsImportModal";
+import { FilterChip } from "@/components/ui";
+import type { SignalSummary } from '@/lib/signal-summary';
 import { useOnlineStatus } from "@/lib/use-online-status";
 import { getTripSnapshot, getCachedTripIds } from "@/lib/offline-storage";
 
@@ -78,7 +80,12 @@ export default function SpotsClient({
     path: true,
     places: true,
     heatmap: false,
+    signal: false, // D-08: off by default
   });
+
+  // Signal layer state
+  const [signalSummaries, setSignalSummaries] = useState<Record<string, SignalSummary>>({});
+  const [signalFilter, setSignalFilter] = useState<'all' | 'good' | 'none' | 'unknown'>('all');
 
   // Load cached spot data from all trip snapshots when offline
   useEffect(() => {
@@ -285,6 +292,17 @@ export default function SpotsClient({
     fetchTimeline(selectedDate || undefined);
   }, [selectedDate, fetchTimeline]);
 
+  // Fetch signal summaries on mount (when online)
+  useEffect(() => {
+    if (!isOnline) return;
+    fetch('/api/locations/signal-summary')
+      .then((res) => res.json())
+      .then((data: Record<string, SignalSummary> | { error: string }) => {
+        if (data && !('error' in data)) setSignalSummaries(data as Record<string, SignalSummary>);
+      })
+      .catch((err) => console.error('Failed to fetch signal summaries:', err));
+  }, [isOnline]);
+
   const refreshPhotos = useCallback(async () => {
     const res = await fetch("/api/photos");
     if (res.ok) {
@@ -358,6 +376,22 @@ export default function SpotsClient({
     setEditingLocation(null);
   }, []);
 
+  // Signal-filtered locations (also serves as base locations for the map)
+  const signalFilteredLocations = useMemo(() => {
+    const source = isOnline ? locations : (offlineLocations.length > 0 ? offlineLocations : locations);
+    if (!layers.signal || signalFilter === 'all') return source;
+    return source.filter((loc) => {
+      const summary = signalSummaries[loc.id];
+      const tier = summary?.tier ?? 'gray';
+      switch (signalFilter) {
+        case 'good': return tier === 'green';
+        case 'none': return tier === 'red';
+        case 'unknown': return tier === 'gray';
+        default: return true;
+      }
+    });
+  }, [locations, offlineLocations, isOnline, layers.signal, signalFilter, signalSummaries]);
+
   // Filter photos by date
   const filteredPhotos = selectedDate
     ? photos.filter((p) => {
@@ -411,6 +445,7 @@ export default function SpotsClient({
             ["spots", "📍 Spots"],
             ["path", "🗺️ Path"],
             ["places", "🏠 Visits"],
+            ["signal", "📶 Signal"],
           ] as const).map(([key, label]) => (
             <button
               key={key}
@@ -480,6 +515,25 @@ export default function SpotsClient({
           </button>
         </div>
       </div>
+
+      {/* Signal filter chips — visible when signal layer is active */}
+      {layers.signal && (
+        <div className="flex gap-1 px-2 py-1.5 bg-stone-50 dark:bg-stone-800 border-b border-stone-200 dark:border-stone-700">
+          {([
+            ['all', 'All'],
+            ['good', '🟢 Good signal'],
+            ['none', '🔴 No signal'],
+            ['unknown', '⚫ Unknown'],
+          ] as const).map(([value, label]) => (
+            <FilterChip
+              key={value}
+              label={label}
+              active={signalFilter === value}
+              onClick={() => setSignalFilter(value)}
+            />
+          ))}
+        </div>
+      )}
 
       {/* Day summary card */}
       {daySummary && (
@@ -610,7 +664,7 @@ export default function SpotsClient({
         )}
         <SpotMap
           ref={mapRef}
-          locations={isOnline ? locations : (offlineLocations.length > 0 ? offlineLocations : locations)}
+          locations={signalFilteredLocations}
           photos={filteredPhotos}
           timelinePoints={timelinePoints}
           placeVisits={placeVisits}
@@ -621,6 +675,7 @@ export default function SpotsClient({
           onLocationEdit={handleLocationEdit}
           onAnimationTime={setAnimTime}
           onPhotoDeleted={(photoId) => setPhotos(prev => prev.filter(p => p.id !== photoId))}
+          signalSummaries={signalSummaries}
         />
         {showLocationForm && pendingCoords && (
           <LocationForm

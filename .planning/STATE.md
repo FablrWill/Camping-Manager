@@ -79,6 +79,10 @@ Progress: [████░░░░░░] 40%
 | Phase 35 P04 | 15 | 2 tasks | 4 files |
 | Phase 35 P05 | 8 | 4 tasks | 3 files |
 | Phase 38 P02 | 15 | 1 tasks | 2 files |
+| Phase 39-personal-signal-map P01 | 3 | 2 tasks | 3 files |
+| Phase 39-personal-signal-map P02 | 179 | 2 tasks | 2 files |
+| Phase 42 P01 | 2 | 3 tasks | 2 files |
+| Phase 42 P02 | 2 | 1 tasks | 3 files |
 | Phase 44 P01 | 241 | 2 tasks | 3 files |
 | Phase 44-google-maps-list-import P02 | 3 | 3 tasks | 2 files |
 
@@ -141,6 +145,12 @@ Recent decisions affecting current work:
 - [Phase 35]: mealId validated as required in feedback POST before other fields — primary key for upsert pattern
 - [Phase 35]: buildMealHistorySection called with global last-10 feedback query (no trip scope) for cross-trip preference carry-forward
 - [Phase 38]: aria-label regex /liked/i matches disliked — use /^liked /i with word boundary in tests
+- [Phase 39-personal-signal-map]: getSignalTier checks red before yellow to prevent cellBars=0 matching yellow clause
+- [Phase 39-personal-signal-map]: signalFilteredLocations replaces inline ternary in SpotMap locations prop — single source of truth regardless of signal filter or online state
+- [Phase 42]: Expense buttons always-visible: removed opacity-0/group-hover pattern for touch usability
+- [Phase 42]: Trip list includes expenses select amount only: enables client-side total for cost badge without separate endpoint
+- [Phase 42]: Badge uses stone/muted colors (bg-stone-100) — amber is reserved for CTA-level elements
+- [Phase 42]: Cost badge hidden when expense total is 0 — no empty-state badge clutters the trip card header
 - [Phase 44-01]: Use ES import (not require()) for fetchGmapsList in tests — Vitest ESM mode does not support require() for TypeScript modules
 - [Phase 44-01]: extractNameNear scans backward 500 chars from coordinate match; returns last double-quoted 2-80 char string; replaces escaped quotes before matching
 - [Phase 44-01]: JSON-LD fallback uses unknown type narrowing throughout — no any usage, @type check before array access
@@ -181,7 +191,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-04T19:45:26.106Z
+Last session: 2026-04-04T19:49:57.461Z
 Last activity: Completed S36 RAG knowledge base refresh
 Resume file: None
 

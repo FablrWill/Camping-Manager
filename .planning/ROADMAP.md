@@ -700,6 +700,86 @@ Plans:
 
 ---
 
+### Phase 02: Executive Trip Prep
+**Status**: ✅ Complete (2026-03-30) — See [v1.0 archive](milestones/v1.0-ROADMAP.md)
+
+### Phase 03: Knowledge Base
+**Status**: ✅ Complete (2026-03-31) — See [v1.0 archive](milestones/v1.0-ROADMAP.md)
+
+### Phase 04: Chat Agent
+**Status**: ✅ Complete (2026-03-31) — See [v1.0 archive](milestones/v1.0-ROADMAP.md)
+
+### Phase 05: Intelligence Features
+**Status**: ✅ Complete (2026-04-01) — See [v1.0 archive](milestones/v1.0-ROADMAP.md)
+
+### Phase 06: Stabilization
+**Status**: ✅ Complete (2026-04-01) — See [v1.1 archive](milestones/v1.1-ROADMAP.md)
+
+### Phase 07: Day-Of Execution
+**Status**: ✅ Complete (2026-04-01) — See [v1.1 archive](milestones/v1.1-ROADMAP.md)
+
+### Phase 08: PWA and Offline
+**Status**: ✅ Complete (2026-04-02) — See [v1.1 archive](milestones/v1.1-ROADMAP.md)
+
+### Phase 09: Learning Loop
+**Status**: ✅ Complete (2026-04-02) — See [v1.1 archive](milestones/v1.1-ROADMAP.md)
+
+### Phase 10: Offline Read Path
+**Status**: ✅ Complete (2026-04-02) — See [v1.1 archive](milestones/v1.1-ROADMAP.md)
+
+### Phase 11: v1.1 Polish
+**Status**: ✅ Complete (2026-04-02) — See [v1.1 archive](milestones/v1.1-ROADMAP.md)
+
+### Phase 36: Agent Jobs Infrastructure
+**Status**: ✅ Complete (2026-04-04) — Background async job system for Claude tasks (Mac mini agent)
+
+### Phase 37: Home Assistant Integration
+**Status**: ✅ Complete (2026-04-04) — Campsite HA sensor integration (renumbered from early planning)
+
+### Phase 43: UX Quick Wins
+**Status**: ✅ Complete (2026-04-04) — FilterChip component, live trip count, theme toggle to settings, dark mode fixes
+
+### Phase 57: Nav Restructure
+**Status**: ✅ Complete (2026-04-04) — Navigation layout improvements
+
+### Phase 45: Trip Prep Stepper
+**Status**: ✅ Complete (2026-04-04) — Trip prep stepper UX improvements
+
+### Phase 46: Empty States
+**Status**: ✅ Complete (2026-04-04) — Empty state illustrations and prompts across pages
+
+### Phase 47: Voice Ghostwriter
+**Status**: ✅ Complete (2026-04-04) — Voice-to-journal: dictate trip story, Claude writes polished entry
+
+### Phase 48: Gear ROI
+**Status**: ✅ Complete (2026-04-04) — Cost-per-trip tracking, surface underused expensive gear
+
+### Phase 49: Seasonal Spot Ratings
+**Status**: ✅ Complete (2026-04-04) — Rate spots by season (great in fall, avoid in summer)
+
+### Phase 50: Fire Ban Alerts
+**Status**: ✅ Complete (2026-04-04) — Fire restriction monitoring for target regions
+
+### Phase 51: Siri Reminders Inbox
+**Status**: ✅ Complete (2026-04-04) — Read Apple Reminders, Claude routes to gear/spots/ideas
+
+### Phase 52: LNT Checklist
+**Status**: ✅ Complete (2026-04-04) — Leave No Trace pack-out checklist per location
+
+### Phase 53: Gear Lending
+**Status**: ✅ Complete (2026-04-04) — Track who borrowed gear and when
+
+### Phase 54: Gear Maintenance
+**Status**: ✅ Complete (2026-04-04) — Maintenance reminders based on last-used date + interval
+
+### Phase 55: Altitude Awareness
+**Status**: ✅ Complete (2026-04-04) — Flag altitude effects for high-elevation spots
+
+### Phase 56: Scenic Layer
+**Status**: ✅ Complete (2026-04-04) — Scenic stops overlay on route map
+
+---
+
 
 ### Phase 44: Google Maps List Import
 
