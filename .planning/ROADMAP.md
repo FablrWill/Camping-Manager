@@ -683,7 +683,7 @@ Plans:
 
 Plans:
 - [x] 42-01-PLAN.md — Touch-friendly expense buttons + expense aggregate in trip API
-- [ ] 42-02-PLAN.md — Cost badge on trip cards
+- [x] 42-02-PLAN.md — Cost badge on trip cards
 
 
 
