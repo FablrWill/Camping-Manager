@@ -27,7 +27,7 @@ export interface PackingListResult {
   tips: string[]
 }
 
-interface GearItem {
+export interface GearItem {
   id: string
   name: string
   brand: string | null
