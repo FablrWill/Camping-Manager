@@ -38,6 +38,7 @@ model GearItem {
   documents        GearDocument[]
   priceCheck       GearPriceCheck?
   maintenanceLogs  GearMaintenanceLog[]
+  loans            GearLoan[]
 }
 
 // --- S27: Gear Maintenance Reminders ---
@@ -51,6 +52,23 @@ model GearMaintenanceLog {
   gearItem   GearItem @relation(fields: [gearItemId], references: [id], onDelete: Cascade)
 
   @@index([gearItemId])
+}
+
+// --- S26: Gear Lending Tracker ---
+
+model GearLoan {
+  id           String    @id @default(cuid())
+  gearItemId   String
+  borrowerName String
+  lentAt       DateTime  @default(now())
+  returnedAt   DateTime?
+  notes        String?
+  createdAt    DateTime  @default(now())
+
+  gearItem GearItem @relation(fields: [gearItemId], references: [id], onDelete: Cascade)
+
+  @@index([gearItemId])
+  @@index([returnedAt])
 }
 
 // --- Phase 32: Deal Monitoring ---
