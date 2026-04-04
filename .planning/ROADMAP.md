@@ -679,7 +679,7 @@ Plans:
 
 **Status**: 🚧 Ready to execute
 **Requirements:** GPX-01, GPX-02, GPX-03, GPX-04, GPX-05
-**Plans:** 3 plans
+**Plans:** 1/3 plans executed
 
 Plans:
 - [ ] 40-P01-foundation.md — Install deps + Trail schema migration + gpx-to-geojson.ts (TDD)
