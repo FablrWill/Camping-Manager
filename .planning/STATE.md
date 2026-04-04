@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Gear Intelligence + Day-Of
 status: executing
-stopped_at: Completed 35-04-PLAN.md
-last_updated: "2026-04-04T05:27:11.614Z"
+stopped_at: Completed 35-05-PLAN.md
+last_updated: "2026-04-04T05:47:17.086Z"
 last_activity: 2026-04-04
 progress:
   total_phases: 24
   completed_phases: 20
-  total_plans: 57
-  completed_plans: 56
+  total_plans: 58
+  completed_plans: 57
   percent: 40
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-01)
 ## Current Position
 
 Phase: 35 (meal-planning-shopping-prep-feedback) — EXECUTING
-Plan: 3 of 5
+Plan: 4 of 5
 Status: Ready to execute
 Last activity: 2026-04-04
 
@@ -78,6 +78,7 @@ Progress: [████░░░░░░] 40%
 | Phase 34 P03 | 12 | 2 tasks | 5 files |
 | Phase 35 P02 | 125 | 2 tasks | 3 files |
 | Phase 35 P04 | 15 | 2 tasks | 4 files |
+| Phase 35 P05 | 8 | 4 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -134,6 +135,9 @@ Recent decisions affecting current work:
 - [Phase 34]: Meal plan status badge (ready/none) shown per trip in TripsClient using mealPlanGeneratedAt field
 - [Phase 35]: buildMealHistorySection is pure function in lib/claude.ts, feedback query crosses all trips for session-to-session preference carry-forward, non-blocking try-catch ensures generation always succeeds
 - [Phase 35]: mealPlanStatus computed server-side in page.tsx via getMealPlanStatus() — keeps DashboardClient pure UI with 4-state logic per D-10/D-11
+- [Phase 35]: checkedNames uses Set<string> with toLowerCase() for case-insensitive match on shopping list regeneration
+- [Phase 35]: mealId validated as required in feedback POST before other fields — primary key for upsert pattern
+- [Phase 35]: buildMealHistorySection called with global last-10 feedback query (no trip scope) for cross-trip preference carry-forward
 
 ### Pending Todos
 
@@ -151,6 +155,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-04T05:27:11.609Z
-Stopped at: Completed 35-04-PLAN.md
+Last session: 2026-04-04T05:47:17.081Z
+Stopped at: Completed 35-05-PLAN.md
 Resume file: None

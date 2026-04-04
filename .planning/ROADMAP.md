@@ -619,7 +619,7 @@ Plans:
 | 32. Deal Monitoring | v3.0 | 0/TBD | Not started | - |
 | 33. Conversational Trip Planner | v3.0 | 4/4 | Complete    | 2026-04-03 |
 | 34. Home Assistant Integration | v3.0 | 4/4 | Complete    | 2026-04-04 |
-| 35. Meal Planning Core | v3.0 | 5/5 | Complete   | 2026-04-04 |
+| 35. Meal Planning Core | v3.0 | 6/6 | Complete   | 2026-04-04 |
 | 36. Meal Planning: Shopping/Prep/Feedback | v3.0 | 0/TBD | Not started | - |
 
 ### Phase 33: Conversational Trip Planner
@@ -635,7 +635,7 @@ Plans:
   5. "Add manually" escape hatch opens the old static form
   6. Trip-creation conversations are persisted to the database
   7. `npm run build` passes
-**Plans:** 5/5 plans complete
+**Plans:** 6/6 plans complete
 
 Plans:
 - [x] 33-00-PLAN.md — Wave 0 test stubs (trip planner tools + ChatBubble extraction)
