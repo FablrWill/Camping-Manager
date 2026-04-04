@@ -60,24 +60,33 @@ export async function POST(
       (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
     )
 
-    // 5. Fetch prior meal feedback from previous plans for this trip
-    const priorFeedback = await prisma.mealFeedback.findMany({
-      where: {
-        meal: {
-          mealPlan: { tripId },
-        },
-      },
-      include: { meal: { select: { name: true, slot: true } } },
-      orderBy: { createdAt: 'desc' },
-    })
-
+    // 5. Fetch prior meal feedback from previous plans for this trip (non-blocking)
     let feedbackHistory: string | undefined
-    if (priorFeedback.length > 0) {
-      const lines = priorFeedback.map((fb) => {
-        const note = fb.note ? ` — "${fb.note}"` : ''
-        return `- ${fb.meal.name} (${fb.meal.slot}): ${fb.rating}${note}`
+    try {
+      const mealPlanRecord = await prisma.mealPlan.findUnique({
+        where: { tripId },
+        select: { id: true },
       })
-      feedbackHistory = lines.join('\n')
+      if (mealPlanRecord) {
+        const priorFeedback = await prisma.mealFeedback.findMany({
+          where: { mealPlanId: mealPlanRecord.id },
+          orderBy: { createdAt: 'desc' },
+          take: 10,
+        })
+        if (priorFeedback.length > 0) {
+          const liked = priorFeedback.filter((f) => f.rating === 'liked' || f.rating === 'loved').map((f) => f.mealName)
+          const disliked = priorFeedback.filter((f) => f.rating === 'disliked' || f.rating === 'skip')
+          const lines: string[] = []
+          if (liked.length > 0) lines.push(`Previously liked: ${liked.join(', ')}.`)
+          if (disliked.length > 0) {
+            const parts = disliked.map((f) => f.notes ? `${f.mealName} (${f.notes})` : f.mealName)
+            lines.push(`Previously disliked: ${parts.join(', ')}.`)
+          }
+          if (lines.length > 0) feedbackHistory = `Will's meal history:\n${lines.join('\n')}`
+        }
+      }
+    } catch (err) {
+      console.error('Feedback fetch failed (non-blocking):', err)
     }
 
     // 6. Call Claude generateMealPlan with bringingDog and feedback history
@@ -197,7 +206,7 @@ export async function POST(
       include: {
         meals: {
           orderBy: [{ day: 'asc' }, { slot: 'asc' }],
-          include: { feedback: true },
+          include: { feedbacks: { orderBy: { createdAt: 'desc' }, take: 1 } },
         },
       },
     })
@@ -209,7 +218,8 @@ export async function POST(
               ...savedPlan,
               meals: savedPlan.meals.map((m) => ({
                 ...m,
-                ingredients: JSON.parse(m.ingredients),
+                ingredients: JSON.parse(m.ingredients) as unknown,
+                feedback: m.feedbacks[0] ?? null,
               })),
             }
           : null,

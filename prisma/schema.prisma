@@ -287,10 +287,13 @@ model MealPlan {
   tripId      String   @unique
   generatedAt DateTime @default(now())
   notes       String?
+  prepGuide   String?  // JSON: PrepGuideResult persisted after generation
   createdAt   DateTime @default(now())
 
-  trip  Trip   @relation(fields: [tripId], references: [id], onDelete: Cascade)
-  meals Meal[]
+  trip              Trip               @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  meals             Meal[]
+  shoppingListItems ShoppingListItem[]
+  feedbacks         MealFeedback[]
 }
 
 model Meal {
@@ -306,21 +309,43 @@ model Meal {
   estimatedMinutes Int?
   createdAt        DateTime @default(now())
 
-  mealPlan MealPlan     @relation(fields: [mealPlanId], references: [id], onDelete: Cascade)
-  feedback MealFeedback?
+  mealPlan  MealPlan       @relation(fields: [mealPlanId], references: [id], onDelete: Cascade)
+  feedbacks MealFeedback[]
 
   @@index([mealPlanId])
   @@index([mealPlanId, day, slot])
 }
 
-model MealFeedback {
-  id        String   @id @default(cuid())
-  mealId    String   @unique
-  rating    String   // "loved" | "ok" | "skip"
-  note      String?
-  createdAt DateTime @default(now())
+model ShoppingListItem {
+  id         String   @id @default(cuid())
+  mealPlanId String
+  item       String
+  quantity   String
+  unit       String   @default("")
+  category   String   @default("other")
+  checked    Boolean  @default(false)
+  createdAt  DateTime @default(now())
 
-  meal Meal @relation(fields: [mealId], references: [id], onDelete: Cascade)
+  mealPlan MealPlan @relation(fields: [mealPlanId], references: [id], onDelete: Cascade)
+
+  @@index([mealPlanId])
+}
+
+model MealFeedback {
+  id         String   @id @default(cuid())
+  mealId     String?
+  mealPlanId String
+  mealName   String
+  rating     String   // "liked" | "disliked"
+  notes      String?
+  createdAt  DateTime @default(now())
+
+  meal     Meal?    @relation(fields: [mealId], references: [id], onDelete: SetNull)
+  mealPlan MealPlan @relation(fields: [mealPlanId], references: [id], onDelete: Cascade)
+
+  @@index([mealPlanId])
+  @@index([mealId])
+  @@index([createdAt])
 }
 
 model TripFeedback {
