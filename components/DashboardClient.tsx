@@ -6,6 +6,7 @@ import { Backpack, Car, MapPin, Tent, ChevronRight, Plus, Tag, ChevronDown } fro
 import { daysUntil } from '@/lib/trip-utils'
 import { getCategoryEmoji } from '@/lib/gear-categories'
 import AgentJobsBadge from './AgentJobsBadge'
+import TripPrepStepper from './TripPrepStepper'
 
 interface DashboardStats {
   gearCount: number
@@ -35,6 +36,15 @@ interface UpcomingTrip {
   mealPlanStatus: string | null
 }
 
+interface TripPrepStatus {
+  tripId: string
+  destination: boolean
+  weather: boolean
+  packing: boolean
+  meals: boolean
+  departure: boolean
+}
+
 interface ActiveDeal {
   id: string
   name: string
@@ -47,12 +57,14 @@ export default function DashboardClient({
   stats,
   recentGear,
   upcomingTrip,
+  tripPrepStatus,
   unreadJobCount,
   activeDeals = [],
 }: {
   stats: DashboardStats
   recentGear: RecentGearItem[]
   upcomingTrip: UpcomingTrip | null
+  tripPrepStatus: TripPrepStatus | null
   unreadJobCount?: number
   activeDeals?: ActiveDeal[]
 }) {
@@ -98,6 +110,20 @@ export default function DashboardClient({
             </div>
           </div>
         </Link>
+      )}
+
+      {/* Trip prep stepper */}
+      {tripPrepStatus && (
+        <TripPrepStepper
+          tripId={tripPrepStatus.tripId}
+          steps={[
+            { label: 'Destination', complete: tripPrepStatus.destination },
+            { label: 'Weather', complete: tripPrepStatus.weather },
+            { label: 'Packing', complete: tripPrepStatus.packing },
+            { label: 'Meals', complete: tripPrepStatus.meals },
+            { label: 'Departure', complete: tripPrepStatus.departure },
+          ]}
+        />
       )}
 
       {/* Quick stats row */}

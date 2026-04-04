@@ -12,17 +12,44 @@ async function fetchUpcomingTrip() {
       name: true,
       startDate: true,
       endDate: true,
+      locationId: true,
+      packingListResult: true,
+      departureTime: true,
       location: { select: { name: true } },
       mealPlan: {
         select: {
+          id: true,
           generatedAt: true,
           shoppingListItems: {
             select: { id: true, checked: true },
           },
         },
       },
+      departureChecklist: { select: { id: true } },
     },
   });
+}
+
+interface TripPrepStatus {
+  tripId: string
+  destination: boolean
+  weather: boolean
+  packing: boolean
+  meals: boolean
+  departure: boolean
+}
+
+function getTripPrepStatus(trip: UpcomingTripQueryResult): TripPrepStatus | null {
+  if (!trip) return null;
+  const hasLocation = trip.locationId != null;
+  return {
+    tripId: trip.id,
+    destination: hasLocation,
+    weather: hasLocation,
+    packing: trip.packingListResult != null,
+    meals: trip.mealPlan != null,
+    departure: trip.departureChecklist != null || trip.departureTime != null,
+  };
 }
 
 function getMealPlanStatus(trip: UpcomingTripQueryResult): string | null {
@@ -96,6 +123,7 @@ export default async function Home() {
         locationName: upcomingTrip.location?.name ?? null,
         mealPlanStatus: getMealPlanStatus(upcomingTrip),
       } : null}
+      tripPrepStatus={getTripPrepStatus(upcomingTrip)}
       unreadJobCount={unreadJobCount}
       activeDeals={activeDeals.map((item) => ({
         id: item.id,

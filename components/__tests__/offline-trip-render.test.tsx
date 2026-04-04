@@ -70,6 +70,15 @@ const mockSnapshot = {
   vehicleInfo: null,
 }
 
+const mockTripPrepStatus = {
+  tripId: 'trip-1',
+  destination: false,
+  weather: false,
+  packing: false,
+  meals: false,
+  departure: false,
+}
+
 const mockPrepState = {
   tripId: 'trip-1',
   tripName: 'Test Trip',
@@ -99,7 +108,7 @@ beforeEach(() => {
 describe('TripPrepClient offline snapshot behavior', () => {
   it('when online, does not call getTripSnapshot', async () => {
     vi.mocked(useOnlineStatus).mockReturnValue(true)
-    render(<TripPrepClient trip={mockTrip} />)
+    render(<TripPrepClient trip={mockTrip} tripPrepStatus={mockTripPrepStatus} />)
     await waitFor(() => expect(global.fetch).toHaveBeenCalled(), { timeout: 2000 })
     expect(getTripSnapshot).not.toHaveBeenCalled()
   })
@@ -107,7 +116,7 @@ describe('TripPrepClient offline snapshot behavior', () => {
   it('when offline, calls getTripSnapshot with trip.id', async () => {
     vi.mocked(useOnlineStatus).mockReturnValue(false)
     vi.mocked(getTripSnapshot).mockResolvedValue(mockSnapshot)
-    render(<TripPrepClient trip={mockTrip} />)
+    render(<TripPrepClient trip={mockTrip} tripPrepStatus={mockTripPrepStatus} />)
     await waitFor(() => {
       expect(getTripSnapshot).toHaveBeenCalledWith('trip-1')
     }, { timeout: 2000 })
@@ -117,7 +126,7 @@ describe('TripPrepClient offline snapshot behavior', () => {
   it('when offline with snapshot, passes offlineData to PackingList', async () => {
     vi.mocked(useOnlineStatus).mockReturnValue(false)
     vi.mocked(getTripSnapshot).mockResolvedValue(mockSnapshot)
-    render(<TripPrepClient trip={mockTrip} />)
+    render(<TripPrepClient trip={mockTrip} tripPrepStatus={mockTripPrepStatus} />)
     await waitFor(() => {
       const packingListEl = screen.queryByTestId('packing-list')
       expect(packingListEl).not.toBeNull()
@@ -129,7 +138,7 @@ describe('TripPrepClient offline snapshot behavior', () => {
   it('when offline with snapshot, passes offlineData to MealPlan', async () => {
     vi.mocked(useOnlineStatus).mockReturnValue(false)
     vi.mocked(getTripSnapshot).mockResolvedValue(mockSnapshot)
-    render(<TripPrepClient trip={mockTrip} />)
+    render(<TripPrepClient trip={mockTrip} tripPrepStatus={mockTripPrepStatus} />)
     await waitFor(() => {
       const mealPlanEl = screen.queryByTestId('meal-plan')
       expect(mealPlanEl).not.toBeNull()
@@ -141,7 +150,7 @@ describe('TripPrepClient offline snapshot behavior', () => {
   it('when offline with snapshot, passes offlineData to WeatherCard', async () => {
     vi.mocked(useOnlineStatus).mockReturnValue(false)
     vi.mocked(getTripSnapshot).mockResolvedValue(mockSnapshot)
-    render(<TripPrepClient trip={mockTrip} />)
+    render(<TripPrepClient trip={mockTrip} tripPrepStatus={mockTripPrepStatus} />)
     await waitFor(() => {
       const weatherEl = screen.queryByTestId('weather-card')
       expect(weatherEl).not.toBeNull()
@@ -153,7 +162,7 @@ describe('TripPrepClient offline snapshot behavior', () => {
   it('when offline with no snapshot, children receive undefined offlineData', async () => {
     vi.mocked(useOnlineStatus).mockReturnValue(false)
     vi.mocked(getTripSnapshot).mockResolvedValue(undefined)
-    render(<TripPrepClient trip={mockTrip} />)
+    render(<TripPrepClient trip={mockTrip} tripPrepStatus={mockTripPrepStatus} />)
     await waitFor(() => {
       expect(getTripSnapshot).toHaveBeenCalledWith('trip-1')
     }, { timeout: 2000 })

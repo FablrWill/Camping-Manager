@@ -3,6 +3,7 @@
 import { useState, useEffect, Fragment } from 'react'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
+import TripPrepStepper from '@/components/TripPrepStepper'
 import TripPrepSection from '@/components/TripPrepSection'
 import WeatherCard from '@/components/WeatherCard'
 import PackingList from '@/components/PackingList'
@@ -18,6 +19,15 @@ import type { DepartureChecklistResult } from '@/lib/parse-claude'
 import { useOnlineStatus } from '@/lib/use-online-status'
 import { getTripSnapshot, type TripSnapshot } from '@/lib/offline-storage'
 
+interface TripPrepStatus {
+  tripId: string
+  destination: boolean
+  weather: boolean
+  packing: boolean
+  meals: boolean
+  departure: boolean
+}
+
 interface TripPrepClientProps {
   trip: {
     id: string
@@ -31,6 +41,7 @@ interface TripPrepClientProps {
     fallbackFor: string | null
     fallbackOrder: number | null
   }
+  tripPrepStatus: TripPrepStatus
 }
 
 interface AlternativeTrip {
@@ -76,7 +87,7 @@ function getDefaultExpanded(sections: PrepSection[], key: string): boolean {
   return firstNotReady?.key === key
 }
 
-export default function TripPrepClient({ trip }: TripPrepClientProps) {
+export default function TripPrepClient({ trip, tripPrepStatus }: TripPrepClientProps) {
   const isOnline = useOnlineStatus()
   const [offlineSnapshot, setOfflineSnapshot] = useState<TripSnapshot | null>(null)
   const [prepState, setPrepState] = useState<PrepState | null>(null)
@@ -248,6 +259,18 @@ export default function TripPrepClient({ trip }: TripPrepClientProps) {
           <span className="text-amber-600 dark:text-amber-400 font-medium">{countdown}</span>
         </div>
       </div>
+
+      {/* Prep progress stepper */}
+      <TripPrepStepper
+        tripId={trip.id}
+        steps={[
+          { label: 'Destination', complete: tripPrepStatus.destination },
+          { label: 'Weather', complete: tripPrepStatus.weather },
+          { label: 'Packing', complete: tripPrepStatus.packing },
+          { label: 'Meals', complete: tripPrepStatus.meals },
+          { label: 'Departure', complete: tripPrepStatus.departure },
+        ]}
+      />
 
       {/* Error state */}
       {error && (

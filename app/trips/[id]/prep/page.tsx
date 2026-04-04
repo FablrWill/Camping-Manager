@@ -10,10 +10,23 @@ export default async function TripPrepPage({ params }: { params: Promise<{ id: s
     include: {
       location: { select: { id: true, name: true, latitude: true, longitude: true } },
       vehicle: { select: { id: true, name: true } },
+      mealPlan: { select: { id: true } },
+      departureChecklist: { select: { id: true } },
     },
+    // select additional scalar fields needed for prep status
   })
 
   if (!trip) notFound()
+
+  const hasLocation = trip.locationId != null
+  const tripPrepStatus = {
+    tripId: trip.id,
+    destination: hasLocation,
+    weather: hasLocation,
+    packing: trip.packingListResult != null,
+    meals: trip.mealPlan != null,
+    departure: trip.departureChecklist != null || trip.departureTime != null,
+  }
 
   return (
     <TripPrepClient
@@ -29,6 +42,7 @@ export default async function TripPrepPage({ params }: { params: Promise<{ id: s
         fallbackFor: trip.fallbackFor ?? null,
         fallbackOrder: trip.fallbackOrder ?? null,
       }}
+      tripPrepStatus={tripPrepStatus}
     />
   )
 }
