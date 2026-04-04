@@ -89,16 +89,42 @@ export default function GearDealsTab({ gearItem }: GearDealsTabProps) {
     return null
   }
 
+  // No target price set — show prompt, no check button
+  if (gearItem.targetPrice == null) {
+    return (
+      <p className="text-sm text-stone-400 dark:text-stone-500 text-center py-4">
+        No target price set. Add a target price in the item&apos;s edit form to enable deal monitoring.
+      </p>
+    )
+  }
+
   const retailers = priceCheck ? parseRetailers(priceCheck.retailers) : []
   const stale = priceCheck ? isStale(priceCheck.checkedAt) : false
 
   return (
     <div className="space-y-3">
-      {/* Check Price button */}
+      {/* Stale banner */}
+      {stale && (
+        <div className="flex items-center gap-2 px-3 py-2.5 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+          <AlertTriangle size={14} className="text-amber-600 dark:text-amber-400 shrink-0" />
+          <p className="text-xs text-amber-700 dark:text-amber-300">
+            Price data is over 30 days old — consider re-checking.
+          </p>
+        </div>
+      )}
+
+      {/* No price check yet */}
+      {!loading && !priceCheck && (
+        <p className="text-sm text-stone-400 dark:text-stone-500 text-center py-2">
+          No price check yet.
+        </p>
+      )}
+
+      {/* Check / Re-check Price button */}
       <button
         onClick={handleCheckPrice}
         disabled={checking || loading}
-        className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-xl text-sm font-medium text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors disabled:opacity-50"
+        className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-amber-600 dark:bg-amber-500 rounded-xl text-sm font-medium text-white dark:text-stone-900 hover:bg-amber-700 dark:hover:bg-amber-400 transition-colors disabled:opacity-50"
       >
         {checking ? (
           <>
@@ -143,12 +169,6 @@ export default function GearDealsTab({ gearItem }: GearDealsTabProps) {
                 </span>
               )}
             </div>
-            {stale && (
-              <span className="flex items-center gap-1 text-xs text-amber-600 dark:text-amber-400">
-                <AlertTriangle size={12} />
-                Stale
-              </span>
-            )}
           </div>
 
           {/* Price info */}
