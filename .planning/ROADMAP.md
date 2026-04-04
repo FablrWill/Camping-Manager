@@ -688,12 +688,12 @@ Plans:
   5. Invalid URL or zero-result scrape surfaces a clear error message (no crash)
   6. `npm run build` passes with no TypeScript errors
 
-**Plans:** 1/3 plans executed
+**Plans:** 3/3 plans complete
 
 Plans:
 - [x] 44-00-PLAN.md — Wave 0 test stubs for gmaps-import parsing logic (included in 44-01)
 - [x] 44-01-PLAN.md — Core lib/gmaps-import.ts + POST API route
-- [ ] 44-02-PLAN.md — GmapsImportModal UI + spots-client wiring
+- [x] 44-02-PLAN.md — GmapsImportModal UI + spots-client wiring
 
 ---
 

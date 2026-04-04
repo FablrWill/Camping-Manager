@@ -3,14 +3,13 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Smarter Feedback Loops
 status: executing
-stopped_at: Completed 44-01-PLAN.md
-last_updated: "2026-04-04T19:27:46Z"
+last_updated: "2026-04-04T19:39:58.079Z"
 last_activity: 2026-04-04 - Completed 44-01 Google Maps list import core library and API route
 progress:
   total_phases: 26
-  completed_phases: 24
+  completed_phases: 25
   total_plans: 70
-  completed_plans: 68
+  completed_plans: 70
   percent: 40
 ---
 
@@ -144,6 +143,8 @@ Recent decisions affecting current work:
 - [Phase 44-01]: Use ES import (not require()) for fetchGmapsList in tests — Vitest ESM mode does not support require() for TypeScript modules
 - [Phase 44-01]: extractNameNear scans backward 500 chars from coordinate match; returns last double-quoted 2-80 char string; replaces escaped quotes before matching
 - [Phase 44-01]: JSON-LD fallback uses unknown type narrowing throughout — no any usage, @type check before array access
+- [Phase 44-google-maps-list-import]: Sequential for-of import loop (not Promise.all) in GmapsImportModal — prevents rate limit issues on batch location import
+- [Phase 44-google-maps-list-import]: GmapsImportModal backdrop click: closes in idle/preview/done, blocked during fetching/importing to prevent accidental data loss
 
 ### Pending Todos
 
@@ -178,7 +179,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-04
+Last session: 2026-04-04T19:39:53.318Z
 Last activity: Completed S36 RAG knowledge base refresh
 Resume file: None
 
