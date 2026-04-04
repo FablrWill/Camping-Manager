@@ -241,6 +241,8 @@ model Trip {
   vehicleChecklistGeneratedAt DateTime? // Phase 29: when vehicle checklist was last generated
   fallbackFor   String?   // Phase 22: ID of the primary trip this is a fallback for
   fallbackOrder Int?      // Phase 22: 2 = Plan B, 3 = Plan C
+  journalEntry   String?   // S20: Voice Ghostwriter journal entry (Claude-written narrative)
+  journalEntryAt DateTime? // S20: when journal entry was last generated
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
