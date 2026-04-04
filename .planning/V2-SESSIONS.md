@@ -59,7 +59,7 @@ A self-coordinating work queue for v2.0 features. Each Claude Code session claim
 | S19 | Empty states + skeleton loaders      | —     | ✅ Done 2026-04-04        | Sonnet, normal | S16        |
 | S20 | Voice Ghostwriter                    | —     | 🔄 In Progress 2026-04-04 | Sonnet, normal | —          |
 | S21 | Gear ROI tracker                     | —     | ⬜ Ready          | Sonnet, normal | —          |
-| S22 | Seasonal spot ratings                | —     | ⬜ Ready          | Sonnet, normal | —          |
+| S22 | Seasonal spot ratings                | —     | 🔄 In Progress 2026-04-04 | Sonnet, normal | —          |
 | S23 | Fire ban + pre-trip alerts           | —     | ⬜ Ready          | Sonnet, normal | —          |
 
 **Why this order matters (conflict groups):**
