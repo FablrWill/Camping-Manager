@@ -55,7 +55,21 @@ function getConditionColor(condition: string | null): string {
   }
 }
 
-export default function GearClient({ initialItems }: { initialItems: GearItem[] }) {
+interface UpgradeOpportunity {
+  gearItemId: string
+  gearItemName: string
+  topAlternativeName: string
+  reason: string
+  verdict: string
+}
+
+export default function GearClient({
+  initialItems,
+  initialUpgrades = [],
+}: {
+  initialItems: GearItem[]
+  initialUpgrades?: UpgradeOpportunity[]
+}) {
   const [items, setItems] = useState<GearItem[]>(initialItems)
   const [activeCategory, setActiveCategory] = useState<string | null>(null)
   const [showWishlist, setShowWishlist] = useState(false)
@@ -66,6 +80,7 @@ export default function GearClient({ initialItems }: { initialItems: GearItem[] 
   const [deletingItem, setDeletingItem] = useState<GearItem | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState<string | null>(null)
+  const [upgradesExpanded, setUpgradesExpanded] = useState(false)
 
   // Filter items
   const filtered = useMemo(() => {
@@ -257,6 +272,40 @@ export default function GearClient({ initialItems }: { initialItems: GearItem[] 
           </div>
         ))}
       </div>
+
+      {/* Upgrade Opportunities */}
+      {initialUpgrades.length > 0 && (
+        <div className="mb-4">
+          <button
+            type="button"
+            onClick={() => setUpgradesExpanded(!upgradesExpanded)}
+            className="flex items-center gap-2 text-sm font-medium text-amber-700 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300"
+          >
+            <span className={`transition-transform ${upgradesExpanded ? 'rotate-90' : ''}`}>&#9654;</span>
+            Upgrade Opportunities ({initialUpgrades.length})
+          </button>
+          {upgradesExpanded && (
+            <div className="mt-2 space-y-2">
+              {initialUpgrades.map((u) => (
+                <button
+                  key={u.gearItemId}
+                  type="button"
+                  onClick={() => openResearchForItem(u.gearItemId)}
+                  className="w-full text-left px-3 py-2 rounded-lg bg-amber-50 dark:bg-amber-950/30 hover:bg-amber-100 dark:hover:bg-amber-950/50 transition-colors"
+                >
+                  <span className="font-medium text-stone-800 dark:text-stone-200">{u.gearItemName}</span>
+                  <span className="text-stone-500 dark:text-stone-400"> -&gt; </span>
+                  <span className="text-amber-700 dark:text-amber-400">{u.topAlternativeName}</span>
+                  <span className="text-stone-500 dark:text-stone-400"> — Worth upgrading</span>
+                  {u.reason && (
+                    <span className="text-stone-500 dark:text-stone-400 text-sm"> ({u.reason})</span>
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Gear list grouped by category */}
       {grouped.length === 0 ? (
