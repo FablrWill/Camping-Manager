@@ -283,14 +283,33 @@ model AgentMemory {
 }
 
 model MealPlan {
-  id          String    @id @default(cuid())
-  tripId      String    @unique  // one meal plan per trip (D-05)
-  result      String    // JSON blob of MealPlanResult
-  generatedAt DateTime  @default(now())
-  cachedAt    DateTime? // Phase 8 offline snapshot (D-11)
-  createdAt   DateTime  @default(now())
+  id          String   @id @default(cuid())
+  tripId      String   @unique
+  generatedAt DateTime @default(now())
+  notes       String?
+  createdAt   DateTime @default(now())
 
-  trip Trip @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  trip  Trip   @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  meals Meal[]
+}
+
+model Meal {
+  id               String   @id @default(cuid())
+  mealPlanId       String
+  day              Int
+  slot             String
+  name             String
+  description      String?
+  ingredients      String
+  cookInstructions String?
+  prepNotes        String?
+  estimatedMinutes Int?
+  createdAt        DateTime @default(now())
+
+  mealPlan MealPlan @relation(fields: [mealPlanId], references: [id], onDelete: Cascade)
+
+  @@index([mealPlanId])
+  @@index([mealPlanId, day, slot])
 }
 
 model TripFeedback {
