@@ -46,6 +46,9 @@ export async function POST(
 
     const { mealId, mealName, rating, notes } = body
 
+    if (!mealId) {
+      return NextResponse.json({ error: 'mealId is required' }, { status: 400 })
+    }
     if (!mealName) {
       return NextResponse.json({ error: 'mealName is required' }, { status: 400 })
     }
@@ -66,11 +69,9 @@ export async function POST(
     }
 
     // Find existing feedback for this meal in this plan
-    const existing = mealId
-      ? await prisma.mealFeedback.findFirst({
-          where: { mealId, mealPlanId: mealPlan.id },
-        })
-      : null
+    const existing = await prisma.mealFeedback.findFirst({
+      where: { mealId, mealPlanId: mealPlan.id },
+    })
 
     if (existing) {
       const updated = await prisma.mealFeedback.update({
@@ -81,7 +82,7 @@ export async function POST(
     } else {
       const created = await prisma.mealFeedback.create({
         data: {
-          mealId: mealId ?? null,
+          mealId,
           mealPlanId: mealPlan.id,
           mealName,
           rating,
