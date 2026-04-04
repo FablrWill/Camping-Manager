@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Gear Intelligence + Day-Of
-status: verifying
-stopped_at: Phase 31 UI-SPEC approved
-last_updated: "2026-04-03T21:30:25.407Z"
-last_activity: 2026-04-03
+status: executing
+stopped_at: Completed 31-01-PLAN.md
+last_updated: "2026-04-04T04:38:06.752Z"
+last_activity: 2026-04-04
 progress:
   total_phases: 24
   completed_phases: 18
-  total_plans: 48
-  completed_plans: 47
+  total_plans: 50
+  completed_plans: 48
   percent: 40
 ---
 
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-01)
 
 **Core value:** Personal camping second brain — a closed-loop system that plans, executes, and learns from every trip
-**Current focus:** Phase 29 complete — next up: Phase 30 (Gear Product Research), Phase 31 (Astro), S11 (Meal Planning)
+**Current focus:** Phase 31 — dark-sky-astro-info
 
 ## Current Position
 
-Phase: 29
-Plan: All plans complete
-Status: Verified (human UAT deferred)
-Last activity: 2026-04-03
+Phase: 31 (dark-sky-astro-info) — EXECUTING
+Plan: 2 of 2
+Status: Ready to execute
+Last activity: 2026-04-04
 
 Progress: [████░░░░░░] 40%
 
@@ -72,6 +72,7 @@ Progress: [████░░░░░░] 40%
 | Phase 33-conversational-trip-planner P01 | 4 | 2 tasks | 5 files |
 | Phase 33-conversational-trip-planner P03 | 20 | 2 tasks | 2 files |
 | Phase 29 P01 | 214 | 2 tasks | 5 files |
+| Phase 31-dark-sky-astro-info P01 | 5 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -119,6 +120,8 @@ Recent decisions affecting current work:
 - [Phase 29]: VehicleChecklistItem has id, text, checked only — no isUnpackedWarning or suggestedTime (simpler than DepartureChecklist)
 - [Phase 29]: Route tests use require() inside test bodies so vite does not fail at compile time when source files do not exist yet
 - [Phase 29]: Migration created manually and applied via prisma migrate deploy due to non-interactive agent environment
+- [Phase 31-dark-sky-astro-info]: UTC noon (T12:00:00Z) used for suncalc Date construction to avoid DST/timezone drift across all system locales
+- [Phase 31-dark-sky-astro-info]: Bortle class implemented as lightpollutionmap.info deep link only — no free no-key API exists, honest placeholder is correct approach
 
 ### Pending Todos
 
@@ -136,6 +139,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-03T21:30:25.403Z
-Stopped at: Phase 31 UI-SPEC approved
-Resume file: .planning/phases/31-dark-sky-astro-info/31-UI-SPEC.md
+Last session: 2026-04-04T04:38:06.745Z
+Stopped at: Completed 31-01-PLAN.md
+Resume file: None

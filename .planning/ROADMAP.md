@@ -463,7 +463,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 31-01-PLAN.md — TDD astro library (suncalc install, tests, lib/astro.ts)
+- [x] 31-01-PLAN.md — TDD astro library (suncalc install, tests, lib/astro.ts)
 - [ ] 31-02-PLAN.md — AstroCard component + TripCard/TripsClient integration
 
 **Parallelization notes:**
@@ -579,7 +579,7 @@ Plans:
 | 28. Weather-Aware Clothing | v3.0 | 1/1 | Complete | 2026-04-03 |
 | 29. Vehicle Pre-Trip Checklist | v3.0 | 3/3 | Complete    | 2026-04-03 |
 | 30. Gear Product Research | v3.0 | 0/TBD | Not started | - |
-| 31. Dark Sky & Astro Info | v3.0 | 0/TBD | Not started | - |
+| 31. Dark Sky & Astro Info | v3.0 | 1/2 | In Progress|  |
 | 32. Deal Monitoring | v3.0 | 0/TBD | Not started | - |
 | 33. Conversational Trip Planner | v3.0 | 4/4 | Complete    | 2026-04-03 |
 | 34. Home Assistant Integration | v3.0 | 0/TBD | Not started | - |
@@ -599,7 +599,7 @@ Plans:
   5. "Add manually" escape hatch opens the old static form
   6. Trip-creation conversations are persisted to the database
   7. `npm run build` passes
-**Plans:** 4/4 plans complete
+**Plans:** 1/2 plans executed
 
 Plans:
 - [x] 33-00-PLAN.md — Wave 0 test stubs (trip planner tools + ChatBubble extraction)
