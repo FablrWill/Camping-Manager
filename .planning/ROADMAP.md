@@ -71,7 +71,7 @@
 
 **Wave 3 — Depends on Wave 2:**
 - [ ] **Phase 30: Gear Product Research** - AI-powered "Research" button, best-in-class comparison, upgrade recommendations
-- [ ] **Phase 31: Dark Sky & Astro Info** - Bortle class, moon phase, sunrise/sunset per location and trip dates
+- [ ] **Phase 31: Dark Sky, Astro Info & Activity Gear Recommendations** - Bortle/moon/sunrise data + activities gear category + trip planner activity suggestions
 
 **Wave 4 — Depends on Wave 3:**
 - [ ] **Phase 32: Deal Monitoring** - Target price on wishlist items, on-demand price check via Claude, deal alerts
@@ -450,8 +450,8 @@ Plans:
 **Parallelization notes:**
 - Wave 3 — can run parallel with Phase 31
 
-### Phase 31: Dark Sky & Astro Info
-**Goal**: Show Bortle class, moon phase, sunrise/sunset for trip locations and dates — useful for stargazing trips and photography
+### Phase 31: Dark Sky, Astro Info & Activity Gear Recommendations
+**Goal**: Show Bortle class, moon phase, sunrise/sunset per location/trip; add `activities` gear category (kayak, telescope, projector, speakers, etc.); trip planner agent infers location suitability from existing notes and surfaces owned/wishlist activity gear as accept/reject suggestions
 **Depends on**: None (independent, but lower priority)
 **Requirements**: TBD
 **Success Criteria** (what must be TRUE):
@@ -459,7 +459,10 @@ Plans:
   2. Moon phase displayed for each night of the trip
   3. Bortle class (light pollution) shown for trip location
   4. Data sourced from free APIs (no API key required)
-  5. `npm run build` passes
+  5. `activities` category exists in `lib/gear-categories.ts` with leisure/entertainment scope
+  6. Trip planner agent suggests relevant activity gear based on inferred location conditions
+  7. Wishlist activity items surfaced as nudges ("you've been eyeing a telescope…")
+  8. `npm run build` passes
 **Plans**: 0/TBD
 
 **Parallelization notes:**
@@ -575,7 +578,7 @@ Plans:
 | 28. Weather-Aware Clothing | v3.0 | 1/1 | Complete | 2026-04-03 |
 | 29. Vehicle Pre-Trip Checklist | v3.0 | 3/3 | Complete    | 2026-04-03 |
 | 30. Gear Product Research | v3.0 | 0/TBD | Not started | - |
-| 31. Dark Sky & Astro Info | v3.0 | 0/TBD | Not started | - |
+| 31. Dark Sky, Astro & Activity Gear | v3.0 | 0/TBD | Not started | - |
 | 32. Deal Monitoring | v3.0 | 0/TBD | Not started | - |
 | 33. Conversational Trip Planner | v3.0 | 4/4 | Complete    | 2026-04-03 |
 | 34. Home Assistant Integration | v3.0 | 0/TBD | Not started | - |
