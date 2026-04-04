@@ -103,7 +103,7 @@ None — v1.2 Ship It complete as of 2026-04-03.
 
 ## Current State
 
-Phase 31 complete (2026-04-04) — Dark Sky Astro Info: suncalc-powered moon phase computation (24 tests), AstroCard with per-night moon emoji/stars badge/Bortle deep-link, integrated below WeatherCard in TripCard. Human UAT pending (31-HUMAN-UAT.md). Phase 29 also complete: Vehicle Pre-Trip Checklist (29-HUMAN-UAT.md pending).
+Phase 33 complete (2026-04-04) — Conversational Trip Planner: "Plan Trip" button opens a full-screen chat sheet powered by /api/trip-planner; dedicated 4-tool agent (gear, weather, locations, web search); ChatBubble renders trip_summary card with amber "Create Trip" button; creation navigates to /trips/[id]/prep. Phase 31 also complete: Dark Sky Astro Info (AstroCard, moon phase, Bortle deep-link). Human UAT approved for both.
 
 ## Current Milestone: ✅ v1.2 Ship It — COMPLETE (2026-04-03)
 
