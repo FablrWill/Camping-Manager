@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Smarter Feedback Loops
 status: executing
-stopped_at: Completed 38-01-PLAN.md
-last_updated: "2026-04-04T07:22:59.441Z"
+stopped_at: Completed 38-02-PLAN.md
+last_updated: "2026-04-04T07:27:38.581Z"
 last_activity: 2026-04-04
 progress:
   total_phases: 25
   completed_phases: 21
   total_plans: 67
-  completed_plans: 61
+  completed_plans: 62
   percent: 40
 ---
 
@@ -79,6 +79,7 @@ Progress: [████░░░░░░] 40%
 | Phase 35 P02 | 125 | 2 tasks | 3 files |
 | Phase 35 P04 | 15 | 2 tasks | 4 files |
 | Phase 35 P05 | 8 | 4 tasks | 3 files |
+| Phase 38 P02 | 15 | 1 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -138,6 +139,7 @@ Recent decisions affecting current work:
 - [Phase 35]: checkedNames uses Set<string> with toLowerCase() for case-insensitive match on shopping list regeneration
 - [Phase 35]: mealId validated as required in feedback POST before other fields — primary key for upsert pattern
 - [Phase 35]: buildMealHistorySection called with global last-10 feedback query (no trip scope) for cross-trip preference carry-forward
+- [Phase 38]: aria-label regex /liked/i matches disliked — use /^liked /i with word boundary in tests
 
 ### Pending Todos
 
@@ -155,6 +157,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-04T07:22:59.436Z
-Stopped at: Completed 38-01-PLAN.md
+Last session: 2026-04-04T07:27:22.753Z
+Stopped at: Completed 38-02-PLAN.md
 Resume file: None

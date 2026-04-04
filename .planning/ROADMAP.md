@@ -657,11 +657,11 @@ Plans:
 
 **Status**: 🚧 In progress
 **Requirements:** REV-01, REV-02, REV-03, REV-04, REV-05, REV-06, REV-07, REV-08
-**Plans:** 3 plans
+**Plans:** 2/3 plans executed
 
 Plans:
-- [ ] 38-01-PLAN.md — Schema migration (Trip.reviewedAt) + POST /api/trips/[id]/review batch endpoint
-- [ ] 38-02-PLAN.md — TripReviewModal multi-step component (Gear → Meals → Spot+Notes)
+- [x] 38-01-PLAN.md — Schema migration (Trip.reviewedAt) + POST /api/trips/[id]/review batch endpoint
+- [x] 38-02-PLAN.md — TripReviewModal multi-step component (Gear → Meals → Spot+Notes)
 - [ ] 38-03-PLAN.md — TripsClient integration (Review button, Reviewed badge, review-needed count)
 
 **Parallelization notes:**
