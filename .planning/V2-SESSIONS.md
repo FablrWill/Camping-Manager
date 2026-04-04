@@ -52,6 +52,7 @@ A self-coordinating work queue for v2.0 features. Each Claude Code session claim
 | S12 | Meal planning: shopping, prep & feedback | 35 | ✅ Done 2026-04-04 | Sonnet, normal | S11 |
 | S13 | Mac mini agent jobs infrastructure    | 36    | ✅ Done 2026-04-04 | Sonnet, normal | —          |
 | S14 | Gear product research                | 30    | ✅ Done 2026-04-04 | Opus, normal | —          |
+| S15 | Post-trip auto-review                | 38    | ✅ Done 2026-04-04 | Sonnet, normal | S11, S12   |
 
 **Why this order matters (conflict groups):**
 

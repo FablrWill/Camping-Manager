@@ -8,6 +8,7 @@
 - ✅ **v2.0 Smarter & Sharper** — Phases 16-24 (shipped 2026-04-03)
 - ✅ **v3.0 Gear Intelligence + Day-Of** — Phases 25-35 (shipped 2026-04-04)
 - 🚧 **v4.0 Smarter Feedback Loops** — Phases 38+ (in progress)
+  - [x] Phase 38: Post-Trip Auto-Review — structured gear/meal/spot review modal with feedback flywheel (completed 2026-04-04)
 - 📋 **v4.0 Backlog** — Voice, social, signal map, background agent, and more — see [Backlog section](#backlog-v40) below
 
 ## Phases
