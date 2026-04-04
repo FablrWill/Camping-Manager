@@ -8,7 +8,7 @@ export const metadata = {
 export default async function GearPage() {
   const now = new Date()
 
-  const [items, overdueItems] = await Promise.all([
+  const [items, overdueItems, activeLoanGroups] = await Promise.all([
     prisma.gearItem.findMany({
       orderBy: [{ category: 'asc' }, { name: 'asc' }],
       include: { priceCheck: true },
@@ -21,9 +21,15 @@ export default async function GearPage() {
         AND "lastMaintenanceAt" IS NOT NULL
         AND datetime("lastMaintenanceAt", '+' || "maintenanceIntervalDays" || ' days') < datetime(${now.toISOString()})
     `,
+    // Count distinct gear items with at least one active (unreturned) loan
+    prisma.gearLoan.groupBy({
+      by: ['gearItemId'],
+      where: { returnedAt: null },
+    }),
   ])
 
   const overdueMaintenanceCount = Number(overdueItems[0]?.count ?? 0)
+  const activeLoanCount = activeLoanGroups.length
 
   // Serialize dates to strings for the client component
   const serialized = items.map((item) => ({
@@ -46,6 +52,7 @@ export default async function GearPage() {
     <GearClient
       initialItems={serialized}
       overdueMaintenanceCount={overdueMaintenanceCount}
+      activeLoanCount={activeLoanCount}
     />
   )
 }

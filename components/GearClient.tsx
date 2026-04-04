@@ -7,6 +7,7 @@ import GearResearchCard from './GearResearchCard'
 import GearDealsTab from './GearDealsTab'
 import GearROITab from './GearROITab'
 import GearMaintenancePanel from './GearMaintenancePanel'
+import GearLoanPanel from './GearLoanPanel'
 import KitPresetsPanel from './KitPresetsPanel'
 import ChatContextButton from '@/components/ChatContextButton'
 import { CATEGORY_GROUPS, CATEGORIES, getCategoryEmoji, getCategoryLabel } from '@/lib/gear-categories'
@@ -76,9 +77,11 @@ function isMaintenanceOverdue(item: GearItem): boolean {
 export default function GearClient({
   initialItems,
   overdueMaintenanceCount,
+  activeLoanCount,
 }: {
   initialItems: GearItem[]
   overdueMaintenanceCount: number
+  activeLoanCount: number
 }) {
   const [items, setItems] = useState<GearItem[]>(initialItems)
   const [isLoading, setIsLoading] = useState(true)
@@ -92,7 +95,7 @@ export default function GearClient({
   const [deleteError, setDeleteError] = useState<string | null>(null)
   const [isResearching, setIsResearching] = useState(false)
   const [showKits, setShowKits] = useState(false)
-  const [detailTab, setDetailTab] = useState<'research' | 'documents' | 'deals' | 'roi' | 'maintenance'>('research')
+  const [detailTab, setDetailTab] = useState<'research' | 'documents' | 'deals' | 'roi' | 'maintenance' | 'loans'>('research')
 
   useEffect(() => {
     setIsLoading(false)
@@ -252,6 +255,17 @@ export default function GearClient({
           <span>
             <span className="font-semibold">{overdueMaintenanceCount} {overdueMaintenanceCount === 1 ? 'item' : 'items'}</span>{' '}
             due for maintenance — tap to service.
+          </span>
+        </div>
+      )}
+
+      {/* Active loans banner */}
+      {activeLoanCount > 0 && (
+        <div className="mb-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 px-4 py-3 text-sm text-amber-700 dark:text-amber-400 flex items-center gap-2">
+          <span>🤝</span>
+          <span>
+            <span className="font-semibold">{activeLoanCount} {activeLoanCount === 1 ? 'item' : 'items'}</span>{' '}
+            currently on loan — open gear detail to manage.
           </span>
         </div>
       )}
@@ -522,6 +536,17 @@ export default function GearClient({
                     <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-red-500 rounded-full" />
                   )}
                 </button>
+                <button
+                  type="button"
+                  onClick={() => setDetailTab('loans')}
+                  className={`flex-1 py-1.5 px-2 rounded-md text-xs font-medium transition-colors ${
+                    detailTab === 'loans'
+                      ? 'bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-50 shadow-sm'
+                      : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-300'
+                  }`}
+                >
+                  Loans
+                </button>
               </div>
 
               {/* Tab content */}
@@ -564,6 +589,9 @@ export default function GearClient({
               )}
               {detailTab === 'maintenance' && (
                 <GearMaintenancePanel gearItemId={editingItem.id} />
+              )}
+              {detailTab === 'loans' && (
+                <GearLoanPanel gearItemId={editingItem.id} />
               )}
             </div>
           ) : undefined}
