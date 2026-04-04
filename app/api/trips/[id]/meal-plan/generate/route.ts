@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { generateMealPlan, type GearItem } from '@/lib/claude'
+import { generateMealPlan, buildMealHistorySection, type GearItem } from '@/lib/claude'
 import { fetchWeather } from '@/lib/weather'
 
 // POST /api/trips/:id/meal-plan/generate — generate full meal plan via Claude
@@ -60,24 +60,18 @@ export async function POST(
       (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
     )
 
-    // 5. Fetch prior meal feedback from previous plans for this trip
-    const priorFeedback = await prisma.mealFeedback.findMany({
-      where: {
-        meal: {
-          mealPlan: { tripId },
-        },
-      },
-      include: { meal: { select: { name: true, slot: true } } },
-      orderBy: { createdAt: 'desc' },
-    })
-
-    let feedbackHistory: string | undefined
-    if (priorFeedback.length > 0) {
-      const lines = priorFeedback.map((fb) => {
-        const note = fb.note ? ` — "${fb.note}"` : ''
-        return `- ${fb.meal.name} (${fb.meal.slot}): ${fb.rating}${note}`
+    // 5. Fetch recent meal feedback across all trips for prompt injection (non-blocking)
+    let mealHistory: string | undefined
+    try {
+      const recentFeedback = await prisma.mealFeedback.findMany({
+        orderBy: { createdAt: 'desc' },
+        take: 10,
+        select: { mealName: true, rating: true, notes: true },
       })
-      feedbackHistory = lines.join('\n')
+      mealHistory = buildMealHistorySection(recentFeedback) || undefined
+    } catch (err) {
+      console.error('Failed to fetch meal feedback (non-blocking):', err)
+      // Continue without feedback — user still gets a valid meal plan
     }
 
     // 6. Call Claude generateMealPlan with bringingDog and feedback history
@@ -93,7 +87,7 @@ export async function POST(
       cookingGear: cookingGear as GearItem[],
       weather,
       bringingDog: trip.bringingDog,
-      feedbackHistory,
+      mealHistory,
     })
 
     // 7. Map Claude result to Meal rows
