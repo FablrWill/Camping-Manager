@@ -65,7 +65,7 @@ A self-coordinating work queue for v2.0 features. Each Claude Code session claim
 | S24 | Siri/Reminders inbox                 | —     | ✅ Done 2026-04-04        | Sonnet, normal | —          |
 | S25 | LNT pack-out checklist               | —     | ⬜ Ready          | Sonnet, normal | —          |
 | S26 | Gear lending tracker                 | —     | ⬜ Ready          | Sonnet, normal | —          |
-| S27 | Gear maintenance reminders           | —     | ⬜ Ready          | Sonnet, normal | —          |
+| S27 | Gear maintenance reminders           | —     | 🔄 In Progress 2026-04-04 | Sonnet, normal | —          |
 | S28 | Shareable trip reports               | —     | ⬜ Ready          | Sonnet, normal | —          |
 | S29 | Altitude awareness callouts          | —     | ⬜ Ready          | Sonnet, normal | —          |
 | S30 | Road trip scenic layer               | —     | ⬜ Ready          | Sonnet, normal | —          |
