@@ -672,6 +672,34 @@ Plans:
 
 ---
 
+### Phase 39: Personal Signal Map
+
+**Goal**: Surface signal quality data visually on the spots map. Overlay colored signal badges on location markers, add a "Signal" layer toggle, and add signal filter chips so Will can see at a glance which campsites have good connectivity before a trip.
+
+**Status**: 🔄 In progress (S37)
+**Session**: S37
+
+**What to build:**
+- `lib/signal-summary.ts` — aggregate SignalLog entries per location into a summary (bestCellBars, bestCellType, bestStarlinkQuality, readingCount); falls back to Location.cellSignal/starlinkSignal if no logs
+- `GET /api/locations/signal-summary` — returns Record<locationId, SignalSummary> for all locations in one request
+- `components/SignalBadge.tsx` — color-coded pill badge (green/yellow/red/gray) showing signal tier
+- Update `components/SpotMap.tsx` — add `signal` to Layers, accept `signalSummaries` prop, render colored DivIcon dots on markers when signal layer is active
+- Update `app/spots/spots-client.tsx` — fetch signal summaries on mount, add "Signal" layer toggle, add signal filter chips (All / Good / No signal / Unknown)
+
+**No schema changes** — SignalLog model and signal API already exist.
+
+**Parallelization notes:**
+- Single-wave — all changes are independent. Can be executed in one pass.
+- Touches `SpotMap.tsx` and `spots-client.tsx` — do not run in parallel with sessions that touch these files.
+
+**Plans:** 2/2 plans complete
+
+Plans:
+- [x] 39-01-PLAN.md — Signal summary library + API endpoint
+- [x] 39-02-PLAN.md — Map signal dots, layer toggle, filter chips
+
+---
+
 
 ### Phase 44: Google Maps List Import
 
@@ -714,7 +742,7 @@ Ideas captured from conversations and planning sessions that haven't been phased
 
 | Idea | Source | Notes |
 |------|--------|-------|
-| **Personal Signal Map** | FEATURE-PHASES.md | Log cell (carrier + bars) and Starlink quality at every campsite over time. Builds a real-world signal database. |
+| **Personal Signal Map** | Phase 39 | ✅ Phased — signal overlay + filter on spots map. No schema changes needed. |
 | **Seasonal Ratings** | FEATURE-PHASES.md | Rate a spot differently by season. A great fall spot may be terrible in summer. |
 | **GPX Import** | FEATURE-PHASES.md | Import trail routes from AllTrails/Wikiloc GPX exports. Overlay on map, attach to location. |
 | **Google Maps List Import** | FEATURE-PHASES.md | Paste a shared Google Maps list → pull all pins as draft saved locations. |

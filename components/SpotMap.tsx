@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback, useImperativeHandle, forwardRef } from "react";
 import { ConfirmDialog } from "@/components/ui";
+import type { SignalSummary } from '@/lib/signal-summary';
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "leaflet.markercluster/dist/MarkerCluster.css";
@@ -31,7 +32,7 @@ function escHtml(s: string | null | undefined): string {
 
 // --- Marker Icons ---
 
-function makeIcon(bg: string, emoji: string, badge?: string) {
+function makeIcon(bg: string, emoji: string, badge?: string, signalDot?: string) {
   return L.divIcon({
     className: "custom-marker",
     html: `<div style="
@@ -40,7 +41,7 @@ function makeIcon(bg: string, emoji: string, badge?: string) {
       display: flex; align-items: center; justify-content: center;
       box-shadow: 0 2px 6px rgba(0,0,0,0.3); font-size: 14px;
       position: relative;
-    ">${emoji}${badge ? `<span style="position:absolute;top:-4px;right:-4px;background:#f59e0b;color:white;border-radius:50%;width:14px;height:14px;font-size:9px;display:flex;align-items:center;justify-content:center;font-weight:bold;">~</span>` : ""}</div>`,
+    ">${emoji}${badge ? `<span style="position:absolute;top:-4px;right:-4px;background:#f59e0b;color:white;border-radius:50%;width:14px;height:14px;font-size:9px;display:flex;align-items:center;justify-content:center;font-weight:bold;">~</span>` : ""}${signalDot ? `<span style="position:absolute;bottom:-2px;right:-2px;width:10px;height:10px;border-radius:50%;background:${signalDot};border:1.5px solid white;"></span>` : ""}</div>`,
     iconSize: [32, 32],
     iconAnchor: [16, 16],
     popupAnchor: [0, -16],
@@ -51,6 +52,13 @@ const PHOTO_ICONS = {
   exif: makeIcon("#3b82f6", "📷"),          // blue — EXIF GPS
   vision: makeIcon("#22c55e", "📷"),         // green — vision exact
   visionApprox: makeIcon("#f97316", "📷", "~"), // orange — vision approximate
+};
+
+const SIGNAL_DOT_COLORS: Record<string, string> = {
+  green: "#22c55e",
+  yellow: "#eab308",
+  red: "#ef4444",
+  gray: "#9ca3af",
 };
 
 const locationIcon = makeIcon("#059669", "📍");
@@ -165,6 +173,7 @@ export interface Layers {
   path: boolean;
   places: boolean;
   heatmap: boolean;
+  signal: boolean;
 }
 
 export interface SpotMapHandle {
@@ -184,6 +193,7 @@ interface SpotMapProps {
   onLocationEdit?: (locationId: string) => void;
   onAnimationTime?: (time: string | null) => void;
   onPhotoDeleted?: (photoId: string) => void;
+  signalSummaries?: Record<string, SignalSummary>;
 }
 
 const SpotMap = forwardRef<SpotMapHandle, SpotMapProps>(function SpotMap(
@@ -199,6 +209,7 @@ const SpotMap = forwardRef<SpotMapHandle, SpotMapProps>(function SpotMap(
     onLocationEdit,
     onAnimationTime,
     onPhotoDeleted,
+    signalSummaries,
   },
   ref
 ) {
@@ -397,7 +408,18 @@ const SpotMap = forwardRef<SpotMapHandle, SpotMapProps>(function SpotMap(
     if (!layers.spots) return;
 
     locations.forEach((loc) => {
-      const marker = L.marker([loc.latitude, loc.longitude], { icon: locationIcon });
+      // Determine signal dot color when signal layer is active
+      let signalDotColor: string | undefined;
+      if (layers.signal && signalSummaries) {
+        const summary = signalSummaries[loc.id];
+        signalDotColor = summary ? SIGNAL_DOT_COLORS[summary.tier] : SIGNAL_DOT_COLORS.gray;
+      }
+
+      const icon = signalDotColor
+        ? makeIcon("#059669", "📍", undefined, signalDotColor)
+        : locationIcon;
+
+      const marker = L.marker([loc.latitude, loc.longitude], { icon });
 
       const stars = loc.rating ? "⭐".repeat(loc.rating) : "";
       const typeLabel = loc.type
@@ -439,7 +461,7 @@ const SpotMap = forwardRef<SpotMapHandle, SpotMapProps>(function SpotMap(
 
       locationLayersRef.current.addLayer(marker);
     });
-  }, [locations, layers.spots, ready, onLocationEdit]);
+  }, [locations, layers.spots, layers.signal, signalSummaries, ready, onLocationEdit]);
 
   // Update activity segment paths
   useEffect(() => {
