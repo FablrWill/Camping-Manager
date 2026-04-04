@@ -70,7 +70,7 @@ A self-coordinating work queue for v2.0 features. Each Claude Code session claim
 | S29 | Altitude awareness callouts          | —     | ✅ Done 2026-04-04 | Sonnet, normal | —          |
 | S30 | Road trip scenic layer               | —     | ✅ Done 2026-04-04 | Sonnet, normal | —          |
 | — | **✅ v4.0 "Personal Touch" complete** | — | — | — | — |
-| S31 | Destination discovery                | —     | 🔄 In Progress    | Sonnet, normal | —          |
+| S31 | Destination discovery                | —     | ✅ Done 2026-04-04 | Sonnet, normal | —          |
 | S32 | Mac mini scheduled intelligence      | —     | ⬜ Ready          | Sonnet, normal | —          |
 | S33 | Chat agent memory                    | —     | ⬜ Ready          | Sonnet, normal | S32        |
 | S34 | Trip intelligence report             | —     | ⬜ Ready          | Sonnet, normal | —          |
