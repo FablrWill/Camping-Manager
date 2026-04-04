@@ -54,7 +54,7 @@ A self-coordinating work queue for v2.0 features. Each Claude Code session claim
 | S14 | Gear product research                | 30    | ✅ Done 2026-04-04 | Opus, normal | —          |
 | S15 | Post-trip auto-review                | 38    | ✅ Done 2026-04-04 | Sonnet, normal | S11, S12   |
 | S16 | UX quick wins                        | —     | ⬜ Ready          | Sonnet, normal | —          |
-| S17 | Nav restructure + More sheet         | —     | 🔄 In Progress 2026-04-04 | Sonnet, normal | —          |
+| S17 | Nav restructure + More sheet         | —     | ✅ Done 2026-04-04        | Sonnet, normal | —          |
 | S18 | TripPrepStepper                      | —     | ⬜ Ready          | Sonnet, normal | S16        |
 | S19 | Empty states + skeleton loaders      | —     | ⬜ Ready          | Sonnet, normal | S16        |
 

@@ -8,6 +8,7 @@ All notable changes to Outland OS are tracked here.
 
 | Session | Date | Summary |
 |---------|------|---------|
+| [36b](changelog/session-36b.md) | 2026-04-04 | S17 Nav restructure: 5-tab BottomNav + MoreSheet (Chat, Inbox, Vehicle, Settings) |
 | [35](changelog/session-35.md) | 2026-04-04 | Phase 32 deal monitoring: targetPrice field, Claude price check, GearDealsTab, dashboard deals card |
 | [34b](changelog/session-34b.md) | 2026-04-04 | Phase 31 dark sky/astro + v4.0: Google Maps import, personal signal map, trip cost tracking |
 | [34](changelog/session-34.md) | 2026-04-04 | Medication tracker — persistent med list, dog med support, auto-calculated trip quantities |
