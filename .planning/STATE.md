@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Smarter Feedback Loops
-status: verifying
-last_updated: "2026-04-04T19:20:48.544Z"
-last_activity: 2026-04-04 - Completed S37 trip cost tracking (phase 42)
+status: executing
+last_updated: "2026-04-04T19:49:57.461Z"
+last_activity: 2026-04-04
 progress:
   total_phases: 26
   completed_phases: 25
-  total_plans: 69
-  completed_plans: 69
+  total_plans: 70
+  completed_plans: 70
   percent: 40
 ---
 
@@ -20,14 +20,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-01)
 
 **Core value:** Personal camping second brain — a closed-loop system that plans, executes, and learns from every trip
-**Current focus:** Phase 42 — trip-cost-tracking
+**Current focus:** Phase 44 — google-maps-list-import
 
 ## Current Position
 
-Phase: 42 (trip-cost-tracking) — COMPLETE
-Plan: 2 of 2
-Status: Phase verified — all checks passed
-Last activity: 2026-04-04 - Completed S37 trip cost tracking (phase 42)
+Phase: 44
+Plan: Not started
+Status: Ready to execute
+Last activity: 2026-04-04
 
 Progress: [████░░░░░░] 40%
 
@@ -79,8 +79,8 @@ Progress: [████░░░░░░] 40%
 | Phase 35 P04 | 15 | 2 tasks | 4 files |
 | Phase 35 P05 | 8 | 4 tasks | 3 files |
 | Phase 38 P02 | 15 | 1 tasks | 2 files |
-| Phase 42 P01 | 2 | 3 tasks | 2 files |
-| Phase 42 P02 | 2 | 1 tasks | 3 files |
+| Phase 44 P01 | 241 | 2 tasks | 3 files |
+| Phase 44-google-maps-list-import P02 | 3 | 3 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -141,10 +141,12 @@ Recent decisions affecting current work:
 - [Phase 35]: mealId validated as required in feedback POST before other fields — primary key for upsert pattern
 - [Phase 35]: buildMealHistorySection called with global last-10 feedback query (no trip scope) for cross-trip preference carry-forward
 - [Phase 38]: aria-label regex /liked/i matches disliked — use /^liked /i with word boundary in tests
-- [Phase 42]: Expense buttons always-visible: removed opacity-0/group-hover pattern for touch usability
-- [Phase 42]: Trip list includes expenses select amount only: enables client-side total for cost badge without separate endpoint
-- [Phase 42]: Badge uses stone/muted colors (bg-stone-100) — amber is reserved for CTA-level elements
-- [Phase 42]: Cost badge hidden when expense total is 0 — no empty-state badge clutters the trip card header
+- [Phase 44-01]: Use ES import (not require()) for fetchGmapsList in tests — Vitest ESM mode does not support require() for TypeScript modules
+- [Phase 44-01]: extractNameNear scans backward 500 chars from coordinate match; returns last double-quoted 2-80 char string; replaces escaped quotes before matching
+- [Phase 44-01]: JSON-LD fallback uses unknown type narrowing throughout — no any usage, @type check before array access
+- [Phase 44-google-maps-list-import]: Sequential for-of import loop (not Promise.all) in GmapsImportModal — prevents rate limit issues on batch location import
+- [Phase 44-google-maps-list-import]: GmapsImportModal backdrop click: closes in idle/preview/done, blocked during fetching/importing to prevent accidental data loss
+- [Phase 44-google-maps-list-import]: GmapsImportModal uses 5-state machine (idle/fetching/preview/importing/done) with sequential for-of import loop and backdrop-click protection during active operations
 
 ### Pending Todos
 
@@ -179,7 +181,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-04T19:20:48.539Z
+Last session: 2026-04-04T19:45:26.106Z
 Last activity: Completed S36 RAG knowledge base refresh
 Resume file: None
 
