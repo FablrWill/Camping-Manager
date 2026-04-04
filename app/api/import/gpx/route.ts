@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { parseGpx } from '@/lib/gpx';
+import { gpxToGeoJson } from '@/lib/gpx-to-geojson';
+import type { FeatureCollection } from 'geojson';
 
 // POST /api/import/gpx — import a GPX file
-// Body: { gpx: string (XML content), createLocations?: boolean }
-// Returns: { waypoints, tracks, locationsCreated }
+// Body: { gpx: string (XML content), createLocations?: boolean, filename?: string }
+// Returns: { waypoints, tracks, locationsCreated, trailsCreated }
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     const body = await request.json();
@@ -48,15 +50,40 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       }
     }
 
+    // Create Trail record from track data (per D-04 and D-06)
+    let trailsCreated = 0;
+    const geojson = gpxToGeoJson(body.gpx);
+    const trackFeatures = geojson.features.filter(
+      (f) => f.geometry.type === 'LineString' || f.geometry.type === 'MultiLineString'
+    );
+
+    if (trackFeatures.length > 0) {
+      const trackCollection: FeatureCollection = {
+        type: 'FeatureCollection',
+        features: trackFeatures,
+      };
+      const trailName = data.name ?? body.filename ?? 'Imported Trail';
+      await prisma.trail.create({
+        data: {
+          name: trailName,
+          geoJson: JSON.stringify(trackCollection),
+          sourceFile: body.filename ?? null,
+        },
+      });
+      trailsCreated++;
+    }
+
     return NextResponse.json({
       name: data.name,
       waypoints: data.waypoints,
       tracks: data.tracks,
       locationsCreated,
+      trailsCreated,
       summary: {
         waypointCount: data.waypoints.length,
         trackCount: data.tracks.length,
         totalTrackPoints: data.tracks.reduce((sum, t) => sum + t.points.length, 0),
+        trailsCreated,
       },
     });
   } catch (error) {

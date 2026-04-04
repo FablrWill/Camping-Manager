@@ -148,6 +148,7 @@ model Location {
   photos          Photo[]
   signalLogs      SignalLog[]
   seasonalRatings SeasonalRating[]
+  trails          Trail[]
 }
 
 model SeasonalRating {
@@ -607,4 +608,25 @@ model TripExpense {
   trip Trip @relation(fields: [tripId], references: [id], onDelete: Cascade)
 
   @@index([tripId])
+}
+
+// --- Phase 40: GPX Trail Overlay ---
+
+model Trail {
+  id             String    @id @default(cuid())
+  name           String
+  description    String?
+  sourceFile     String?
+  geoJson        String    // JSON: GeoJSON FeatureCollection from @tmcw/togeojson
+  distanceKm     Float?
+  elevationGainM Float?
+  locationId     String?
+  color          String    @default("#22c55e")
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  location Location? @relation(fields: [locationId], references: [id], onDelete: SetNull)
+
+  @@index([locationId])
+  @@index([createdAt])
 }

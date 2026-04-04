@@ -9,6 +9,7 @@
 - ✅ **v3.0 Gear Intelligence + Day-Of** — Phases 25-35 (shipped 2026-04-04)
 - 🚧 **v4.0 Smarter Feedback Loops** — Phases 38+ (in progress)
   - [x] Phase 38: Post-Trip Auto-Review — structured gear/meal/spot review modal with feedback flywheel (completed 2026-04-04)
+  - [ ] Phase 40: GPX Import (trail overlays) — import AllTrails/Wikiloc GPX files, render trails as map overlays
 - 📋 **v4.0 Backlog** — Voice, social, signal map, background agent, and more — see [Backlog section](#backlog-v40) below
 
 ## Phases
@@ -672,31 +673,24 @@ Plans:
 
 ---
 
-### Phase 39: Personal Signal Map
+### Phase 40: GPX Import (Trail Overlays)
 
-**Goal**: Surface signal quality data visually on the spots map. Overlay colored signal badges on location markers, add a "Signal" layer toggle, and add signal filter chips so Will can see at a glance which campsites have good connectivity before a trip.
+**Goal**: Import GPX trail files from AllTrails/Wikiloc. Tracks persist as Trail records and render as green polyline overlays on the Spots map. Existing waypoint→Location import is preserved and extended.
 
-**Status**: 🔄 In progress (S37)
-**Session**: S37
-
-**What to build:**
-- `lib/signal-summary.ts` — aggregate SignalLog entries per location into a summary (bestCellBars, bestCellType, bestStarlinkQuality, readingCount); falls back to Location.cellSignal/starlinkSignal if no logs
-- `GET /api/locations/signal-summary` — returns Record<locationId, SignalSummary> for all locations in one request
-- `components/SignalBadge.tsx` — color-coded pill badge (green/yellow/red/gray) showing signal tier
-- Update `components/SpotMap.tsx` — add `signal` to Layers, accept `signalSummaries` prop, render colored DivIcon dots on markers when signal layer is active
-- Update `app/spots/spots-client.tsx` — fetch signal summaries on mount, add "Signal" layer toggle, add signal filter chips (All / Good / No signal / Unknown)
-
-**No schema changes** — SignalLog model and signal API already exist.
-
-**Parallelization notes:**
-- Single-wave — all changes are independent. Can be executed in one pass.
-- Touches `SpotMap.tsx` and `spots-client.tsx` — do not run in parallel with sessions that touch these files.
-
-**Plans:** 2/2 plans complete
+**Status**: 🚧 Ready to execute
+**Requirements:** GPX-01, GPX-02, GPX-03, GPX-04, GPX-05
+**Plans:** 2/3 plans executed
 
 Plans:
-- [x] 39-01-PLAN.md — Signal summary library + API endpoint
-- [x] 39-02-PLAN.md — Map signal dots, layer toggle, filter chips
+- [ ] 40-P01-foundation.md — Install deps + Trail schema migration + gpx-to-geojson.ts (TDD)
+- [ ] 40-P02-api.md — Extend /api/import/gpx + new /api/trails endpoints
+- [ ] 40-P03-map-ui.md — SpotMap trail layer + SpotsClient toggle/list/delete UI
+
+**Parallelization notes:**
+- Plan 40-P01 is Wave 1 — foundation, no dependencies
+- Plan 40-P02 is Wave 2 — depends on 40-P01 (schema + lib)
+- Plan 40-P03 is Wave 3 — depends on 40-P02 (API routes); has human-verify checkpoint
+
 
 ---
 
@@ -781,30 +775,6 @@ Plans:
 ---
 
 
-### Phase 44: Google Maps List Import
-
-**Goal**: Let Will paste a shared Google Maps list URL, have the server scrape and parse the page HTML (no API key), extract place names and coordinates, and present a checklist of draft Location previews he can confirm to import. Zero friction path from a saved Google Maps list to Outland OS Spots map.
-
-**Status**: 🚧 In progress
-**Depends on**: None
-**Requirements**: GMAPS-01, GMAPS-02, GMAPS-03, GMAPS-04, GMAPS-05
-**Success Criteria** (what must be TRUE):
-  1. Pasting a valid Google Maps share URL returns at least one place preview
-  2. Each preview shows name and coordinates (lat/lng)
-  3. Unchecking a place excludes it from the import
-  4. Confirmed locations appear on the Spots map immediately after modal closes
-  5. Invalid URL or zero-result scrape surfaces a clear error message (no crash)
-  6. `npm run build` passes with no TypeScript errors
-
-**Plans:** 3/3 plans complete
-
-Plans:
-- [x] 44-00-PLAN.md — Wave 0 test stubs for gmaps-import parsing logic (included in 44-01)
-- [x] 44-01-PLAN.md — Core lib/gmaps-import.ts + POST API route
-- [x] 44-02-PLAN.md — GmapsImportModal UI + spots-client wiring
-
----
-
 ## Backlog (v4.0+)
 
 Ideas captured from conversations and planning sessions that haven't been phased yet. These are real intentions, not wishlist noise — each one was explicitly discussed or directly derived from Will's use patterns.
@@ -822,7 +792,7 @@ Ideas captured from conversations and planning sessions that haven't been phased
 
 | Idea | Source | Notes |
 |------|--------|-------|
-| **Personal Signal Map** | Phase 39 | ✅ Phased — signal overlay + filter on spots map. No schema changes needed. |
+| **Personal Signal Map** | FEATURE-PHASES.md | Log cell (carrier + bars) and Starlink quality at every campsite over time. Builds a real-world signal database. |
 | **Seasonal Ratings** | FEATURE-PHASES.md | Rate a spot differently by season. A great fall spot may be terrible in summer. |
 | **GPX Import** | FEATURE-PHASES.md | Import trail routes from AllTrails/Wikiloc GPX exports. Overlay on map, attach to location. |
 | **Google Maps List Import** | FEATURE-PHASES.md | Paste a shared Google Maps list → pull all pins as draft saved locations. |

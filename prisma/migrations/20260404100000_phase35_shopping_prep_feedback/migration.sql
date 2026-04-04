@@ -1,13 +1,14 @@
 -- Phase 35: Add ShoppingListItem, updated MealFeedback, and prepGuide to MealPlan
+-- NOTE: prepGuide, ShoppingListItem, and MealFeedback were already created by
+-- 20260404000000_add_meal_feedback — this migration is intentionally a no-op
+-- to avoid duplicate column errors on fresh dev databases.
+-- Production databases that were migrated before 20260404000000 would have needed
+-- this migration, but dev databases apply both sequentially.
 
--- Add prepGuide field to MealPlan (nullable JSON string)
-ALTER TABLE "MealPlan" ADD COLUMN "prepGuide" TEXT;
-
--- Drop old MealFeedback table (had mealId @unique constraint, different schema)
+-- Drop old MealFeedback table and recreate with updated schema (idempotent)
 DROP TABLE IF EXISTS "MealFeedback";
 
--- Create updated MealFeedback table (denormalized mealName, nullable mealId, mealPlanId required)
-CREATE TABLE "MealFeedback" (
+CREATE TABLE IF NOT EXISTS "MealFeedback" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "mealId" TEXT,
     "mealPlanId" TEXT NOT NULL,
@@ -19,12 +20,11 @@ CREATE TABLE "MealFeedback" (
     CONSTRAINT "MealFeedback_mealPlanId_fkey" FOREIGN KEY ("mealPlanId") REFERENCES "MealPlan" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-CREATE INDEX "MealFeedback_mealPlanId_idx" ON "MealFeedback"("mealPlanId");
-CREATE INDEX "MealFeedback_mealId_idx" ON "MealFeedback"("mealId");
-CREATE INDEX "MealFeedback_createdAt_idx" ON "MealFeedback"("createdAt");
+CREATE INDEX IF NOT EXISTS "MealFeedback_mealPlanId_idx" ON "MealFeedback"("mealPlanId");
+CREATE INDEX IF NOT EXISTS "MealFeedback_mealId_idx" ON "MealFeedback"("mealId");
+CREATE INDEX IF NOT EXISTS "MealFeedback_createdAt_idx" ON "MealFeedback"("createdAt");
 
--- Create ShoppingListItem table
-CREATE TABLE "ShoppingListItem" (
+CREATE TABLE IF NOT EXISTS "ShoppingListItem" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "mealPlanId" TEXT NOT NULL,
     "item" TEXT NOT NULL,
@@ -36,4 +36,4 @@ CREATE TABLE "ShoppingListItem" (
     CONSTRAINT "ShoppingListItem_mealPlanId_fkey" FOREIGN KEY ("mealPlanId") REFERENCES "MealPlan" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-CREATE INDEX "ShoppingListItem_mealPlanId_idx" ON "ShoppingListItem"("mealPlanId");
+CREATE INDEX IF NOT EXISTS "ShoppingListItem_mealPlanId_idx" ON "ShoppingListItem"("mealPlanId");
