@@ -159,3 +159,19 @@ Which phases cover which requirements. Updated during roadmap creation.
 ---
 *Requirements defined: 2026-04-02*
 *Last updated: 2026-04-02 after roadmap creation*
+
+## Phase 42: Trip Cost Tracking
+
+| ID | Description | Priority |
+|----|-------------|----------|
+| EXP-01 | TripExpense model: id, tripId, category (fuel/campsite/food/gear/permits/misc), amountCents (int), note (optional), date, createdAt | Must |
+| EXP-02 | GET /api/trips/[id]/expenses — return all expenses sorted by date desc | Must |
+| EXP-03 | POST /api/trips/[id]/expenses — create expense; DELETE /api/trips/[id]/expenses/[expenseId] — delete | Must |
+| EXP-04 | TripExpensePanel component: expense list, inline add form, category subtotals, total in amber bold | Must |
+| EXP-05 | Cost badge on trip cards: show total spend when expenses exist; hidden when none | Must |
+
+| EXP-01 | Phase 42 | Complete |
+| EXP-02 | Phase 42 | Complete |
+| EXP-03 | Phase 42 | Complete |
+| EXP-04 | Phase 42 | Complete |
+| EXP-05 | Phase 42 | Complete |

@@ -1,6 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { parseClaudeJSON, PackingListResultSchema, MealPlanResultSchema, DepartureChecklistResultSchema, DepartureChecklistResult, TripSummaryResultSchema, type TripSummaryResult, GearDocumentResultSchema, type GearDocumentResult, VehicleChecklistResultSchema, type VehicleChecklistResult, NormalizedMealPlanResultSchema, type NormalizedMealPlanResult, SingleMealSchema, type SingleMeal, GearResearchResultSchema, type GearResearchResult, ShoppingListResultSchema, type ShoppingListResult, PrepGuideResultSchema, type PrepGuideResult, GearPriceCheckResultSchema, type GearPriceCheckResult, LNTChecklistResultSchema, type LNTChecklistResult } from '@/lib/parse-claude'
 import { CATEGORY_EMOJI, CATEGORIES } from '@/lib/gear-categories'
+import type { PackingContext } from '@/lib/packing-intelligence'
 
 export const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -213,6 +214,7 @@ export async function generatePackingList(params: {
   }
   feedbackContext?: GearFeedbackSummary[]
   bringingDog?: boolean
+  packingContext?: PackingContext
 }): Promise<PackingListResult> {
   const {
     tripName,
@@ -227,6 +229,7 @@ export async function generatePackingList(params: {
     weather,
     feedbackContext,
     bringingDog,
+    packingContext,
   } = params
 
   const gearByCategory: Record<string, GearItem[]> = {}
@@ -250,6 +253,24 @@ export async function generatePackingList(params: {
   const clothingItems = gearInventory.filter((g) => g.category === 'clothing')
   const clothingGuidance = buildClothingGuidance(weather, clothingItems)
 
+  // S35 Smart Packing v2: inject rich historical intelligence blocks
+  const intelligenceBlocks: string[] = []
+  if (packingContext?.locationHistory) {
+    intelligenceBlocks.push(`LOCATION HISTORY:\n${packingContext.locationHistory}`)
+  }
+  if (packingContext?.seasonalContext) {
+    intelligenceBlocks.push(`SEASONAL CONTEXT:\n${packingContext.seasonalContext}`)
+  }
+  if (packingContext?.gearSkipSuggestions) {
+    intelligenceBlocks.push(`GEAR SKIP SUGGESTIONS:\n${packingContext.gearSkipSuggestions}`)
+  }
+  if (packingContext?.weightNote) {
+    intelligenceBlocks.push(`WEIGHT NOTE:\n${packingContext.weightNote}`)
+  }
+  const intelligenceSection = intelligenceBlocks.length > 0
+    ? '\n' + intelligenceBlocks.join('\n\n') + '\n'
+    : ''
+
   const dogSection = bringingDog
     ? `\nDOG CONTEXT:\nWill is bringing his dog on this trip. Add a "Dog" section to the packing list with essential dog gear: food + collapsible bowl, water bowl, leash + backup leash, poop bags (2x expected amount), dog-specific first aid supplies (tweezers for ticks, wound spray). Note any dog-friendly considerations for the destination.\n`
     : ''
@@ -269,7 +290,7 @@ GEAR INVENTORY (items the user owns):
 ${gearSection || 'No gear in inventory yet.'}
 
 ${feedbackSection}
-
+${intelligenceSection}
 INSTRUCTIONS:
 1. Build the packing list primarily from the user's gear inventory. Reference items by their [id:xxx] tag.
 2. Add essential items NOT in the inventory (like food cooler, firewood, water, toiletries, etc.) — mark these as not from inventory.
@@ -278,7 +299,7 @@ INSTRUCTIONS:
 5. Adjust for trip duration: longer trips need more consumables.
 6. Categories: ${CATEGORIES.map((c) => c.value).join(', ')}.
 7. Include 2-3 brief, specific tips based on the weather and trip details (e.g., "Charge the EcoFlow fully — limited solar expected with cloud cover Saturday").
-8. If GEAR HISTORY is provided, use it to inform recommendations: deprioritize items marked "didn't need" on 2+ trips, and flag items frequently forgotten as "RECOMMENDED — frequently forgotten".
+8. If GEAR HISTORY is provided, use it to inform recommendations: deprioritize items marked "didn't need" on 2+ trips, and flag items frequently forgotten as "RECOMMENDED — frequently forgotten". If LOCATION HISTORY, SEASONAL CONTEXT, GEAR SKIP SUGGESTIONS, or WEIGHT NOTE blocks are provided, use them to further personalize recommendations: reference past location experiences, warn about seasonal conditions, deprioritize items suggested for skipping, and note weight concerns.
 
 Respond ONLY with valid JSON matching this exact structure:
 {
