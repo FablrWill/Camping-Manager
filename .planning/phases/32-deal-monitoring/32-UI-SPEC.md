@@ -42,7 +42,7 @@ Declared values (must be multiples of 4):
 | 3xl | 64px | Page-level spacing — not used in this phase |
 
 Exceptions:
-- Touch targets for "Check Price" and "Re-check" buttons: minimum 44px height on mobile (`min-h-[44px]`), consistent with existing Button component usage in modals.
+- Touch targets for "Check Price" and "Re-check Price" buttons: minimum 44px height on mobile (`min-h-[44px]`), consistent with existing Button component usage in modals.
 
 Source: Observed patterns in `GearResearchTab.tsx`, `Badge.tsx`, `Button.tsx`. Standard 8-point grid applies.
 
@@ -53,9 +53,9 @@ Source: Observed patterns in `GearResearchTab.tsx`, `Badge.tsx`, `Button.tsx`. S
 | Role | Size | Weight | Line Height |
 |------|------|--------|-------------|
 | Body | 14px (`text-sm`) | 400 (regular) | 1.5 |
-| Label | 12px (`text-xs`) | 500 (medium) | 1.4 |
+| Label | 12px (`text-xs`) | 400 (regular) | 1.4 |
 | Heading | 16px (`text-base`) | 600 (semibold) | 1.2 |
-| Display | 20px (`text-xl`) | 700 (bold) | 1.2 |
+| Display | 20px (`text-xl`) | 600 (semibold) | 1.2 |
 
 Notes:
 - Deals tab content follows `GearResearchTab.tsx` patterns: item name at `text-sm font-semibold`, metadata (checkedAt, price range) at `text-xs`.
@@ -73,12 +73,12 @@ Source: `GearResearchTab.tsx` lines 36-55, `Badge.tsx` (`text-xs font-medium`).
 |------|-------|-------|
 | Dominant (60%) | `--color-bg-primary` (#fafaf9 light / #0c0a09 dark) | Page background, modal backdrop |
 | Secondary (30%) | `--color-bg-surface` (#ffffff light / #1c1917 dark) + `--color-bg-surface-alt` (#f5f5f4 light / #292524 dark) | Cards in Deals tab, tab content area, dashboard card |
-| Accent (10%) | `--color-accent` (#d97706 amber-600 light / #f59e0b amber-500 dark) | "Check Price" and "Re-check" primary button backgrounds only |
+| Accent (10%) | `--color-accent` (#d97706 amber-600 light / #f59e0b amber-500 dark) | "Check Price" and "Re-check Price" primary button backgrounds only |
 | Destructive | `--color-danger` (#dc2626 red-600 light / #ef4444 red-500 dark) | Stale warning icon color only |
 
 Accent reserved for:
 - "Check Price" button (primary CTA inside Deals tab)
-- "Re-check" button (secondary action after result is shown)
+- "Re-check Price" button (secondary action after result is shown)
 
 NOT used for: deal status badge, target price label, price range display, tab button active state (which uses stone-900/stone-50 text contrast).
 
@@ -101,7 +101,7 @@ Source: `globals.css` custom properties, `Badge.tsx` variant styles, `GearResear
 |---------|------|
 | Deals tab label | "Deals" |
 | Primary CTA (no prior check) | "Check Price" |
-| Re-check CTA (result exists) | "Re-check" |
+| Re-check CTA (result exists) | "Re-check Price" |
 | Loading state message | "Checking prices…" |
 | Empty state heading (no target price set) | "No target price set" |
 | Empty state body (no target price set) | "Add a target price in the gear edit form to start monitoring deals." |
@@ -155,7 +155,7 @@ Modified components:
   Deal status:        [No deal yet]  or  [Deal!]
   Last checked:       March 5, 2026
 
-  [Re-check button]
+  [Re-check Price button]
 
 [Staleness disclaimer — always visible below results]
   Prices based on Claude's training data — may be outdated.
