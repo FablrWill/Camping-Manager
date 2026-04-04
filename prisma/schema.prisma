@@ -505,6 +505,14 @@ model Settings {
   updatedAt             DateTime @updatedAt
 }
 
+model CampingProfile {
+  id           String   @id @default("singleton") // singleton — always the same row
+  reportJson   String
+  generatedAt  DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
 model SharedLocation {
   id        String   @id @default(cuid())
   slug      String   @unique
