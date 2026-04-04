@@ -7,6 +7,8 @@ import { daysUntil } from '@/lib/trip-utils'
 import { getCategoryEmoji } from '@/lib/gear-categories'
 import AgentJobsBadge from './AgentJobsBadge'
 import TripPrepStepper from './TripPrepStepper'
+import IntelligenceCard from './IntelligenceCard'
+import type { WeeklyBriefingResult } from '@/lib/agent/jobs/weekly-briefing'
 
 interface DashboardStats {
   gearCount: number
@@ -60,6 +62,7 @@ export default function DashboardClient({
   tripPrepStatus,
   unreadJobCount,
   activeDeals = [],
+  latestBriefing = null,
 }: {
   stats: DashboardStats
   recentGear: RecentGearItem[]
@@ -67,6 +70,7 @@ export default function DashboardClient({
   tripPrepStatus: TripPrepStatus | null
   unreadJobCount?: number
   activeDeals?: ActiveDeal[]
+  latestBriefing?: WeeklyBriefingResult | null
 }) {
   const [dealsOpen, setDealsOpen] = useState(false)
 
@@ -125,6 +129,9 @@ export default function DashboardClient({
           ]}
         />
       )}
+
+      {/* Intelligence card — shows latest weekly briefing when available */}
+      <IntelligenceCard briefing={latestBriefing} />
 
       {/* Quick stats row */}
       <section className="grid grid-cols-2 gap-3">

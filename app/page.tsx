@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import DashboardClient from "@/components/DashboardClient";
+import type { WeeklyBriefingResult } from "@/lib/agent/jobs/weekly-briefing";
 
 type UpcomingTripQueryResult = Awaited<ReturnType<typeof fetchUpcomingTrip>>;
 
@@ -63,7 +64,7 @@ function getMealPlanStatus(trip: UpcomingTripQueryResult): string | null {
 }
 
 export default async function Home() {
-  const [gearCount, wishlistCount, locationCount, photoCount, vehicleMods, tripCount, recentGear, upcomingTrip, unreadJobCount, activeDeals] =
+  const [gearCount, wishlistCount, locationCount, photoCount, vehicleMods, tripCount, recentGear, upcomingTrip, unreadJobCount, activeDeals, latestBriefingJob] =
     await Promise.all([
       prisma.gearItem.count({ where: { isWishlist: false } }),
       prisma.gearItem.count({ where: { isWishlist: true } }),
@@ -93,7 +94,21 @@ export default async function Home() {
         include: { priceCheck: true },
         orderBy: { updatedAt: "desc" },
       }),
+      prisma.agentJob.findFirst({
+        where: { type: 'weekly_briefing', status: 'done' },
+        orderBy: { completedAt: 'desc' },
+        select: { result: true },
+      }),
     ]);
+
+  let latestBriefing: WeeklyBriefingResult | null = null;
+  if (latestBriefingJob?.result) {
+    try {
+      latestBriefing = JSON.parse(latestBriefingJob.result) as WeeklyBriefingResult;
+    } catch {
+      // Malformed result — skip
+    }
+  }
 
   const totalWeight = await prisma.gearItem.aggregate({
     where: { isWishlist: false, weight: { not: null } },
@@ -132,6 +147,7 @@ export default async function Home() {
         foundPriceRange: item.priceCheck?.foundPriceRange ?? null,
         foundPriceLow: item.priceCheck?.foundPriceLow ?? null,
       }))}
+      latestBriefing={latestBriefing}
     />
   );
 }

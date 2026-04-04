@@ -1,6 +1,7 @@
 #!/usr/bin/env tsx
 /**
  * agent-runner.ts — Mac mini background worker for the AgentJob queue.
+ * Imports: processDealCheck, processMaintenanceDue, processTripWeatherAlert, processWeeklyBriefing
  *
  * Polls the Outland OS API for pending jobs, processes them with Claude,
  * and posts results back. Run with PM2 or launchd on the Mac mini.
@@ -13,6 +14,11 @@
  *   AGENT_BASE_URL     — app URL (default: http://localhost:3000)
  *   AGENT_POLL_INTERVAL — seconds between polls (default: 30)
  */
+
+import { processDealCheck, type DealCheckPayload } from '../lib/agent/jobs/deal-check';
+import { processMaintenanceDue, type MaintenanceDuePayload } from '../lib/agent/jobs/maintenance-due';
+import { processTripWeatherAlert, type TripWeatherAlertPayload } from '../lib/agent/jobs/trip-weather-alert';
+import { processWeeklyBriefing, type WeeklyBriefingPayload } from '../lib/agent/jobs/weekly-briefing';
 
 const BASE_URL = process.env.AGENT_BASE_URL || 'http://localhost:3000';
 const POLL_INTERVAL = Number(process.env.AGENT_POLL_INTERVAL || '30') * 1000;
@@ -223,6 +229,10 @@ type JobProcessor = (payload: unknown) => Promise<unknown>;
 const processors: Record<string, JobProcessor> = {
   gear_enrichment: (payload) => processGearEnrichment(payload as GearEnrichmentPayload),
   pre_trip_alert: (payload) => processPreTripAlert(payload as PreTripAlertPayload),
+  deal_check: (payload) => processDealCheck(payload as DealCheckPayload),
+  maintenance_due: (payload) => processMaintenanceDue(payload as MaintenanceDuePayload),
+  trip_weather_alert: (payload) => processTripWeatherAlert(payload as TripWeatherAlertPayload),
+  weekly_briefing: (payload) => processWeeklyBriefing(payload as WeeklyBriefingPayload),
 };
 
 async function processJob(job: AgentJob): Promise<void> {
