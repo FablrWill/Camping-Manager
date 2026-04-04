@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Gear Intelligence + Day-Of
 status: executing
-stopped_at: Phase 32 plans ready — 4 plans verified
-last_updated: "2026-04-04T08:00:00.000Z"
+stopped_at: Completed 32-deal-monitoring 32-01-PLAN.md
+last_updated: "2026-04-04T06:08:17.127Z"
 last_activity: 2026-04-04
 progress:
   total_phases: 26
   completed_phases: 19
-  total_plans: 55
-  completed_plans: 50
+  total_plans: 59
+  completed_plans: 51
   percent: 40
 ---
 
@@ -21,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-01)
 
 **Core value:** Personal camping second brain — a closed-loop system that plans, executes, and learns from every trip
-**Current focus:** Multiple parallel sessions active
+**Current focus:** Phase 32 — deal-monitoring
 
 ## Current Position
 
-Phase: 31, 36 (parallel)
-Plan: Not started
-Status: In Progress — Phase 31 (Dark Sky, thirsty-hawking) + Phase 36 (Mac Mini Agent Jobs, Mac mini executing)
+Phase: 32 (deal-monitoring) — EXECUTING
+Plan: 2 of 4
+Status: Ready to execute
 Last activity: 2026-04-04
 
 Progress: [████░░░░░░] 40%
@@ -75,6 +75,7 @@ Progress: [████░░░░░░] 40%
 | Phase 30-gear-product-research P01 | 235 | 2 tasks | 7 files |
 | Phase 30-gear-product-research P02 | 125 | 2 tasks | 2 files |
 | Phase 30-gear-product-research P03 | 4 | 2 tasks | 2 files |
+| Phase 32-deal-monitoring P01 | 274 | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -127,6 +128,8 @@ Recent decisions affecting current work:
 - [Phase 30-gear-product-research]: GearResearchTab fetches on mount via GET, POST triggers research; tab resets to documents on modal open
 - [Phase 30-gear-product-research]: Upgrade Opportunities section placed above gear list — surfaces actionable items immediately on page load
 - [Phase 30-gear-product-research]: JSON parsing of result blob done in server component (page.tsx) — client receives clean UpgradeOpportunity objects, not raw JSON
+- [Phase 32-deal-monitoring]: GearPriceCheckResultSchema omits foundPriceHigh — not used for deal detection per D-11; Zod strips unknown keys
+- [Phase 32-deal-monitoring]: isAtOrBelowTarget uses null guard (item.targetPrice != null) — returns false when no target price set
 
 ### Pending Todos
 
@@ -146,6 +149,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-04T05:35:07.075Z
-Stopped at: Phase 32 UI-SPEC approved
-Resume file: .planning/phases/32-deal-monitoring/32-UI-SPEC.md
+Last session: 2026-04-04T06:08:17.122Z
+Stopped at: Completed 32-deal-monitoring 32-01-PLAN.md
+Resume file: None

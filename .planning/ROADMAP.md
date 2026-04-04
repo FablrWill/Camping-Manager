@@ -521,7 +521,7 @@ Plans:
   5. `npm run build` passes
 **Plans**: 4 plans
 Plans:
-- [ ] 32-01-PLAN.md — Schema migration + Zod schema + Claude function + API route
+- [x] 32-01-PLAN.md — Schema migration + Zod schema + Claude function + API route
 - [ ] 32-02-PLAN.md — GearForm targetPrice field + PUT route update
 - [ ] 32-03-PLAN.md — GearDealsTab component + GearClient integration + deal badges
 - [ ] 32-04-PLAN.md — Dashboard collapsible Deals card
@@ -543,7 +543,7 @@ Plans:
   5. "Add manually" escape hatch opens the old static form
   6. Trip-creation conversations are persisted to the database
   7. `npm run build` passes
-**Plans:** 4/4 plans complete
+**Plans:** 1/4 plans executed
 
 Plans:
 - [x] 33-00-PLAN.md — Wave 0 test stubs (trip planner tools + ChatBubble extraction)
@@ -683,7 +683,7 @@ Plans:
 | 29. Vehicle Pre-Trip Checklist | v3.0 | 3/3 | Complete    | 2026-04-03 |
 | 30. Gear Product Research | v3.0 | 3/3 | Complete    | 2026-04-04 |
 | 31. Dark Sky & Astro Info | v3.0 | 0/TBD | In Progress | - |
-| 32. Deal Monitoring | v3.0 | 0/TBD | Not started | - |
+| 32. Deal Monitoring | v3.0 | 1/4 | In Progress|  |
 | 33. Conversational Trip Planner | v3.0 | 4/4 | Complete    | 2026-04-03 |
 | 34. Meal Planning Core | v3.0 | 4/4 | Complete | 2026-04-04 |
 | 35. Meal Planning: Shopping List, Prep Guide & Feedback | v3.0 | TBD/TBD | Complete | 2026-04-04 |
