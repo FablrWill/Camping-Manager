@@ -345,3 +345,24 @@ export const LNTChecklistResultSchema = z.object({
 
 export type LNTChecklistResult = z.infer<typeof LNTChecklistResultSchema>;
 export type LNTChecklistItem = z.infer<typeof LNTChecklistItemSchema>;
+
+// --- S34: Trip Intelligence Report Schema ---
+
+export const TripIntelligenceReportSchema = z.object({
+  patterns: z.array(z.string()),
+  gearInsights: z.array(
+    z.object({
+      name: z.string(),
+      insight: z.string(),
+      action: z.enum(['keep', 'reconsider', 'always_bring']),
+    })
+  ),
+  spotsToRevisit: z.array(
+    z.object({
+      name: z.string(),
+      reason: z.string(),
+    })
+  ),
+});
+
+export type TripIntelligenceClaudeData = z.infer<typeof TripIntelligenceReportSchema>;

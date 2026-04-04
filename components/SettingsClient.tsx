@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Button, Card, Input } from '@/components/ui';
 import PageHeader from '@/components/ui/PageHeader';
+import TripIntelligenceCard from './TripIntelligenceCard';
 
 export default function SettingsClient() {
   const [name, setName] = useState('');
@@ -173,6 +174,9 @@ export default function SettingsClient() {
           </div>
         </div>
       </Card>
+
+      {/* My Camping Profile */}
+      <TripIntelligenceCard />
 
     </div>
   );
