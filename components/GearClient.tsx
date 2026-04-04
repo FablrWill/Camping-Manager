@@ -6,6 +6,7 @@ import GearDocumentsTab from './GearDocumentsTab'
 import GearResearchCard from './GearResearchCard'
 import GearDealsTab from './GearDealsTab'
 import GearROITab from './GearROITab'
+import GearMaintenancePanel from './GearMaintenancePanel'
 import KitPresetsPanel from './KitPresetsPanel'
 import ChatContextButton from '@/components/ChatContextButton'
 import { CATEGORY_GROUPS, CATEGORIES, getCategoryEmoji, getCategoryLabel } from '@/lib/gear-categories'
@@ -34,6 +35,8 @@ interface GearItem {
   researchedAt: string | null
   targetPrice: number | null
   priceCheck: { isAtOrBelowTarget: boolean } | null
+  lastMaintenanceAt: string | null
+  maintenanceIntervalDays: number | null
   createdAt: string
   updatedAt: string
 }
@@ -63,7 +66,20 @@ function getConditionColor(condition: string | null): string {
   }
 }
 
-export default function GearClient({ initialItems }: { initialItems: GearItem[] }) {
+function isMaintenanceOverdue(item: GearItem): boolean {
+  if (!item.maintenanceIntervalDays || !item.lastMaintenanceAt) return false
+  const dueDate = new Date(item.lastMaintenanceAt)
+  dueDate.setDate(dueDate.getDate() + item.maintenanceIntervalDays)
+  return dueDate < new Date()
+}
+
+export default function GearClient({
+  initialItems,
+  overdueMaintenanceCount,
+}: {
+  initialItems: GearItem[]
+  overdueMaintenanceCount: number
+}) {
   const [items, setItems] = useState<GearItem[]>(initialItems)
   const [isLoading, setIsLoading] = useState(true)
   const [activeCategory, setActiveCategory] = useState<string | null>(null)
@@ -76,7 +92,7 @@ export default function GearClient({ initialItems }: { initialItems: GearItem[] 
   const [deleteError, setDeleteError] = useState<string | null>(null)
   const [isResearching, setIsResearching] = useState(false)
   const [showKits, setShowKits] = useState(false)
-  const [detailTab, setDetailTab] = useState<'research' | 'documents' | 'deals' | 'roi'>('research')
+  const [detailTab, setDetailTab] = useState<'research' | 'documents' | 'deals' | 'roi' | 'maintenance'>('research')
 
   useEffect(() => {
     setIsLoading(false)
@@ -228,6 +244,17 @@ export default function GearClient({ initialItems }: { initialItems: GearItem[] 
           </button>
         </div>
       </div>
+
+      {/* Overdue maintenance banner */}
+      {overdueMaintenanceCount > 0 && (
+        <div className="mb-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 px-4 py-3 text-sm text-red-700 dark:text-red-400 flex items-center gap-2">
+          <span>🔧</span>
+          <span>
+            <span className="font-semibold">{overdueMaintenanceCount} {overdueMaintenanceCount === 1 ? 'item' : 'items'}</span>{' '}
+            due for maintenance — tap to service.
+          </span>
+        </div>
+      )}
 
       {/* Owned / Wishlist toggle */}
       <div className="flex gap-1 mb-4 bg-stone-200 dark:bg-stone-800 rounded-lg p-1">
@@ -481,6 +508,20 @@ export default function GearClient({ initialItems }: { initialItems: GearItem[] 
                 >
                   ROI
                 </button>
+                <button
+                  type="button"
+                  onClick={() => setDetailTab('maintenance')}
+                  className={`flex-1 py-1.5 px-2 rounded-md text-xs font-medium transition-colors relative ${
+                    detailTab === 'maintenance'
+                      ? 'bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-50 shadow-sm'
+                      : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-300'
+                  }`}
+                >
+                  Maint.
+                  {isMaintenanceOverdue(editingItem) && (
+                    <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-red-500 rounded-full" />
+                  )}
+                </button>
               </div>
 
               {/* Tab content */}
@@ -520,6 +561,9 @@ export default function GearClient({ initialItems }: { initialItems: GearItem[] 
                   gearItemId={editingItem.id}
                   gearName={editingItem.name}
                 />
+              )}
+              {detailTab === 'maintenance' && (
+                <GearMaintenancePanel gearItemId={editingItem.id} />
               )}
             </div>
           ) : undefined}
