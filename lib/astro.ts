@@ -248,3 +248,100 @@ function minutesToTimeStr(totalMinutes: number): string {
 
   return `${hours12}:${minutes.toString().padStart(2, '0')} ${period}`
 }
+
+// --- Phase 31: suncalc-based per-night computation (used by AstroCard) ---
+
+import * as SunCalc from 'suncalc'
+import type { DayForecast } from '@/lib/weather'
+
+export interface NightAstro {
+  date: string          // YYYY-MM-DD
+  moonPhase: number     // 0.0-1.0 (suncalc phase value)
+  moonFraction: number  // 0.0-1.0 (illuminated fraction)
+  moonLabel: string     // "Full Moon", "New Moon", etc.
+  moonEmoji: string     // emoji character
+  goodForStars: boolean // moonFraction < 0.25
+  sunrise?: string      // "6:42 AM" from DayForecast
+  sunset?: string       // "7:58 PM" from DayForecast
+}
+
+export interface TripAstroData {
+  nights: NightAstro[]
+  bortleLink?: string   // lightpollutionmap.info deep link if coords available
+}
+
+export function getMoonPhaseLabel(phase: number): string {
+  if (phase < 0.03 || phase > 0.97) return 'New Moon'
+  if (phase < 0.22) return 'Waxing Crescent'
+  if (phase < 0.28) return 'First Quarter'
+  if (phase < 0.47) return 'Waxing Gibbous'
+  if (phase < 0.53) return 'Full Moon'
+  if (phase < 0.72) return 'Waning Gibbous'
+  if (phase < 0.78) return 'Last Quarter'
+  return 'Waning Crescent'
+}
+
+export function getMoonPhaseEmoji(phase: number): string {
+  if (phase < 0.03 || phase > 0.97) return '\u{1F311}'
+  if (phase < 0.22) return '\u{1F312}'
+  if (phase < 0.28) return '\u{1F313}'
+  if (phase < 0.47) return '\u{1F314}'
+  if (phase < 0.53) return '\u{1F315}'
+  if (phase < 0.72) return '\u{1F316}'
+  if (phase < 0.78) return '\u{1F317}'
+  return '\u{1F318}'
+}
+
+export function getBortleLink(lat: number, lon: number): string {
+  const state = 'eyJiYXNlbWFwIjoic3RlbGxhciIsIm92ZXJsYXkiOiJ3YTIwMTUiLCJvdmVybGF5T3BhY2l0eSI6ODV9'
+  return `https://www.lightpollutionmap.info/#zoom=10&lat=${lat}&lng=${lon}&state=${state}`
+}
+
+export function computeAstro(params: {
+  startDate: string
+  endDate: string
+  lat?: number
+  lon?: number
+  weatherDays?: DayForecast[]
+}): TripAstroData {
+  const { startDate, endDate, lat, lon, weatherDays } = params
+  const dates = buildAstroDateRange(startDate, endDate)
+
+  const nights: NightAstro[] = dates.map((date) => {
+    const illumination = SunCalc.getMoonIllumination(new Date(`${date}T12:00:00Z`))
+    const { phase, fraction } = illumination
+
+    const night: NightAstro = {
+      date,
+      moonPhase: phase,
+      moonFraction: fraction,
+      moonLabel: getMoonPhaseLabel(phase),
+      moonEmoji: getMoonPhaseEmoji(phase),
+      goodForStars: fraction < 0.25,
+    }
+
+    const matchingDay = weatherDays?.find((d) => d.date === date)
+    if (matchingDay) {
+      night.sunrise = matchingDay.sunrise
+      night.sunset = matchingDay.sunset
+    }
+
+    return night
+  })
+
+  return {
+    nights,
+    bortleLink: lat !== undefined && lon !== undefined ? getBortleLink(lat, lon) : undefined,
+  }
+}
+
+function buildAstroDateRange(startDate: string, endDate: string): string[] {
+  const dates: string[] = []
+  const current = new Date(`${startDate}T12:00:00Z`)
+  const end = new Date(`${endDate}T12:00:00Z`)
+  while (current <= end) {
+    dates.push(current.toISOString().slice(0, 10))
+    current.setUTCDate(current.getUTCDate() + 1)
+  }
+  return dates
+}

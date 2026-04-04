@@ -192,19 +192,19 @@ Return a JSON object with this exact shape:
     }
 
     const parsed = parseClaudeJSON(content.text, SingleMealSchema)
-    if (!parsed) {
+    if (!parsed.success) {
       return NextResponse.json({ error: 'Claude returned an invalid meal schema' }, { status: 422 })
     }
 
     const updated = await prisma.meal.update({
       where: { id: meal.id },
       data: {
-        name: parsed.name,
-        description: parsed.description ?? null,
-        ingredients: JSON.stringify(parsed.ingredients),
-        cookInstructions: parsed.cookInstructions ?? null,
-        prepNotes: parsed.prepNotes ?? null,
-        estimatedMinutes: parsed.estimatedMinutes ?? null,
+        name: parsed.data.name,
+        description: parsed.data.description ?? null,
+        ingredients: JSON.stringify(parsed.data.ingredients),
+        cookInstructions: parsed.data.cookInstructions ?? null,
+        prepNotes: parsed.data.prepNotes ?? null,
+        estimatedMinutes: parsed.data.estimatedMinutes ?? null,
       },
     })
 
