@@ -20,6 +20,7 @@ model GearItem {
   isWishlist  Boolean  @default(false)
   purchaseUrl String?
   price       Float?
+  targetPrice Float?   // Phase 32: target deal price for deal monitoring
   notes       String?
   wattage     Float?   // power draw in watts (consumers) or peak output (solar panel)
   hoursPerDay Float?   // default daily usage hours; falls back to lookup table if null
@@ -32,6 +33,7 @@ model GearItem {
   packingItems PackingItem[]
   documents    GearDocument[]
   research     GearResearch?
+  priceCheck   GearPriceCheck?
 }
 
 model Vehicle {
@@ -394,6 +396,20 @@ model GearResearch {
   verdict      String   // "Worth upgrading" | "Keep what you have" | "Only if budget allows"
   researchedAt DateTime @default(now())
   createdAt    DateTime @default(now())
+
+  gearItem GearItem @relation(fields: [gearItemId], references: [id], onDelete: Cascade)
+}
+
+// --- Phase 32: Deal Monitoring ---
+
+model GearPriceCheck {
+  id                String   @id @default(cuid())
+  gearItemId        String   @unique
+  foundPriceRange   String
+  foundPriceLow     Float
+  checkedAt         DateTime @default(now())
+  isAtOrBelowTarget Boolean
+  createdAt         DateTime @default(now())
 
   gearItem GearItem @relation(fields: [gearItemId], references: [id], onDelete: Cascade)
 }

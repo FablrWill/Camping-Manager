@@ -234,3 +234,14 @@ export const GearResearchResultSchema = z.object({
 
 export type GearResearchResult = z.infer<typeof GearResearchResultSchema>;
 export type GearResearchAlternative = z.infer<typeof GearResearchAlternativeSchema>;
+
+// --- Gear Price Check Schemas (Phase 32 — matches lib/claude.ts GearPriceCheckResult) ---
+
+export const GearPriceCheckResultSchema = z.object({
+  foundPriceRange: z.string(),
+  foundPriceLow: z.coerce.number(),
+  retailers: z.array(z.string()).default([]),
+  disclaimer: z.string(),
+});
+
+export type GearPriceCheckResult = z.infer<typeof GearPriceCheckResultSchema>;
