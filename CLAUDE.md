@@ -335,6 +335,40 @@ Use these entry points:
 Do not make direct repo edits outside a GSD workflow unless the user explicitly asks to bypass it.
 <!-- GSD:workflow-end -->
 
+## Production Database — CRITICAL RULES
+
+**The Mac mini is the production environment. The MacBook is development only.**
+
+| Environment | Machine | Database location | Contains |
+|-------------|---------|------------------|---------|
+| Production | Mac mini (`lisa`) | `~/outland-data/db.sqlite` | Will's real gear, trips, locations, photos |
+| Development | MacBook | `prisma/dev.db` | Seed data only — safe to wipe |
+
+### Rules every session must follow
+
+1. **NEVER run `npm run db:reset` on the Mac mini.** This drops and recreates the database. All of Will's data is gone. There is no undo.
+2. **NEVER run `prisma migrate dev` on the Mac mini.** Use `prisma migrate deploy` only — it applies pending migrations without resetting.
+3. **NEVER run `prisma db push` on the Mac mini.** It can silently drop columns or tables to match the schema.
+4. **Always back up before any migration on the Mac mini:**
+   ```bash
+   ssh lisa 'cp ~/outland-data/db.sqlite ~/outland-data/backups/db-pre-migration-$(date +%Y%m%d).sqlite'
+   ```
+5. **Schema changes follow this workflow:**
+   - Develop and test the migration on the MacBook (`prisma migrate dev` → local dev.db only)
+   - Commit the migration files
+   - On Mac mini: `git pull && prisma migrate deploy` (applies only, never resets)
+
+### Can MacBook Claude Code SSH into the Mac mini?
+
+Yes — and this is the correct pattern for deploying schema changes. Mac mini SSH alias is `lisa`:
+```bash
+ssh lisa 'cd ~/outland && git pull && npx prisma migrate deploy && pm2 restart outland'
+```
+Claude Code sessions on the MacBook **may SSH into `lisa` to deploy migrations and restart the app**, but must **never run any destructive database command** over that connection. When in doubt, run the backup command first.
+
+### The deploy script already does this correctly
+`scripts/deploy.sh` on the Mac mini runs `prisma migrate deploy` (safe). Never bypass it with manual commands unless you know exactly what you're doing.
+
 ## v2.0 Session Queue
 
 v2.0 features are tracked in `.planning/V2-SESSIONS.md`. Each Claude Code session should:
