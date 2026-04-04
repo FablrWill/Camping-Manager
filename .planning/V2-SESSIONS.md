@@ -1659,7 +1659,10 @@ All v5.0 sessions use `/gsd:quick`. Full specs are in `.planning/V2-SESSIONS.md`
 ```
 Pull origin main, then claim S31 in .planning/V2-SESSIONS.md (mark it 🔄 In Progress, commit + push). Then run /gsd:quick with this task:
 
-Build destination discovery — a "Where should I go this weekend?" feature. Create lib/destination-discovery.ts with a suggestDestinations() function that scores all saved locations against the Open-Meteo weekend forecast using: weather score (0–40pts), recency bonus (+15 if not visited in 30+ days), seasonal rating (stored SeasonalRating × 6), and drive distance from Asheville 35.5°N/82.5°W (0–15pts). Create POST /api/destinations/suggest. Build DestinationSuggesterSheet.tsx (date picker → 3 ranked suggestion cards with weather, distance, reasoning → "Plan this trip" pre-fills trip create form). Add a "Where should I go?" button to DashboardClient. Add a suggest_destination tool to the chat agent. Full spec in V2-SESSIONS.md under S31. When done, mark S31 ✅ Done, commit, push.
+Build destination discovery — a "Where should I go this weekend?" feature. Create lib/destination-discovery.ts with a suggestDestinations() function that scores all saved locations against the Open-Meteo weekend forecast using: weather score (0–40pts), recency bonus (+15 if not visited in 30+ days), seasonal rating (stored SeasonalRating × 6), and drive distance from Asheville 35.5°N/82.5°W (0–15pts). Create POST /api/destinations/suggest. Build DestinationSuggesterSheet.tsx (date picker → 3 ranked suggestion cards with weather, distance, reasoning → "Plan this trip" pre-fills trip create form). Add a "Where should I go?" button to DashboardClient. Add a suggest_destination tool to the chat agent. Full spec in V2-SESSIONS.md under S31.
+
+When done: mark S31 ✅ Done in V2-SESSIONS.md, commit, push, then merge to main:
+git checkout main && git merge - && git push origin main
 ```
 
 ---
@@ -1668,7 +1671,10 @@ Build destination discovery — a "Where should I go this weekend?" feature. Cre
 ```
 Pull origin main, then claim S32 in .planning/V2-SESSIONS.md (mark it 🔄 In Progress, commit + push). Then run /gsd:quick with this task:
 
-Extend AgentJob with scheduled recurring jobs. Add scheduledFor DateTime? and recurringCron String? to the AgentJob schema and run a migration. Extend GET /api/agent/jobs to also return jobs where scheduledFor <= now. Build 4 new job type handlers: deal_check (daily 8am — Claude estimates market price for gear with targetPrice set), maintenance_due (weekly Sunday — surfaces overdue maintenance items), trip_weather_alert (daily 7am — flags upcoming trips with bad weather forecasts), weekly_briefing (Sunday 9am — aggregates all three into one summary). Create scripts/scheduler.ts for the Mac mini (PM2 managed, checks every minute, seeds recurring jobs on first run). Build IntelligenceCard.tsx and wire it into DashboardClient. All Claude calls in job handlers use claude-haiku-4-5. Full spec in V2-SESSIONS.md under S32. When done, mark S32 ✅ Done, commit, push.
+Extend AgentJob with scheduled recurring jobs. Add scheduledFor DateTime? and recurringCron String? to the AgentJob schema and run a migration. Extend GET /api/agent/jobs to also return jobs where scheduledFor <= now. Build 4 new job type handlers: deal_check (daily 8am — Claude estimates market price for gear with targetPrice set), maintenance_due (weekly Sunday — surfaces overdue maintenance items), trip_weather_alert (daily 7am — flags upcoming trips with bad weather forecasts), weekly_briefing (Sunday 9am — aggregates all three into one summary). Create scripts/scheduler.ts for the Mac mini (PM2 managed, checks every minute, seeds recurring jobs on first run). Build IntelligenceCard.tsx and wire it into DashboardClient. All Claude calls in job handlers use claude-haiku-4-5. Full spec in V2-SESSIONS.md under S32.
+
+When done: mark S32 ✅ Done in V2-SESSIONS.md, commit, push, then merge to main:
+git checkout main && git merge - && git push origin main
 ```
 
 ---
@@ -1677,7 +1683,10 @@ Extend AgentJob with scheduled recurring jobs. Add scheduledFor DateTime? and re
 ```
 Pull origin main, then claim S33 in .planning/V2-SESSIONS.md (mark it 🔄 In Progress, commit + push). Then run /gsd:quick with this task:
 
-Add persistent memory to the chat agent. Create an AgentMemory model in Prisma (id, key String @unique, value String JSON, summary String, updatedAt, createdAt) and run a migration. Create GET/POST /api/agent/memory. Build lib/agent/memory.ts with loadMemoryContext() (fetches all entries, formats as < 500 token context block) and upsertMemory(). Inject loadMemoryContext() into the chat system prompt in app/api/chat/route.ts. Add a remember_this chat tool so Will can say "remember that..." and it persists. Add a refresh-memory scheduled job (weekly, via S32 scheduler) that re-analyzes trip history and gear feedback to update camping_patterns and gear_preferences keys. Add a "Clear agent memory" button in SettingsClient. Full spec in V2-SESSIONS.md under S33. When done, mark S33 ✅ Done, commit, push.
+Add persistent memory to the chat agent. Create an AgentMemory model in Prisma (id, key String @unique, value String JSON, summary String, updatedAt, createdAt) and run a migration. Create GET/POST /api/agent/memory. Build lib/agent/memory.ts with loadMemoryContext() (fetches all entries, formats as < 500 token context block) and upsertMemory(). Inject loadMemoryContext() into the chat system prompt in app/api/chat/route.ts. Add a remember_this chat tool so Will can say "remember that..." and it persists. Add a refresh-memory scheduled job (weekly, via S32 scheduler) that re-analyzes trip history and gear feedback to update camping_patterns and gear_preferences keys. Add a "Clear agent memory" button in SettingsClient. Full spec in V2-SESSIONS.md under S33.
+
+When done: mark S33 ✅ Done in V2-SESSIONS.md, commit, push, then merge to main:
+git checkout main && git merge - && git push origin main
 ```
 
 ---
@@ -1686,7 +1695,10 @@ Add persistent memory to the chat agent. Create an AgentMemory model in Prisma (
 ```
 Pull origin main, then claim S34 in .planning/V2-SESSIONS.md (mark it 🔄 In Progress, commit + push). Then run /gsd:quick with this task:
 
-Build an on-demand camping report card. Create lib/trip-intelligence.ts with generateTripIntelligence() that queries all trips/gear/feedback, computes stats (trip count, avg nights, top season, avg drive distance), then calls claude-sonnet-4-6 to analyze patterns and return: patterns[], gearInsights[], spotsToRevisit[]. Add a CampingProfile singleton model to Prisma (id, reportJson, generatedAt) and run a migration. Create POST /api/trips/intelligence (generate + cache) and GET (return cached). Build TripIntelligenceCard.tsx with stat badges, patterns section, gear insights, spots to revisit, and a Refresh button. Wire it into SettingsClient under "My Camping Profile". Full spec in V2-SESSIONS.md under S34. When done, mark S34 ✅ Done, commit, push.
+Build an on-demand camping report card. Create lib/trip-intelligence.ts with generateTripIntelligence() that queries all trips/gear/feedback, computes stats (trip count, avg nights, top season, avg drive distance), then calls claude-sonnet-4-6 to analyze patterns and return: patterns[], gearInsights[], spotsToRevisit[]. Add a CampingProfile singleton model to Prisma (id, reportJson, generatedAt) and run a migration. Create POST /api/trips/intelligence (generate + cache) and GET (return cached). Build TripIntelligenceCard.tsx with stat badges, patterns section, gear insights, spots to revisit, and a Refresh button. Wire it into SettingsClient under "My Camping Profile". Full spec in V2-SESSIONS.md under S34.
+
+When done: mark S34 ✅ Done in V2-SESSIONS.md, commit, push, then merge to main:
+git checkout main && git merge - && git push origin main
 ```
 
 ---
@@ -1695,7 +1707,10 @@ Build an on-demand camping report card. Create lib/trip-intelligence.ts with gen
 ```
 Pull origin main, then claim S35 in .planning/V2-SESSIONS.md (mark it 🔄 In Progress, commit + push). Then run /gsd:quick with this task:
 
-Upgrade the packing list generator with richer historical context. Create lib/packing-intelligence.ts with buildPackingContext(tripId) that queries: past trips to the same or nearby location, gear feedback from last 10 trips, seasonal patterns, and altitude. Update generatePackingList() in lib/claude.ts to accept PackingContext and inject 4 context blocks into the prompt: location history, seasonal temperature notes, gear-to-skip suggestions (items brought but never used on similar trips), and a weight estimate if gear weights are recorded. Update app/api/packing-list/route.ts to call buildPackingContext before generating. No schema changes needed — all data already exists. Full spec in V2-SESSIONS.md under S35. When done, mark S35 ✅ Done, commit, push.
+Upgrade the packing list generator with richer historical context. Create lib/packing-intelligence.ts with buildPackingContext(tripId) that queries: past trips to the same or nearby location, gear feedback from last 10 trips, seasonal patterns, and altitude. Update generatePackingList() in lib/claude.ts to accept PackingContext and inject 4 context blocks into the prompt: location history, seasonal temperature notes, gear-to-skip suggestions (items brought but never used on similar trips), and a weight estimate if gear weights are recorded. Update app/api/packing-list/route.ts to call buildPackingContext before generating. No schema changes needed — all data already exists. Full spec in V2-SESSIONS.md under S35.
+
+When done: mark S35 ✅ Done in V2-SESSIONS.md, commit, push, then merge to main:
+git checkout main && git merge - && git push origin main
 ```
 
 ---
@@ -1704,7 +1719,10 @@ Upgrade the packing list generator with richer historical context. Create lib/pa
 ```
 Pull origin main, then claim S36 in .planning/V2-SESSIONS.md (mark it 🔄 In Progress, commit + push). Then run /gsd:quick with this task:
 
-Refresh and improve the RAG knowledge base. Add source String?, refreshedAt DateTime?, contentHash String? to the knowledge document model in Prisma and run a migration. Create lib/rag/sources.ts as a registry of public NC camping sources (USFS Pisgah/Nantahala alerts RSS, NC State Parks pages, LNT guidelines, iOverlander NC export, Campendium NC). Build scripts/refresh-corpus.ts for the Mac mini: fetch each source, compute SHA-256 hash, skip if unchanged, re-chunk and re-embed if changed. Improve lib/rag/chunker.ts to split on semantic sections (headers) and preserve source/date metadata per chunk. Add corpus_refresh AgentJob type handler. Add a "Knowledge Base" section to SettingsClient showing corpus size, last refresh date, and a "Refresh now" button. Respect robots.txt on all scraped sources. Full spec in V2-SESSIONS.md under S36. When done, mark S36 ✅ Done, commit, push.
+Refresh and improve the RAG knowledge base. Add source String?, refreshedAt DateTime?, contentHash String? to the knowledge document model in Prisma and run a migration. Create lib/rag/sources.ts as a registry of public NC camping sources (USFS Pisgah/Nantahala alerts RSS, NC State Parks pages, LNT guidelines, iOverlander NC export, Campendium NC). Build scripts/refresh-corpus.ts for the Mac mini: fetch each source, compute SHA-256 hash, skip if unchanged, re-chunk and re-embed if changed. Improve lib/rag/chunker.ts to split on semantic sections (headers) and preserve source/date metadata per chunk. Add corpus_refresh AgentJob type handler. Add a "Knowledge Base" section to SettingsClient showing corpus size, last refresh date, and a "Refresh now" button. Respect robots.txt on all scraped sources. Full spec in V2-SESSIONS.md under S36.
+
+When done: mark S36 ✅ Done in V2-SESSIONS.md, commit, push, then merge to main:
+git checkout main && git merge - && git push origin main
 ```
 
 ---
