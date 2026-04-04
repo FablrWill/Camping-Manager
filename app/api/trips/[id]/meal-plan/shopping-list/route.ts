@@ -78,7 +78,16 @@ export async function POST(
 
     const result = await generateShoppingList({ tripName: trip.name, meals })
 
-    // Persist: delete old items, create new ones
+    // Load existing checked items before replacing
+    const existingItems = await prisma.shoppingListItem.findMany({
+      where: { mealPlanId: mealPlan.id },
+      select: { item: true, checked: true },
+    })
+    const checkedNames = new Set(
+      existingItems.filter((i) => i.checked).map((i) => i.item.toLowerCase())
+    )
+
+    // Persist: delete old items, create new ones (preserving checked state by name)
     await prisma.$transaction([
       prisma.shoppingListItem.deleteMany({ where: { mealPlanId: mealPlan.id } }),
       prisma.shoppingListItem.createMany({
@@ -88,7 +97,7 @@ export async function POST(
           quantity: item.quantity,
           unit: item.unit,
           category: item.category,
-          checked: false,
+          checked: checkedNames.has(item.item.toLowerCase()),
         })),
       }),
     ])
