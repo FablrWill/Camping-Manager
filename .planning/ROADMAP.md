@@ -72,7 +72,7 @@
 
 **Wave 3 — Depends on Wave 2:**
 - [ ] **Phase 30: Gear Product Research** - AI-powered "Research" button, best-in-class comparison, upgrade recommendations
-- [ ] **Phase 31: Dark Sky, Astro Info & Activity Gear Recommendations** - Bortle/moon/sunrise data + activities gear category + trip planner activity suggestions
+- 🔄 **Phase 31: Dark Sky, Astro Info & Activity Gear Recommendations** - Bortle/moon/sunrise data + activities gear category + trip planner activity suggestions (in progress)
 
 **Wave 4 — Depends on Wave 3:**
 - [ ] **Phase 32: Deal Monitoring** - Target price on wishlist items, on-demand price check via Claude, deal alerts
