@@ -344,6 +344,7 @@ export async function generateMealPlan(params: {
     days: WeatherDay[]
     alerts: WeatherAlert[]
   }
+  bringingDog?: boolean
 }): Promise<MealPlanResult> {
   const {
     tripName,
@@ -356,6 +357,7 @@ export async function generateMealPlan(params: {
     tripNotes,
     cookingGear,
     weather,
+    bringingDog,
   } = params
 
   const weatherSection = buildWeatherSection(weather)
@@ -383,7 +385,10 @@ ${weatherSection}
 
 COOKING EQUIPMENT (from gear inventory):
 ${cookingGearSection || 'No cooking gear in inventory — suggest simple no-cook meals and recommend basic gear to add.'}
-
+${bringingDog ? `
+DOG ON TRIP:
+A dog is coming on this trip. Avoid heavy use of foods toxic to dogs (onions, garlic, grapes, chocolate, xylitol). You may suggest a dog-friendly snack idea in the tips section.
+` : ''}
 MEAL PREP STRATEGY:
 The user has a vacuum sealer (with bag rolls) and sous vide machine at home. Pre-trip prep is preferred:
 - Proteins should be sous vide'd and vacuum sealed at home when practical

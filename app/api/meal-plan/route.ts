@@ -107,6 +107,7 @@ export async function POST(request: NextRequest) {
         tripNotes: trip.notes ?? undefined,
         cookingGear,
         weather,
+        bringingDog: trip.bringingDog,
       })
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to generate meal plan'
