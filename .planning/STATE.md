@@ -3,14 +3,13 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Smarter Feedback Loops
 status: executing
-stopped_at: Completed 38-03-PLAN.md
-last_updated: "2026-04-04T07:34:00.000Z"
-last_activity: 2026-04-04 - Completed quick task 260404-km8: Smart packing v2 (S35)
+last_updated: "2026-04-04T19:30:09.922Z"
+last_activity: "2026-04-04 - Completed quick task 260404-km8: Smart packing v2 (S35)"
 progress:
   total_phases: 25
-  completed_phases: 21
+  completed_phases: 24
   total_plans: 67
-  completed_plans: 63
+  completed_plans: 67
   percent: 40
 ---
 
@@ -80,6 +79,7 @@ Progress: [████░░░░░░] 40%
 | Phase 35 P04 | 15 | 2 tasks | 4 files |
 | Phase 35 P05 | 8 | 4 tasks | 3 files |
 | Phase 38 P02 | 15 | 1 tasks | 2 files |
+| Phase 44 P00 | 230 | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -140,6 +140,7 @@ Recent decisions affecting current work:
 - [Phase 35]: mealId validated as required in feedback POST before other fields — primary key for upsert pattern
 - [Phase 35]: buildMealHistorySection called with global last-10 feedback query (no trip scope) for cross-trip preference carry-forward
 - [Phase 38]: aria-label regex /liked/i matches disliked — use /^liked /i with word boundary in tests
+- [Phase 44]: Export parseLocationsFromText and parseSavedPlacesJson as named exports — allows direct unit testing without mocking the DB
 
 ### Pending Todos
 
@@ -174,7 +175,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-04
+Last session: 2026-04-04T19:29:58.785Z
 Last activity: Completed S36 RAG knowledge base refresh
 Resume file: None
 
