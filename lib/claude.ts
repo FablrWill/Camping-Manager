@@ -1,5 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk'
-import { parseClaudeJSON, PackingListResultSchema, MealPlanResultSchema, DepartureChecklistResultSchema, DepartureChecklistResult, TripSummaryResultSchema, type TripSummaryResult, GearDocumentResultSchema, type GearDocumentResult, VehicleChecklistResultSchema, type VehicleChecklistResult, GearResearchResultSchema, type GearResearchResult } from '@/lib/parse-claude'
+import { parseClaudeJSON, PackingListResultSchema, MealPlanResultSchema, DepartureChecklistResultSchema, DepartureChecklistResult, TripSummaryResultSchema, type TripSummaryResult, GearDocumentResultSchema, type GearDocumentResult, VehicleChecklistResultSchema, type VehicleChecklistResult, GearResearchResultSchema, type GearResearchResult, GearPriceCheckResultSchema, type GearPriceCheckResult } from '@/lib/parse-claude'
 import { CATEGORY_EMOJI, CATEGORIES } from '@/lib/gear-categories'
 
 const anthropic = new Anthropic({
@@ -819,4 +819,52 @@ Respond with ONLY a JSON object matching this structure:
     throw new Error(parseResult.error);
   }
   return parseResult.data;
+}
+
+export async function generateGearPriceCheck(params: {
+  name: string;
+  brand: string | null;
+  modelNumber: string | null;
+  category: string;
+  price: number | null;
+  targetPrice: number | null;
+}): Promise<GearPriceCheckResult> {
+  const { name, brand, modelNumber, category, price, targetPrice } = params;
+
+  const itemDescription = [
+    `Name: ${name}`,
+    brand ? `Brand: ${brand}` : null,
+    modelNumber ? `Model: ${modelNumber}` : null,
+    `Category: ${category}`,
+    price ? `User paid: $${price}` : null,
+    targetPrice ? `Target price: $${targetPrice}` : null,
+  ].filter(Boolean).join('\n- ');
+
+  const message = await anthropic.messages.create({
+    model: 'claude-sonnet-4-20250514',
+    max_tokens: 1024,
+    messages: [{
+      role: 'user',
+      content: `You are a camping gear price research assistant.
+Given details about a gear item, return your best estimate of the current retail price range from major outdoor retailers.
+
+GEAR:
+- ${itemDescription}
+
+Return ONLY valid JSON (no markdown fences):
+{
+  "foundPriceRange": "$89-109",
+  "foundPriceLow": 89.0,
+  "retailers": ["REI", "Amazon", "Backcountry"],
+  "disclaimer": "Prices based on Claude's training data -- may be outdated."
+}`,
+    }],
+  });
+
+  const text = message.content[0].type === 'text' ? message.content[0].text : '';
+  const priceParseResult = parseClaudeJSON(text, GearPriceCheckResultSchema);
+  if (!priceParseResult.success) {
+    throw new Error(priceParseResult.error);
+  }
+  return priceParseResult.data;
 }
