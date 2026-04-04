@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import GearForm from './GearForm'
 import GearDocumentsTab from './GearDocumentsTab'
+import GearResearchTab from './GearResearchTab'
 import ChatContextButton from '@/components/ChatContextButton'
 import { CATEGORY_GROUPS, CATEGORIES, getCategoryEmoji, getCategoryLabel } from '@/lib/gear-categories'
 
@@ -61,6 +62,7 @@ export default function GearClient({ initialItems }: { initialItems: GearItem[] 
   const [searchQuery, setSearchQuery] = useState('')
   const [editingItem, setEditingItem] = useState<GearItem | null>(null)
   const [showForm, setShowForm] = useState(false)
+  const [activeTab, setActiveTab] = useState<'documents' | 'research'>('documents')
   const [deletingItem, setDeletingItem] = useState<GearItem | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState<string | null>(null)
@@ -148,12 +150,23 @@ export default function GearClient({ initialItems }: { initialItems: GearItem[] 
   function openEdit(item: GearItem) {
     setEditingItem(item)
     setShowForm(true)
+    setActiveTab('documents')
   }
 
   function openAdd() {
     setEditingItem(null)
     setShowForm(true)
+    setActiveTab('documents')
   }
+
+  const openResearchForItem = useCallback((itemId: string) => {
+    const item = items.find(i => i.id === itemId)
+    if (item) {
+      setEditingItem(item)
+      setShowForm(true)
+      setActiveTab('research')
+    }
+  }, [items])
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-6">
@@ -365,14 +378,46 @@ export default function GearClient({ initialItems }: { initialItems: GearItem[] 
           }}
           extraContent={editingItem ? (
             <div className="border-t border-stone-200 dark:border-stone-700 pt-4 mt-2">
-              <h3 className="text-sm font-medium text-stone-700 dark:text-stone-300 mb-3">Documents</h3>
-              <GearDocumentsTab
-                gearItemId={editingItem.id}
-                gearName={editingItem.name}
-                gearBrand={editingItem.brand}
-                gearModelNumber={editingItem.modelNumber}
-                gearCategory={editingItem.category}
-              />
+              {/* Tab header */}
+              <div className="flex gap-4 mb-3">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('documents')}
+                  className={`text-sm font-medium pb-1 border-b-2 transition-colors ${
+                    activeTab === 'documents'
+                      ? 'border-amber-600 text-amber-700 dark:text-amber-400'
+                      : 'border-transparent text-stone-500 hover:text-stone-700 dark:text-stone-400'
+                  }`}
+                >
+                  Documents
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('research')}
+                  className={`text-sm font-medium pb-1 border-b-2 transition-colors ${
+                    activeTab === 'research'
+                      ? 'border-amber-600 text-amber-700 dark:text-amber-400'
+                      : 'border-transparent text-stone-500 hover:text-stone-700 dark:text-stone-400'
+                  }`}
+                >
+                  Research
+                </button>
+              </div>
+              {/* Tab content */}
+              {activeTab === 'documents' ? (
+                <GearDocumentsTab
+                  gearItemId={editingItem.id}
+                  gearName={editingItem.name}
+                  gearBrand={editingItem.brand}
+                  gearModelNumber={editingItem.modelNumber}
+                  gearCategory={editingItem.category}
+                />
+              ) : (
+                <GearResearchTab
+                  gearItemId={editingItem.id}
+                  gearName={editingItem.name}
+                />
+              )}
             </div>
           ) : undefined}
         />
