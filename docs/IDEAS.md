@@ -278,6 +278,44 @@ App shows pending indicator when a job is queued, surfaces results inline (deal 
 
 ---
 
+### Telescope / Stargazing Kit
+**Added:** 2026-04-03
+**Context:** Will is interested in exploring a camping telescope for dark sky / stargazing sites.
+
+A natural complement to the existing Dark Sky feature (Bortle class, moon phase, golden hour). Ideas:
+- Telescope gear subcategory with aperture, focal length, and mount type fields
+- "Is this a good stargazing spot?" rating based on Bortle class + light pollution for saved locations
+- Pre-trip stargazing conditions forecast (seeing quality, transparency, moon interference)
+- Equipment checklist tailored to astro nights (red flashlight, hand warmers for eyepieces, dew heater)
+- Claude can suggest targets based on conditions ("Great night for Andromeda — try these settings for your scope")
+- Log what you observed and where — builds a personal astronomical journal over time
+
+---
+
+### GPX Import
+**Added:** 2026-04-03
+**Context:** Listed in Feature Phases but not yet detailed. Captures trail data from AllTrails and Wikiloc.
+
+AllTrails and Wikiloc don't have public APIs but both export GPX files. Import flow:
+- User exports GPX from AllTrails/Wikiloc app
+- Shares/uploads to Outland OS
+- App parses waypoints, elevation, distance, trail name
+- Creates a saved location for the trailhead, attaches the route
+- Route overlays on the map as a colored trail line
+
+---
+
+### Google Maps Saved List Import
+**Added:** 2026-04-03
+**Context:** Listed in Feature Phases. Will often saves locations in Google Maps — this brings them into Outland OS.
+
+- User shares a Google Maps list URL (or exports)
+- App scrapes the list pins: name, coordinates, any notes
+- Each pin becomes a draft saved location for review + confirmation
+- Deduplication against existing locations by proximity check
+
+---
+
 ### Siri/Reminders Inbox — "Capture on the Road"
 **Added:** 2026-03-30
 **Context:** Will uses Siri via CarPlay while driving to dump random thoughts, feature ideas, gear todos, and trip notes into Apple Reminders. It's a fast, zero-friction capture habit — not what Reminders was designed for, but it works. The problem is those items pile up unorganized and nothing gets done with them.
