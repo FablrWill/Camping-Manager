@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { generateMealPlan } from '@/lib/claude'
+import { generateMealPlan, anthropic } from '@/lib/claude'
 import { fetchWeather } from '@/lib/weather'
+import { parseClaudeJSON, SingleMealSchema } from '@/lib/parse-claude'
 
 export async function GET(request: NextRequest) {
   try {
@@ -103,6 +104,7 @@ export async function POST(request: NextRequest) {
         tripNotes: trip.notes ?? undefined,
         cookingGear,
         weather,
+        bringingDog: trip.bringingDog,
       })
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to generate meal plan'
@@ -125,6 +127,91 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Meal plan generation failed:', error)
     const message = error instanceof Error ? error.message : 'Failed to generate meal plan'
+    return NextResponse.json({ error: message }, { status: 500 })
+  }
+}
+
+export async function PATCH(request: NextRequest) {
+  try {
+    const { tripId, day, mealType } = await request.json()
+
+    if (!tripId) return NextResponse.json({ error: 'tripId is required' }, { status: 400 })
+    if (day === undefined || day === null) return NextResponse.json({ error: 'day is required' }, { status: 400 })
+    if (!mealType) return NextResponse.json({ error: 'mealType is required' }, { status: 400 })
+
+    if (!process.env.ANTHROPIC_API_KEY) {
+      return NextResponse.json({ error: 'Claude API key not configured' }, { status: 500 })
+    }
+
+    const mealPlan = await prisma.mealPlan.findUnique({
+      where: { tripId },
+      include: { meals: true },
+    })
+    if (!mealPlan) {
+      return NextResponse.json({ error: 'Meal plan not found' }, { status: 404 })
+    }
+
+    const meal = mealPlan.meals.find((m) => m.day === day && m.slot === mealType)
+    if (!meal) {
+      return NextResponse.json({ error: `No ${mealType} found for day ${day}` }, { status: 404 })
+    }
+
+    const trip = await prisma.trip.findUnique({
+      where: { id: tripId },
+      include: { location: true },
+    })
+
+    const response = await anthropic.messages.create({
+      model: 'claude-opus-4-6',
+      max_tokens: 1024,
+      messages: [
+        {
+          role: 'user',
+          content: `You are a camping meal planner. Generate a single replacement ${mealType} meal for a camping trip.
+Trip: ${trip?.name ?? 'camping trip'}
+Location: ${trip?.location?.name ?? 'unknown'}
+Meal slot: day ${day}, ${mealType}
+Current meal being replaced: ${meal.name}
+
+Return a JSON object with this exact shape:
+{
+  "name": "Meal name",
+  "description": "Brief description",
+  "ingredients": [{"item": "ingredient", "amount": "quantity"}],
+  "cookInstructions": "How to cook at camp",
+  "prepNotes": "Any at-home prep notes",
+  "estimatedMinutes": 20
+}`,
+        },
+      ],
+    })
+
+    const content = response.content[0]
+    if (content.type !== 'text') {
+      return NextResponse.json({ error: 'Unexpected Claude response type' }, { status: 500 })
+    }
+
+    const parsed = parseClaudeJSON(content.text, SingleMealSchema)
+    if (!parsed) {
+      return NextResponse.json({ error: 'Claude returned an invalid meal schema' }, { status: 422 })
+    }
+
+    const updated = await prisma.meal.update({
+      where: { id: meal.id },
+      data: {
+        name: parsed.name,
+        description: parsed.description ?? null,
+        ingredients: JSON.stringify(parsed.ingredients),
+        cookInstructions: parsed.cookInstructions ?? null,
+        prepNotes: parsed.prepNotes ?? null,
+        estimatedMinutes: parsed.estimatedMinutes ?? null,
+      },
+    })
+
+    return NextResponse.json(updated)
+  } catch (error) {
+    console.error('Per-meal regeneration failed:', error)
+    const message = error instanceof Error ? error.message : 'Failed to regenerate meal'
     return NextResponse.json({ error: message }, { status: 500 })
   }
 }

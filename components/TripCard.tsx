@@ -179,6 +179,12 @@ export default function TripCard({
                   {trip._count.photos} photos
                 </span>
               )}
+              {trip.mealPlanGeneratedAt && (
+                <span className="flex items-center gap-1">
+                  <span className="text-xs">🍽️</span>
+                  Meal plan
+                </span>
+              )}
             </div>
 
             {trip.notes && (

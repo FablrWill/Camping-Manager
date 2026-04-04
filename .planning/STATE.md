@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Gear Intelligence + Day-Of
 status: executing
-stopped_at: Completed 34-03-PLAN.md
-last_updated: "2026-04-04T01:37:04.515Z"
+stopped_at: Completed 35-05-PLAN.md
+last_updated: "2026-04-04T05:51:08.577Z"
 last_activity: 2026-04-04
 progress:
   total_phases: 24
-  completed_phases: 19
-  total_plans: 52
-  completed_plans: 51
+  completed_phases: 20
+  total_plans: 58
+  completed_plans: 57
   percent: 40
 ---
 
@@ -21,7 +21,7 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-01)
 
 **Core value:** Personal camping second brain — a closed-loop system that plans, executes, and learns from every trip
-**Current focus:** Phase 34 — meal-planning-core
+**Current focus:** Phase 35 — meal-planning-shopping-prep-feedback
 
 ## Current Position
 
@@ -76,6 +76,9 @@ Progress: [████░░░░░░] 40%
 | Phase 34 P01 | 5 | 2 tasks | 5 files |
 | Phase 34 P02 | 3 | 2 tasks | 4 files |
 | Phase 34 P03 | 12 | 2 tasks | 5 files |
+| Phase 35 P02 | 125 | 2 tasks | 3 files |
+| Phase 35 P04 | 15 | 2 tasks | 4 files |
+| Phase 35 P05 | 8 | 4 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -130,6 +133,11 @@ Recent decisions affecting current work:
 - [Phase 34]: POST /generate persists Meal rows in prisma.$transaction with atomic Trip.mealPlanGeneratedAt update
 - [Phase 34]: MealPlanClient renders day-by-day collapsible meals with per-meal PATCH regeneration; old MealPlan component replaced in TripPrepClient
 - [Phase 34]: Meal plan status badge (ready/none) shown per trip in TripsClient using mealPlanGeneratedAt field
+- [Phase 35]: buildMealHistorySection is pure function in lib/claude.ts, feedback query crosses all trips for session-to-session preference carry-forward, non-blocking try-catch ensures generation always succeeds
+- [Phase 35]: mealPlanStatus computed server-side in page.tsx via getMealPlanStatus() — keeps DashboardClient pure UI with 4-state logic per D-10/D-11
+- [Phase 35]: checkedNames uses Set<string> with toLowerCase() for case-insensitive match on shopping list regeneration
+- [Phase 35]: mealId validated as required in feedback POST before other fields — primary key for upsert pattern
+- [Phase 35]: buildMealHistorySection called with global last-10 feedback query (no trip scope) for cross-trip preference carry-forward
 
 ### Pending Todos
 
@@ -147,6 +155,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-04T01:27:45.753Z
-Stopped at: Completed 34-03-PLAN.md
+Last session: 2026-04-04T05:47:17.081Z
+Stopped at: Completed 35-05-PLAN.md
 Resume file: None

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { generateMealPlan, type GearItem } from '@/lib/claude'
+import { generateMealPlan, buildMealHistorySection, type GearItem } from '@/lib/claude'
 import { fetchWeather } from '@/lib/weather'
 
 // POST /api/trips/:id/meal-plan/generate — generate full meal plan via Claude
@@ -60,24 +60,17 @@ export async function POST(
       (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
     )
 
-    // 5. Fetch prior meal feedback from previous plans for this trip
-    const priorFeedback = await prisma.mealFeedback.findMany({
-      where: {
-        meal: {
-          mealPlan: { tripId },
-        },
-      },
-      include: { meal: { select: { name: true, slot: true } } },
-      orderBy: { createdAt: 'desc' },
-    })
-
+    // 5. Fetch prior meal feedback across all trips (non-blocking)
     let feedbackHistory: string | undefined
-    if (priorFeedback.length > 0) {
-      const lines = priorFeedback.map((fb) => {
-        const note = fb.note ? ` — "${fb.note}"` : ''
-        return `- ${fb.meal.name} (${fb.meal.slot}): ${fb.rating}${note}`
+    try {
+      const recentFeedback = await prisma.mealFeedback.findMany({
+        orderBy: { createdAt: 'desc' },
+        take: 10,
       })
-      feedbackHistory = lines.join('\n')
+      const mealHistory = buildMealHistorySection(recentFeedback)
+      feedbackHistory = mealHistory || undefined
+    } catch (err) {
+      console.error('Feedback fetch failed (non-blocking):', err)
     }
 
     // 6. Call Claude generateMealPlan with bringingDog and feedback history
@@ -197,7 +190,7 @@ export async function POST(
       include: {
         meals: {
           orderBy: [{ day: 'asc' }, { slot: 'asc' }],
-          include: { feedback: true },
+          include: { feedbacks: { orderBy: { createdAt: 'desc' }, take: 1 } },
         },
       },
     })
@@ -209,7 +202,8 @@ export async function POST(
               ...savedPlan,
               meals: savedPlan.meals.map((m) => ({
                 ...m,
-                ingredients: JSON.parse(m.ingredients),
+                ingredients: JSON.parse(m.ingredients) as unknown,
+                feedback: m.feedbacks[0] ?? null,
               })),
             }
           : null,

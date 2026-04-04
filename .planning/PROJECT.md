@@ -192,4 +192,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-04 after Phase 34 complete — Meal Planning Core shipped*
+*Last updated: 2026-04-04 after Phase 35 complete — Shopping List, Prep Guide & Feedback shipped*

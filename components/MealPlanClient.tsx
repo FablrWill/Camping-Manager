@@ -11,11 +11,11 @@ import {
   ChefHat,
   ShoppingCart,
   ClipboardList,
-  ThumbsUp,
-  Minus,
-  ThumbsDown,
 } from 'lucide-react'
 import { Button, ConfirmDialog } from '@/components/ui'
+import ShoppingListClient from './ShoppingListClient'
+import PrepGuideClient from './PrepGuideClient'
+import MealFeedbackButton from './MealFeedbackButton'
 
 // ── Types ───────────────────────────────────────────────────────────────────
 
@@ -23,13 +23,6 @@ interface MealIngredient {
   item: string
   quantity: string
   unit: string
-}
-
-interface MealFeedbackData {
-  id: string
-  mealId: string
-  rating: string
-  note: string | null
 }
 
 interface MealData {
@@ -42,13 +35,13 @@ interface MealData {
   cookInstructions: string | null
   prepNotes: string | null
   estimatedMinutes: number | null
-  feedback: MealFeedbackData | null
 }
 
 interface MealPlanData {
   id: string
   generatedAt: string
   notes: string | null
+  prepGuide: string | null
   meals: MealData[]
 }
 
@@ -57,39 +50,9 @@ interface MealPlanClientProps {
   tripName: string
 }
 
-// ── Shopping list types ──────────────────────────────────────────────────────
-
-interface ShoppingItem {
-  item: string
-  quantity: string
-  unit: string
-  fromMeals: string[]
-}
-
-type ShoppingCategory = 'produce' | 'protein' | 'dairy' | 'grains' | 'pantry' | 'other'
-
-interface ShoppingList {
-  produce: ShoppingItem[]
-  protein: ShoppingItem[]
-  dairy: ShoppingItem[]
-  grains: ShoppingItem[]
-  pantry: ShoppingItem[]
-  other: ShoppingItem[]
-}
-
-// ── Prep guide types ─────────────────────────────────────────────────────────
-
-interface PrepEntry {
-  mealId: string
-  day: number
-  slot: string
-  mealName: string
-  prepNotes: string
-}
-
 // ── Constants ────────────────────────────────────────────────────────────────
 
-type TabId = 'meals' | 'shopping' | 'prep'
+type TabId = 'plan' | 'shopping' | 'prep'
 
 const SLOT_COLORS: Record<string, string> = {
   breakfast: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400',
@@ -97,25 +60,6 @@ const SLOT_COLORS: Record<string, string> = {
   dinner: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-400',
   snack: 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-400',
 }
-
-const CATEGORY_LABELS: Record<ShoppingCategory, string> = {
-  produce: 'Produce',
-  protein: 'Proteins & Meat',
-  dairy: 'Dairy',
-  grains: 'Bread & Grains',
-  pantry: 'Pantry',
-  other: 'Other',
-}
-
-const CATEGORY_ORDER: ShoppingCategory[] = ['produce', 'protein', 'dairy', 'grains', 'pantry', 'other']
-
-const RATING_CONFIG = {
-  loved: { label: 'Loved it', icon: ThumbsUp, color: 'text-green-600 dark:text-green-400', bg: 'bg-green-100 dark:bg-green-900/40' },
-  ok: { label: 'It was ok', icon: Minus, color: 'text-stone-500 dark:text-stone-400', bg: 'bg-stone-100 dark:bg-stone-700' },
-  skip: { label: 'Skip it', icon: ThumbsDown, color: 'text-red-500 dark:text-red-400', bg: 'bg-red-100 dark:bg-red-900/40' },
-} as const
-
-type RatingKey = keyof typeof RATING_CONFIG
 
 // ── Helper functions ─────────────────────────────────────────────────────────
 
@@ -141,10 +85,6 @@ function groupByDay(meals: MealData[]): Map<number, MealData[]> {
   return map
 }
 
-function isRatingKey(val: string): val is RatingKey {
-  return val === 'loved' || val === 'ok' || val === 'skip'
-}
-
 // ── Tab bar ──────────────────────────────────────────────────────────────────
 
 interface TabBarProps {
@@ -154,20 +94,20 @@ interface TabBarProps {
 
 function TabBar({ active, onChange }: TabBarProps) {
   const tabs: { id: TabId; label: string; icon: React.ReactNode }[] = [
-    { id: 'meals', label: 'Meals', icon: <ChefHat size={14} /> },
+    { id: 'plan', label: 'Plan', icon: <ChefHat size={14} /> },
     { id: 'shopping', label: 'Shopping', icon: <ShoppingCart size={14} /> },
-    { id: 'prep', label: 'Prep Guide', icon: <ClipboardList size={14} /> },
+    { id: 'prep', label: 'Prep', icon: <ClipboardList size={14} /> },
   ]
 
   return (
-    <div className="flex border-b border-stone-100 dark:border-stone-800">
+    <div className="flex bg-stone-50 dark:bg-stone-800/50 border-b border-stone-100 dark:border-stone-800">
       {tabs.map((tab) => (
         <button
           key={tab.id}
           onClick={() => onChange(tab.id)}
-          className={`flex items-center gap-1.5 px-4 py-2.5 text-xs font-medium transition-colors ${
+          className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-sm font-medium transition-colors ${
             active === tab.id
-              ? 'text-amber-600 dark:text-amber-400 border-b-2 border-amber-500 -mb-px'
+              ? 'border-b-2 border-amber-500 text-stone-900 dark:text-stone-100 font-semibold'
               : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-300'
           }`}
         >
@@ -179,290 +119,12 @@ function TabBar({ active, onChange }: TabBarProps) {
   )
 }
 
-// ── Shopping tab ─────────────────────────────────────────────────────────────
-
-interface ShoppingTabProps {
-  tripId: string
-}
-
-function ShoppingTab({ tripId }: ShoppingTabProps) {
-  const [shoppingList, setShoppingList] = useState<ShoppingList | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [checked, setChecked] = useState<Set<string>>(new Set())
-
-  useEffect(() => {
-    async function fetchShoppingList() {
-      try {
-        const res = await fetch(`/api/trips/${tripId}/meal-plan/shopping-list`)
-        if (!res.ok) {
-          setError('Could not load shopping list')
-          return
-        }
-        const data = await res.json() as { shoppingList: ShoppingList }
-        setShoppingList(data.shoppingList)
-      } catch {
-        setError('Could not load shopping list')
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchShoppingList()
-  }, [tripId])
-
-  const toggleChecked = useCallback((key: string) => {
-    setChecked((prev) => {
-      const next = new Set(prev)
-      if (next.has(key)) {
-        next.delete(key)
-      } else {
-        next.add(key)
-      }
-      return next
-    })
-  }, [])
-
-  if (loading) {
-    return (
-      <div className="p-4 flex items-center gap-2">
-        <Loader2 size={14} className="animate-spin text-amber-500" />
-        <span className="text-sm text-stone-500 dark:text-stone-400">Building shopping list...</span>
-      </div>
-    )
-  }
-
-  if (error) {
-    return <p className="p-4 text-sm text-red-500 dark:text-red-400">{error}</p>
-  }
-
-  if (!shoppingList) return null
-
-  const hasItems = CATEGORY_ORDER.some((cat) => shoppingList[cat].length > 0)
-  if (!hasItems) {
-    return (
-      <p className="p-4 text-sm text-stone-500 dark:text-stone-400">
-        No ingredients found. Generate a meal plan first.
-      </p>
-    )
-  }
-
-  return (
-    <div className="divide-y divide-stone-100 dark:divide-stone-800">
-      {CATEGORY_ORDER.map((cat) => {
-        const items = shoppingList[cat]
-        if (items.length === 0) return null
-        return (
-          <div key={cat} className="px-4 py-3">
-            <h4 className="text-[11px] font-semibold uppercase tracking-wide text-stone-400 dark:text-stone-500 mb-2">
-              {CATEGORY_LABELS[cat]}
-            </h4>
-            <ul className="space-y-1.5">
-              {items.map((item) => {
-                const key = `${cat}-${item.item.toLowerCase()}`
-                const isChecked = checked.has(key)
-                const quantityLabel = [item.quantity, item.unit].filter(Boolean).join(' ')
-                return (
-                  <li key={key} className="flex items-start gap-2">
-                    <input
-                      type="checkbox"
-                      id={key}
-                      checked={isChecked}
-                      onChange={() => toggleChecked(key)}
-                      className="mt-0.5 accent-amber-500 shrink-0"
-                    />
-                    <label
-                      htmlFor={key}
-                      className={`text-sm cursor-pointer leading-tight ${
-                        isChecked
-                          ? 'line-through text-stone-400 dark:text-stone-600'
-                          : 'text-stone-700 dark:text-stone-300'
-                      }`}
-                    >
-                      {item.item}
-                      {quantityLabel && (
-                        <span className="text-stone-400 dark:text-stone-500 ml-1 text-xs">
-                          ({quantityLabel})
-                        </span>
-                      )}
-                    </label>
-                  </li>
-                )
-              })}
-            </ul>
-          </div>
-        )
-      })}
-      <div className="px-4 py-2">
-        <p className="text-[10px] text-stone-400 dark:text-stone-500 italic">
-          Checkboxes reset when you close this page
-        </p>
-      </div>
-    </div>
-  )
-}
-
-// ── Prep Guide tab ───────────────────────────────────────────────────────────
-
-interface PrepGuideTabProps {
-  tripId: string
-}
-
-function PrepGuideTab({ tripId }: PrepGuideTabProps) {
-  const [entries, setEntries] = useState<PrepEntry[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-    async function fetchPrepGuide() {
-      try {
-        const res = await fetch(`/api/trips/${tripId}/meal-plan/prep-guide`)
-        if (!res.ok) {
-          setError('Could not load prep guide')
-          return
-        }
-        const data = await res.json() as { prepGuide: PrepEntry[] }
-        setEntries(data.prepGuide)
-      } catch {
-        setError('Could not load prep guide')
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchPrepGuide()
-  }, [tripId])
-
-  if (loading) {
-    return (
-      <div className="p-4 flex items-center gap-2">
-        <Loader2 size={14} className="animate-spin text-amber-500" />
-        <span className="text-sm text-stone-500 dark:text-stone-400">Loading prep guide...</span>
-      </div>
-    )
-  }
-
-  if (error) {
-    return <p className="p-4 text-sm text-red-500 dark:text-red-400">{error}</p>
-  }
-
-  if (entries.length === 0) {
-    return (
-      <p className="p-4 text-sm text-stone-500 dark:text-stone-400">
-        No prep notes found. Claude will add prep notes when generating meal plans.
-      </p>
-    )
-  }
-
-  // Group by day
-  const byDay = new Map<number, PrepEntry[]>()
-  for (const entry of entries) {
-    byDay.set(entry.day, [...(byDay.get(entry.day) ?? []), entry])
-  }
-  const sortedDays = Array.from(byDay.keys()).sort((a, b) => a - b)
-
-  return (
-    <div className="divide-y divide-stone-100 dark:divide-stone-800">
-      {sortedDays.map((day) => {
-        const dayEntries = byDay.get(day) ?? []
-        return (
-          <div key={day} className="px-4 py-3">
-            <h4 className="text-[11px] font-semibold uppercase tracking-wide text-stone-400 dark:text-stone-500 mb-2">
-              Day {day}
-            </h4>
-            <ul className="space-y-3">
-              {dayEntries.map((entry) => {
-                const slotColor = SLOT_COLORS[entry.slot.toLowerCase()] ?? SLOT_COLORS.snack
-                return (
-                  <li key={entry.mealId} className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0 ${slotColor}`}>
-                        {slotLabel(entry.slot)}
-                      </span>
-                      <span className="text-xs font-medium text-stone-700 dark:text-stone-300">
-                        {entry.mealName}
-                      </span>
-                    </div>
-                    <p className="text-xs text-stone-500 dark:text-stone-400 leading-relaxed pl-1">
-                      {entry.prepNotes}
-                    </p>
-                  </li>
-                )
-              })}
-            </ul>
-          </div>
-        )
-      })}
-    </div>
-  )
-}
-
-// ── Feedback buttons ─────────────────────────────────────────────────────────
-
-interface FeedbackButtonsProps {
-  mealId: string
-  tripId: string
-  currentRating: string | null
-  onFeedbackSaved: (mealId: string, rating: string) => void
-}
-
-function FeedbackButtons({ mealId, tripId, currentRating, onFeedbackSaved }: FeedbackButtonsProps) {
-  const [saving, setSaving] = useState<RatingKey | null>(null)
-
-  const handleRate = useCallback(async (rating: RatingKey) => {
-    if (saving) return
-    setSaving(rating)
-    // Optimistic update
-    onFeedbackSaved(mealId, rating)
-    try {
-      const res = await fetch(`/api/trips/${tripId}/meal-plan/meals/${mealId}/feedback`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ rating }),
-      })
-      if (!res.ok) {
-        // Revert on failure — just refetch would be heavy; silently keep optimistic update
-        console.error('Failed to save meal feedback')
-      }
-    } catch {
-      console.error('Failed to save meal feedback')
-    } finally {
-      setSaving(null)
-    }
-  }, [mealId, tripId, saving, onFeedbackSaved])
-
-  return (
-    <div className="flex items-center gap-1 pt-1 border-t border-stone-100 dark:border-stone-700">
-      <span className="text-[10px] text-stone-400 dark:text-stone-500 mr-0.5">Rate:</span>
-      {(Object.keys(RATING_CONFIG) as RatingKey[]).map((key) => {
-        const config = RATING_CONFIG[key]
-        const Icon = config.icon
-        const isActive = currentRating === key
-        const isSaving = saving === key
-        return (
-          <button
-            key={key}
-            onClick={() => handleRate(key)}
-            disabled={saving !== null}
-            title={config.label}
-            className={`flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-medium transition-colors disabled:opacity-60 ${
-              isActive
-                ? `${config.bg} ${config.color}`
-                : 'text-stone-400 dark:text-stone-500 hover:bg-stone-100 dark:hover:bg-stone-700'
-            }`}
-          >
-            {isSaving ? (
-              <Loader2 size={10} className="animate-spin" />
-            ) : (
-              <Icon size={10} />
-            )}
-            <span>{key}</span>
-          </button>
-        )
-      })}
-    </div>
-  )
-}
-
 // ── Meals tab ────────────────────────────────────────────────────────────────
+
+interface FeedbackEntry {
+  rating: string
+  notes: string | null
+}
 
 interface MealsTabProps {
   mealPlan: MealPlanData
@@ -470,7 +132,7 @@ interface MealsTabProps {
   regeneratingMealId: string | null
   generating: boolean
   onRegenerateMeal: (mealId: string) => void
-  onFeedbackSaved: (mealId: string, rating: string) => void
+  feedbackMap: Map<string, FeedbackEntry>
 }
 
 function MealsTab({
@@ -479,7 +141,7 @@ function MealsTab({
   regeneratingMealId,
   generating,
   onRegenerateMeal,
-  onFeedbackSaved,
+  feedbackMap,
 }: MealsTabProps) {
   const [collapsedDays, setCollapsedDays] = useState<Set<number>>(new Set())
 
@@ -525,7 +187,7 @@ function MealsTab({
                 {meals.map((meal) => {
                   const isRegenerating = regeneratingMealId === meal.id
                   const slotColor = SLOT_COLORS[meal.slot.toLowerCase()] ?? SLOT_COLORS.snack
-                  const currentRating = meal.feedback?.rating ?? null
+                  const existingFeedback = feedbackMap.get(meal.id)
 
                   return (
                     <div
@@ -600,11 +262,16 @@ function MealsTab({
                       )}
 
                       {/* Feedback */}
-                      <FeedbackButtons
+                      <MealFeedbackButton
                         mealId={meal.id}
+                        mealName={meal.name}
                         tripId={tripId}
-                        currentRating={currentRating}
-                        onFeedbackSaved={onFeedbackSaved}
+                        initialRating={
+                          existingFeedback?.rating === 'liked' || existingFeedback?.rating === 'disliked'
+                            ? existingFeedback.rating
+                            : null
+                        }
+                        initialNote={existingFeedback?.notes ?? null}
                       />
                     </div>
                   )
@@ -620,14 +287,15 @@ function MealsTab({
 
 // ── Main component ───────────────────────────────────────────────────────────
 
-export default function MealPlanClient({ tripId, tripName: _tripName }: MealPlanClientProps) {
+export default function MealPlanClient({ tripId, tripName }: MealPlanClientProps) {
   const [mealPlan, setMealPlan] = useState<MealPlanData | null>(null)
   const [loading, setLoading] = useState(true)
   const [generating, setGenerating] = useState(false)
   const [regeneratingMealId, setRegeneratingMealId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [showRegenerateConfirm, setShowRegenerateConfirm] = useState(false)
-  const [activeTab, setActiveTab] = useState<TabId>('meals')
+  const [activeTab, setActiveTab] = useState<TabId>('plan')
+  const [feedbackMap, setFeedbackMap] = useState<Map<string, { rating: string; notes: string | null }>>(new Map())
 
   useEffect(() => {
     async function fetchMealPlan() {
@@ -648,6 +316,29 @@ export default function MealPlanClient({ tripId, tripName: _tripName }: MealPlan
     fetchMealPlan()
   }, [tripId])
 
+  // Fetch feedback map on mount (non-blocking)
+  useEffect(() => {
+    async function fetchFeedback() {
+      try {
+        const res = await fetch(`/api/trips/${tripId}/meal-plan/feedback`)
+        if (!res.ok) return
+        const data = await res.json() as {
+          feedbacks: Array<{ mealId: string | null; rating: string; notes: string | null }>
+        }
+        const map = new Map<string, { rating: string; notes: string | null }>()
+        for (const fb of data.feedbacks) {
+          if (fb.mealId) {
+            map.set(fb.mealId, { rating: fb.rating, notes: fb.notes })
+          }
+        }
+        setFeedbackMap(map)
+      } catch {
+        // Non-blocking — feedback map stays empty
+      }
+    }
+    fetchFeedback()
+  }, [tripId])
+
   const handleGenerate = useCallback(async () => {
     setGenerating(true)
     setError(null)
@@ -663,7 +354,7 @@ export default function MealPlanClient({ tripId, tripName: _tripName }: MealPlan
       }
       const data = await res.json() as { mealPlan: MealPlanData }
       setMealPlan(data.mealPlan)
-      setActiveTab('meals')
+      setActiveTab('plan')
     } catch {
       setError("Couldn't generate meal plan — tap Retry to try again.")
     } finally {
@@ -698,7 +389,7 @@ export default function MealPlanClient({ tripId, tripName: _tripName }: MealPlan
         return {
           ...prev,
           meals: prev.meals.map((m) =>
-            m.id === mealId ? { ...data.meal, feedback: m.feedback } : m
+            m.id === mealId ? data.meal : m
           ),
         }
       })
@@ -709,22 +400,7 @@ export default function MealPlanClient({ tripId, tripName: _tripName }: MealPlan
     }
   }, [tripId])
 
-  const handleFeedbackSaved = useCallback((mealId: string, rating: string) => {
-    if (!isRatingKey(rating)) return
-    setMealPlan((prev) => {
-      if (!prev) return prev
-      return {
-        ...prev,
-        meals: prev.meals.map((m) => {
-          if (m.id !== mealId) return m
-          const newFeedback: MealFeedbackData = m.feedback
-            ? { ...m.feedback, rating }
-            : { id: '', mealId, rating, note: null }
-          return { ...m, feedback: newFeedback }
-        }),
-      }
-    })
-  }, [])
+  // MealFeedbackButton handles its own API calls; no local feedback state needed
 
   if (loading) {
     return (
@@ -845,20 +521,35 @@ export default function MealPlanClient({ tripId, tripName: _tripName }: MealPlan
       <TabBar active={activeTab} onChange={setActiveTab} />
 
       {/* Tab content */}
-      {activeTab === 'meals' && (
+      {activeTab === 'plan' && (
         <MealsTab
           mealPlan={mealPlan}
           tripId={tripId}
           regeneratingMealId={regeneratingMealId}
           generating={generating}
           onRegenerateMeal={handleRegenerateMeal}
-          onFeedbackSaved={handleFeedbackSaved}
+          feedbackMap={feedbackMap}
         />
       )}
 
-      {activeTab === 'shopping' && <ShoppingTab tripId={tripId} />}
+      {activeTab === 'shopping' && (
+        <ShoppingListClient
+          tripId={tripId}
+          tripName={tripName}
+          mealPlanId={mealPlan.id}
+        />
+      )}
 
-      {activeTab === 'prep' && <PrepGuideTab tripId={tripId} />}
+      {activeTab === 'prep' && (
+        <PrepGuideClient
+          tripId={tripId}
+          initialPrepGuide={
+            mealPlan.prepGuide
+              ? (JSON.parse(mealPlan.prepGuide) as { beforeLeave: Array<{ step: string; meals: string[] }>; atCamp: Array<{ day: number; mealSlot: string; steps: string[] }> })
+              : null
+          }
+        />
+      )}
 
       {/* Attribution */}
       <div className="px-4 py-2 border-t border-stone-100 dark:border-stone-800 text-center">

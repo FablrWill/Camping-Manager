@@ -1,6 +1,40 @@
 import { prisma } from "@/lib/db";
 import DashboardClient from "@/components/DashboardClient";
 
+type UpcomingTripQueryResult = Awaited<ReturnType<typeof fetchUpcomingTrip>>;
+
+async function fetchUpcomingTrip() {
+  return prisma.trip.findFirst({
+    where: { startDate: { gte: new Date() } },
+    orderBy: { startDate: "asc" },
+    select: {
+      id: true,
+      name: true,
+      startDate: true,
+      endDate: true,
+      location: { select: { name: true } },
+      mealPlan: {
+        select: {
+          generatedAt: true,
+          shoppingListItems: {
+            select: { id: true, checked: true },
+          },
+        },
+      },
+    },
+  });
+}
+
+function getMealPlanStatus(trip: UpcomingTripQueryResult): string | null {
+  if (!trip) return null;
+  if (!trip.mealPlan) return 'No meal plan yet \u2014 tap to generate';
+  const items = trip.mealPlan.shoppingListItems ?? [];
+  if (items.length === 0) return 'Meal plan ready \u2014 shopping list pending';
+  const unchecked = items.filter((i) => !i.checked).length;
+  if (unchecked === 0) return 'All stocked up \u2014 ready to roll';
+  return `Shopping list ready \u2014 ${unchecked} items to get`;
+}
+
 export default async function Home() {
   const [gearCount, wishlistCount, locationCount, photoCount, vehicleMods, recentGear, upcomingTrip, unreadJobCount] =
     await Promise.all([
@@ -22,17 +56,7 @@ export default async function Home() {
           updatedAt: true,
         },
       }),
-      prisma.trip.findFirst({
-        where: { startDate: { gte: new Date() } },
-        orderBy: { startDate: "asc" },
-        select: {
-          id: true,
-          name: true,
-          startDate: true,
-          endDate: true,
-          location: { select: { name: true } },
-        },
-      }),
+      fetchUpcomingTrip(),
       prisma.agentJob.count({
         where: { status: "done", readAt: null },
       }),
@@ -63,6 +87,7 @@ export default async function Home() {
         startDate: upcomingTrip.startDate.toISOString(),
         endDate: upcomingTrip.endDate.toISOString(),
         locationName: upcomingTrip.location?.name ?? null,
+        mealPlanStatus: getMealPlanStatus(upcomingTrip),
       } : null}
       unreadJobCount={unreadJobCount}
     />

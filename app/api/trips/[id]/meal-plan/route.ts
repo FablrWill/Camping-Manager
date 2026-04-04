@@ -14,7 +14,7 @@ export async function GET(
       include: {
         meals: {
           orderBy: [{ day: 'asc' }, { slot: 'asc' }],
-          include: { feedback: true },
+          include: { feedbacks: { orderBy: { createdAt: 'desc' }, take: 1 } },
         },
       },
     })
@@ -24,9 +24,11 @@ export async function GET(
     }
 
     // Parse ingredients JSON for each meal
+    // feedbacks is now a list; expose first feedback as `feedback` for backward compat
     const mealsWithParsedIngredients = mealPlan.meals.map((meal) => ({
       ...meal,
-      ingredients: JSON.parse(meal.ingredients),
+      ingredients: JSON.parse(meal.ingredients) as unknown,
+      feedback: meal.feedbacks[0] ?? null,
     }))
 
     return NextResponse.json({
