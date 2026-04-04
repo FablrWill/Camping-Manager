@@ -56,14 +56,15 @@ Source: Existing `MealPlanClient.tsx` uses `p-4` (16px) as base card padding. Sp
 | Role | Size | Weight | Line Height |
 |------|------|--------|-------------|
 | Body | 14px (text-sm) | 400 (normal) | 1.5 |
-| Label | 12px (text-xs) | 500 (medium) | 1.4 |
+| Label | 12px (text-xs) | 400 (normal) | 1.4 |
 | Heading | 16px (text-base) | 600 (semibold) | 1.2 |
-| Display | 20px (text-xl) | 700 (bold) | 1.2 |
+| Display | 20px (text-xl) | 600 (semibold) | 1.2 |
 
 Notes:
+- Exactly 2 weights used: 400 for Body + Label, 600 for Heading + Display. Size alone differentiates Label (12px) from Body (14px) and Display (20px) from Heading (16px).
 - Heading (16px semibold) matches `h3` in existing MealPlanClient card headers.
-- Label (12px medium) matches slot labels, timestamps, and status badges in existing components.
-- Display (20px bold) matches dashboard section headings; not used in MealPlanClient itself.
+- Label (12px normal) matches slot labels, timestamps, and status badges in existing components.
+- Display (20px semibold) matches dashboard section headings; not used in MealPlanClient itself.
 - No new font sizes introduced — Phase 35 inherits the Phase 34 typography scale.
 
 Source: `MealPlanClient.tsx` (text-sm, text-xs classes), `DashboardClient.tsx` (text-2xl for hero, text-base for card titles), `globals.css`.
@@ -135,6 +136,10 @@ Modified components:
 - Default state: two icon buttons side by side — `ThumbsUp` and `ThumbsDown` from Lucide, size 16.
 - Button size: `min-h-[44px] min-w-[44px]` to meet touch target requirement. Use `px-3 py-2` with the icon centered.
 - Unrated state: both buttons use `ghost` variant styling (`text-stone-400 hover:text-stone-600`).
+- **Accessibility (unrated state):** Both buttons must carry explicit `aria-label` attributes when no rating has been set:
+  - ThumbsUp: `aria-label="This meal was great"`
+  - ThumbsDown: `aria-label="This meal needs work"`
+  - When a rating is active, update `aria-label` to reflect the current state: `aria-label="Rated: great — tap to change"` / `aria-label="Rated: needs work — tap to change"`.
 - After tapping 👍: button fills `text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/30 rounded-md`. 👎 returns to ghost.
 - After tapping 👎: button fills `text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-900/30 rounded-md`. 👍 returns to ghost.
 - Tapping either thumb reveals a `<textarea>` directly below the buttons with `placeholder="Add a note (optional)"`.
