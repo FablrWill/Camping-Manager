@@ -29,6 +29,7 @@ interface UpcomingTrip {
   startDate: string
   endDate: string
   locationName: string | null
+  mealPlanStatus: string | null
 }
 
 export default function DashboardClient({
@@ -54,7 +55,7 @@ export default function DashboardClient({
 
       {/* Upcoming trip card */}
       {upcomingTrip && (
-        <Link href={`/trips/${upcomingTrip.id}/prep`} className="block">
+        <Link href="/trips" className="block">
           <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-xl p-4 flex items-center justify-between">
             <div>
               <p className="text-xs text-amber-600 dark:text-amber-400 font-medium uppercase tracking-wider">
@@ -65,6 +66,11 @@ export default function DashboardClient({
               </p>
               {upcomingTrip.locationName && (
                 <p className="text-sm text-stone-500 dark:text-stone-400">{upcomingTrip.locationName}</p>
+              )}
+              {upcomingTrip.mealPlanStatus && (
+                <p className="text-xs text-amber-700 dark:text-amber-300 mt-1">
+                  {upcomingTrip.mealPlanStatus}
+                </p>
               )}
             </div>
             <div className="text-amber-600 dark:text-amber-400 shrink-0 ml-3">
