@@ -44,7 +44,8 @@ Declared values (multiples of 4):
 
 Exceptions:
 - Applied-kit chip `✕` remove button: 44px minimum touch target (height `min-h-[44px]` on the chip row, or pad each chip to `py-2.5` so the row is touch-safe on mobile)
-- Gear list row height inside KitStackPanel: `py-1.5` (6px top/bottom) — matches existing KitPresetsPanel pattern
+
+Note: Gear list row height inside KitStackPanel is an implementation-level detail — match the existing KitPresetsPanel visual rhythm at implementation time. No specific px value is declared in this contract.
 
 ---
 
@@ -53,13 +54,13 @@ Exceptions:
 | Role | Size | Weight | Line Height |
 |------|------|--------|-------------|
 | Body | 14px (`text-sm`) | 400 regular | 1.5 |
-| Label | 14px (`text-sm`) | 600 semibold (`font-medium`) | 1.4 |
+| Label | 14px (`text-sm`) | 600 semibold (`font-semibold`) | 1.4 |
 | Panel heading | 18px (`text-lg`) | 700 bold (`font-bold`) | 1.2 |
 | Section subheading | 12px (`text-xs`) | 600 semibold (`font-semibold`) | 1.4 |
 
 Source: RESEARCH.md (match KitPresetsPanel.tsx patterns) — verified against `KitPresetsPanel.tsx` lines 178, 213, 219.
 
-Only 2 weights: regular (400) for body copy and secondary info, semibold/bold (600–700) for headings and labels. Never use 3 or more distinct weights in this phase.
+Only 2 weight classes: `font-semibold` for labels and section subheadings, `font-bold` for panel headings. Never introduce a third weight class in this phase.
 
 ---
 
@@ -83,12 +84,12 @@ Accent is NOT used for: the "Ask Claude to review" button (see interaction contr
 ### "Ask Claude to review" button — amber ghost variant
 Source: CONTEXT.md `## Claude's Discretion` — visual treatment deferred to researcher.
 Decision: Use an amber ghost/outline style, not the filled amber primary style. This distinguishes the optional AI step from the primary "Apply Kits" action and signals lower commitment.
-Exact classes: `border border-amber-500 dark:border-amber-400 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/30 rounded-xl px-4 py-2.5 font-medium text-sm transition-colors`
+Exact classes: `border border-amber-500 dark:border-amber-400 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/30 rounded-xl px-4 py-2.5 font-semibold text-sm transition-colors`
 
 ### Applied-kit chips
 Applied-kit chips (e.g., "Weekend Warrior ✕") use the secondary surface with a stone border — no accent color.
 Exact classes: `bg-stone-100 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-800 dark:text-stone-200 rounded-full px-3 py-1 text-sm flex items-center gap-1.5`
-Remove (✕) button within chip: `text-stone-400 hover:text-red-500 dark:hover:text-red-400 transition-colors`
+Remove (✕) button within chip: `text-stone-400 hover:text-red-500 dark:hover:text-red-400 transition-colors` with `aria-label="Remove {kit name}"` (substitute the actual kit name at render time).
 
 ### Success state
 Inline success messages use `text-emerald-600 dark:text-emerald-400 text-sm` — matches existing codebase pattern (RESEARCH.md verified).
@@ -103,7 +104,7 @@ New components and interaction states needed for this phase.
 
 A slide-up modal that replaces the existing single-apply kit dropdown in `PackingList.tsx`. Contains:
 
-1. **Header** — "Apply Kit Presets" title + `✕` close button. Same sticky header pattern as KitPresetsPanel.
+1. **Header** — "Apply Kit Presets" title + `✕` close button with `aria-label="Close"`. Same sticky header pattern as KitPresetsPanel.
 2. **Kit checkbox list** — All saved kits as checkboxes. Multi-select. Each row shows kit name + item count.
    - Item count shown as secondary text: "8 items" in `text-xs text-stone-400 dark:text-stone-500`
    - Source: CONTEXT.md `## Claude's Discretion` resolved — show item counts alongside names (more informative than names alone, low cost)
@@ -119,9 +120,9 @@ Panel container: `bg-white dark:bg-stone-900 rounded-t-2xl sm:rounded-2xl w-full
 
 Shown below the kit picker trigger after at least one kit has been applied. Renders horizontally scrollable row of chips.
 
-Layout: `flex flex-wrap gap-2 items-center` with a "Applied:" label in `text-xs text-stone-500 dark:text-stone-400 font-medium` prefix.
+Layout: `flex flex-wrap gap-2 items-center` with a "Applied:" label in `text-xs text-stone-500 dark:text-stone-400 font-semibold` prefix.
 
-Each chip: kit name + `✕` remove button. Removing a kit triggers unapply logic.
+Each chip: kit name + `✕` remove button with `aria-label="Remove {kit name}"`. Removing a kit triggers unapply logic.
 
 Loading state during unapply: spinner replaces `✕` on the specific chip being removed; chip turns `opacity-50`. Other chips remain interactive.
 
@@ -131,7 +132,7 @@ A compact inline form that appears below the generated packing list. Not a full 
 Source: RESEARCH.md Open Question 2 — resolved as inline input, not KitPresetsPanel.
 
 Layout:
-- Heading: `text-sm font-medium text-stone-700 dark:text-stone-300` — "Save this list as a kit preset"
+- Heading: `text-sm font-semibold text-stone-700 dark:text-stone-300` — "Save this list as a kit preset"
 - Secondary: `text-xs text-stone-500 dark:text-stone-400` — "Saves {N} gear items from your inventory"
 - Input: same `px-3 py-2.5 rounded-lg border border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800` pattern
 - "Save Kit" button: amber filled, same style as primary button
@@ -266,3 +267,7 @@ No third-party component registries. All components are hand-rolled Tailwind mat
 | Kit remove (chip ✕): no confirm dialog | Low-stakes reversible action (researcher decision) |
 | Typography sizes and weights | `components/KitPresetsPanel.tsx` verified line by line |
 | lucide-react icons | `components/PackingList.tsx` line 4 (already imported) |
+| aria-label on ✕ close button | Checker revision — accessibility contract (2026-04-04) |
+| aria-label on ✕ remove chip button | Checker revision — accessibility contract (2026-04-04) |
+| font-medium collapsed to font-semibold | Checker revision — 2-weight enforcement (2026-04-04) |
+| py-1.5 removed from spacing contract | Checker revision — non-multiple-of-4 removed (2026-04-04) |
