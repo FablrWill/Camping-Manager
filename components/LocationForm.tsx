@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Button, Input, Select, Textarea, ConfirmDialog } from "@/components/ui";
 import { isValidDate } from "@/lib/validate";
 import SignalLogPanel from "@/components/SignalLogPanel";
+import { getAltitudeWarning, metersToFeet } from "@/lib/altitude";
 
 type Season = "spring" | "summer" | "fall" | "winter";
 
@@ -25,6 +26,7 @@ export interface LocationData {
   name: string;
   latitude: number;
   longitude: number;
+  altitude?: number | null;
   type: string;
   description: string;
   rating: number | null;
@@ -224,10 +226,44 @@ export default function LocationForm({
         </div>
 
         <form onSubmit={handleSubmit} className="px-4 py-3 space-y-4">
-          {/* Coordinates display */}
+          {/* Coordinates + altitude display */}
           <div className="text-xs text-stone-400 dark:text-stone-500 font-mono">
             {lat.toFixed(6)}, {lng.toFixed(6)}
+            {existing?.altitude != null && (
+              <span className="ml-2">
+                · 📍 {Math.round(metersToFeet(existing.altitude)).toLocaleString()} ft
+              </span>
+            )}
           </div>
+
+          {/* Altitude callout — shown for existing locations above 6,000 ft */}
+          {(() => {
+            if (existing?.altitude == null) return null;
+            const altFt = metersToFeet(existing.altitude);
+            const warning = getAltitudeWarning(altFt);
+            if (!warning) return null;
+            const isHigh = warning.level === 'high';
+            return (
+              <div className={`rounded-xl px-3 py-2.5 space-y-1.5 ${
+                isHigh
+                  ? 'bg-orange-50 dark:bg-orange-950/30 border border-orange-200 dark:border-orange-800'
+                  : 'bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800'
+              }`}>
+                <p className={`text-sm font-semibold ${
+                  isHigh ? 'text-orange-700 dark:text-orange-300' : 'text-amber-700 dark:text-amber-300'
+                }`}>
+                  ⛰️ {isHigh ? 'High altitude' : 'Elevated campsite'} — {Math.round(altFt).toLocaleString()} ft
+                </p>
+                <ul className={`text-xs space-y-0.5 list-disc list-inside ${
+                  isHigh ? 'text-orange-600 dark:text-orange-400' : 'text-amber-600 dark:text-amber-400'
+                }`}>
+                  {warning.tips.map((tip, i) => (
+                    <li key={i}>{tip}</li>
+                  ))}
+                </ul>
+              </div>
+            );
+          })()}
 
           {/* Name */}
           <Input

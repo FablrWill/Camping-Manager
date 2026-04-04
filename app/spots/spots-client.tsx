@@ -273,6 +273,7 @@ export default function SpotsClient({
         name: loc.name,
         latitude: loc.latitude,
         longitude: loc.longitude,
+        altitude: loc.altitude ?? null,
         type: loc.type ?? "",
         description: loc.description ?? "",
         rating: loc.rating ?? null,

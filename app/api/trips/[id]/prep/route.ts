@@ -14,7 +14,7 @@ export async function GET(
     const trip = await prisma.trip.findUnique({
       where: { id },
       include: {
-        location: { select: { id: true, name: true, latitude: true, longitude: true, type: true, notes: true, description: true, cellSignal: true } },
+        location: { select: { id: true, name: true, latitude: true, longitude: true, altitude: true, type: true, notes: true, description: true, cellSignal: true } },
         vehicle: { select: { id: true, name: true } },
         packingItems: { select: { packed: true } },
       },
@@ -171,6 +171,7 @@ export async function GET(
       endDate: trip.endDate.toISOString(),
       sections,
       overallReady: sections.every(s => s.status === 'ready'),
+      locationAltitudeM: trip.location?.altitude ?? null,
     }
 
     return NextResponse.json(prepState)

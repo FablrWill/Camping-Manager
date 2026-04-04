@@ -95,6 +95,7 @@ model Location {
   name          String
   latitude      Float?
   longitude     Float?
+  altitude      Float?   // meters, from EXIF on photo import
   type          String?  // dispersed, campground, overlook, water_access
   description   String?
   rating        Int?     // 1-5

@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import TripPrepStepper from '@/components/TripPrepStepper'
 import PreTripAlertCard from '@/components/PreTripAlertCard'
+import AltitudeCard from '@/components/AltitudeCard'
 import TripPrepSection from '@/components/TripPrepSection'
 import WeatherCard from '@/components/WeatherCard'
 import PackingList from '@/components/PackingList'
@@ -13,6 +14,7 @@ import MealPlanClient from '@/components/MealPlanClient'
 import PowerBudget from '@/components/PowerBudget'
 import VehicleChecklistCard from '@/components/VehicleChecklistCard'
 import { PREP_SECTIONS, PrepState, PrepSection } from '@/lib/prep-sections'
+import { metersToFeet, ALTITUDE_THRESHOLDS } from '@/lib/altitude'
 import { formatDateRange, daysUntil, tripNights } from '@/lib/trip-utils'
 import type { DayForecast, WeatherAlert } from '@/lib/weather'
 import type { LastStopsResult } from '@/lib/overpass'
@@ -275,6 +277,12 @@ export default function TripPrepClient({ trip, tripPrepStatus }: TripPrepClientP
 
       {/* Pre-trip alert check — first card in prep */}
       <PreTripAlertCard tripId={trip.id} />
+
+      {/* Altitude card — shown when prep data is loaded and destination is high-elevation */}
+      {prepState?.locationAltitudeM != null &&
+        metersToFeet(prepState.locationAltitudeM) >= ALTITUDE_THRESHOLDS.moderate && (
+        <AltitudeCard altitudeFt={metersToFeet(prepState.locationAltitudeM)} />
+      )}
 
       {/* Error state */}
       {error && (

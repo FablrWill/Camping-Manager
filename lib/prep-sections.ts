@@ -16,6 +16,8 @@ export interface PrepState {
   endDate: string
   sections: PrepSection[]
   overallReady: boolean
+  /** Location altitude in meters (from EXIF). Convert to feet before display. */
+  locationAltitudeM?: number | null
 }
 
 export interface SectionConfig {
