@@ -21,7 +21,7 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-01)
 
 **Core value:** Personal camping second brain — a closed-loop system that plans, executes, and learns from every trip
-**Current focus:** v4.0 backlog — S28 shareable trip reports in progress; S20-S27, S29-S30 complete
+**Current focus:** Phase 44 — google-maps-list-import
 
 ## Current Position
 
