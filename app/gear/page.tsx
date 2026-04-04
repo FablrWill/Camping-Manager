@@ -15,6 +15,7 @@ export default async function GearPage() {
     ...item,
     createdAt: item.createdAt.toISOString(),
     updatedAt: item.updatedAt.toISOString(),
+    researchedAt: item.researchedAt?.toISOString() ?? null,
   }))
 
   return <GearClient initialItems={serialized} />

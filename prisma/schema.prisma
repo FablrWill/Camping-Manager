@@ -26,6 +26,8 @@ model GearItem {
   hasBattery  Boolean  @default(false) // has internal rechargeable battery — reminder to charge before trips
   modelNumber   String?  // e.g. "ESP32-WROOM-32"
   connectivity  String?  // e.g. "WiFi, Bluetooth"
+  researchResult  String?   // JSON: { alternatives: [...], summary, recommendation }
+  researchedAt    DateTime? // when research was last run — stale after 90 days
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

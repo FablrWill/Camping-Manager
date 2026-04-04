@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react'
 import GearForm from './GearForm'
 import GearDocumentsTab from './GearDocumentsTab'
+import GearResearchCard from './GearResearchCard'
 import ChatContextButton from '@/components/ChatContextButton'
 import { CATEGORY_GROUPS, CATEGORIES, getCategoryEmoji, getCategoryLabel } from '@/lib/gear-categories'
 
@@ -25,6 +26,8 @@ interface GearItem {
   hasBattery: boolean
   modelNumber: string | null
   connectivity: string | null
+  researchResult: string | null
+  researchedAt: string | null
   createdAt: string
   updatedAt: string
 }
@@ -64,6 +67,7 @@ export default function GearClient({ initialItems }: { initialItems: GearItem[] 
   const [deletingItem, setDeletingItem] = useState<GearItem | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState<string | null>(null)
+  const [isResearching, setIsResearching] = useState(false)
 
   // Filter items
   const filtered = useMemo(() => {
@@ -159,6 +163,22 @@ export default function GearClient({ initialItems }: { initialItems: GearItem[] 
       setDeleteError('Failed to delete item. Please try again.')
     } finally {
       setIsDeleting(false)
+    }
+  }
+
+  async function handleResearch(): Promise<void> {
+    if (!editingItem) return
+    setIsResearching(true)
+    try {
+      const res = await fetch(`/api/gear/${editingItem.id}/research`, { method: 'POST' })
+      if (!res.ok) throw new Error('Failed to research')
+      const updated = await res.json()
+      setItems((prev) => prev.map((i) => (i.id === updated.id ? updated : i)))
+      setEditingItem(updated)
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setIsResearching(false)
     }
   }
 
@@ -382,15 +402,26 @@ export default function GearClient({ initialItems }: { initialItems: GearItem[] 
             setEditingItem(null)
           }}
           extraContent={editingItem ? (
-            <div className="border-t border-stone-200 dark:border-stone-700 pt-4 mt-2">
-              <h3 className="text-sm font-medium text-stone-700 dark:text-stone-300 mb-3">Documents</h3>
-              <GearDocumentsTab
-                gearItemId={editingItem.id}
-                gearName={editingItem.name}
-                gearBrand={editingItem.brand}
-                gearModelNumber={editingItem.modelNumber}
-                gearCategory={editingItem.category}
-              />
+            <div className="space-y-4 border-t border-stone-200 dark:border-stone-700 pt-4 mt-2">
+              <div>
+                <h3 className="text-sm font-medium text-stone-700 dark:text-stone-300 mb-3">Research</h3>
+                <GearResearchCard
+                  researchResult={editingItem.researchResult}
+                  researchedAt={editingItem.researchedAt}
+                  onResearch={handleResearch}
+                  isResearching={isResearching}
+                />
+              </div>
+              <div>
+                <h3 className="text-sm font-medium text-stone-700 dark:text-stone-300 mb-3">Documents</h3>
+                <GearDocumentsTab
+                  gearItemId={editingItem.id}
+                  gearName={editingItem.name}
+                  gearBrand={editingItem.brand}
+                  gearModelNumber={editingItem.modelNumber}
+                  gearCategory={editingItem.category}
+                />
+              </div>
             </div>
           ) : undefined}
         />

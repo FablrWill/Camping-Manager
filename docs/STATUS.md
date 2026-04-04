@@ -1,7 +1,7 @@
 # Project Status — Outland OS
 
 ## Quick Pickup
-> **Last session:** 2026-04-04 (Session 31 — S13 Mac mini agent jobs infrastructure, Phase 36)
+> **Last session:** 2026-04-04 (Session 32 — S14 gear product research, Phase 30)
 > **Milestone v1.0:** ✅ Complete — all 5 phases shipped 2026-04-01
 > **Milestone v1.1:** ✅ Complete — Phases 6-11 shipped 2026-04-02
 > **Milestone v1.2:** ✅ Complete — Phases 12-15 shipped 2026-04-03
@@ -55,7 +55,8 @@
 - **Meal Planning Core (Phase 34)** — Claude-generated meal plans, MealPlan/Meal models, trip integration
 - **Meal Planning Shopping/Prep/Feedback (Phase 35)** — Shopping list, prep guide, meal feedback
 - **Agent Jobs Infrastructure (Phase 36)** — AgentJob queue, polling API, results endpoint, dashboard badge, gear enrichment trigger
-- **Phases 30-32** — Not yet started (product research, astro, deals)
+- **Gear Product Research (Phase 30)** — Claude-powered "Research" button on gear items, alternatives comparison, recommendation badges
+- **Phases 31-32** — Not yet started (astro/activity gear, deals)
 
 ## Known Blockers
 - **HA hardware** — In Durham. Will picking up ~mid-April 2026. Blocks HA bridge feature (S10) only.

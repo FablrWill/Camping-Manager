@@ -264,3 +264,23 @@ export const NormalizedMealPlanResultSchema = z.object({
 });
 
 export type NormalizedMealPlanResult = z.infer<typeof NormalizedMealPlanResultSchema>;
+
+// --- Gear Research Schemas (Phase 30) ---
+
+const GearAlternativeSchema = z.object({
+  name: z.string(),
+  brand: z.string(),
+  price: z.string(),
+  weight: z.string(),
+  pros: z.array(z.string()),
+  cons: z.array(z.string()),
+  url: z.string().optional(),
+});
+
+export const GearResearchResultSchema = z.object({
+  alternatives: z.array(GearAlternativeSchema),
+  summary: z.string(),
+  recommendation: z.enum(['keep', 'consider_upgrade', 'upgrade']),
+});
+
+export type GearResearchResult = z.infer<typeof GearResearchResultSchema>;

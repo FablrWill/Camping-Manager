@@ -1,5 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk'
-import { parseClaudeJSON, PackingListResultSchema, MealPlanResultSchema, DepartureChecklistResultSchema, DepartureChecklistResult, TripSummaryResultSchema, type TripSummaryResult, GearDocumentResultSchema, type GearDocumentResult, VehicleChecklistResultSchema, type VehicleChecklistResult, NormalizedMealPlanResultSchema, type NormalizedMealPlanResult, SingleMealSchema, type SingleMeal } from '@/lib/parse-claude'
+import { parseClaudeJSON, PackingListResultSchema, MealPlanResultSchema, DepartureChecklistResultSchema, DepartureChecklistResult, TripSummaryResultSchema, type TripSummaryResult, GearDocumentResultSchema, type GearDocumentResult, VehicleChecklistResultSchema, type VehicleChecklistResult, NormalizedMealPlanResultSchema, type NormalizedMealPlanResult, SingleMealSchema, type SingleMeal, GearResearchResultSchema, type GearResearchResult } from '@/lib/parse-claude'
 import { CATEGORY_EMOJI, CATEGORIES } from '@/lib/gear-categories'
 
 const anthropic = new Anthropic({
@@ -843,6 +843,68 @@ Respond ONLY with valid JSON (no markdown):
   const text = message.content[0].type === 'text' ? message.content[0].text : ''
 
   const parseResult = parseClaudeJSON(text, VehicleChecklistResultSchema)
+  if (!parseResult.success) {
+    throw new Error(parseResult.error)
+  }
+
+  return parseResult.data
+}
+
+export async function researchGearItem(params: {
+  name: string
+  brand: string | null
+  category: string
+  weight: number | null
+  price: number | null
+  condition: string | null
+}): Promise<GearResearchResult> {
+  const { name, brand, category, weight, price, condition } = params
+
+  const prompt = `You are a camping gear research expert. Given a specific piece of gear, find the 3 best alternatives and compare them.
+
+GEAR TO RESEARCH:
+- Name: ${name}
+- Brand: ${brand || 'Unknown'}
+- Category: ${category}
+- Weight: ${weight != null ? `${weight} lb` : 'Unknown'}
+- Price: ${price != null ? `$${price}` : 'Unknown'}
+- Condition: ${condition || 'Unknown'}
+
+INSTRUCTIONS:
+1. Identify 3 strong alternatives in the same category that a car camper would consider.
+2. For each alternative, provide: name, brand, approximate price (as "$XX" string), weight (as "X.X oz" or "X.X lb" string), 2-3 pros, 1-2 cons.
+3. If you know a likely product page URL, include it. Otherwise omit the url field.
+4. Write a 2-3 sentence summary comparing the user's current item to the alternatives. Be direct and opinionated.
+5. Give a recommendation: "keep" (current item is solid), "consider_upgrade" (alternatives offer meaningful improvements), or "upgrade" (current item has clear weaknesses).
+
+Focus on practical differences that matter for car camping: weight, durability, packability, value. Skip marketing fluff.
+
+Respond ONLY with valid JSON (no markdown code blocks):
+{
+  "alternatives": [
+    {
+      "name": "Product Name",
+      "brand": "Brand",
+      "price": "$XX",
+      "weight": "X.X oz",
+      "pros": ["pro 1", "pro 2"],
+      "cons": ["con 1"],
+      "url": "https://..."
+    }
+  ],
+  "summary": "Your X is... The Y offers...",
+  "recommendation": "keep" | "consider_upgrade" | "upgrade"
+}`
+
+  const message = await anthropic.messages.create({
+    model: 'claude-sonnet-4-20250514',
+    max_tokens: 2000,
+    messages: [{ role: 'user', content: prompt }],
+  })
+
+  const text = message.content[0].type === 'text' ? message.content[0].text : ''
+
+  const parseResult = parseClaudeJSON(text, GearResearchResultSchema)
   if (!parseResult.success) {
     throw new Error(parseResult.error)
   }
