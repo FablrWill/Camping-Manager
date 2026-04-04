@@ -72,6 +72,7 @@ Progress: [████░░░░░░] 40%
 | Phase 33-conversational-trip-planner P01 | 4 | 2 tasks | 5 files |
 | Phase 33-conversational-trip-planner P03 | 20 | 2 tasks | 2 files |
 | Phase 29 P01 | 214 | 2 tasks | 5 files |
+| Phase 34-meal-planning-core P00 | 69 | 1 tasks | 3 files |
 | Phase 34 P01 | 5 | 2 tasks | 5 files |
 
 ## Accumulated Context
@@ -120,6 +121,7 @@ Recent decisions affecting current work:
 - [Phase 29]: VehicleChecklistItem has id, text, checked only — no isUnpackedWarning or suggestedTime (simpler than DepartureChecklist)
 - [Phase 29]: Route tests use require() inside test bodies so vite does not fail at compile time when source files do not exist yet
 - [Phase 29]: Migration created manually and applied via prisma migrate deploy due to non-interactive agent environment
+- [Phase 34-meal-planning-core]: Use it.todo() for Wave 0 stubs — pending not failing; route imports commented until Plan 02 creates files
 - [Phase 34]: Applied MealPlan normalization migration manually via better-sqlite3 — FTS triggers block prisma migrate deploy
 - [Phase 34]: meal-plan route upserts header only after schema normalization — Plan 02 adds Meal row persistence
 

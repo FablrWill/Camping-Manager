@@ -552,7 +552,7 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 34-00-PLAN.md — Wave 0 test stubs (meal-plan-route, meal-regenerate-route, meal-plan-schema)
+- [x] 34-00-PLAN.md — Wave 0 test stubs (meal-plan-route, meal-regenerate-route, meal-plan-schema)
 - [ ] 34-01-PLAN.md — Schema migration (normalize MealPlan + create Meal table) + Zod schemas
 - [ ] 34-02-PLAN.md — lib/claude.ts updates (bringingDog, regenerateMeal) + all API routes
 - [ ] 34-03-PLAN.md — MealPlanClient component + TripPrepClient wiring + TripsClient badge
