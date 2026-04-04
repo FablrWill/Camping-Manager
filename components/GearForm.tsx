@@ -16,6 +16,7 @@ interface GearItem {
   isWishlist: boolean
   purchaseUrl: string | null
   price: number | null
+  targetPrice: number | null
   notes: string | null
   wattage: number | null
   hoursPerDay: number | null
@@ -88,6 +89,7 @@ export default function GearForm({
   const [description, setDescription] = useState(item?.description ?? '')
   const [weight, setWeight] = useState(item?.weight?.toString() ?? '')
   const [price, setPrice] = useState(item?.price?.toString() ?? '')
+  const [targetPrice, setTargetPrice] = useState(item?.targetPrice?.toString() ?? '')
   const [wattage, setWattage] = useState(item?.wattage?.toString() ?? '')
   const [hoursPerDay, setHoursPerDay] = useState(item?.hoursPerDay?.toString() ?? '')
   const [hasBattery, setHasBattery] = useState(item?.hasBattery ?? false)
@@ -96,6 +98,9 @@ export default function GearForm({
   const [notes, setNotes] = useState(item?.notes ?? '')
   const [modelNumber, setModelNumber] = useState(item?.modelNumber ?? '')
   const [connectivity, setConnectivity] = useState(item?.connectivity ?? '')
+
+  // isWishlist is read from item prop for conditional display
+  const isWishlist = item?.isWishlist ?? false
 
   // AI identification state
   const [identifyTab, setIdentifyTab] = useState<'url' | 'photo'>('url')
@@ -181,6 +186,7 @@ export default function GearForm({
       storageLocation: storageLocation || null,
       purchaseUrl: purchaseUrl || null,
       price: safeParseFloat(price),
+      targetPrice: safeParseFloat(targetPrice),
       notes: notes || null,
       wattage: safeParseFloat(wattage),
       hoursPerDay: safeParseFloat(hoursPerDay),
@@ -426,6 +432,29 @@ export default function GearForm({
               />
             </div>
           </div>
+
+          {/* Target Price — wishlist items only */}
+          {isWishlist && (
+            <div>
+              <label htmlFor="gear-target-price" className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
+                Target price ($)
+              </label>
+              <input
+                id="gear-target-price"
+                name="targetPrice"
+                type="number"
+                step="0.01"
+                min="0"
+                value={targetPrice}
+                onChange={(e) => setTargetPrice(e.target.value)}
+                placeholder="e.g. 299.00"
+                className={inputClass}
+              />
+              <p className="text-xs text-stone-400 dark:text-stone-500 mt-1">
+                Set a deal alert threshold — Claude will flag when prices drop to this level
+              </p>
+            </div>
+          )}
 
           {/* Power fields */}
           <div className="grid grid-cols-2 gap-3">

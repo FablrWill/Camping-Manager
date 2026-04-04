@@ -63,6 +63,7 @@ export async function POST(request: NextRequest) {
         isWishlist: body.isWishlist ?? false,
         purchaseUrl: body.purchaseUrl || null,
         price: safeParseFloat(body.price),
+        targetPrice: safeParseFloat(body.targetPrice),
         notes: body.notes || null,
         wattage: safeParseFloat(body.wattage),
         hoursPerDay: safeParseFloat(body.hoursPerDay),
