@@ -1,6 +1,6 @@
 # Outland OS — Task Tracker
 
-> **Last updated:** 2026-04-03 (v2.0 complete; v3.0 Waves 1-2 done — Phases 25-29 + 33 complete; next: 30, 31, S11)
+> **Last updated:** 2026-04-04 (medication tracker shipped — persistent med list, dog med support, auto-calculated packing quantities; next: Phase 29 cont., 30, 31)
 > **Start here** if you're picking up after a break.
 > **North star:** `docs/USER-JOURNEY.md` — read this before building anything new.
 

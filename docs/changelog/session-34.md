@@ -1,47 +1,33 @@
-# Session 34 — Phase 31: Dark Sky, Astro Info & Activity Gear
+# Session 34 — Medication Tracker + Auto-Calculated Packing Quantities
 
 **Date:** 2026-04-04
-**Phase:** 31 — Dark Sky, Astro Info & Activity Gear Recommendations
-**Model:** Opus 4.6
+**Branch:** claude/tender-newton → merged to main
 
-## What Changed
+## What Was Built
 
-### New: Activities Gear Category
-- Added `activities` category to `lib/gear-categories.ts` (emoji: target)
-- Covers leisure/entertainment gear: telescope, projector, speakers, kayak, fishing rod, camera, etc.
-- Lives in the "Action" group alongside Navigation, Hiking, Dog
+### Medication Tracker
 
-### New: Astronomy Utility Library (`lib/astro.ts`)
-- **Moon phase calculator** — Synodic month algorithm from known new moon reference. Returns phase name, illumination %, emoji, and dark-sky-friendly flag
-- **Golden hour** — Computed from sunrise/sunset (morning and evening windows)
-- **Astronomical twilight** — Dusk/dawn times for true darkness (~90 min after sunset)
-- **Bortle class estimation** — Infers light pollution from location type, notes, description, and cell signal strength. No new schema fields.
-- **Night sky summary** — Combines all above into a stargazing quality rating (excellent/good/fair/poor)
+A persistent, global medication list that auto-calculates trip quantities and injects them into every packing list.
 
-### New: Dark Sky Trip Prep Section
-- Added `dark-sky` section to `lib/prep-sections.ts`
-- Trip prep API (`/api/trips/[id]/prep`) now returns per-night moon phase, golden hour, astronomical twilight, dark hours, stargazing quality, and Bortle estimate
-- Summary shows Bortle class + moon phase at a glance
+**New model:** `Medication` — stores name, dosesPerDay, unitsPerDose, unit (pill/tablet/ml/etc.), and an `isForDog` flag. Persists across all trips — enter once, auto-included everywhere.
 
-### New: Astro API Endpoint (`/api/astro`)
-- `GET /api/astro?lat=&lon=&startDate=&endDate=` — full astro data for any coordinates + date range
-- `POST /api/astro` with `{ date }` — quick moon phase lookup for a single date
-- Returns per-night data, Bortle estimate, and best stargazing night
+**Calculation:** `dosesPerDay × nights × unitsPerDose` — deterministic, no Claude tokens needed.
+Example: 2 pills/day × 3-night trip = 6 pills, shown as `"6 pills (2x/day × 3 nights)"` inline.
 
-### Updated: Trip Planner Agent
-- System prompt now includes activity gear recommendation logic
-- Agent suggests relevant activity gear based on location conditions (dark sky, water access, trails)
-- Wishlist nudge: mentions relevant wishlist items ("You've been eyeing a telescope — great trip for one")
-- Dark sky awareness: factors moon phase into trip timing suggestions
+**Injection:** Medications are injected post-generation into the packing list:
+- Your meds → prepended to the `health` category (creates it if Claude didn't)
+- Dog meds → prepended to the `dog` category
 
-### Updated: listLocations Tool
-- Now returns `waterAccess` and `description` fields so the trip planner can reason about activity suitability
+**UI:** `MedicationManager` component renders above the packing list in the Packing prep section. Add/edit/delete meds with: name, doses/day, amount/dose, unit, dog toggle.
 
 ## Files Changed
-- `lib/gear-categories.ts` — added `activities` category
-- `lib/astro.ts` — **new** — moon phase, golden hour, Bortle estimation
-- `lib/prep-sections.ts` — added dark-sky section config
-- `app/api/trips/[id]/prep/route.ts` — dark-sky section handler
-- `app/api/astro/route.ts` — **new** — standalone astro data endpoint
-- `lib/agent/trip-planner-system-prompt.ts` — activity gear + dark sky awareness
-- `lib/agent/tools/listLocations.ts` — added waterAccess + description to select
+
+| File | Change |
+|------|--------|
+| `prisma/schema.prisma` | Added `Medication` model |
+| `prisma/migrations/20260404000000_add_medications/migration.sql` | Migration SQL |
+| `app/api/medications/route.ts` | GET all, POST create |
+| `app/api/medications/[id]/route.ts` | PUT update, DELETE |
+| `components/MedicationManager.tsx` | New UI component (add/edit/delete meds, dog toggle) |
+| `app/api/packing-list/route.ts` | Fetch meds + inject into result after Claude generation |
+| `components/TripPrepClient.tsx` | Mount `MedicationManager` above `PackingList` in packing section |
