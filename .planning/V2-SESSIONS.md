@@ -56,7 +56,7 @@ A self-coordinating work queue for v2.0 features. Each Claude Code session claim
 | S16 | UX quick wins                        | —     | ✅ Done 2026-04-04        | Sonnet, normal | —          |
 | S17 | Nav restructure + More sheet         | —     | ✅ Done 2026-04-04        | Sonnet, normal | —          |
 | S18 | TripPrepStepper                      | —     | ⬜ Ready          | Sonnet, normal | S16        |
-| S19 | Empty states + skeleton loaders      | —     | 🔄 In Progress 2026-04-04 | Sonnet, normal | S16        |
+| S19 | Empty states + skeleton loaders      | —     | ✅ Done 2026-04-04        | Sonnet, normal | S16        |
 
 **Why this order matters (conflict groups):**
 
