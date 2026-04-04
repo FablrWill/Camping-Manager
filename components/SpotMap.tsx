@@ -106,6 +106,7 @@ export interface MapLocation {
   waterAccess?: boolean;
   visitedAt?: string | null;
   notes?: string | null;
+  bestSeason?: string | null; // e.g. "fall" — derived from SeasonalRating
 }
 
 export interface MapPhoto {
@@ -402,11 +403,20 @@ const SpotMap = forwardRef<SpotMapHandle, SpotMapProps>(function SpotMap(
         ? loc.type.replace("_", " ").replace(/\b\w/g, (c) => c.toUpperCase())
         : "";
 
+      const SEASON_BADGE: Record<string, string> = {
+        spring: "🌸 Best in Spring",
+        summer: "☀️ Best in Summer",
+        fall:   "🍂 Best in Fall",
+        winter: "❄️ Best in Winter",
+      };
+      const seasonBadge = loc.bestSeason ? SEASON_BADGE[loc.bestSeason] ?? null : null;
+
       const popup = L.popup().setContent(`
         <div style="min-width:180px;font-family:system-ui;">
           <h3 style="margin:0 0 4px;font-size:15px;font-weight:600;">${escHtml(loc.name)}</h3>
           ${typeLabel ? `<p style="margin:2px 0;color:#666;font-size:12px;">${typeLabel}</p>` : ""}
           ${stars ? `<p style="margin:2px 0;">${stars}</p>` : ""}
+          ${seasonBadge ? `<p style="margin:4px 0;display:inline-block;background:#fef3c7;color:#92400e;border-radius:999px;padding:2px 8px;font-size:11px;font-weight:600;">${escHtml(seasonBadge)}</p>` : ""}
           ${loc.description ? `<p style="margin:4px 0;font-size:13px;color:#444;">${escHtml(loc.description.slice(0, 120))}${loc.description.length > 120 ? "..." : ""}</p>` : ""}
           ${onLocationEdit ? `<button data-edit-location="${loc.id}" style="margin-top:6px;padding:4px 12px;background:#d97706;color:white;border:none;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;">Edit</button>` : ""}
         </div>

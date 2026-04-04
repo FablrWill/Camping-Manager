@@ -1,9 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button, Input, Select, Textarea, ConfirmDialog } from "@/components/ui";
 import { isValidDate } from "@/lib/validate";
 import SignalLogPanel from "@/components/SignalLogPanel";
+
+type Season = "spring" | "summer" | "fall" | "winter";
+
+interface SeasonalRatingData {
+  season: Season;
+  rating: number;
+  notes: string;
+}
+
+const SEASONS: { key: Season; label: string; emoji: string }[] = [
+  { key: "spring", label: "Spring", emoji: "🌸" },
+  { key: "summer", label: "Summer", emoji: "☀️" },
+  { key: "fall",   label: "Fall",   emoji: "🍂" },
+  { key: "winter", label: "Winter", emoji: "❄️" },
+];
 
 export interface LocationData {
   id?: string;
@@ -88,6 +103,43 @@ export default function LocationForm({
   const [error, setError] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  const emptySeasonalRatings = (): Record<Season, SeasonalRatingData> => ({
+    spring: { season: "spring", rating: 0, notes: "" },
+    summer: { season: "summer", rating: 0, notes: "" },
+    fall:   { season: "fall",   rating: 0, notes: "" },
+    winter: { season: "winter", rating: 0, notes: "" },
+  });
+
+  const [seasonalRatings, setSeasonalRatings] = useState<Record<Season, SeasonalRatingData>>(emptySeasonalRatings);
+
+  useEffect(() => {
+    if (!isEdit || !existing?.id) return;
+    fetch(`/api/locations/${existing.id}/seasonal-ratings`)
+      .then((r) => r.json())
+      .then((data: { season: string; rating: number; notes: string | null }[]) => {
+        if (!Array.isArray(data)) return;
+        const next = emptySeasonalRatings();
+        for (const item of data) {
+          const s = item.season as Season;
+          if (next[s]) {
+            next[s] = { season: s, rating: item.rating, notes: item.notes ?? "" };
+          }
+        }
+        setSeasonalRatings(next);
+      })
+      .catch(() => { /* ignore — ratings section just stays empty */ });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isEdit, existing?.id]);
+
+  const saveSeasonRating = useCallback((season: Season, rating: number, notes: string) => {
+    if (!existing?.id) return;
+    fetch(`/api/locations/${existing.id}/seasonal-ratings`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ season, rating, notes }),
+    }).catch(() => { /* fire-and-forget */ });
+  }, [existing?.id]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -295,6 +347,62 @@ export default function LocationForm({
           {/* Signal history — only for existing locations */}
           {isEdit && existing?.id && (
             <SignalLogPanel locationId={existing.id} />
+          )}
+
+          {/* Seasonal ratings — only for existing locations */}
+          {isEdit && existing?.id && (
+            <div className="space-y-2">
+              <h3 className="text-sm font-medium text-stone-700 dark:text-stone-300">Seasonal Ratings</h3>
+              <div className="grid grid-cols-2 gap-3">
+                {SEASONS.map(({ key, label, emoji }) => {
+                  const sr = seasonalRatings[key];
+                  return (
+                    <div
+                      key={key}
+                      className="border border-stone-200 dark:border-stone-700 rounded-xl p-3 space-y-2 bg-stone-50 dark:bg-stone-800/50"
+                    >
+                      <div className="flex items-center gap-1 text-sm font-medium text-stone-700 dark:text-stone-300">
+                        <span>{emoji}</span>
+                        <span>{label}</span>
+                      </div>
+                      <div className="flex gap-0.5">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <button
+                            key={star}
+                            type="button"
+                            onClick={() => {
+                              const newRating = sr.rating === star ? 0 : star;
+                              const next = { ...seasonalRatings, [key]: { ...sr, rating: newRating } };
+                              setSeasonalRatings(next);
+                              if (newRating > 0) saveSeasonRating(key, newRating, sr.notes);
+                            }}
+                            className={`text-lg transition-colors ${
+                              sr.rating >= star ? "text-amber-400" : "text-stone-300 dark:text-stone-600"
+                            }`}
+                            aria-label={`Rate ${label} ${star} star${star !== 1 ? "s" : ""}`}
+                          >
+                            ★
+                          </button>
+                        ))}
+                      </div>
+                      <input
+                        type="text"
+                        value={sr.notes}
+                        onChange={(e) => {
+                          const notes = e.target.value;
+                          setSeasonalRatings((prev) => ({ ...prev, [key]: { ...prev[key], notes } }));
+                        }}
+                        onBlur={() => {
+                          if (sr.rating > 0) saveSeasonRating(key, sr.rating, sr.notes);
+                        }}
+                        placeholder="Note..."
+                        className="w-full text-xs px-2 py-1 rounded-lg border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-300 placeholder-stone-400"
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           )}
 
           {/* Error */}

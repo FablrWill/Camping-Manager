@@ -109,9 +109,24 @@ model Location {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  trips      Trip[]
-  photos     Photo[]
-  signalLogs SignalLog[]
+  trips           Trip[]
+  photos          Photo[]
+  signalLogs      SignalLog[]
+  seasonalRatings SeasonalRating[]
+}
+
+model SeasonalRating {
+  id         String   @id @default(cuid())
+  locationId String
+  season     String   // "spring" | "summer" | "fall" | "winter"
+  rating     Int      // 1-5
+  notes      String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  location   Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+
+  @@unique([locationId, season])
+  @@index([locationId])
 }
 
 model SignalLog {
