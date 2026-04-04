@@ -121,6 +121,23 @@ export default function GearClient({ initialItems }: { initialItems: GearItem[] 
       setItems((prev) => prev.map((i) => (i.id === saved.id ? saved : i)))
     } else {
       setItems((prev) => [...prev, saved])
+
+      // Auto-queue gear enrichment if brand and notes are both empty
+      if (!saved.brand && !saved.notes) {
+        fetch('/api/agent/jobs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'gear_enrichment',
+            triggeredBy: 'auto',
+            payload: {
+              gearItemId: saved.id,
+              name: saved.name,
+              category: saved.category,
+            },
+          }),
+        }).catch(() => { /* fire-and-forget */ })
+      }
     }
 
     setShowForm(false)

@@ -398,6 +398,23 @@ model InboxItem {
   @@index([createdAt])
 }
 
+// --- Phase 36: Agent Jobs Infrastructure ---
+
+model AgentJob {
+  id          String    @id @default(cuid())
+  type        String    // "gear_enrichment" | "weather_analysis" | "deal_check" | etc.
+  status      String    @default("pending") // pending | running | done | failed
+  triggeredBy String    @default("manual") // manual | schedule | auto
+  payload     String    // JSON input
+  result      String?   // JSON output (null until done)
+  readAt      DateTime? // null until user acknowledges the result
+  createdAt   DateTime  @default(now())
+  completedAt DateTime?
+
+  @@index([status])
+  @@index([createdAt])
+}
+
 // --- Phase 25: Gear Docs & Manual Finder ---
 
 model GearDocument {

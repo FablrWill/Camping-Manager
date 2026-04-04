@@ -1,7 +1,7 @@
 # Project Status — Outland OS
 
 ## Quick Pickup
-> **Last session:** 2026-04-03 (Session 29 — Mac mini: AI gear ID, iMessage pipeline, Phase 14 deployment)
+> **Last session:** 2026-04-04 (Session 31 — S13 Mac mini agent jobs infrastructure, Phase 36)
 > **Milestone v1.0:** ✅ Complete — all 5 phases shipped 2026-04-01
 > **Milestone v1.1:** ✅ Complete — Phases 6-11 shipped 2026-04-02
 > **Milestone v1.2:** ✅ Complete — Phases 12-15 shipped 2026-04-03
@@ -52,6 +52,9 @@
 - **Weather-Aware Clothing (Phase 28)** — buildClothingGuidance(), UV forecast, injected into packing list
 - **Vehicle Pre-Trip Checklist (Phase 29)** — 🔄 In progress (Plans 01-02 done, Plan 03 UI checkpoint running)
 - **Conversational Trip Planner (Phase 33)** — TripPlannerSheet full-screen chat + TripsClient wiring; UAT deferred
+- **Meal Planning Core (Phase 34)** — Claude-generated meal plans, MealPlan/Meal models, trip integration
+- **Meal Planning Shopping/Prep/Feedback (Phase 35)** — Shopping list, prep guide, meal feedback
+- **Agent Jobs Infrastructure (Phase 36)** — AgentJob queue, polling API, results endpoint, dashboard badge, gear enrichment trigger
 - **Phases 30-32** — Not yet started (product research, astro, deals)
 
 ## Known Blockers

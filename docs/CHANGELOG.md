@@ -8,6 +8,7 @@ All notable changes to Outland OS are tracked here.
 
 | Session | Date | Summary |
 |---------|------|---------|
+| [31](changelog/session-31.md) | 2026-04-04 | S13 Mac mini agent jobs infrastructure: AgentJob model, 3 API routes, dashboard badge, gear enrichment trigger |
 | [30](changelog/session-30.md) | 2026-04-03 | UX review + execution plan: nav IA, prep stepper, component standards, 2-week sprint |
 | [29](changelog/session-29.md) | 2026-04-03 | Mobile gear entry via AI (link/photo → auto-fill form) + iMessage-to-knowledge-base pipeline |
 | [28](changelog/session-28.md) | 2026-04-03 | S01 photo bulk import: queue fix + verification (feature already shipped) |

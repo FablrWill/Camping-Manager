@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { Backpack, Car, MapPin, Tent, ChevronRight, Plus } from 'lucide-react'
 import { daysUntil } from '@/lib/trip-utils'
 import { getCategoryEmoji } from '@/lib/gear-categories'
+import AgentJobsBadge from './AgentJobsBadge'
 
 interface DashboardStats {
   gearCount: number
@@ -35,15 +36,20 @@ export default function DashboardClient({
   stats,
   recentGear,
   upcomingTrip,
+  unreadJobCount,
 }: {
   stats: DashboardStats
   recentGear: RecentGearItem[]
   upcomingTrip: UpcomingTrip | null
+  unreadJobCount?: number
 }) {
   return (
     <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
       {/* Hero */}
-      <section className="text-center py-6">
+      <section className="text-center py-6 relative">
+        <div className="absolute right-0 top-6">
+          <AgentJobsBadge initialCount={unreadJobCount ?? 0} />
+        </div>
         <h2 className="text-2xl font-bold text-stone-800 dark:text-stone-100 tracking-tight">
           Outland OS
         </h2>

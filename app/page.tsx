@@ -2,7 +2,7 @@ import { prisma } from "@/lib/db";
 import DashboardClient from "@/components/DashboardClient";
 
 export default async function Home() {
-  const [gearCount, wishlistCount, locationCount, photoCount, vehicleMods, recentGear, upcomingTrip] =
+  const [gearCount, wishlistCount, locationCount, photoCount, vehicleMods, recentGear, upcomingTrip, unreadJobCount] =
     await Promise.all([
       prisma.gearItem.count({ where: { isWishlist: false } }),
       prisma.gearItem.count({ where: { isWishlist: true } }),
@@ -33,6 +33,9 @@ export default async function Home() {
           location: { select: { name: true } },
         },
       }),
+      prisma.agentJob.count({
+        where: { status: "done", readAt: null },
+      }),
     ]);
 
   const totalWeight = await prisma.gearItem.aggregate({
@@ -61,6 +64,7 @@ export default async function Home() {
         endDate: upcomingTrip.endDate.toISOString(),
         locationName: upcomingTrip.location?.name ?? null,
       } : null}
+      unreadJobCount={unreadJobCount}
     />
   );
 }
