@@ -70,7 +70,7 @@
 - [x] **Phase 29: Vehicle Pre-Trip Checklist** - Tire pressure, oil, coolant, terrain-aware checks paired with Day Sequencer (completed 2026-04-03)
 
 **Wave 3 — Depends on Wave 2:**
-- [ ] **Phase 30: Gear Product Research** - AI-powered "Research" button, best-in-class comparison, upgrade recommendations
+- [x] **Phase 30: Gear Product Research** - AI-powered "Research" button, best-in-class comparison, upgrade recommendations (completed 2026-04-03)
 - [ ] **Phase 31: Dark Sky & Astro Info** - Bortle class, moon phase, sunrise/sunset per location and trip dates
 
 **Wave 4 — Depends on Wave 3:**
@@ -449,7 +449,7 @@ Plans:
 Plans:
 - [x] 30-01-PLAN.md — Schema, Zod types, Claude function, API route + tests
 - [x] 30-02-PLAN.md — GearResearchTab component + tab switcher in GearClient
-- [ ] 30-03-PLAN.md — Upgrade Opportunities section + human verify
+- [x] 30-03-PLAN.md — Upgrade Opportunities section + human verify
 
 **Parallelization notes:**
 - Wave 3 — can run parallel with Phase 31
@@ -578,7 +578,7 @@ Plans:
 | 27. Safety Float Plan | v3.0 | 1/1 | Complete | 2026-04-03 |
 | 28. Weather-Aware Clothing | v3.0 | 1/1 | Complete | 2026-04-03 |
 | 29. Vehicle Pre-Trip Checklist | v3.0 | 3/3 | Complete    | 2026-04-03 |
-| 30. Gear Product Research | v3.0 | 2/3 | In Progress|  |
+| 30. Gear Product Research | v3.0 | 3/3 | Complete | 2026-04-03 |
 | 31. Dark Sky & Astro Info | v3.0 | 0/TBD | Not started | - |
 | 32. Deal Monitoring | v3.0 | 0/TBD | Not started | - |
 | 33. Conversational Trip Planner | v3.0 | 4/4 | Complete    | 2026-04-03 |

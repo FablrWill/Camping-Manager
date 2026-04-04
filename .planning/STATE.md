@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Gear Intelligence + Day-Of
 status: executing
-stopped_at: Completed 30-02-PLAN.md
-last_updated: "2026-04-04T03:55:45.342Z"
+stopped_at: Completed 30-03-PLAN.md
+last_updated: "2026-04-04T04:00:00.000Z"
 last_activity: 2026-04-04
 progress:
   total_phases: 24
-  completed_phases: 18
+  completed_phases: 19
   total_plans: 51
-  completed_plans: 49
+  completed_plans: 50
   percent: 40
 ---
 
@@ -21,12 +21,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-01)
 
 **Core value:** Personal camping second brain — a closed-loop system that plans, executes, and learns from every trip
-**Current focus:** Phase 30 — gear-product-research
+**Current focus:** Phase 31 — dark-sky-astro-info
 
 ## Current Position
 
-Phase: 30 (gear-product-research) — EXECUTING
-Plan: 3 of 3
+Phase: 31 (dark-sky-astro-info) — Ready to execute
+Plan: Not started
 Status: Ready to execute
 Last activity: 2026-04-04
 
@@ -74,6 +74,7 @@ Progress: [████░░░░░░] 40%
 | Phase 29 P01 | 214 | 2 tasks | 5 files |
 | Phase 30-gear-product-research P01 | 235 | 2 tasks | 7 files |
 | Phase 30-gear-product-research P02 | 125 | 2 tasks | 2 files |
+| Phase 30-gear-product-research P03 | 4 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -124,6 +125,8 @@ Recent decisions affecting current work:
 - [Phase 30-gear-product-research]: GearResearch uses @unique on gearItemId — one per gear item, upserted on re-research
 - [Phase 30-gear-product-research]: verdict stored as top-level String column alongside JSON result blob — enables fast filtering without JSON parsing
 - [Phase 30-gear-product-research]: GearResearchTab fetches on mount via GET, POST triggers research; tab resets to documents on modal open
+- [Phase 30-gear-product-research]: Upgrade Opportunities section placed above gear list — surfaces actionable items immediately on page load
+- [Phase 30-gear-product-research]: JSON parsing of result blob done in server component (page.tsx) — client receives clean UpgradeOpportunity objects, not raw JSON
 
 ### Pending Todos
 
@@ -141,6 +144,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-04T03:55:45.337Z
-Stopped at: Completed 30-02-PLAN.md
+Last session: 2026-04-04T04:00:00.000Z
+Stopped at: Completed 30-03-PLAN.md
 Resume file: None
