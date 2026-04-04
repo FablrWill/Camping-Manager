@@ -2,16 +2,31 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 
 // GET /api/agent/jobs — list jobs, optional status filter + unread flag
+// ?scheduled=ready returns jobs where scheduledFor <= now regardless of other filters
 export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status');
     const unread = searchParams.get('unread');
-
-    const where: Record<string, unknown> = {};
+    const scheduled = searchParams.get('scheduled');
 
     const type = searchParams.get('type');
     const tripId = searchParams.get('tripId');
+
+    // scheduled=ready: return jobs where scheduledFor <= now (for scheduler polling)
+    if (scheduled === 'ready') {
+      const jobs = await prisma.agentJob.findMany({
+        where: {
+          scheduledFor: { lte: new Date() },
+          status: 'pending',
+        },
+        orderBy: { scheduledFor: 'asc' },
+        take: 50,
+      });
+      return NextResponse.json(jobs);
+    }
+
+    const where: Record<string, unknown> = {};
 
     if (status) {
       where.status = status;
@@ -57,6 +72,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         type: body.type,
         payload: typeof body.payload === 'string' ? body.payload : JSON.stringify(body.payload),
         triggeredBy: body.triggeredBy || 'manual',
+        scheduledFor: body.scheduledFor ? new Date(body.scheduledFor) : undefined,
+        recurringCron: body.recurringCron ?? undefined,
       },
     });
 

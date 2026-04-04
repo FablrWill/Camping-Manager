@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-04-01)
 Phase: 35
 Plan: Not started
 Status: Ready to execute
-Last activity: 2026-04-04
+Last activity: 2026-04-04 - Completed quick task 260404-joc: S32 Mac mini scheduled intelligence
 
 Progress: [████░░░░░░] 40%
 
@@ -154,6 +154,12 @@ None yet.
 - Serwist/Turbopack: if manual sw.js fails App Router URL pattern validation in spike, fall back to Serwist with --webpack flag
 - Voice debrief extraction schema needs a prompt engineering spike before Phase 9 UI is built
 - iOS 7-day storage clearing: surface snapshot age clearly in the UI (Phase 8)
+
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260404-joc | Extend AgentJob with scheduled recurring jobs (scheduledFor, recurringCron), build 4 job handlers, scheduler script, IntelligenceCard dashboard widget | 2026-04-04 | 7ccf6e2 | [260404-joc-extend-agentjob-with-scheduled-recurring](./quick/260404-joc-extend-agentjob-with-scheduled-recurring/) |
 
 ## Session Continuity
 

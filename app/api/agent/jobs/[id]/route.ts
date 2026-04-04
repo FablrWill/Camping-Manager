@@ -46,6 +46,14 @@ export async function PATCH(
       data.status = body.status;
     }
 
+    // Advance scheduledFor (used by scheduler to set next run time on template jobs)
+    if (typeof body.scheduledFor === 'string') {
+      const parsed = new Date(body.scheduledFor);
+      if (!isNaN(parsed.getTime())) {
+        data.scheduledFor = parsed;
+      }
+    }
+
     if (Object.keys(data).length === 0) {
       return NextResponse.json({ error: 'No valid fields to update' }, { status: 400 });
     }

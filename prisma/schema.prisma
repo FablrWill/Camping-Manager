@@ -535,18 +535,21 @@ model InboxItem {
 // --- Phase 36: Agent Jobs Infrastructure ---
 
 model AgentJob {
-  id          String    @id @default(cuid())
-  type        String    // "gear_enrichment" | "weather_analysis" | "deal_check" | etc.
-  status      String    @default("pending") // pending | running | done | failed
-  triggeredBy String    @default("manual") // manual | schedule | auto
-  payload     String    // JSON input
-  result      String?   // JSON output (null until done)
-  readAt      DateTime? // null until user acknowledges the result
-  createdAt   DateTime  @default(now())
-  completedAt DateTime?
+  id            String    @id @default(cuid())
+  type          String    // "gear_enrichment" | "weather_analysis" | "deal_check" | etc.
+  status        String    @default("pending") // pending | running | done | failed
+  triggeredBy   String    @default("manual") // manual | schedule | auto
+  payload       String    // JSON input
+  result        String?   // JSON output (null until done)
+  readAt        DateTime? // null until user acknowledges the result
+  scheduledFor  DateTime? // when this job should next run (scheduler template jobs)
+  recurringCron String?   // cron expression: "0 8 * * *" = 8am daily
+  createdAt     DateTime  @default(now())
+  completedAt   DateTime?
 
   @@index([status])
   @@index([createdAt])
+  @@index([scheduledFor])
 }
 
 // --- Camp Kit Presets ---
