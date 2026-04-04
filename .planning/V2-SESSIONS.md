@@ -78,6 +78,7 @@ A self-coordinating work queue for v2.0 features. Each Claude Code session claim
 | S36 | Knowledge base refresh               | —     | ✅ Done 2026-04-04 | Sonnet, normal | —          |
 | S37 | Personal signal map (39) + Trip cost tracking (42) | 39,42 | ✅ Done 2026-04-04 | Sonnet, normal | —          |
 | S38 | Google Maps list import              | 44    | ✅ Done 2026-04-04 | Sonnet, normal | —          |
+| S39 | Security & hardening                 | 58    | ⬜ Ready | Sonnet, normal | S38        |
 | S10 | Home Assistant integration           | 33    | ⏸ Blocked (~mid-Apr hardware) | Sonnet, normal | S09 |
 
 **Why this order matters (conflict groups):**
@@ -1776,6 +1777,40 @@ Pull origin main, then claim S37 in .planning/V2-SESSIONS.md (mark it 🔄 In Pr
 Build a Google Maps list importer. User pastes a shared Google Maps list URL, the server fetches and scrapes the page HTML (no API key), extracts place names + coordinates from embedded JSON data, returns draft Location previews. User reviews the checklist and confirms which to import. Create lib/gmaps-import.ts (fetch + parse logic), app/api/import/gmaps-list/route.ts (POST endpoint), and GmapsImportModal.tsx (idle → fetching → preview → importing → done state machine). Wire an "Import from Google Maps" entry point into the Spots map UI. No new npm packages, no schema changes. Full spec in V2-SESSIONS.md under S37.
 
 When done: mark S37 ✅ Done in V2-SESSIONS.md, commit, push, then merge to main:
+git checkout main && git merge - && git push origin main
+```
+
+---
+
+**S39 — Security & Hardening (Phase 58)** *(after S38 Google Maps import)*
+```
+Pull origin main, then claim S39 in .planning/V2-SESSIONS.md (mark it 🔄 In Progress, commit + push). Then run /gsd:execute-phase 58.
+
+This session closes the top-priority gaps from the 2026-04-04 cross-AI review (Gemini 2.5-flash + GPT-5.1-Codex-Max). Both reviewers agreed: surface area has outpaced guardrails. No new features — only hardening.
+
+Eight requirements to implement (HARDEN-01 through HARDEN-08):
+
+1. **Auth middleware** — Create `lib/middleware/auth.ts` with a shared-secret check. Add `APP_SECRET` to `.env.example`. Apply to all `/api/*` routes except explicitly public ones (share page, health endpoint). Return 401 with `{ error: "Unauthorized" }` if header missing or wrong. (~2 hrs)
+
+2. **File upload hardening** — Add MIME allowlist (image/jpeg, image/png, image/heic, image/webp, application/pdf) and size cap (20MB for photos, 50MB for PDFs) to `app/api/photos/upload/route.ts`, `app/api/photos/bulk-import/route.ts`, and gear document routes. Return 400 with clear error. (~1 hr)
+
+3. **LLM tool safety** — In `lib/agent/tools/updateTrip.ts`, `updateGear.ts`, `deleteGear.ts`: add a server-side guard that requires a `confirmed: true` argument OR moves the tool behind a two-step flow (propose → user confirms → execute). The system-prompt-only approach is insufficient. (~half day)
+
+4. **Rate limiting** — Add in-memory token bucket rate limiter to `/api/chat`, `/api/trip-planner`, `/api/packing-list`, `/api/meal-plan`. Cap: 10 req/min per route. Return 429 with `{ error: "Rate limit exceeded", retryAfter: N }`. No npm package needed — simple counter with timestamp in module scope. (~2 hrs)
+
+5. **Test debt** — Find all `it.todo` stubs in `tests/`. Implement passing tests for: Meal Planning generation (MEAL-01 to MEAL-07), shopping list (SHOP-01 to SHOP-06), meal feedback (FEED-01 to FEED-04), and packing feedback injection. Skip E2E stubs — unit/integration only. (~1 session, can be split)
+
+6. **parseClaudeJSON consistency** — Audit `scripts/agent-runner.ts` job handlers. Replace any `JSON.parse(cleaned)` with `parseClaudeJSON<T>(raw, schema)`. Add a Zod schema for each job output type if missing. (~2 hrs)
+
+7. **Backup verification** — Add a check in `app/api/health/route.ts` (create if missing) that reads the latest backup file timestamp from `~/outland-data/backups/` and reports PASS/WARN (>24h stale) / FAIL (missing). Surface in Settings page next to backup status. (~1 hr)
+
+8. **React Error Boundaries** — Wrap `SpotMap`, `PackingList`, `MealPlanClient`, and `ChatClient` in error boundaries. Simple `ErrorBoundary` component with a "Something went wrong — reload" fallback. (~1 hr)
+
+**Files likely touched:** `lib/middleware/auth.ts` (new), `app/api/*/route.ts` (auth header check), `app/api/health/route.ts` (new or extend), `lib/agent/tools/updateTrip.ts`, `lib/agent/tools/updateGear.ts`, `scripts/agent-runner.ts`, `components/ErrorBoundary.tsx` (new), `components/SpotMap.tsx`, `components/PackingList.tsx`, `components/MealPlanClient.tsx`, `components/ChatClient.tsx`, `tests/**/*.test.ts` (many)
+
+**No schema changes required.** No new npm packages (rate limiter is hand-rolled). `npm run build` must pass.
+
+When done: mark S39 ✅ Done in V2-SESSIONS.md, commit, push, then merge to main:
 git checkout main && git merge - && git push origin main
 ```
 

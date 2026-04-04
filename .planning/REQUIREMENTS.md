@@ -73,19 +73,26 @@ Requirements for milestone v2.0 "Field Intelligence".
 - [x] **ASTRO-04**: suncalc used for moon phase computation (client-side, no API key); no new env vars required
 - [x] **ASTRO-05**: npm run build passes with all new files; no type errors
 
+## Active Requirements
+
+### Phase 58: Security & Hardening
+
+Requirements for Phase 58 "Security & Hardening". Escalated from Future to Active after second cross-AI review (2026-04-04) — both Gemini and Codex flagged these as top-priority blockers before adding more features.
+
+> Source: `.planning/review/FULL-PROJECT-REVIEW-2026-04-04.md` — Gemini (2.5-flash) + Codex (gpt-5.1-codex-max)
+
+- [ ] **HARDEN-01**: Auth middleware — shared-secret header on all `/api/*` routes; env var `APP_SECRET`; return 401 if missing or wrong (Codex HIGH, Gemini MEDIUM) — ~2 hrs
+- [ ] **HARDEN-02**: File upload hardening — MIME allowlist (image/jpeg, image/png, image/heic, application/pdf), max size cap (20MB photos, 50MB PDFs), reject with 400 on violation (`app/api/photos/upload`, `app/api/photos/bulk-import`, gear docs routes) (both MEDIUM) — ~1 hr
+- [ ] **HARDEN-03**: LLM tool safety — server-side guard on destructive agent tools (updateTrip, updateGear, deleteGear): require `confirmed: true` in tool args OR move behind internal-only route that validates before executing (Codex HIGH) — ~half day
+- [ ] **HARDEN-04**: Rate limiting — per-minute cap on `/api/chat`, `/api/trip-planner`, `/api/packing-list`, `/api/meal-plan`; simple in-memory token bucket is sufficient for single-user (both MEDIUM) — ~2 hrs
+- [ ] **HARDEN-05**: Test debt — convert 50+ `it.todo` stubs to passing tests, prioritizing Meal Planning (Phase 34/35) and Feedback injection logic (Gemini CRITICAL) — ~1 session
+- [ ] **HARDEN-06**: parseClaudeJSON consistency — audit `scripts/agent-runner.ts` and any route not using the safe-parse utility; replace raw `JSON.parse` after fence-strip with `parseClaudeJSON<T>` (Codex MEDIUM)
+- [ ] **HARDEN-07**: Backup verification — add a nightly health check that confirms the backup cron ran and the backup file exists/is non-zero; surface failure in `/api/health` or Settings page (both flagged gap)
+- [ ] **HARDEN-08**: React Error Boundaries — wrap Map, PackingList, MealPlan, and ChatClient in error boundaries so a component crash doesn't take down the page shell (Gemini)
+
 ## Future Requirements
 
 Deferred to future release. Tracked but not in current roadmap.
-
-### Hardening (from Cross-AI Review, 2026-04-03)
-
-> Source: `.planning/review/CROSS-AI-REVIEWS.md` — Gemini (gemini-3-flash) + Codex (gpt-5.1-codex-max)
-
-- **HARDEN-01**: Auth middleware — shared-secret header or local-only check on all API routes (Codex HIGH, Gemini LOW)
-- **HARDEN-02**: File upload hardening — MIME allowlist + file size cap on photo/intake endpoints (both MEDIUM)
-- **HARDEN-03**: LLM tool safety — server-side confirmation for destructive agent tool operations (delete, bulk update) (Codex HIGH)
-- **HARDEN-04**: Rate limiting on Claude chat endpoint to prevent runaway API costs (both MEDIUM)
-- **HARDEN-05**: E2E smoke tests for critical flows (chat, upload, map, offline cache) (both flagged gap)
 
 ### Infrastructure
 
