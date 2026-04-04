@@ -8,6 +8,8 @@ import VoiceRecordModal from './VoiceRecordModal'
 import TripCard from './TripCard'
 import TripPlannerSheet from './TripPlannerSheet'
 import type { DayForecast, WeatherAlert } from '@/lib/weather'
+import { computeAstro } from '@/lib/astro'
+import type { TripAstroData } from '@/lib/astro'
 
 interface TripData {
   id: string
@@ -57,6 +59,7 @@ export default function TripsClient({ initialTrips, locations, vehicles }: Trips
   const [weatherLoading, setWeatherLoading] = useState<Record<string, boolean>>({})
   const [weatherErrors, setWeatherErrors] = useState<Record<string, string>>({})
   const [fetchedTrips] = useState<Set<string>>(new Set())
+  const [astroByTrip, setAstroByTrip] = useState<Record<string, TripAstroData>>({})
 
   // Edit/delete state
   const [editingTrip, setEditingTrip] = useState<TripData | null>(null)
@@ -194,6 +197,39 @@ export default function TripsClient({ initialTrips, locations, vehicles }: Trips
       }
     })
   }, [trips, now, fetchedTrips])
+
+  // Compute astro data for upcoming trips (pure computation, no API call)
+  useEffect(() => {
+    const upcoming = trips.filter((t) => t.endDate >= now)
+    if (upcoming.length === 0) return
+
+    setAstroByTrip((prev) => {
+      const next: Record<string, TripAstroData> = { ...prev }
+      let changed = false
+
+      upcoming.forEach((trip) => {
+        const start = trip.startDate.split('T')[0]
+        const end = trip.endDate.split('T')[0]
+        const weatherData = weatherByTrip[trip.id]
+        // Cache key: trip.id + whether weather data is present.
+        // Re-compute when weather arrives so sunrise/sunset can merge.
+        const hasWeather = !!weatherData?.days?.length
+        const existingHasWeather = !!next[trip.id]?.nights[0]?.sunrise
+        if (next[trip.id] && (existingHasWeather || !hasWeather)) return // already up-to-date
+
+        next[trip.id] = computeAstro({
+          startDate: start,
+          endDate: end,
+          lat: trip.location?.latitude ?? undefined,
+          lon: trip.location?.longitude ?? undefined,
+          weatherDays: weatherData?.days,
+        })
+        changed = true
+      })
+
+      return changed ? next : prev // return same reference if nothing changed — no re-render
+    })
+  }, [trips, now, weatherByTrip])
 
   const upcoming = trips.filter((t) => t.endDate >= now)
   const past = trips.filter((t) => t.endDate < now)
@@ -406,6 +442,7 @@ export default function TripsClient({ initialTrips, locations, vehicles }: Trips
                       weatherLoading={weatherLoading[trip.id]}
                       weatherError={weatherErrors[trip.id]}
                       onDebrief={setDebriefTrip}
+                      astro={astroByTrip[trip.id]}
                     />
                     {/* Add Plan B/C button — only for upcoming primary trips without max fallbacks */}
                     {!trip.fallbackFor && trip._count.alternatives < 2 && new Date(trip.startDate) > new Date() && (
@@ -441,6 +478,7 @@ export default function TripsClient({ initialTrips, locations, vehicles }: Trips
                     weatherLoading={weatherLoading[trip.id]}
                     weatherError={weatherErrors[trip.id]}
                     onDebrief={setDebriefTrip}
+                    astro={astroByTrip[trip.id]}
                   />
                 ))}
               </div>

@@ -13,6 +13,7 @@ import {
 import Link from 'next/link'
 import { Button } from '@/components/ui'
 import WeatherCard from '@/components/WeatherCard'
+import AstroCard from '@/components/AstroCard'
 import PackingList from '@/components/PackingList'
 import MealPlan from '@/components/MealPlan'
 import PowerBudget from '@/components/PowerBudget'
@@ -20,6 +21,7 @@ import VoiceDebriefButton from './VoiceDebriefButton'
 import PostTripReview from './PostTripReview'
 import { formatDateRange, daysUntil, tripNights } from '@/lib/trip-utils'
 import type { DayForecast, WeatherAlert } from '@/lib/weather'
+import type { TripAstroData } from '@/lib/astro'
 
 interface TripData {
   id: string
@@ -56,6 +58,7 @@ interface TripCardProps {
   weatherLoading?: boolean
   weatherError?: string | null
   onDebrief: (trip: { id: string; name: string; locationId: string | null }) => void
+  astro?: TripAstroData
 }
 
 export default function TripCard({
@@ -68,6 +71,7 @@ export default function TripCard({
   weatherLoading,
   weatherError,
   onDebrief,
+  astro,
 }: TripCardProps) {
   const now = new Date().toISOString()
   const nights = tripNights(trip.startDate, trip.endDate)
@@ -239,6 +243,18 @@ export default function TripCard({
               elevation={weather?.elevation}
               loading={weatherLoading ?? false}
               error={weatherError ?? null}
+            />
+          </div>
+        )}
+
+        {/* Astro card for upcoming trips */}
+        {!isPast && (
+          <div className="mt-3">
+            <AstroCard
+              nights={astro?.nights ?? []}
+              locationName={trip.location?.name}
+              dateRange={formatDateRange(trip.startDate, trip.endDate)}
+              bortleLink={astro?.bortleLink}
             />
           </div>
         )}
