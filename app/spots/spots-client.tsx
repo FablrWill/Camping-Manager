@@ -580,7 +580,7 @@ export default function SpotsClient({
       )}
 
       {/* Stats footer */}
-      <div className="flex items-center justify-between px-3 py-2 text-xs text-stone-500 dark:text-stone-400 border-t border-stone-200 dark:border-stone-700">
+      <div className="flex items-center justify-between px-3 py-2 text-xs text-stone-500 dark:text-stone-400 bg-white dark:bg-stone-900 border-t border-stone-200 dark:border-stone-700">
         <div className="flex gap-3">
           <span>📷 {geoPhotos.length} photos</span>
           {totalPathPts > 0 && <span>🗺️ {totalPathPts.toLocaleString()} pts</span>}

@@ -2,8 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Moon, Settings as SettingsIcon, Sun } from 'lucide-react'
-import { useTheme } from './ThemeProvider'
+import { Settings as SettingsIcon } from 'lucide-react'
 
 const PAGE_TITLES: Record<string, string> = {
   '/': 'Outland OS',
@@ -18,7 +17,6 @@ const PAGE_TITLES: Record<string, string> = {
 
 export default function TopHeader() {
   const pathname = usePathname()
-  const { resolvedTheme, toggleTheme } = useTheme()
 
   const title = PAGE_TITLES[pathname] || 'Outland OS'
 
@@ -35,13 +33,6 @@ export default function TopHeader() {
         >
           <SettingsIcon size={20} />
         </Link>
-        <button
-          onClick={toggleTheme}
-          className="p-2 rounded-lg text-stone-400 hover:text-stone-600 hover:bg-stone-100 dark:hover:text-stone-200 dark:hover:bg-stone-800 transition-colors"
-          aria-label={resolvedTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-        >
-          {resolvedTheme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
-        </button>
       </div>
     </header>
   )

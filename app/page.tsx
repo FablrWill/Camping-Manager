@@ -36,13 +36,14 @@ function getMealPlanStatus(trip: UpcomingTripQueryResult): string | null {
 }
 
 export default async function Home() {
-  const [gearCount, wishlistCount, locationCount, photoCount, vehicleMods, recentGear, upcomingTrip, unreadJobCount, activeDeals] =
+  const [gearCount, wishlistCount, locationCount, photoCount, vehicleMods, tripCount, recentGear, upcomingTrip, unreadJobCount, activeDeals] =
     await Promise.all([
       prisma.gearItem.count({ where: { isWishlist: false } }),
       prisma.gearItem.count({ where: { isWishlist: true } }),
       prisma.location.count(),
       prisma.photo.count(),
       prisma.vehicleMod.count(),
+      prisma.trip.count(),
       prisma.gearItem.findMany({
         where: { isWishlist: false },
         orderBy: { updatedAt: "desc" },
@@ -81,6 +82,7 @@ export default async function Home() {
         photoCount,
         vehicleMods,
         totalWeight: totalWeight._sum.weight ?? 0,
+        tripCount,
       }}
       recentGear={recentGear.map((g) => ({
         ...g,

@@ -14,6 +14,7 @@ interface DashboardStats {
   photoCount: number
   vehicleMods: number
   totalWeight: number
+  tripCount: number
 }
 
 interface RecentGearItem {
@@ -176,10 +177,10 @@ export default function DashboardClient({
             </span>
           </div>
           <p className="text-2xl font-bold text-stone-900 dark:text-stone-50">
-            0
+            {stats.tripCount}
           </p>
           <p className="text-xs text-stone-400 dark:text-stone-500 mt-0.5">
-            plan your next trip
+            {stats.tripCount === 1 ? 'trip planned' : 'trips planned'}
           </p>
         </Link>
       </section>
