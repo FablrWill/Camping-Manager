@@ -38,16 +38,12 @@ Declared values (multiples of 4):
 |-------|-------|-------|
 | xs | 4px | Icon gaps, inline padding |
 | sm | 8px | Compact element spacing (gap-2, py-1.5) |
-| md | 16px | Default element spacing (p-3 = 12px, p-4 = 16px) |
+| sm+ | 12px | Panel interior padding (p-3), layer toggle pill horizontal padding (px-3), trail list row horizontal padding (px-3) |
+| md | 16px | Default element spacing (p-4) |
 | lg | 24px | Section padding |
 | xl | 32px | Layout gaps |
 | 2xl | 48px | Major section breaks |
 | 3xl | 64px | Page-level spacing |
-
-Exceptions:
-- Layer toggle pills: `px-2.5 py-1` (10px / 4px) — matches existing toggle button pattern exactly
-- Import panel interior: `p-3` (12px) — matches existing GPX and Google Maps import panel pattern
-- Trail list rows: `py-2 px-3` (8px / 12px) — compact list row within import panel
 
 Source: Observed from `spots-client.tsx` lines 358-468.
 
@@ -97,7 +93,7 @@ All new UI elements in this phase extend existing patterns in `spots-client.tsx`
 - Pattern: Append `["trails", "🥾 Trails"]` to the existing `([...] as const).map()` array
 - Active state: `bg-stone-800 text-white dark:bg-stone-200 dark:text-stone-900`
 - Inactive state: `bg-stone-200 text-stone-500 dark:bg-stone-700 dark:text-stone-400`
-- Size: `px-2.5 py-1 text-xs rounded-full font-medium transition-colors`
+- Size: `px-3 py-1 text-xs rounded-full font-medium transition-colors`
 - Touch target: minimum 32px height at 4px vertical padding + 12px font = ~32px — acceptable for a map control bar
 
 ### GPX Import Panel Extension
@@ -118,7 +114,7 @@ New section added inside the existing panel, below `{gpxMessage}`:
 - Layout: `flex items-center justify-between py-2`
 - Left: trail name — `text-sm text-stone-700 dark:text-stone-300`
 - Left sub: distance if available — `text-xs text-stone-500 dark:text-stone-400 ml-1` (e.g. "4.2 km")
-- Right: delete button — ghost icon button, `text-stone-400 hover:text-red-600 dark:hover:text-red-400 transition-colors p-1 rounded`
+- Right: delete button — ghost icon button, `text-stone-400 hover:text-red-600 dark:hover:text-red-400 transition-colors p-1 rounded`, `aria-label="Delete trail"`
 - Separator between rows: none (tight list, panel is compact)
 - Loading state: three skeleton rows `animate-pulse bg-stone-200 dark:bg-stone-700 h-4 rounded`
 
