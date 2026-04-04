@@ -374,10 +374,10 @@ export default function TripExpenses({ tripId }: TripExpensesProps) {
               <span className="text-sm font-semibold text-stone-900 dark:text-stone-50 shrink-0">
                 {formatCurrency(expense.amount)}
               </span>
-              <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+              <div className="flex items-center gap-0.5 shrink-0">
                 <button
                   onClick={() => openEdit(expense)}
-                  className="p-1 text-stone-400 hover:text-stone-600 dark:hover:text-stone-300"
+                  className="p-1.5 text-stone-400 hover:text-stone-600 dark:hover:text-stone-300"
                   aria-label="Edit expense"
                 >
                   <Pencil size={12} />
@@ -385,7 +385,7 @@ export default function TripExpenses({ tripId }: TripExpensesProps) {
                 <button
                   onClick={() => handleDelete(expense.id)}
                   disabled={deletingId === expense.id}
-                  className="p-1 text-stone-400 hover:text-red-500 disabled:opacity-50"
+                  className="p-1.5 text-stone-400 hover:text-red-500 disabled:opacity-50"
                   aria-label="Delete expense"
                 >
                   <Trash2 size={12} />
