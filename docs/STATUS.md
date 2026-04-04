@@ -1,7 +1,7 @@
 # Project Status — Outland OS
 
 ## Quick Pickup
-> **Last session:** 2026-04-04 (Session 34 — Phase 31 dark sky, astro info, activities gear)
+> **Last session:** 2026-04-04 (Session 37 — S20 Voice Ghostwriter)
 > **Milestone v1.0:** ✅ Complete — all 5 phases shipped 2026-04-01
 > **Milestone v1.1:** ✅ Complete — Phases 6-11 shipped 2026-04-02
 > **Milestone v1.2:** ✅ Complete — Phases 12-15 shipped 2026-04-03
@@ -111,6 +111,7 @@
 - **Session 32** (2026-04-04) — S14 Gear product research (Phase 30).
 - **Session 33** (2026-04-04) — S15 Mac mini agent runner script, kit presets, GPX import.
 - **Session 34** (2026-04-04) — Phase 31: dark sky, astro info, activities gear category, moon phase, Bortle estimation, trip planner activity recommendations.
+- **Session 37** (2026-04-04) — S20 Voice Ghostwriter: record trip monologue → Claude writes journal entry → saved to trip, edit/save flow in TripCard.
 
 ## Key Files
 - `TASKS.md` — What's done, what's next, where to start
