@@ -672,6 +672,7 @@ Plans:
 
 ---
 
+
 ## Backlog (v4.0+)
 
 Ideas captured from conversations and planning sessions that haven't been phased yet. These are real intentions, not wishlist noise — each one was explicitly discussed or directly derived from Will's use patterns.
