@@ -146,6 +146,31 @@ export function chunkMarkdown(fileContent: string, filePath: string): RawChunk[]
 }
 
 /**
+ * Chunk arbitrary text using the appropriate strategy based on content structure.
+ * - If the text contains markdown H2/H3 headings (## or ###), delegates to chunkMarkdown.
+ * - Otherwise, splits at paragraph boundaries using the same 512-token limit.
+ *
+ * This is the entry point for the corpus refresh pipeline when content has already
+ * been fetched and the format is unknown. It does NOT modify chunkMarkdown or
+ * chunkWebPage — it sits alongside them as an alternative for refresh-script use.
+ *
+ * @param text    Raw text content to chunk
+ * @param source  Source identifier (URL or file path) used as the RawChunk.source
+ */
+export function chunkText(text: string, source: string): RawChunk[] {
+  const isMarkdownLike = text.includes('\n## ') || text.includes('\n### ');
+
+  if (isMarkdownLike) {
+    return chunkMarkdown(text, source);
+  }
+
+  // Paragraph-split with a derived title from the source string
+  const title = source.split('/').pop() ?? source;
+  const fakeFilePath = source;
+  return splitAtParagraphs(text, title, fakeFilePath, {}, 0);
+}
+
+/**
  * Read a file and chunk it based on file type.
  * Supports: .md (markdown), .pdf (PDF text extraction), http/https URLs (web scraping).
  */

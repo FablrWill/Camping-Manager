@@ -332,15 +332,17 @@ model PackingItem {
 }
 
 model KnowledgeChunk {
-  id         String   @id @default(cuid())
-  source     String   // file path or URL, e.g. "data/research/dispersed-camping-regulations.md"
-  title      String   // heading text or document title
-  content    String   // plain text chunk, target 256-512 tokens
-  embedding  Bytes    // Float32Array as BLOB — 512 dims for voyage-3-lite
-  metadata   String   // JSON: { topic, region, category, confidence, verifyFlag }
-  chunkIdx   Int      // 0-based position within source document
-  tokenCount Int      // estimated token count for this chunk
-  createdAt  DateTime @default(now())
+  id          String    @id @default(cuid())
+  source      String    // file path or URL, e.g. "data/research/dispersed-camping-regulations.md"
+  title       String    // heading text or document title
+  content     String    // plain text chunk, target 256-512 tokens
+  embedding   Bytes     // Float32Array as BLOB — 512 dims for voyage-3-lite
+  metadata    String    // JSON: { topic, region, category, confidence, verifyFlag }
+  chunkIdx    Int       // 0-based position within source document
+  tokenCount  Int       // estimated token count for this chunk
+  contentHash String?   // SHA-256 of chunk content for change detection
+  refreshedAt DateTime? // when chunk was last refreshed from source
+  createdAt   DateTime  @default(now())
 
   @@index([source])
 }
