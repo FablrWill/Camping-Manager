@@ -4,6 +4,82 @@ import { MemoryArraySchema } from '@/lib/parse-claude';
 
 export const SLIDING_WINDOW_SIZE = 20;
 
+/** Key used to store the AI-generated rolling summary row in AgentMemory */
+const SUMMARY_KEY = '__summary__';
+
+/**
+ * Build a compact memory context string (< 500 tokens) for injection into the system prompt.
+ * Returns the stored summary if available, otherwise falls back to raw key-value pairs.
+ * This is injected at the start of every chat turn.
+ */
+export async function buildMemorySummary(): Promise<string> {
+  const memories = await prisma.agentMemory.findMany({
+    orderBy: { updatedAt: 'desc' },
+  });
+
+  if (memories.length === 0) return '';
+
+  // Use stored summary if available
+  const summaryRow = memories.find((m) => m.key === SUMMARY_KEY);
+  if (summaryRow?.summary) {
+    return `WHAT I KNOW ABOUT YOU:\n${summaryRow.summary}`;
+  }
+
+  // Fallback: render raw pairs (excluding the summary meta-row)
+  const pairs = memories
+    .filter((m) => m.key !== SUMMARY_KEY)
+    .map((m) => `- ${m.key}: ${m.value}`)
+    .join('\n');
+
+  return pairs ? `WHAT I KNOW ABOUT YOU:\n${pairs}` : '';
+}
+
+/**
+ * Refresh the stored memory summary using a lightweight Haiku call.
+ * Condenses all current key-value pairs into a single paragraph < 500 tokens.
+ * Called by the background refresh job and after significant memory updates.
+ * Fire-and-forget safe — never throws.
+ */
+export async function refreshMemorySummary(): Promise<void> {
+  try {
+    const memories = await prisma.agentMemory.findMany({
+      where: { key: { not: SUMMARY_KEY } },
+      orderBy: { updatedAt: 'desc' },
+    });
+
+    if (memories.length === 0) return;
+
+    const pairs = memories.map((m) => `${m.key}: ${m.value}`).join('\n');
+
+    const haiku = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+    const response = await haiku.messages.create({
+      model: 'claude-3-5-haiku-20241022',
+      max_tokens: 256,
+      messages: [
+        {
+          role: 'user',
+          content: `Condense these user memory entries into a single concise paragraph under 400 tokens. Preserve all specific facts (dietary needs, preferences, companions, gear, regions). Write in second person ("You prefer...", "You don't eat..."). Return only the paragraph, no markdown.
+
+${pairs}`,
+        },
+      ],
+    });
+
+    const summary =
+      response.content[0]?.type === 'text' ? response.content[0].text.trim() : '';
+
+    if (!summary) return;
+
+    await prisma.agentMemory.upsert({
+      where: { key: SUMMARY_KEY },
+      update: { value: 'summary', summary },
+      create: { key: SUMMARY_KEY, value: 'summary', summary },
+    });
+  } catch (err) {
+    console.error('Memory summary refresh failed:', err);
+  }
+}
+
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 /**
@@ -20,12 +96,9 @@ export async function buildContextWindow(
 ): Promise<Array<{ role: 'user' | 'assistant'; content: string }>> {
   const messages: Array<{ role: 'user' | 'assistant'; content: string }> = [];
 
-  // Load agent memories
-  const memories = await prisma.agentMemory.findMany();
-  const memoryBlock =
-    memories.length > 0
-      ? `\n\nWHAT I KNOW ABOUT YOU:\n${memories.map((m) => `- ${m.key}: ${m.value}`).join('\n')}`
-      : '';
+  // Load compact memory summary (< 500 tokens)
+  const memorySummary = await buildMemorySummary();
+  const memoryBlock = memorySummary ? `\n\n${memorySummary}` : '';
 
   const contextBlock = pageContext ? `\nCURRENT CONTEXT: ${pageContext}` : '';
 
