@@ -73,7 +73,7 @@ A self-coordinating work queue for v2.0 features. Each Claude Code session claim
 | S31 | Destination discovery                | —     | ⬜ Ready          | Sonnet, normal | —          |
 | S32 | Mac mini scheduled intelligence      | —     | ⬜ Ready          | Sonnet, normal | —          |
 | S33 | Chat agent memory                    | —     | ⬜ Ready          | Sonnet, normal | S32        |
-| S34 | Trip intelligence report             | —     | ⬜ Ready          | Sonnet, normal | —          |
+| S34 | Trip intelligence report             | —     | 🔄 In Progress    | Sonnet, normal | —          |
 | S35 | Smart packing v2                     | —     | ⬜ Ready          | Sonnet, normal | —          |
 | S36 | Knowledge base refresh               | —     | ⬜ Ready          | Sonnet, normal | —          |
 | S10 | Home Assistant integration           | 33    | ⏸ Blocked (~mid-Apr hardware) | Sonnet, normal | S09 |
