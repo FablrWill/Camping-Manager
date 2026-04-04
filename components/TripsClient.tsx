@@ -38,6 +38,7 @@ interface TripData {
   journalEntry: string | null  // S20: Voice Ghostwriter
   journalEntryAt: string | null  // S20: when journal was last written
   shareToken: string | null  // S28: public share token
+  expenses: Array<{ amount: number }>  // Phase 42: expense amounts for cost badge
 }
 
 interface WeatherData {
@@ -325,6 +326,7 @@ export default function TripsClient({ initialTrips, locations, vehicles }: Trips
           packingItems: saved.packingItems ?? [],
           mealPlan: saved.mealPlan ?? null,
           reviewedAt: saved.reviewedAt ?? null,
+          expenses: saved.expenses ?? [],
         },
         ...prev,
       ])
