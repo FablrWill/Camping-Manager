@@ -64,7 +64,7 @@ A self-coordinating work queue for v2.0 features. Each Claude Code session claim
 | S23 | Fire ban + pre-trip alerts           | —     | ✅ Done 2026-04-04        | Sonnet, normal | —          |
 | S24 | Siri/Reminders inbox                 | —     | ✅ Done 2026-04-04        | Sonnet, normal | —          |
 | S25 | LNT pack-out checklist               | —     | ✅ Done 2026-04-04        | Sonnet, normal | —          |
-| S26 | Gear lending tracker                 | —     | ⬜ Ready          | Sonnet, normal | —          |
+| S26 | Gear lending tracker                 | —     | 🔄 In Progress 2026-04-04 | Sonnet, normal | —          |
 | S27 | Gear maintenance reminders           | —     | 🔄 In Progress 2026-04-04 | Sonnet, normal | —          |
 | S28 | Shareable trip reports               | —     | ⬜ Ready          | Sonnet, normal | —          |
 | S29 | Altitude awareness callouts          | —     | ✅ Done          | Sonnet, normal | objective-chebyshev |
