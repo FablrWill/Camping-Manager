@@ -10,6 +10,8 @@ export async function POST(req: NextRequest) {
     const text = formData.get('text') as string | null;
     const url = formData.get('url') as string | null;
     const file = formData.get('file') as File | null;
+    const sourceHintRaw = formData.get('sourceHint') as string | null;
+    const sourceHint = sourceHintRaw === 'reminder' ? ('reminder' as const) : undefined;
 
     if (!text && !url && !file) {
       return NextResponse.json({ error: 'Provide text, url, or file' }, { status: 400 });
@@ -32,6 +34,7 @@ export async function POST(req: NextRequest) {
       text: text ?? undefined,
       url: url ?? undefined,
       imagePath,
+      sourceHint,
     });
 
     const item = await prisma.inboxItem.create({

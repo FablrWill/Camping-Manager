@@ -2,11 +2,13 @@ import { extractGearFromUrl } from './extractors/gear-from-url';
 import { extractGearFromImage } from './extractors/gear-from-image';
 import { extractLocationFromImage } from './extractors/location-from-image';
 import { classifyText } from './extractors/classify-text';
+import { classifyReminder } from './extractors/reminders';
 
 export interface TriageInput {
   text?: string;
   url?: string;
   imagePath?: string;
+  sourceHint?: 'reminder';
 }
 
 export interface TriageResult {
@@ -69,7 +71,10 @@ export async function triageInput(input: TriageInput): Promise<TriageResult> {
   }
 
   if (input.text) {
-    const classification = await classifyText(input.text);
+    const classification =
+      input.sourceHint === 'reminder'
+        ? await classifyReminder(input.text)
+        : await classifyText(input.text);
     return {
       sourceType: 'text',
       rawContent: input.text,

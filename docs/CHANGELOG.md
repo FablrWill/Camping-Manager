@@ -8,6 +8,7 @@ All notable changes to Outland OS are tracked here.
 
 | Session | Date | Summary |
 |---------|------|---------|
+| [38](changelog/session-38.md) | 2026-04-04 | S24 Siri/Reminders inbox bridge: sourceHint param, reminders extractor, Shortcut setup doc |
 | [37b](changelog/session-37b.md) | 2026-04-04 | S20 Voice Ghostwriter: record trip monologue → Claude writes journal entry → saved to trip |
 | [37](changelog/session-37.md) | 2026-04-04 | S22 Seasonal spot ratings: SeasonalRating model, 2×2 star pickers in LocationForm, Best in [season] popup badge |
 | [36b](changelog/session-36b.md) | 2026-04-04 | S17 Nav restructure: 5-tab BottomNav + MoreSheet (Chat, Inbox, Vehicle, Settings) |
