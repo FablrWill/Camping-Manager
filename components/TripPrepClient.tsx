@@ -6,7 +6,7 @@ import { ArrowLeft } from 'lucide-react'
 import TripPrepSection from '@/components/TripPrepSection'
 import WeatherCard from '@/components/WeatherCard'
 import PackingList from '@/components/PackingList'
-import MealPlan from '@/components/MealPlan'
+import MealPlanClient from '@/components/MealPlanClient'
 import PowerBudget from '@/components/PowerBudget'
 import VehicleChecklistCard from '@/components/VehicleChecklistCard'
 import { PREP_SECTIONS, PrepState, PrepSection } from '@/lib/prep-sections'
@@ -360,10 +360,9 @@ export default function TripPrepClient({ trip }: TripPrepClientProps) {
                 )}
 
                 {config.key === 'meals' && (
-                  <MealPlan
+                  <MealPlanClient
                     tripId={trip.id}
                     tripName={trip.name}
-                    offlineData={!isOnline && offlineSnapshot?.mealPlan ? offlineSnapshot.mealPlan as import('@/lib/claude').MealPlanResult : undefined}
                   />
                 )}
 
