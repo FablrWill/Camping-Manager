@@ -2,7 +2,7 @@ export type CategoryValue =
   | 'shelter' | 'sleep' | 'cook' | 'hydration' | 'clothing'
   | 'lighting' | 'tools' | 'safety' | 'furniture'
   | 'power' | 'electronics' | 'vehicle'
-  | 'navigation' | 'hiking' | 'dog'
+  | 'navigation' | 'hiking' | 'dog' | 'activities'
 
 export interface Category {
   value: CategoryValue
@@ -46,9 +46,10 @@ export const CATEGORY_GROUPS: CategoryGroup[] = [
   {
     name: 'Action',
     categories: [
-      { value: 'navigation', label: 'Navigation', emoji: '🧭' },
-      { value: 'hiking',     label: 'Hiking',     emoji: '🥾' },
-      { value: 'dog',        label: 'Dog',        emoji: '🐕' },
+      { value: 'navigation',  label: 'Navigation',  emoji: '🧭' },
+      { value: 'hiking',      label: 'Hiking',      emoji: '🥾' },
+      { value: 'activities',  label: 'Activities',   emoji: '🎯' },
+      { value: 'dog',         label: 'Dog',          emoji: '🐕' },
     ],
   },
 ]

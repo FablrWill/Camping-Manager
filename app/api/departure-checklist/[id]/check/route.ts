@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { safeJsonParse } from '@/lib/safe-json'
 import type { DepartureChecklistResult } from '@/lib/parse-claude'
+import type { Prisma } from '@prisma/client'
 
 export async function PATCH(
   request: NextRequest,
@@ -20,7 +21,7 @@ export async function PATCH(
     }
 
     // Wrap read-modify-write in $transaction to prevent race conditions on rapid check-off taps
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const checklist = await tx.departureChecklist.findUnique({ where: { id } })
       if (!checklist) throw new Error('NOT_FOUND')
 

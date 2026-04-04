@@ -45,6 +45,11 @@ export default function SpotsClient({
   const [showGpxImport, setShowGpxImport] = useState(false);
   const [gpxImporting, setGpxImporting] = useState(false);
   const [gpxMessage, setGpxMessage] = useState<string | null>(null);
+  const [showGmapsImport, setShowGmapsImport] = useState(false);
+  const [gmapsText, setGmapsText] = useState('');
+  const [gmapsImporting, setGmapsImporting] = useState(false);
+  const [gmapsMessage, setGmapsMessage] = useState<string | null>(null);
+  const [gmapsError, setGmapsError] = useState<string | null>(null);
   const [photos, setPhotos] = useState(initialPhotos);
   const [darkMode, setDarkMode] = useState(false);
 
@@ -145,6 +150,64 @@ export default function SpotsClient({
     } finally {
       setGpxImporting(false);
       e.target.value = '';
+    }
+  }
+
+  async function handleGmapsImport() {
+    if (!gmapsText.trim()) return;
+    setGmapsImporting(true);
+    setGmapsMessage(null);
+    setGmapsError(null);
+    try {
+      // Detect if user pasted a URL or text
+      const isUrl = gmapsText.trim().startsWith('http');
+      const payload = isUrl
+        ? { url: gmapsText.trim(), text: gmapsText.trim() }
+        : { text: gmapsText.trim() };
+
+      const res = await fetch('/api/import/google-maps', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json() as {
+        locationsCreated?: number;
+        locationsSkipped?: number;
+        error?: string;
+      };
+
+      if (!res.ok) {
+        setGmapsError(data.error || 'Import failed');
+        return;
+      }
+
+      const parts: string[] = [];
+      if (data.locationsCreated && data.locationsCreated > 0) {
+        parts.push(`${data.locationsCreated} location${data.locationsCreated !== 1 ? 's' : ''} added`);
+      }
+      if (data.locationsSkipped && data.locationsSkipped > 0) {
+        parts.push(`${data.locationsSkipped} skipped (already exist)`);
+      }
+      setGmapsMessage(parts.join(', ') || 'No locations found');
+
+      // Refresh map locations if any were created
+      if (data.locationsCreated && data.locationsCreated > 0) {
+        const locRes = await fetch('/api/locations');
+        if (locRes.ok) {
+          const locs = await locRes.json();
+          setLocations(locs.filter((l: MapLocation) => l.latitude != null && l.longitude != null));
+        }
+      }
+
+      // Clear the text area on success
+      if (data.locationsCreated && data.locationsCreated > 0) {
+        setGmapsText('');
+      }
+    } catch {
+      setGmapsError('Failed to import Google Maps data');
+    } finally {
+      setGmapsImporting(false);
     }
   }
 
@@ -342,13 +405,19 @@ export default function SpotsClient({
           )}
           <ShareLocationButton />
           <button
-            onClick={() => { setShowGpxImport(!showGpxImport); setShowUpload(false) }}
+            onClick={() => { setShowGmapsImport(!showGmapsImport); setShowGpxImport(false); setShowUpload(false) }}
+            className="px-3 py-1.5 border border-stone-300 dark:border-stone-600 text-stone-700 dark:text-stone-300 text-sm font-medium rounded-lg hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors"
+          >
+            G-Maps
+          </button>
+          <button
+            onClick={() => { setShowGpxImport(!showGpxImport); setShowGmapsImport(false); setShowUpload(false) }}
             className="px-3 py-1.5 border border-stone-300 dark:border-stone-600 text-stone-700 dark:text-stone-300 text-sm font-medium rounded-lg hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors"
           >
             GPX
           </button>
           <button
-            onClick={() => { setShowUpload(!showUpload); setShowGpxImport(false) }}
+            onClick={() => { setShowUpload(!showUpload); setShowGpxImport(false); setShowGmapsImport(false) }}
             className="px-3 py-1.5 bg-amber-600 text-white text-sm font-medium rounded-lg hover:bg-amber-700 transition-colors"
           >
             + Add Photos
@@ -393,6 +462,41 @@ export default function SpotsClient({
           )}
           {gpxMessage && (
             <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-2 font-medium">{gpxMessage}</p>
+          )}
+        </div>
+      )}
+
+      {/* Google Maps Import panel */}
+      {showGmapsImport && (
+        <div className="mx-2 mt-2 p-3 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg">
+          <p className="text-sm font-medium text-stone-700 dark:text-stone-300 mb-2">
+            Import from Google Maps
+          </p>
+          <p className="text-xs text-stone-500 dark:text-stone-400 mb-2">
+            Paste a Google Maps list URL, place URLs, or text with coordinates. Each pin becomes a saved location.
+          </p>
+          <textarea
+            value={gmapsText}
+            onChange={(e) => setGmapsText(e.target.value)}
+            placeholder={"Paste Google Maps URLs or location data here...\n\nExamples:\nhttps://www.google.com/maps/place/.../@35.5951,-82.5515,...\n\nOr plain coordinates:\nMy Campsite\n35.5951, -82.5515"}
+            rows={5}
+            className="w-full px-3 py-2 text-sm border border-stone-300 dark:border-stone-600 rounded-lg bg-white dark:bg-stone-900 text-stone-800 dark:text-stone-200 placeholder-stone-400 dark:placeholder-stone-500 resize-none focus:outline-none focus:ring-2 focus:ring-amber-500"
+          />
+          <button
+            onClick={handleGmapsImport}
+            disabled={gmapsImporting || !gmapsText.trim()}
+            className="mt-2 px-4 py-2 bg-amber-600 text-white text-sm font-medium rounded-lg hover:bg-amber-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {gmapsImporting ? 'Importing...' : 'Import Locations'}
+          </button>
+          {gmapsImporting && (
+            <p className="text-xs text-amber-600 dark:text-amber-400 mt-2 animate-pulse">Parsing locations...</p>
+          )}
+          {gmapsMessage && (
+            <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-2 font-medium">{gmapsMessage}</p>
+          )}
+          {gmapsError && (
+            <p className="text-xs text-red-600 dark:text-red-400 mt-2 font-medium">{gmapsError}</p>
           )}
         </div>
       )}

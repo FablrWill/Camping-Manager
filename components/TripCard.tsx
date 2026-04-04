@@ -16,6 +16,7 @@ import WeatherCard from '@/components/WeatherCard'
 import PackingList from '@/components/PackingList'
 import MealPlan from '@/components/MealPlan'
 import PowerBudget from '@/components/PowerBudget'
+import TripExpenses from '@/components/TripExpenses'
 import VoiceDebriefButton from './VoiceDebriefButton'
 import PostTripReview from './PostTripReview'
 import { formatDateRange, daysUntil, tripNights } from '@/lib/trip-utils'
@@ -266,6 +267,16 @@ export default function TripCard({
             <PackingList tripId={trip.id} tripName={trip.name} />
             <MealPlan tripId={trip.id} tripName={trip.name} />
             <PowerBudget tripId={trip.id} tripName={trip.name} />
+          </div>
+        )}
+
+        {/* Cost tracking — available for all trips when expanded */}
+        {isSelected && (
+          <div
+            className="mt-3 border-t border-stone-200 dark:border-stone-700 pt-3"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <TripExpenses tripId={trip.id} />
           </div>
         )}
       </div>

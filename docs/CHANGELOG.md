@@ -8,6 +8,7 @@ All notable changes to Outland OS are tracked here.
 
 | Session | Date | Summary |
 |---------|------|---------|
+| [34b](changelog/session-34b.md) | 2026-04-04 | Phase 31 dark sky/astro + v4.0: Google Maps import, personal signal map, trip cost tracking |
 | [34](changelog/session-34.md) | 2026-04-04 | Medication tracker — persistent med list, dog med support, auto-calculated trip quantities |
 | [33](changelog/session-33.md) | 2026-04-04 | S15 Mac mini agent runner script, PATCH status support, PM2 config, GearForm stash recovery |
 | [32](changelog/session-32.md) | 2026-04-04 | S14 Gear product research: Claude-powered alternatives comparison, research card in gear detail |

@@ -1,7 +1,7 @@
 # Project Status — Outland OS
 
 ## Quick Pickup
-> **Last session:** 2026-04-04 (Session 32 — S14 gear product research, Phase 30)
+> **Last session:** 2026-04-04 (Session 34 — Phase 31 dark sky, astro info, activities gear)
 > **Milestone v1.0:** ✅ Complete — all 5 phases shipped 2026-04-01
 > **Milestone v1.1:** ✅ Complete — Phases 6-11 shipped 2026-04-02
 > **Milestone v1.2:** ✅ Complete — Phases 12-15 shipped 2026-04-03
@@ -56,7 +56,8 @@
 - **Meal Planning Shopping/Prep/Feedback (Phase 35)** — Shopping list, prep guide, meal feedback
 - **Agent Jobs Infrastructure (Phase 36)** — AgentJob queue, polling API, results endpoint, dashboard badge, gear enrichment trigger
 - **Gear Product Research (Phase 30)** — Claude-powered "Research" button on gear items, alternatives comparison, recommendation badges
-- **Phases 31-32** — Not yet started (astro/activity gear, deals)
+- **Dark Sky, Astro & Activities (Phase 31)** — Activities gear category, moon phase calculator, Bortle estimation, dark sky trip prep section, astro API, trip planner activity recommendations
+- **Phase 32** — Not yet started (deal monitoring, deprioritized)
 
 ## Known Blockers
 - **HA hardware** — In Durham. Will picking up ~mid-April 2026. Blocks HA bridge feature (S10) only.
@@ -105,6 +106,11 @@
 - **Session 27** (2026-04-02) — Phase 14 execution — PM2 config, deploy script, backup/watchdog, Mac mini setup guide.
 - **Session 28** (2026-04-03) — S01 photo bulk import: queue fix + verification (feature already shipped).
 - **Session 29** (2026-04-03) — Mac mini: AI gear ID (link/photo → auto-fill), iMessage knowledge pipeline, Phase 14 production deployment (PM2, launchd, backups, .env fixed to real DB).
+- **Session 30** (2026-04-03) — UX review + execution plan.
+- **Session 31** (2026-04-04) — S13 Mac mini agent jobs infrastructure.
+- **Session 32** (2026-04-04) — S14 Gear product research (Phase 30).
+- **Session 33** (2026-04-04) — S15 Mac mini agent runner script, kit presets, GPX import.
+- **Session 34** (2026-04-04) — Phase 31: dark sky, astro info, activities gear category, moon phase, Bortle estimation, trip planner activity recommendations.
 
 ## Key Files
 - `TASKS.md` — What's done, what's next, where to start

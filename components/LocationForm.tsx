@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Button, Input, Select, Textarea, ConfirmDialog } from "@/components/ui";
 import { isValidDate } from "@/lib/validate";
+import SignalLogPanel from "@/components/SignalLogPanel";
 
 export interface LocationData {
   id?: string;
@@ -290,6 +291,11 @@ export default function LocationForm({
             placeholder="Private notes, tips, reminders..."
             rows={2}
           />
+
+          {/* Signal history — only for existing locations */}
+          {isEdit && existing?.id && (
+            <SignalLogPanel locationId={existing.id} />
+          )}
 
           {/* Error */}
           {error && (

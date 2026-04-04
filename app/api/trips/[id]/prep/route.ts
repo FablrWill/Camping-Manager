@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { fetchWeather } from '@/lib/weather'
+import { getNightSkyInfo, estimateBortleClass } from '@/lib/astro'
 import { PREP_SECTIONS, PrepState, PrepSection, PrepStatus } from '@/lib/prep-sections'
 
 export async function GET(
@@ -13,7 +14,7 @@ export async function GET(
     const trip = await prisma.trip.findUnique({
       where: { id },
       include: {
-        location: { select: { id: true, name: true, latitude: true, longitude: true } },
+        location: { select: { id: true, name: true, latitude: true, longitude: true, type: true, notes: true, description: true, cellSignal: true } },
         vehicle: { select: { id: true, name: true } },
         packingItems: { select: { packed: true } },
       },
@@ -105,6 +106,52 @@ export async function GET(
           summary = 'No powered gear in inventory'
         }
         data = { poweredDeviceCount: count }
+      } else if (config.key === 'dark-sky') {
+        if (!trip.location || trip.location.latitude == null || trip.location.longitude == null) {
+          status = 'not_started'
+          summary = 'No location set'
+        } else {
+          try {
+            const startDate = trip.startDate.toISOString().split('T')[0]
+            const endDate = trip.endDate.toISOString().split('T')[0]
+            const forecast = await fetchWeather(
+              trip.location.latitude,
+              trip.location.longitude,
+              startDate,
+              endDate
+            )
+
+            const bortle = estimateBortleClass(
+              trip.location.type,
+              trip.location.notes,
+              trip.location.description,
+              trip.location.cellSignal
+            )
+
+            const nights = forecast.days.map(day => {
+              const nightDate = new Date(day.date + 'T22:00:00')
+              return {
+                date: day.date,
+                dayLabel: day.dayLabel,
+                ...getNightSkyInfo(nightDate, day.sunrise, day.sunset),
+              }
+            })
+
+            const bestNight = nights.reduce((best, n) =>
+              n.moonPhase.illumination < best.moonPhase.illumination ? n : best
+            )
+
+            status = bestNight.stargazingQuality === 'excellent' || bestNight.stargazingQuality === 'good'
+              ? 'ready'
+              : 'in_progress'
+            summary = `Bortle ${bortle.bortle} · ${bestNight.moonPhase.emoji} ${bestNight.moonPhase.name}`
+
+            data = { bortle, nights }
+          } catch {
+            status = 'not_started'
+            summary = 'Astro data unavailable'
+          }
+        }
       }
 
       sections.push({
