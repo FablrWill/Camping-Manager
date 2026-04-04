@@ -7,6 +7,7 @@
 - ✅ **v1.2 Ship It** — Phases 12-15 (shipped 2026-04-03)
 - ✅ **v2.0 Smarter & Sharper** — Phases 16-24 (shipped 2026-04-03)
 - ✅ **v3.0 Gear Intelligence + Day-Of** — Phases 25-35 (shipped 2026-04-04)
+- 🚧 **v4.0 Smarter Feedback Loops** — Phases 38+ (in progress)
 - 📋 **v4.0 Backlog** — Voice, social, signal map, background agent, and more — see [Backlog section](#backlog-v40) below
 
 ## Phases
@@ -647,6 +648,26 @@ Plans:
 - Plan 33-00 is Wave 0 — test stubs, no dependencies
 - Plans 33-01 and 33-02 are Wave 1 — parallel, depend on 33-00, no file overlap
 - Plan 33-03 is Wave 2 — depends on both 33-01 (API route) and 33-02 (ChatClient props)
+
+---
+
+### Phase 38: Post-Trip Auto-Review
+
+**Goal**: After a trip ends, give Will a structured low-friction way to log what worked and what didn't — gear used/forgotten/unused, meal ratings, spot rating, and free-form notes. Data feeds Phase 17 packing personalization and Phase 35 meal feedback loop.
+
+**Status**: 🚧 In progress
+**Requirements:** REV-01, REV-02, REV-03, REV-04, REV-05, REV-06, REV-07, REV-08
+**Plans:** 3 plans
+
+Plans:
+- [ ] 38-01-PLAN.md — Schema migration (Trip.reviewedAt) + POST /api/trips/[id]/review batch endpoint
+- [ ] 38-02-PLAN.md — TripReviewModal multi-step component (Gear → Meals → Spot+Notes)
+- [ ] 38-03-PLAN.md — TripsClient integration (Review button, Reviewed badge, review-needed count)
+
+**Parallelization notes:**
+- Plan 38-01 is Wave 1 — schema + API, no dependencies
+- Plan 38-02 is Wave 2 — depends on 38-01 (API contract)
+- Plan 38-03 is Wave 3 — depends on 38-01 (schema types) and 38-02 (modal component); has checkpoint
 
 ---
 
