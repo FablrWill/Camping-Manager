@@ -101,6 +101,32 @@ export function aggregateGearFeedback(
   return Object.values(totals)
 }
 
+export function buildMealHistorySection(
+  feedback: Array<{ mealName: string; rating: string; notes: string | null }>
+): string {
+  if (feedback.length === 0) return ''
+
+  const liked = feedback.filter(f => f.rating === 'liked').map(f => f.mealName)
+  const disliked = feedback.filter(f => f.rating === 'disliked')
+
+  const lines: string[] = []
+  if (liked.length > 0) {
+    lines.push(`Previously liked: ${liked.join(', ')}.`)
+  }
+  if (disliked.length > 0) {
+    const dislikedText = disliked
+      .map(f => f.notes ? `${f.mealName} (${f.notes})` : f.mealName)
+      .join(', ')
+    lines.push(`Previously disliked: ${dislikedText}.`)
+    const avoidPatterns = disliked.filter(f => f.notes).map(f => f.notes!)
+    if (avoidPatterns.length > 0) {
+      lines.push(`Avoid: ${avoidPatterns.join('; ')}.`)
+    }
+  }
+
+  return `WILL'S MEAL HISTORY:\n${lines.join('\n')}`
+}
+
 export function buildFeedbackSection(feedback?: GearFeedbackSummary[]): string {
   if (!feedback || feedback.length === 0) return ''
   const lines = feedback.map((f) => {
@@ -346,6 +372,7 @@ export async function generateMealPlan(params: {
   }
   bringingDog?: boolean
   feedbackHistory?: string
+  mealHistory?: string  // Feedback history block for prompt injection (from buildMealHistorySection)
 }): Promise<NormalizedMealPlanResult> {
   const {
     tripName,
@@ -360,6 +387,7 @@ export async function generateMealPlan(params: {
     weather,
     bringingDog,
     feedbackHistory,
+    mealHistory,
   } = params
 
   const weatherSection = buildWeatherSection(weather)
@@ -381,6 +409,10 @@ export async function generateMealPlan(params: {
     ? `\nPAST MEAL FEEDBACK:\n${feedbackHistory}\nUse this history to avoid repeating meals rated "skip", suggest fewer "ok" meals, and lean into the style of "loved" meals.\n`
     : ''
 
+  const mealHistorySection = mealHistory
+    ? `\n${mealHistory}\nRepeat liked meals if appropriate. Avoid disliked meals and patterns noted above.\n`
+    : ''
+
   const prompt = `You are a car camping meal planner. Generate a practical, delicious meal plan for this trip.
 
 TRIP DETAILS:
@@ -392,7 +424,7 @@ ${vehicleName ? `- Vehicle: ${vehicleName}` : ''}
 ${tripNotes ? `- Notes: ${tripNotes}` : ''}
 
 ${weatherSection}
-${dogSection}${feedbackSection}
+${dogSection}${feedbackSection}${mealHistorySection}
 COOKING EQUIPMENT (from gear inventory):
 ${cookingGearSection || 'No cooking gear in inventory — suggest simple no-cook meals and recommend basic gear to add.'}
 

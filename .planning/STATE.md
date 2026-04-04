@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Gear Intelligence + Day-Of
 status: executing
-stopped_at: Completed 35-01-PLAN.md
-last_updated: "2026-04-04T04:41:18.567Z"
-last_activity: 2026-04-04
+stopped_at: Phase 35 UI-SPEC approved
+last_updated: "2026-04-04T04:33:03.137Z"
+last_activity: 2026-04-04 -- Phase 35 execution started
 progress:
   total_phases: 24
-  completed_phases: 20
-  total_plans: 53
-  completed_plans: 52
+  completed_phases: 19
+  total_plans: 57
+  completed_plans: 51
   percent: 40
 ---
 
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-01)
 
 **Core value:** Personal camping second brain — a closed-loop system that plans, executes, and learns from every trip
-**Current focus:** Phase 34 — meal-planning-core
+**Current focus:** Phase 35 — meal-planning-shopping-prep-feedback
 
 ## Current Position
 
-Phase: 35
-Plan: Not started
-Status: Ready to execute
-Last activity: 2026-04-04
+Phase: 35 (meal-planning-shopping-prep-feedback) — EXECUTING
+Plan: 1 of 5
+Status: Executing Phase 35
+Last activity: 2026-04-04 -- Phase 35 execution started
 
 Progress: [████░░░░░░] 40%
 
@@ -76,7 +76,6 @@ Progress: [████░░░░░░] 40%
 | Phase 34 P01 | 5 | 2 tasks | 5 files |
 | Phase 34 P02 | 3 | 2 tasks | 4 files |
 | Phase 34 P03 | 12 | 2 tasks | 5 files |
-| Phase 35 P01 | 195 | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -131,8 +130,6 @@ Recent decisions affecting current work:
 - [Phase 34]: POST /generate persists Meal rows in prisma.$transaction with atomic Trip.mealPlanGeneratedAt update
 - [Phase 34]: MealPlanClient renders day-by-day collapsible meals with per-meal PATCH regeneration; old MealPlan component replaced in TripPrepClient
 - [Phase 34]: Meal plan status badge (ready/none) shown per trip in TripsClient using mealPlanGeneratedAt field
-- [Phase 35-01]: Shopping list aggregated on-the-fly from meal ingredients — no ShoppingListItem Prisma model added; simpler approach works without migration
-- [Phase 35-01]: generateShoppingList() and generatePrepGuide() added to lib/claude.ts; prepGuide prompt includes vacuum sealer + sous vide context
 
 ### Pending Todos
 
@@ -150,6 +147,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-04T04:41:18.562Z
-Stopped at: Completed 35-01-PLAN.md
-Resume file: None
+Last session: 2026-04-04T03:54:03.215Z
+Stopped at: Phase 35 UI-SPEC approved
+Resume file: .planning/phases/35-meal-planning-shopping-prep-feedback/35-UI-SPEC.md
