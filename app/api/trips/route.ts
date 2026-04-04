@@ -22,6 +22,9 @@ export async function GET() {
             meals: { select: { id: true, name: true, slot: true, day: true } },
           },
         },
+        expenses: {
+          select: { amount: true },
+        },
       },
       orderBy: { startDate: "desc" },
     });

@@ -15,6 +15,7 @@ import {
   Share2,
   Copy,
   X,
+  DollarSign,
 } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui'
@@ -55,6 +56,7 @@ interface TripData {
   journalEntry: string | null  // S20: Voice Ghostwriter
   journalEntryAt: string | null  // S20: when journal was last written
   shareToken: string | null  // S28: public share token
+  expenses: Array<{ amount: number }>  // Phase 42: expense amounts for cost badge
 }
 
 interface WeatherData {
@@ -145,6 +147,19 @@ export default function TripCard({
                   +{trip._count.alternatives}B
                 </span>
               )}
+              {/* Cost badge — Phase 42 */}
+              {(() => {
+                const expenseTotal = trip.expenses.reduce((sum, e) => sum + e.amount, 0)
+                return expenseTotal > 0 ? (
+                  <span
+                    title={`Trip cost: $${expenseTotal.toFixed(2)}`}
+                    className="inline-flex items-center gap-0.5 text-xs font-medium text-stone-500 dark:text-stone-400 bg-stone-100 dark:bg-stone-800 rounded-full px-1.5 py-0.5 shrink-0"
+                  >
+                    <DollarSign size={10} />
+                    {expenseTotal.toFixed(2)}
+                  </span>
+                ) : null
+              })()}
               {/* Edit/delete buttons */}
               <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
                 <Button

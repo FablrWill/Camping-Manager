@@ -2,15 +2,14 @@
 gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Smarter Feedback Loops
-status: executing
-stopped_at: Completed 38-03-PLAN.md
-last_updated: "2026-04-04T07:34:00.000Z"
-last_activity: 2026-04-04 - Completed quick task 260404-km8: Smart packing v2 (S35)
+status: verifying
+last_updated: "2026-04-04T19:20:48.544Z"
+last_activity: 2026-04-04 - Completed S37 trip cost tracking (phase 42)
 progress:
-  total_phases: 25
-  completed_phases: 21
-  total_plans: 67
-  completed_plans: 63
+  total_phases: 26
+  completed_phases: 25
+  total_plans: 69
+  completed_plans: 69
   percent: 40
 ---
 
@@ -21,14 +20,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-01)
 
 **Core value:** Personal camping second brain — a closed-loop system that plans, executes, and learns from every trip
-**Current focus:** v4.0 backlog — S28 shareable trip reports in progress; S20-S27, S29-S30 complete
+**Current focus:** Phase 42 — trip-cost-tracking
 
 ## Current Position
 
-Phase: 35
-Plan: Not started
-Status: Ready to execute
-Last activity: 2026-04-04 - Completed quick task 260404-km8: Smart packing v2 (S35)
+Phase: 42 (trip-cost-tracking) — COMPLETE
+Plan: 2 of 2
+Status: Phase verified — all checks passed
+Last activity: 2026-04-04 - Completed S37 trip cost tracking (phase 42)
 
 Progress: [████░░░░░░] 40%
 
@@ -80,6 +79,8 @@ Progress: [████░░░░░░] 40%
 | Phase 35 P04 | 15 | 2 tasks | 4 files |
 | Phase 35 P05 | 8 | 4 tasks | 3 files |
 | Phase 38 P02 | 15 | 1 tasks | 2 files |
+| Phase 42 P01 | 2 | 3 tasks | 2 files |
+| Phase 42 P02 | 2 | 1 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -140,6 +141,10 @@ Recent decisions affecting current work:
 - [Phase 35]: mealId validated as required in feedback POST before other fields — primary key for upsert pattern
 - [Phase 35]: buildMealHistorySection called with global last-10 feedback query (no trip scope) for cross-trip preference carry-forward
 - [Phase 38]: aria-label regex /liked/i matches disliked — use /^liked /i with word boundary in tests
+- [Phase 42]: Expense buttons always-visible: removed opacity-0/group-hover pattern for touch usability
+- [Phase 42]: Trip list includes expenses select amount only: enables client-side total for cost badge without separate endpoint
+- [Phase 42]: Badge uses stone/muted colors (bg-stone-100) — amber is reserved for CTA-level elements
+- [Phase 42]: Cost badge hidden when expense total is 0 — no empty-state badge clutters the trip card header
 
 ### Pending Todos
 
@@ -174,7 +179,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-04
+Last session: 2026-04-04T19:20:48.539Z
 Last activity: Completed S36 RAG knowledge base refresh
 Resume file: None
 

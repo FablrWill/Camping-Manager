@@ -21,6 +21,7 @@ export default async function TripsPage() {
             meals: { select: { id: true, name: true, slot: true, day: true } },
           },
         },
+        expenses: { select: { amount: true } },  // Phase 42: cost badge aggregate
       },
       orderBy: { startDate: "desc" },
     }),
@@ -46,6 +47,7 @@ export default async function TripsPage() {
         journalEntry: t.journalEntry ?? null,
         journalEntryAt: t.journalEntryAt?.toISOString() ?? null,
         shareToken: t.shareToken ?? null,
+        expenses: t.expenses,
       }))}
       locations={locations}
       vehicles={vehicles}
