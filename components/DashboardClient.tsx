@@ -1,7 +1,8 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
-import { Backpack, Car, MapPin, Tent, ChevronRight, Plus } from 'lucide-react'
+import { Backpack, Car, MapPin, Tent, ChevronRight, ChevronDown, ChevronUp, Plus } from 'lucide-react'
 import { daysUntil } from '@/lib/trip-utils'
 import { getCategoryEmoji } from '@/lib/gear-categories'
 
@@ -31,15 +32,26 @@ interface UpcomingTrip {
   locationName: string | null
 }
 
+interface ActiveDeal {
+  gearItemId: string
+  gearItemName: string
+  targetPrice: number
+  foundPriceRange: string
+}
+
 export default function DashboardClient({
   stats,
   recentGear,
   upcomingTrip,
+  initialDeals = [],
 }: {
   stats: DashboardStats
   recentGear: RecentGearItem[]
   upcomingTrip: UpcomingTrip | null
+  initialDeals?: ActiveDeal[]
 }) {
+  const [dealsExpanded, setDealsExpanded] = useState(true)
+
   return (
     <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
       {/* Hero */}
@@ -72,6 +84,42 @@ export default function DashboardClient({
             </div>
           </div>
         </Link>
+      )}
+
+      {/* Active deals card */}
+      {initialDeals.length > 0 && (
+        <section className="bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-700 p-4">
+          <button
+            className="flex items-center justify-between w-full"
+            onClick={() => setDealsExpanded((prev) => !prev)}
+          >
+            <span className="text-base font-semibold text-stone-900 dark:text-stone-100">
+              Deals ({initialDeals.length})
+            </span>
+            {dealsExpanded ? (
+              <ChevronUp size={18} className="text-stone-400 dark:text-stone-500" />
+            ) : (
+              <ChevronDown size={18} className="text-stone-400 dark:text-stone-500" />
+            )}
+          </button>
+          {dealsExpanded && (
+            <div className="mt-3">
+              {initialDeals.map((deal) => (
+                <div
+                  key={deal.gearItemId}
+                  className="flex items-center justify-between py-2 border-b border-stone-100 dark:border-stone-800 last:border-0"
+                >
+                  <span className="text-sm font-medium text-stone-900 dark:text-stone-100">
+                    {deal.gearItemName}
+                  </span>
+                  <span className="text-xs text-stone-500 dark:text-stone-400">
+                    Target: ${deal.targetPrice} / Found: {deal.foundPriceRange}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
       )}
 
       {/* Quick stats row */}

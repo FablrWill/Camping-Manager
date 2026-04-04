@@ -2,7 +2,7 @@ import { prisma } from "@/lib/db";
 import DashboardClient from "@/components/DashboardClient";
 
 export default async function Home() {
-  const [gearCount, wishlistCount, locationCount, photoCount, vehicleMods, recentGear, upcomingTrip] =
+  const [gearCount, wishlistCount, locationCount, photoCount, vehicleMods, recentGear, upcomingTrip, activeDeals] =
     await Promise.all([
       prisma.gearItem.count({ where: { isWishlist: false } }),
       prisma.gearItem.count({ where: { isWishlist: true } }),
@@ -33,12 +33,25 @@ export default async function Home() {
           location: { select: { name: true } },
         },
       }),
+      prisma.gearPriceCheck.findMany({
+        where: { isAtOrBelowTarget: true },
+        include: {
+          gearItem: { select: { id: true, name: true, targetPrice: true } },
+        },
+      }),
     ]);
 
   const totalWeight = await prisma.gearItem.aggregate({
     where: { isWishlist: false, weight: { not: null } },
     _sum: { weight: true },
   });
+
+  const initialDeals = activeDeals.map((d) => ({
+    gearItemId: d.gearItem.id,
+    gearItemName: d.gearItem.name,
+    targetPrice: d.gearItem.targetPrice!,
+    foundPriceRange: d.foundPriceRange,
+  }));
 
   return (
     <DashboardClient
@@ -61,6 +74,7 @@ export default async function Home() {
         endDate: upcomingTrip.endDate.toISOString(),
         locationName: upcomingTrip.location?.name ?? null,
       } : null}
+      initialDeals={initialDeals}
     />
   );
 }

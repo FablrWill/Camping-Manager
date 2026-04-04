@@ -9,6 +9,7 @@ export default async function GearPage() {
   const [items, upgradeResearch] = await Promise.all([
     prisma.gearItem.findMany({
       orderBy: [{ category: 'asc' }, { name: 'asc' }],
+      include: { priceCheck: { select: { isAtOrBelowTarget: true } } },
     }),
     prisma.gearResearch.findMany({
       where: { verdict: 'Worth upgrading' },

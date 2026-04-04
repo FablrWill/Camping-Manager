@@ -4,6 +4,7 @@ import { useState, useMemo, useCallback } from 'react'
 import GearForm from './GearForm'
 import GearDocumentsTab from './GearDocumentsTab'
 import GearResearchTab from './GearResearchTab'
+import GearDealsTab from './GearDealsTab'
 import ChatContextButton from '@/components/ChatContextButton'
 import { CATEGORY_GROUPS, CATEGORIES, getCategoryEmoji, getCategoryLabel } from '@/lib/gear-categories'
 
@@ -27,6 +28,7 @@ interface GearItem {
   modelNumber: string | null
   connectivity: string | null
   targetPrice: number | null
+  priceCheck: { isAtOrBelowTarget: boolean } | null
   createdAt: string
   updatedAt: string
 }
@@ -77,7 +79,7 @@ export default function GearClient({
   const [searchQuery, setSearchQuery] = useState('')
   const [editingItem, setEditingItem] = useState<GearItem | null>(null)
   const [showForm, setShowForm] = useState(false)
-  const [activeTab, setActiveTab] = useState<'documents' | 'research'>('documents')
+  const [activeTab, setActiveTab] = useState<'documents' | 'research' | 'deals'>('documents')
   const [deletingItem, setDeletingItem] = useState<GearItem | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState<string | null>(null)
@@ -360,6 +362,16 @@ export default function GearClient({
                               {item.condition}
                             </span>
                           )}
+                          {item.isWishlist && item.priceCheck?.isAtOrBelowTarget && (
+                            <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+                              Deal!
+                            </span>
+                          )}
+                          {item.isWishlist && item.targetPrice != null && !item.priceCheck?.isAtOrBelowTarget && (
+                            <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-stone-100 text-stone-500 dark:bg-stone-800 dark:text-stone-400">
+                              Target: ${item.targetPrice.toFixed(0)}
+                            </span>
+                          )}
                         </div>
                         <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-sm text-stone-500 dark:text-stone-400">
                           {item.brand && <span>{item.brand}</span>}
@@ -452,6 +464,19 @@ export default function GearClient({
                 >
                   Research
                 </button>
+                {editingItem.isWishlist && (
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('deals')}
+                    className={`text-sm font-medium pb-1 border-b-2 transition-colors ${
+                      activeTab === 'deals'
+                        ? 'border-amber-600 text-amber-700 dark:text-amber-400'
+                        : 'border-transparent text-stone-500 hover:text-stone-700 dark:text-stone-400'
+                    }`}
+                  >
+                    Deals
+                  </button>
+                )}
               </div>
               {/* Tab content */}
               {activeTab === 'documents' ? (
@@ -462,6 +487,8 @@ export default function GearClient({
                   gearModelNumber={editingItem.modelNumber}
                   gearCategory={editingItem.category}
                 />
+              ) : activeTab === 'deals' ? (
+                <GearDealsTab gearItem={editingItem} />
               ) : (
                 <GearResearchTab
                   gearItemId={editingItem.id}
