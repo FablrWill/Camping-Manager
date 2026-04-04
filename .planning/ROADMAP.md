@@ -672,6 +672,25 @@ Plans:
 
 ---
 
+### Phase 41: Camp Kit Presets / Loadout Templates
+
+**Goal**: Upgrade the existing kit preset system into a first-class feature — add "save packing list as template," explicit multi-kit stacking, and a Claude review step that flags trip-specific gaps on top of a preset base.
+
+**Status**: 🔲 Not started
+**Plans:** 0 plans created
+
+Plans:
+- [ ] 41-01-PLAN.md — Save-from-packing-list flow + preset picker discoverability
+- [ ] 41-02-PLAN.md — Multi-kit stacking UI (applied kits list + remove)
+- [ ] 41-03-PLAN.md — Claude augmentation step ("Ask Claude to review" after applying presets)
+
+**Parallelization notes:**
+- Plan 41-01 is Wave 1 — no dependencies
+- Plan 41-02 is Wave 2 — depends on 41-01 (improved picker surface area)
+- Plan 41-03 is Wave 3 — depends on 41-01 and 41-02 (needs applied kits context)
+
+---
+
 
 ## Backlog (v4.0+)
 
