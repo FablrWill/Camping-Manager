@@ -76,6 +76,7 @@ A self-coordinating work queue for v2.0 features. Each Claude Code session claim
 | S34 | Trip intelligence report             | —     | ✅ Done 2026-04-04 | Sonnet, normal | —          |
 | S35 | Smart packing v2                     | —     | ⬜ Ready          | Sonnet, normal | —          |
 | S36 | Knowledge base refresh               | —     | ✅ Done 2026-04-04 | Sonnet, normal | —          |
+| S37 | Personal signal map                  | 39    | 🔄 In Progress    | Sonnet, normal | —          |
 | S10 | Home Assistant integration           | 33    | ⏸ Blocked (~mid-Apr hardware) | Sonnet, normal | S09 |
 
 **Why this order matters (conflict groups):**
@@ -1724,6 +1725,49 @@ Refresh and improve the RAG knowledge base. Add source String?, refreshedAt Date
 When done: mark S36 ✅ Done in V2-SESSIONS.md, commit, push, then merge to main:
 git checkout main && git merge - && git push origin main
 ```
+
+---
+
+### S37 — Personal Signal Map
+
+**What to build:** Surface signal quality visually on the spots map. Overlay colored signal badges on location markers, add a "Signal" layer toggle, and add a signal filter chip so Will can see at a glance which campsites have good connectivity.
+
+**User story:** Will opens the Spots map before a trip, toggles "Signal" on, and immediately sees green/yellow/red badges on each pin showing cell and Starlink quality from his logged readings.
+
+**Data already exists** — `SignalLog` model, `SignalLogPanel`, and `GET/POST /api/locations/[id]/signal` are all built. This session only adds the map visualization layer.
+
+**Files to create:**
+- `lib/signal-summary.ts` — `computeSignalSummary(logs, fallbackCell, fallbackStarlink)` that derives: `bestCellBars` (max), `bestCellType` (highest rank in none→3G→LTE→5G), `bestStarlinkQuality` (highest rank in none→weak→moderate→strong→excellent), `readingCount`. Falls back to `cellSignal`/`starlinkSignal` summary strings on Location if `readingCount === 0`.
+- `app/api/locations/signal-summary/route.ts` — `GET` returns `Record<string, SignalSummary>` (locationId → summary). Queries all locations with their signalLogs via `prisma.location.findMany({ include: { signalLogs: true } })` and calls `computeSignalSummary` for each.
+- `components/SignalBadge.tsx` — Small pill badge. Color logic: green = LTE or 5G with 3+ bars OR Starlink strong/excellent; yellow = any cell signal with 1–2 bars OR Starlink moderate; red = cellType "none" or bars 0; gray = no data. Shows: bars count + cell type OR Starlink icon. Props: `{ summary: SignalSummary; className?: string }`.
+
+**Files to modify:**
+- `components/SpotMap.tsx`:
+  - Add `signal: boolean` to `Layers` interface.
+  - Add `signalSummaries?: Record<string, SignalSummary>` to `SpotMapProps`.
+  - In the location marker render loop (around line 396–440): when `layers.signal && signalSummaries[loc.id]`, append a `L.DivIcon` tooltip or render a `SignalBadge` as a custom div overlay using `L.marker` with `divIcon`. Use a lightweight HTML string in the DivIcon to avoid React rendering in Leaflet context — render a colored dot (●) with title attribute for accessibility.
+- `app/spots/spots-client.tsx`:
+  - Add `signal: false` to initial `Layers` state.
+  - Add `signal: boolean` to `Layers` (import updated type from SpotMap).
+  - On mount, fetch `GET /api/locations/signal-summary` and store in `signalSummaries` state.
+  - Add "Signal" toggle button alongside existing layer toggles (photos, spots, path, places, heatmap).
+  - Add a signal filter chip row below the map controls: "All" / "Good signal" / "No signal" / "Unknown" — filters `locations` array passed to SpotMap by signal quality bucket.
+  - Pass `signalSummaries` to `SpotMap`.
+
+**Acceptance criteria:**
+- Toggling "Signal" layer shows colored dot badges on all location markers that have signal data
+- Markers with no signal data show a gray dot when signal layer is on
+- Signal filter chips correctly show/hide locations by connectivity bucket
+- Signal API endpoint returns summaries for all locations in one request
+- No layout shift when signal layer is toggled
+- Build passes, no TypeScript errors
+
+**Constraints:**
+- No new npm packages
+- No schema changes
+- Do not break existing layer toggles (photos, spots, path, places, heatmap)
+- SignalBadge must not render inside Leaflet — use HTML string in DivIcon only
+- S37 touches `components/SpotMap.tsx` and `app/spots/spots-client.tsx` — do not run in parallel with any session that also touches these files
 
 ---
 
