@@ -1,5 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk'
-import { parseClaudeJSON, PackingListResultSchema, MealPlanResultSchema, DepartureChecklistResultSchema, DepartureChecklistResult, TripSummaryResultSchema, type TripSummaryResult, GearDocumentResultSchema, type GearDocumentResult, VehicleChecklistResultSchema, type VehicleChecklistResult, NormalizedMealPlanResultSchema, type NormalizedMealPlanResult, SingleMealSchema, type SingleMeal, GearResearchResultSchema, type GearResearchResult, ShoppingListResultSchema, type ShoppingListResult, PrepGuideResultSchema, type PrepGuideResult, GearPriceCheckResultSchema, type GearPriceCheckResult } from '@/lib/parse-claude'
+import { parseClaudeJSON, PackingListResultSchema, MealPlanResultSchema, DepartureChecklistResultSchema, DepartureChecklistResult, TripSummaryResultSchema, type TripSummaryResult, GearDocumentResultSchema, type GearDocumentResult, VehicleChecklistResultSchema, type VehicleChecklistResult, NormalizedMealPlanResultSchema, type NormalizedMealPlanResult, SingleMealSchema, type SingleMeal, GearResearchResultSchema, type GearResearchResult, ShoppingListResultSchema, type ShoppingListResult, PrepGuideResultSchema, type PrepGuideResult, GearPriceCheckResultSchema, type GearPriceCheckResult, LNTChecklistResultSchema, type LNTChecklistResult } from '@/lib/parse-claude'
 import { CATEGORY_EMOJI, CATEGORIES } from '@/lib/gear-categories'
 
 export const anthropic = new Anthropic({
@@ -1091,4 +1091,52 @@ export function buildMealHistorySection(feedbacks: Array<{
   }
 
   return `\n\n## Will's meal history\n${lines.join('\n')}\n`
+}
+
+// ── S25: LNT pack-out checklist generator ────────────────────────────────────
+
+export async function generateLNTChecklist(params: {
+  locationName: string | null
+  locationType: string | null
+  locationNotes: string | null
+  tripNotes: string | null
+}): Promise<LNTChecklistResult> {
+  const { locationName, locationType, locationNotes, tripNotes } = params
+
+  const locationContext = [
+    locationName ? `Location: ${locationName}` : null,
+    locationType ? `Type: ${locationType}` : null,
+    locationNotes ? `Location notes: ${locationNotes}` : null,
+    tripNotes ? `Trip notes: ${tripNotes}` : null,
+  ]
+    .filter(Boolean)
+    .join('\n')
+
+  const prompt = `You are an expert Leave No Trace educator. Generate a concise, location-specific LNT pack-out checklist for a car camper.
+
+${locationContext || 'Location: General dispersed camping'}
+
+INSTRUCTIONS:
+1. Generate 5-10 actionable checklist items specific to this location and type.
+2. Consider: waste disposal, campfire protocols, wildlife precautions, water sources, fragile terrain.
+3. Items must be concise action phrases (10 words or fewer).
+4. Assign a unique short id to each item (e.g. "lnt-1", "lnt-2").
+5. Return ONLY valid JSON (no markdown fences).
+
+JSON format:
+{"items": [{"id": "lnt-1", "text": "Pack out all food scraps and wrappers", "checked": false}]}`
+
+  const message = await anthropic.messages.create({
+    model: 'claude-haiku-4-5',
+    max_tokens: 1024,
+    messages: [{ role: 'user', content: prompt }],
+  })
+
+  const text = message.content[0].type === 'text' ? message.content[0].text : ''
+  const parseResult = parseClaudeJSON(text, LNTChecklistResultSchema)
+  if (!parseResult.success) {
+    throw new Error(parseResult.error)
+  }
+
+  return parseResult.data
 }

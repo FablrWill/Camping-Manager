@@ -330,3 +330,18 @@ export const PrepGuideResultSchema = z.object({
 });
 
 export type PrepGuideResult = z.infer<typeof PrepGuideResultSchema>;
+
+// --- S25: LNT Checklist Schema ---
+
+const LNTChecklistItemSchema = z.object({
+  id: z.string(),
+  text: z.string(),
+  checked: z.boolean().default(false),
+});
+
+export const LNTChecklistResultSchema = z.object({
+  items: z.array(LNTChecklistItemSchema),
+});
+
+export type LNTChecklistResult = z.infer<typeof LNTChecklistResultSchema>;
+export type LNTChecklistItem = z.infer<typeof LNTChecklistItemSchema>;

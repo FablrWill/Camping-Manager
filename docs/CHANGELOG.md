@@ -8,6 +8,7 @@ All notable changes to Outland OS are tracked here.
 
 | Session | Date | Summary |
 |---------|------|---------|
+| [39](changelog/session-39.md) | 2026-04-04 | S25 LNT pack-out checklist: Haiku-generated location-specific checklist, amber/green progress bar, persisted checkboxes |
 | [38](changelog/session-38.md) | 2026-04-04 | S24 Siri/Reminders inbox bridge: sourceHint param, reminders extractor, Shortcut setup doc |
 | [37b](changelog/session-37b.md) | 2026-04-04 | S20 Voice Ghostwriter: record trip monologue → Claude writes journal entry → saved to trip |
 | [37](changelog/session-37.md) | 2026-04-04 | S22 Seasonal spot ratings: SeasonalRating model, 2×2 star pickers in LocationForm, Best in [season] popup badge |
