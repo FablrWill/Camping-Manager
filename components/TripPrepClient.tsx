@@ -19,6 +19,7 @@ import { metersToFeet, ALTITUDE_THRESHOLDS } from '@/lib/altitude'
 import { formatDateRange, daysUntil, tripNights } from '@/lib/trip-utils'
 import type { DayForecast, WeatherAlert } from '@/lib/weather'
 import type { LastStopsResult } from '@/lib/overpass'
+import ScenicStopsCard from '@/components/ScenicStopsCard'
 import type { DepartureChecklistResult } from '@/lib/parse-claude'
 import { useOnlineStatus } from '@/lib/use-online-status'
 import { getTripSnapshot, type TripSnapshot } from '@/lib/offline-storage'
@@ -506,6 +507,10 @@ export default function TripPrepClient({ trip, tripPrepStatus }: TripPrepClientP
                     </div>
                   )}
                 </div>
+              )}
+              {/* Scenic & POI card — after Fuel & Last Stops (S30) */}
+              {config.key === 'weather' && trip.location?.latitude && trip.location?.longitude && (
+                <ScenicStopsCard tripId={trip.id} />
               )}
               {/* Permits & Reservations card — after Fuel & Last Stops (Phase 21) */}
               {config.key === 'weather' && (

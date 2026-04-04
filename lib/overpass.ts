@@ -1,8 +1,18 @@
 /**
- * Overpass API client for Outland OS — fuel & last stop planner
+ * Overpass API client for Outland OS — fuel & last stop planner + scenic POI finder
  * Free, no API key required. Queries OpenStreetMap via Overpass.
  * Docs: https://wiki.openstreetmap.org/wiki/Overpass_API
  */
+
+export type ScenicStopType = 'viewpoint' | 'waterfall' | 'attraction' | 'historic' | 'nature'
+
+export interface ScenicStop {
+  name: string
+  type: ScenicStopType
+  distanceMiles: number
+  lat: number
+  lon: number
+}
 
 export interface LastStop {
   name: string
@@ -139,4 +149,100 @@ export async function fetchLastStops(
     grocery: grocery.sort(sortByDist).slice(0, 2),
     outdoor: outdoor.sort(sortByDist).slice(0, 2),
   }
+}
+
+/**
+ * Build OverpassQL query for scenic POIs within 50km of a point.
+ * Targets: viewpoints, waterfalls, attractions, historic sites, nature reserves.
+ */
+function buildScenicQuery(lat: number, lon: number): string {
+  return `[out:json][timeout:25];
+(
+  node["tourism"="viewpoint"](around:50000,${lat},${lon});
+  node["tourism"="waterfall"](around:50000,${lat},${lon});
+  node["tourism"="attraction"](around:50000,${lat},${lon});
+  node["historic"](around:50000,${lat},${lon});
+  node["leisure"="nature_reserve"](around:50000,${lat},${lon});
+  way["tourism"="viewpoint"](around:50000,${lat},${lon});
+  way["tourism"="waterfall"](around:50000,${lat},${lon});
+  way["tourism"="attraction"](around:50000,${lat},${lon});
+  way["historic"](around:50000,${lat},${lon});
+  way["leisure"="nature_reserve"](around:50000,${lat},${lon});
+);
+out center body;`
+}
+
+/**
+ * Classify OSM tags into a ScenicStopType.
+ * Returns null for unrecognized tags.
+ */
+function assignScenicType(tags: Record<string, string>): ScenicStopType | null {
+  if (tags['tourism'] === 'waterfall') return 'waterfall'
+  if (tags['tourism'] === 'viewpoint') return 'viewpoint'
+  if (tags['leisure'] === 'nature_reserve') return 'nature'
+  if (tags['historic']) return 'historic'
+  if (tags['tourism'] === 'attraction') return 'attraction'
+  return null
+}
+
+/**
+ * Fetch scenic stops (viewpoints, waterfalls, attractions, historic sites, nature reserves)
+ * within 50km of the given coordinates using Overpass API.
+ *
+ * Returns up to 6 results sorted by distance ascending. Skips unnamed results.
+ */
+export async function fetchScenicStops(
+  latitude: number,
+  longitude: number,
+): Promise<ScenicStop[]> {
+  const query = buildScenicQuery(latitude, longitude)
+
+  const res = await fetch('https://overpass-api.de/api/interpreter', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: `data=${encodeURIComponent(query)}`,
+  })
+
+  if (!res.ok) {
+    const text = await res.text()
+    throw new Error(`Overpass API error (${res.status}): ${text}`)
+  }
+
+  const data = await res.json()
+  const elements: Array<{
+    id: number
+    type: string
+    lat?: number
+    lon?: number
+    center?: { lat: number; lon: number }
+    tags?: Record<string, string>
+  }> = data.elements ?? []
+
+  // Deduplicate by OSM id
+  const seen = new Map<number, { lat: number; lon: number; tags: Record<string, string> }>()
+  for (const el of elements) {
+    if (seen.has(el.id) || !el.tags) continue
+    const lat = el.lat ?? el.center?.lat
+    const lon = el.lon ?? el.center?.lon
+    if (lat === undefined || lon === undefined) continue
+    seen.set(el.id, { lat, lon, tags: el.tags })
+  }
+
+  const stops: ScenicStop[] = []
+
+  for (const el of seen.values()) {
+    const name = el.tags['name']
+    if (!name || name.trim() === '') continue
+
+    const type = assignScenicType(el.tags)
+    if (!type) continue
+
+    const distanceMiles = Math.round(
+      haversineDistanceMiles(latitude, longitude, el.lat, el.lon) * 10,
+    ) / 10
+
+    stops.push({ name, type, distanceMiles, lat: el.lat, lon: el.lon })
+  }
+
+  return stops.sort((a, b) => a.distanceMiles - b.distanceMiles).slice(0, 6)
 }
