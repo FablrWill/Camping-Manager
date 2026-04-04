@@ -581,7 +581,7 @@ Plans:
 | 30. Gear Product Research | v3.0 | 0/TBD | Not started | - |
 | 31. Dark Sky & Astro Info | v3.0 | 2/2 | Complete    | 2026-04-04 |
 | 32. Deal Monitoring | v3.0 | 0/TBD | Not started | - |
-| 33. Conversational Trip Planner | v3.0 | 4/4 | Complete    | 2026-04-03 |
+| 33. Conversational Trip Planner | v3.0 | 4/4 | Complete    | 2026-04-04 |
 | 34. Home Assistant Integration | v3.0 | 0/TBD | Not started | - |
 | 35. Meal Planning Core | v3.0 | 0/TBD | Not started | - |
 | 36. Meal Planning: Shopping/Prep/Feedback | v3.0 | 0/TBD | Not started | - |
@@ -599,7 +599,7 @@ Plans:
   5. "Add manually" escape hatch opens the old static form
   6. Trip-creation conversations are persisted to the database
   7. `npm run build` passes
-**Plans:** 2/2 plans complete
+**Plans:** 4/4 plans complete
 
 Plans:
 - [x] 33-00-PLAN.md — Wave 0 test stubs (trip planner tools + ChatBubble extraction)
