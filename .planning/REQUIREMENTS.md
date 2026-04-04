@@ -170,8 +170,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | EXP-04 | TripExpensePanel component: expense list, inline add form, category subtotals, total in amber bold | Must |
 | EXP-05 | Cost badge on trip cards: show total spend when expenses exist; hidden when none | Must |
 
-| EXP-01 | Phase 42 | Pending |
-| EXP-02 | Phase 42 | Pending |
-| EXP-03 | Phase 42 | Pending |
-| EXP-04 | Phase 42 | Pending |
+| EXP-01 | Phase 42 | Complete |
+| EXP-02 | Phase 42 | Complete |
+| EXP-03 | Phase 42 | Complete |
+| EXP-04 | Phase 42 | Complete |
 | EXP-05 | Phase 42 | Pending |

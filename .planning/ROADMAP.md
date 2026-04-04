@@ -682,7 +682,7 @@ Plans:
 **Requirements:** EXP-01, EXP-02, EXP-03, EXP-04, EXP-05
 
 Plans:
-- [ ] 42-01-PLAN.md — Touch-friendly expense buttons + expense aggregate in trip API
+- [x] 42-01-PLAN.md — Touch-friendly expense buttons + expense aggregate in trip API
 - [ ] 42-02-PLAN.md — Cost badge on trip cards
 
 
