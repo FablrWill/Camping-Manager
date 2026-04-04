@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Gear Intelligence + Day-Of
 status: executing
-stopped_at: Completed 34-03-PLAN.md
-last_updated: "2026-04-04T01:37:04.515Z"
+stopped_at: Completed 35-03-PLAN.md
+last_updated: "2026-04-04T05:13:00Z"
 last_activity: 2026-04-04
 progress:
   total_phases: 24
   completed_phases: 19
   total_plans: 52
-  completed_plans: 51
+  completed_plans: 52
   percent: 40
 ---
 
@@ -21,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-01)
 
 **Core value:** Personal camping second brain — a closed-loop system that plans, executes, and learns from every trip
-**Current focus:** Phase 34 — meal-planning-core
+**Current focus:** Phase 35 — meal-planning-shopping-prep-feedback
 
 ## Current Position
 
 Phase: 35
-Plan: Not started
-Status: Ready to execute
+Plan: 03 (completed)
+Status: Phase complete
 Last activity: 2026-04-04
 
 Progress: [████░░░░░░] 40%
@@ -76,6 +76,7 @@ Progress: [████░░░░░░] 40%
 | Phase 34 P01 | 5 | 2 tasks | 5 files |
 | Phase 34 P02 | 3 | 2 tasks | 4 files |
 | Phase 34 P03 | 12 | 2 tasks | 5 files |
+| Phase 35-meal-planning-shopping-prep-feedback P03 | ~240 | 3 tasks | 15 files |
 
 ## Accumulated Context
 
@@ -130,6 +131,9 @@ Recent decisions affecting current work:
 - [Phase 34]: POST /generate persists Meal rows in prisma.$transaction with atomic Trip.mealPlanGeneratedAt update
 - [Phase 34]: MealPlanClient renders day-by-day collapsible meals with per-meal PATCH regeneration; old MealPlan component replaced in TripPrepClient
 - [Phase 34]: Meal plan status badge (ready/none) shown per trip in TripsClient using mealPlanGeneratedAt field
+- [Phase 35]: MealFeedback schema uses append-only liked/disliked with required mealPlanId; mealId nullable (no @unique)
+- [Phase 35]: ShoppingListClient persists checked state to DB via PATCH; PrepGuideClient stores guide as JSON blob in MealPlan.prepGuide
+- [Phase 35]: MealFeedbackButton is self-contained with its own API calls; parent only passes initial state for server-side hydration
 
 ### Pending Todos
 
@@ -147,6 +151,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-04T01:27:45.753Z
-Stopped at: Completed 34-03-PLAN.md
+Last session: 2026-04-04T05:13:00Z
+Stopped at: Completed 35-03-PLAN.md
 Resume file: None
