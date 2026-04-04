@@ -28,6 +28,7 @@ interface TripData {
   permitNotes: string | null
   fallbackFor: string | null
   fallbackOrder: number | null
+  hasMealPlan: boolean
 }
 
 interface WeatherData {

@@ -8,6 +8,7 @@ export default async function TripsPage() {
         location: { select: { id: true, name: true, latitude: true, longitude: true } },
         vehicle: { select: { id: true, name: true } },
         _count: { select: { packingItems: true, photos: true, alternatives: true } },
+        mealPlan: { select: { id: true } },
       },
       orderBy: { startDate: "desc" },
     }),
@@ -28,6 +29,7 @@ export default async function TripsPage() {
         endDate: t.endDate.toISOString(),
         createdAt: t.createdAt.toISOString(),
         updatedAt: t.updatedAt.toISOString(),
+        hasMealPlan: !!t.mealPlan,
       }))}
       locations={locations}
       vehicles={vehicles}

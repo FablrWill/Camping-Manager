@@ -40,6 +40,7 @@ interface TripData {
   permitNotes: string | null
   fallbackFor: string | null
   fallbackOrder: number | null
+  hasMealPlan: boolean
 }
 
 interface WeatherData {
@@ -180,6 +181,12 @@ export default function TripCard({
                 <span className="flex items-center gap-1">
                   <Camera size={12} />
                   {trip._count.photos} photos
+                </span>
+              )}
+              {trip.hasMealPlan && (
+                <span className="flex items-center gap-1">
+                  <span className="text-xs">🍽️</span>
+                  Meal plan
                 </span>
               )}
             </div>
