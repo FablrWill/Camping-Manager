@@ -366,7 +366,7 @@ Plans:
 
 Plans:
 - [x] 34-01-PLAN.md — Schema migration (normalize MealPlan + create Meal table) + Zod schemas
-- [ ] 34-02-PLAN.md — lib/claude.ts updates (bringingDog, regenerateMeal) + all API routes
+- [x] 34-02-PLAN.md — lib/claude.ts updates (bringingDog, regenerateMeal) + all API routes
 - [ ] 34-03-PLAN.md — MealPlanClient component + TripPrepClient wiring + TripsClient badge
 
 **Parallelization notes:**
@@ -385,7 +385,7 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 34-01-PLAN.md — Schema migration (normalize MealPlan + create Meal table) + Zod schemas
+- [x] 34-01-PLAN.md — Schema migration (normalize MealPlan + create Meal table) + Zod schemas
 - [ ] 34-02-PLAN.md — lib/claude.ts updates (bringingDog, regenerateMeal) + all API routes
 - [ ] 34-03-PLAN.md — MealPlanClient component + TripPrepClient wiring + TripsClient badge
 
@@ -624,7 +624,7 @@ Plans:
 | 31. Dark Sky & Astro Info | v3.0 | 0/TBD | Not started | - |
 | 32. Deal Monitoring | v3.0 | 0/TBD | Not started | - |
 | 33. Conversational Trip Planner | v3.0 | 4/4 | Complete    | 2026-04-03 |
-| 34. Home Assistant Integration | v3.0 | 1/4 | In Progress|  |
+| 34. Home Assistant Integration | v3.0 | 3/4 | In Progress|  |
 | 35. Meal Planning Core | v3.0 | 0/TBD | Not started | - |
 | 36. Meal Planning: Shopping/Prep/Feedback | v3.0 | 0/TBD | Not started | - |
 
@@ -641,7 +641,7 @@ Plans:
   5. "Add manually" escape hatch opens the old static form
   6. Trip-creation conversations are persisted to the database
   7. `npm run build` passes
-**Plans:** 1/4 plans executed
+**Plans:** 3/4 plans executed
 
 Plans:
 - [x] 33-00-PLAN.md — Wave 0 test stubs (trip planner tools + ChatBubble extraction)
