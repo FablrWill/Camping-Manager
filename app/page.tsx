@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { prisma } from "@/lib/db";
 import DashboardClient from "@/components/DashboardClient";
 import type { WeeklyBriefingResult } from "@/lib/agent/jobs/weekly-briefing";
