@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Smarter Feedback Loops
 status: executing
-last_updated: "2026-04-04T19:42:26.523Z"
+last_updated: "2026-04-04T19:51:21.016Z"
 last_activity: 2026-04-04
 progress:
-  total_phases: 26
-  completed_phases: 24
-  total_plans: 70
-  completed_plans: 68
+  total_phases: 27
+  completed_phases: 25
+  total_plans: 72
+  completed_plans: 71
   percent: 40
 ---
 
@@ -25,7 +25,7 @@ See: .planning/PROJECT.md (updated 2026-04-01)
 ## Current Position
 
 Phase: 41 (camp-kit-presets) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 Status: Ready to execute
 Last activity: 2026-04-04
 
@@ -82,6 +82,7 @@ Progress: [████░░░░░░] 40%
 | Phase 42 P01 | 2 | 3 tasks | 2 files |
 | Phase 42 P02 | 2 | 1 tasks | 3 files |
 | Phase 41-camp-kit-presets P01 | 3 | 2 tasks | 3 files |
+| Phase 41-camp-kit-presets P02 | 8 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -149,6 +150,8 @@ Recent decisions affecting current work:
 - [Phase 41-camp-kit-presets]: extractGearIdsFromPackingList uses type predicate filter to safely narrow items with defined gearId
 - [Phase 41-camp-kit-presets]: computeGearIdsToRemove uses Set for O(n) lookup on protected IDs across remaining kits
 - [Phase 41-camp-kit-presets]: Save as Kit UI: collapsed link pattern (amber underlined) expands inline — minimal footprint
+- [Phase 41-camp-kit-presets]: KitStackPanel closes on backdrop click via e.target === e.currentTarget check
+- [Phase 41-camp-kit-presets]: handleRemoveKit skips unapply API call when gearIdsToRemove is empty — avoids unnecessary network requests for fully-shared kits
 
 ### Pending Todos
 
@@ -183,7 +186,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-04T19:42:26.518Z
+Last session: 2026-04-04T19:51:21.011Z
 Last activity: Completed phase 41 plan 01 — kit-utils + Save as Kit
 Resume file: None
 
