@@ -50,6 +50,7 @@ export default function SpotsClient({
   const [gmapsImporting, setGmapsImporting] = useState(false);
   const [gmapsMessage, setGmapsMessage] = useState<string | null>(null);
   const [gmapsError, setGmapsError] = useState<string | null>(null);
+  const [gmapsFileImporting, setGmapsFileImporting] = useState(false);
   const [photos, setPhotos] = useState(initialPhotos);
   const [darkMode, setDarkMode] = useState(false);
 
@@ -208,6 +209,51 @@ export default function SpotsClient({
       setGmapsError('Failed to import Google Maps data');
     } finally {
       setGmapsImporting(false);
+    }
+  }
+
+  async function handleGmapsFileImport(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setGmapsFileImporting(true);
+    setGmapsMessage(null);
+    setGmapsError(null);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await fetch('/api/import/google-maps', {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await res.json() as {
+        locationsCreated?: number;
+        locationsSkipped?: number;
+        error?: string;
+      };
+      if (!res.ok) {
+        setGmapsError(data.error || 'Import failed');
+        return;
+      }
+      const parts: string[] = [];
+      if (data.locationsCreated && data.locationsCreated > 0) {
+        parts.push(`${data.locationsCreated} location${data.locationsCreated !== 1 ? 's' : ''} added`);
+      }
+      if (data.locationsSkipped && data.locationsSkipped > 0) {
+        parts.push(`${data.locationsSkipped} skipped (already exist)`);
+      }
+      setGmapsMessage(parts.join(', ') || 'No locations found');
+      if (data.locationsCreated && data.locationsCreated > 0) {
+        const locRes = await fetch('/api/locations');
+        if (locRes.ok) {
+          const locs = await locRes.json();
+          setLocations(locs.filter((l: MapLocation) => l.latitude != null && l.longitude != null));
+        }
+      }
+    } catch {
+      setGmapsError('Failed to import Google Maps file');
+    } finally {
+      setGmapsFileImporting(false);
+      e.target.value = '';
     }
   }
 
@@ -474,9 +520,24 @@ export default function SpotsClient({
           <p className="text-sm font-medium text-stone-700 dark:text-stone-300 mb-2">
             Import from Google Maps
           </p>
-          <p className="text-xs text-stone-500 dark:text-stone-400 mb-2">
-            Paste a Google Maps list URL, place URLs, or text with coordinates. Each pin becomes a saved location.
+          <p className="text-xs text-stone-500 dark:text-stone-400 mb-1">
+            Upload a <strong>Saved Places.json</strong> from Google Takeout, or paste URLs and coordinates below.
           </p>
+          {/* File upload option */}
+          <label className="block mb-3">
+            <span className="text-xs text-stone-500 dark:text-stone-400 block mb-1">Saved Places.json from Google Takeout:</span>
+            <input
+              type="file"
+              accept=".json,application/json"
+              onChange={handleGmapsFileImport}
+              disabled={gmapsFileImporting}
+              className="block w-full text-sm text-stone-500 dark:text-stone-400 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-amber-50 dark:file:bg-amber-900/30 file:text-amber-700 dark:file:text-amber-400 hover:file:bg-amber-100 dark:hover:file:bg-amber-900/50 file:cursor-pointer disabled:opacity-50"
+            />
+          </label>
+          {gmapsFileImporting && (
+            <p className="text-xs text-amber-600 dark:text-amber-400 mb-2 animate-pulse">Importing from file...</p>
+          )}
+          <p className="text-xs text-stone-400 dark:text-stone-500 mb-2">— or paste URLs / coordinates —</p>
           <textarea
             value={gmapsText}
             onChange={(e) => setGmapsText(e.target.value)}

@@ -1,15 +1,111 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 
-interface ParsedLocation {
+export interface ParsedLocation {
   name: string;
   latitude: number;
   longitude: number;
   address?: string;
 }
 
+// Google Takeout "Saved Places.json" GeoJSON types
+interface TakeoutGeoCoordinates {
+  Latitude?: string | number;
+  Longitude?: string | number;
+}
+
+interface TakeoutLocation {
+  Address?: string;
+  'Business Name'?: string;
+  'Geo Coordinates'?: TakeoutGeoCoordinates;
+}
+
+interface TakeoutProperties {
+  Title?: string;
+  Location?: TakeoutLocation;
+  'Google Maps URL'?: string;
+}
+
+interface TakeoutFeature {
+  type?: string;
+  geometry?: {
+    type?: string;
+    coordinates?: [number, number] | unknown;
+  };
+  properties?: TakeoutProperties;
+}
+
+interface TakeoutFeatureCollection {
+  type?: string;
+  features?: TakeoutFeature[];
+}
+
+// Parse Google Takeout "Saved Places.json" GeoJSON format
+export function parseSavedPlacesJson(json: unknown): ParsedLocation[] {
+  const locations: ParsedLocation[] = [];
+
+  if (typeof json !== 'object' || json === null) return locations;
+
+  const fc = json as TakeoutFeatureCollection;
+  if (fc.type !== 'FeatureCollection' || !Array.isArray(fc.features)) return locations;
+
+  for (const feature of fc.features) {
+    if (!feature || typeof feature !== 'object') continue;
+
+    let lat: number | null = null;
+    let lon: number | null = null;
+    let name = '';
+    let address: string | undefined;
+
+    // Extract coordinates from geometry (GeoJSON: [longitude, latitude])
+    if (
+      feature.geometry &&
+      feature.geometry.type === 'Point' &&
+      Array.isArray(feature.geometry.coordinates) &&
+      feature.geometry.coordinates.length >= 2
+    ) {
+      const coords = feature.geometry.coordinates as number[];
+      const geomLon = Number(coords[0]);
+      const geomLat = Number(coords[1]);
+      if (isValidCoord(geomLat, geomLon)) {
+        lat = geomLat;
+        lon = geomLon;
+      }
+    }
+
+    // Extract coordinates from properties.Location.Geo Coordinates (fallback/override)
+    const props = feature.properties;
+    if (props?.Location?.['Geo Coordinates']) {
+      const gc = props.Location['Geo Coordinates'];
+      const gcLat = Number(gc.Latitude);
+      const gcLon = Number(gc.Longitude);
+      if (isValidCoord(gcLat, gcLon)) {
+        lat = gcLat;
+        lon = gcLon;
+      }
+    }
+
+    if (lat === null || lon === null) continue;
+
+    // Extract name: prefer Business Name, fallback to Title, fallback to coords
+    name =
+      props?.Location?.['Business Name']?.trim() ||
+      props?.Title?.trim() ||
+      `Saved Place (${lat.toFixed(4)}, ${lon.toFixed(4)})`;
+
+    // Extract address
+    if (props?.Location?.Address) {
+      address = props.Location.Address.trim() || undefined;
+    }
+
+    locations.push({ name, latitude: lat, longitude: lon, address });
+  }
+
+  return locations;
+}
+
 // Parse pasted text for location data (names, coordinates, addresses)
-function parseLocationsFromText(text: string): ParsedLocation[] {
+export function parseLocationsFromText(text: string): ParsedLocation[] {
   const locations: ParsedLocation[] = [];
 
   // Pattern 1: Google Maps URL coordinates — @lat,lon or /lat,lon
@@ -133,15 +229,109 @@ function parseLocationsFromText(text: string): ParsedLocation[] {
   return locations;
 }
 
-function isValidCoord(lat: number, lon: number): boolean {
+export function isValidCoord(lat: number, lon: number): boolean {
   return lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180;
 }
 
-// POST /api/import/google-maps — import locations from Google Maps list
-// Body: { url?: string, text?: string }
-// Returns: { locationsCreated, locationsSkipped, locations: [...] }
+// Save parsed locations to the database, deduplicating by coordinates
+async function saveLocations(parsed: ParsedLocation[]): Promise<{
+  locationsCreated: number;
+  locationsSkipped: number;
+  locations: Array<{ id: string; name: string; latitude: number; longitude: number }>;
+}> {
+  let locationsCreated = 0;
+  let locationsSkipped = 0;
+  const createdLocations: Array<{ id: string; name: string; latitude: number; longitude: number }> = [];
+
+  for (const loc of parsed) {
+    // Dedup: check for existing location at similar coordinates (within ~100m)
+    const existing = await prisma.location.findFirst({
+      where: {
+        latitude: { gte: loc.latitude - 0.001, lte: loc.latitude + 0.001 },
+        longitude: { gte: loc.longitude - 0.001, lte: loc.longitude + 0.001 },
+      },
+    });
+
+    if (existing) {
+      locationsSkipped++;
+      continue;
+    }
+
+    const created = await prisma.location.create({
+      data: {
+        name: loc.name,
+        latitude: loc.latitude,
+        longitude: loc.longitude,
+        type: 'campground',
+        description: loc.address || null,
+        notes: 'Imported from Google Maps',
+      },
+    });
+
+    createdLocations.push({
+      id: created.id,
+      name: created.name,
+      latitude: loc.latitude,
+      longitude: loc.longitude,
+    });
+    locationsCreated++;
+  }
+
+  return { locationsCreated, locationsSkipped, locations: createdLocations };
+}
+
+// POST /api/import/google-maps — import locations from Google Maps list or Saved Places JSON
+// Accepts:
+//   - application/json: { url?: string, text?: string }
+//   - multipart/form-data: { file: File (.json Saved Places export) }
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
+    const contentType = request.headers.get('content-type') || '';
+
+    // Handle multipart form data (file upload)
+    if (contentType.includes('multipart/form-data')) {
+      const formData = await request.formData();
+      const file = formData.get('file');
+
+      if (!file || !(file instanceof File)) {
+        return NextResponse.json({ error: 'No file provided' }, { status: 400 });
+      }
+
+      if (!file.name.endsWith('.json')) {
+        return NextResponse.json(
+          { error: 'Only .json files are supported. Upload a Saved Places.json from Google Takeout.' },
+          { status: 400 }
+        );
+      }
+
+      const text = await file.text();
+      let json: unknown;
+      try {
+        json = JSON.parse(text);
+      } catch {
+        return NextResponse.json(
+          { error: 'Invalid JSON file. Make sure you uploaded a valid Saved Places.json from Google Takeout.' },
+          { status: 400 }
+        );
+      }
+
+      const parsed = parseSavedPlacesJson(json);
+
+      if (parsed.length === 0) {
+        return NextResponse.json(
+          {
+            error:
+              'No locations found in this JSON file. Make sure it is a "Saved Places.json" file from Google Takeout (Maps data).',
+          },
+          { status: 400 }
+        );
+      }
+
+      const result = await saveLocations(parsed);
+      return NextResponse.json(result);
+    }
+
+    // Handle JSON body (existing text/URL paste behavior)
     const body = await request.json();
 
     if (!body.url && !body.text) {
@@ -197,49 +387,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    let locationsCreated = 0;
-    let locationsSkipped = 0;
-    const createdLocations: Array<{ id: string; name: string; latitude: number; longitude: number }> = [];
-
-    for (const loc of parsed) {
-      // Dedup: check for existing location at similar coordinates (within ~100m)
-      const existing = await prisma.location.findFirst({
-        where: {
-          latitude: { gte: loc.latitude - 0.001, lte: loc.latitude + 0.001 },
-          longitude: { gte: loc.longitude - 0.001, lte: loc.longitude + 0.001 },
-        },
-      });
-
-      if (existing) {
-        locationsSkipped++;
-        continue;
-      }
-
-      const created = await prisma.location.create({
-        data: {
-          name: loc.name,
-          latitude: loc.latitude,
-          longitude: loc.longitude,
-          type: 'campground',
-          description: loc.address || null,
-          notes: 'Imported from Google Maps',
-        },
-      });
-
-      createdLocations.push({
-        id: created.id,
-        name: created.name,
-        latitude: loc.latitude,
-        longitude: loc.longitude,
-      });
-      locationsCreated++;
-    }
-
-    return NextResponse.json({
-      locationsCreated,
-      locationsSkipped,
-      locations: createdLocations,
-    });
+    const result = await saveLocations(parsed);
+    return NextResponse.json(result);
   } catch (error) {
     console.error('Failed to import Google Maps data:', error);
     return NextResponse.json(
