@@ -53,6 +53,10 @@ A self-coordinating work queue for v2.0 features. Each Claude Code session claim
 | S13 | Mac mini agent jobs infrastructure    | 36    | ✅ Done 2026-04-04 | Sonnet, normal | —          |
 | S14 | Gear product research                | 30    | ✅ Done 2026-04-04 | Opus, normal | —          |
 | S15 | Post-trip auto-review                | 38    | ✅ Done 2026-04-04 | Sonnet, normal | S11, S12   |
+| S16 | UX quick wins                        | —     | ⬜ Ready          | Sonnet, normal | —          |
+| S17 | Nav restructure + More sheet         | —     | ⬜ Ready          | Sonnet, normal | —          |
+| S18 | TripPrepStepper                      | —     | ⬜ Ready          | Sonnet, normal | S16        |
+| S19 | Empty states + skeleton loaders      | —     | ⬜ Ready          | Sonnet, normal | S16        |
 
 **Why this order matters (conflict groups):**
 
@@ -65,6 +69,10 @@ A self-coordinating work queue for v2.0 features. Each Claude Code session claim
 - S11 touches `schema.prisma`, `lib/claude.ts` (same as S07), `TripsClient.tsx` (same as S07), `TripPrepClient.tsx` (same as S07) — S10 dependency removed (meal planning doesn't need HA; was a merge-conflict precaution only, no longer relevant with sequential execution)
 - S12 touches same files as S11 plus `DashboardClient.tsx` — must wait for S11
 - S13 is mostly new files (`agent_jobs` migration, new API routes, new UI component) — no conflicts with prior sessions
+- S16 touches `app/page.tsx`, `DashboardClient.tsx`, `TopHeader.tsx`, `app/spots/spots-client.tsx`, new `components/ui/FilterChip.tsx` — no conflict with S17
+- S17 touches `BottomNav.tsx`, new `components/MoreSheet.tsx` only — no conflict with S16; **S16 and S17 can run in parallel**
+- S18 touches `DashboardClient.tsx` (same as S16) and new `components/TripPrepStepper.tsx` — must wait for S16
+- S19 touches `GearClient.tsx`, `TripsClient.tsx`, `app/spots/spots-client.tsx` (same as S16), new `components/ui/Skeleton.tsx` — must wait for S16; **S18 and S19 can run in parallel after S16**
 
 ---
 
@@ -789,6 +797,186 @@ Pull origin main, then claim S12 in .planning/V2-SESSIONS.md (mark it 🔄 In Pr
 ```
 Pull origin main, then claim S13 in .planning/V2-SESSIONS.md (mark it 🔄 In Progress, commit + push the claim). Then run /gsd:plan-phase 36 to plan the Mac mini background agent infrastructure — the full spec is in V2-SESSIONS.md under S13. After planning is approved, run /gsd:execute-phase 36. When done, mark S13 ✅ Done in V2-SESSIONS.md, commit, and push.
 ```
+
+---
+
+---
+
+### S16 — UX Quick Wins
+
+**What to build:** Four targeted fixes from the UX execution plan — all small effort, no new dependencies.
+
+**User story:** Will opens the app and the dashboard shows real trip data, the header is clean, dark mode works correctly on the spots page, and filter chips look consistent with the design system.
+
+**Tasks (in order):**
+
+1. **Add trip count to dashboard** — `prisma.trip.count()` in `app/page.tsx` Promise.all, pass as `tripCount` prop to `DashboardClient`. Add a trip stat card (amber, Tent icon) to the stats grid, matching the existing gear/spots/mods card pattern. Also add `upcomingTripCount` (trips with `startDate >= now`) if useful.
+
+2. **Simplify header** — In `components/TopHeader.tsx`, remove the theme toggle button entirely. It already lives in `SettingsClient` — no new work needed there.
+
+3. **Fix dark mode gaps on /spots** — In `app/spots/spots-client.tsx` (or wherever the layer toggle buttons and LocationForm wrapper live), add `dark:` Tailwind variants to match the rest of the app's dark mode tokens: `dark:bg-stone-800`, `dark:border-stone-700`, `dark:text-stone-100` etc. Cross-check with `STYLE-GUIDE.md` for token names.
+
+4. **Add FilterChip to components/ui** — New file `components/ui/FilterChip.tsx`. Props: `label: string`, `active: boolean`, `onClick: () => void`. Active state: `bg-amber-500 text-white`. Inactive: `bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300`. Export from `components/ui/index.ts`. Migrate the gear category filter bar in `GearClient.tsx` to use `FilterChip` instead of ad-hoc classes.
+
+**Key files:**
+- `app/page.tsx` — add tripCount to Promise.all
+- `components/DashboardClient.tsx` — add tripCount prop + stat card
+- `components/TopHeader.tsx` — remove theme toggle
+- `app/spots/spots-client.tsx` — dark mode fixes
+- `components/ui/FilterChip.tsx` — new component
+- `components/ui/index.ts` — export FilterChip
+- `components/GearClient.tsx` — migrate filter bar to FilterChip
+
+**Acceptance criteria:**
+- Dashboard stat grid shows a live trip count (not 0)
+- Header has one utility icon, no theme toggle
+- `/spots` layer toggles and LocationForm container look correct in dark mode
+- Gear category filter pills use FilterChip component with amber active state
+- Build passes, no TypeScript errors
+
+**Constraints:**
+- No new npm packages
+- Do not add a `SegmentedControl` component — FilterChip only (keep scope tight)
+- Do not touch BottomNav — that's S17
+
+---
+
+### S17 — Nav Restructure + More Sheet
+
+**What to build:** Reduce the bottom nav from 6 tabs to 5 tabs (`Home / Trips / Gear / Spots / More`). Move Chat, Inbox, Vehicle, and Settings into a slide-up "More" sheet. Inbox badge moves with it.
+
+**User story:** Will has 5 clean tabs. Everything else is one tap away via "More." No more cramped 6-tab bar.
+
+**Key files:**
+- `components/BottomNav.tsx` — reduce to 5 items, add "More" tab that opens MoreSheet
+- `components/MoreSheet.tsx` — new slide-up sheet component with Chat, Inbox (badged), Vehicle, Settings items
+
+**Implementation notes:**
+
+`BottomNav.tsx` currently has 6 items: Home, Gear, Spots, Trips, Chat, Inbox. New order: `Home / Trips / Gear / Spots / ··· More`. Remove Chat and Inbox from the tab array. The "More" tab uses `Ellipsis` or `MoreHorizontal` from Lucide. Tapping "More" opens `MoreSheet` (not a route — local state toggle).
+
+`MoreSheet.tsx` — a `fixed inset-0` overlay with a slide-up panel from the bottom. Items: Chat (`/chat`), Inbox (`/inbox`, with pending badge from the same `/api/inbox?status=pending` fetch), Vehicle (`/vehicle`), Settings (`/settings`). Each item is a full-width `Link` row with icon + label. Tap any item to navigate (sheet closes on navigation via `usePathname` effect). Tap outside or a close button to dismiss. Use `dark:bg-stone-900 bg-white border-t border-stone-200 dark:border-stone-700` for the sheet.
+
+Move the pending inbox badge fetch from `BottomNav.tsx` into `MoreSheet.tsx` (or a shared hook if preferred). Badge still shows as a red dot on the Inbox row.
+
+**Acceptance criteria:**
+- Bottom nav shows exactly 5 tabs
+- Tapping "More" opens the sheet
+- All 4 destinations in the More sheet navigate correctly
+- Inbox badge visible on the Inbox row in the sheet
+- Sheet closes when navigating away or tapping outside
+- Dark mode correct on both nav and sheet
+- Build passes, no TypeScript errors
+
+**Constraints:**
+- No new npm packages — use Lucide icons and Tailwind only
+- Do not modify any page routes or layouts — nav only
+- Do not touch DashboardClient, TripsClient, or any feature components
+
+---
+
+### S18 — TripPrepStepper
+
+**What to build:** A `TripPrepStepper` component that shows the 5-step core journey (Destination → Weather → Packing → Meals → Departure) with completion state for an active trip. Surface it on the Home dashboard and on the trip prep page.
+
+**User story:** Will opens the app. Under the upcoming trip card on the dashboard, he sees a 5-step stepper showing which prep steps are done. Tapping a step opens the relevant section. The app's core value is immediately legible.
+
+**Key files:**
+- `components/TripPrepStepper.tsx` — new component
+- `components/DashboardClient.tsx` — render stepper below upcoming trip card
+- `app/page.tsx` — pass prep completion data for the upcoming trip
+- `app/trips/[id]/prep/page.tsx` (or `TripPrepClient.tsx`) — render stepper at top of prep page
+
+**Step definitions:**
+```
+1. Destination  — complete when trip has a location assigned (trip.locationId != null)
+2. Weather      — always available (weather loads from location); mark complete if trip has location
+3. Packing      — complete when packingListResult is not null on the trip
+4. Meals        — complete when trip.mealPlan exists
+5. Departure    — complete when trip.departureChecklistResult is not null (or departureTime is set)
+```
+
+**Component design:**
+- Horizontal row of 5 steps on mobile (icon + label below, or just icon + number)
+- Active/complete step: amber fill circle with checkmark or step number
+- Incomplete step: stone outline circle
+- Connecting line between steps, amber fills left-to-right as steps complete
+- Tapping a step navigates to `/trips/[id]/prep` (or scrolls to that section if already on prep page)
+- If no active trip: render nothing (null)
+
+**Data flow:**
+- `app/page.tsx` already fetches the upcoming trip. Extend the select to include: `packingListResult`, `mealPlan { id }`, `departureChecklistResult`, `locationId`, `departureTime`
+- Pass a `tripPrepStatus` object to `DashboardClient`: `{ tripId, destination: bool, weather: bool, packing: bool, meals: bool, departure: bool }`
+- `TripPrepStepper` takes `tripId` + `steps: {label, complete}[]` as props — no data fetching, pure display
+
+**Acceptance criteria:**
+- Stepper renders below the upcoming trip card on the dashboard
+- Correct steps are marked complete based on real trip data
+- Tapping a step navigates to the trip prep page
+- No stepper renders when there is no upcoming trip
+- Stepper also renders at the top of the trip prep page
+- Build passes, no TypeScript errors
+
+**Constraints:**
+- No new npm packages
+- Stepper is display-only — no inline editing
+- Do not change the prep page layout beyond adding the stepper at the top
+- Depends on S16 (DashboardClient must have tripCount changes landed first to avoid merge conflict)
+
+---
+
+### S19 — Empty States + Skeleton Loaders
+
+**What to build:** Add skeleton loading rows and proper empty states to the three main list screens: Gear, Trips, and Spots. Also add `aria-label` to icon-only buttons flagged in the UX audit.
+
+**User story:** Will opens the app on slow camp WiFi. Instead of a blank white flash, he sees pulse-animated skeleton rows. If a list is genuinely empty, he sees a helpful empty state with an emoji and a CTA instead of nothing.
+
+**Key files:**
+- `components/ui/Skeleton.tsx` — new reusable skeleton component
+- `components/ui/index.ts` — export Skeleton
+- `components/GearClient.tsx` — empty state + skeleton
+- `components/TripsClient.tsx` — empty state + skeleton
+- `app/spots/spots-client.tsx` — empty state for location list
+
+**Skeleton component:**
+```tsx
+// components/ui/Skeleton.tsx
+// Props: className?: string
+// Renders: div with animate-pulse bg-stone-200 dark:bg-stone-700 rounded
+```
+
+**Empty state pattern** (already defined in style guide):
+```
+text-center py-16 + emoji (large) + heading + subtext + optional CTA button
+```
+
+- **Gear empty**: 🎒 "No gear yet" / "Add your first item to get started" / [+ Add Gear] button
+- **Trips empty**: 🏕️ "No trips yet" / "Plan your first adventure" / [+ New Trip] button
+- **Spots empty**: 📍 "No spots saved" / "Drop a pin on the map to save a location" — no CTA (map is the CTA)
+
+**Skeleton rows:**
+- Gear list: 4 skeleton rows, each mimicking the gear item card height (~64px) with a short wide bar + narrow bar
+- Trips list: 3 skeleton rows mimicking trip card height (~72px)
+- Loading trigger: these screens are client components that fetch on mount via `useEffect`. Add an `isLoading` state initialized to `true`, show skeletons while `isLoading`, flip to `false` when fetch resolves.
+
+**a11y aria-labels:**
+Audit flagged icon-only buttons missing `aria-label`. Add `aria-label` to:
+- All trash/delete icon buttons in `GearClient.tsx`, `TripsClient.tsx`, `LocationForm.tsx`
+- All edit/pencil icon buttons in same files
+- Search clear button in `GearClient.tsx` if present
+- Pattern: `aria-label="Delete [item type]"`, `aria-label="Edit [item type]"`
+
+**Acceptance criteria:**
+- Skeleton rows appear on initial load for Gear and Trips screens
+- Empty states render (not blank) when lists have no data
+- All icon-only buttons have `aria-label` attributes
+- Skeleton component exported from `components/ui/index.ts`
+- Build passes, no TypeScript errors
+
+**Constraints:**
+- No new npm packages
+- Do not add loading states to the map itself — Leaflet handles its own loading
+- Depends on S16 (spots-client.tsx is also touched by S16 — must be sequential)
 
 ---
 

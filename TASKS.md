@@ -1,6 +1,6 @@
 # Outland OS — Task Tracker
 
-> **Last updated:** 2026-04-04 (Phase 32 complete — deal monitoring: targetPrice field, Claude price check function, GearDealsTab, dashboard deals card; next: Phase 29 cont., 30, 31, 33)
+> **Last updated:** 2026-04-04 (Phase 29 marked complete — VehicleChecklistCard confirmed shipped; S16-S19 UX sprint added to V2-SESSIONS.md queue)
 > **Start here** if you're picking up after a break.
 > **North star:** `docs/USER-JOURNEY.md` — read this before building anything new.
 
@@ -41,7 +41,7 @@
 | 26. Trip Day Sequencer | ✅ Complete | departureTime schema, departure checklist with time-anchored suggestions, DepartureChecklistClient |
 | 27. Safety Float Plan | ✅ Complete | Deterministic plain-text float plan email via float-plan API route (no AI token cost) |
 | 28. Weather-Aware Clothing | ✅ Complete | buildClothingGuidance() in lib/claude.ts, UV forecast, injected into packing list prompt |
-| 29. Vehicle Pre-Trip Checklist | 🔄 In Progress | Plan 01 done (schema + TDD tests), Plan 02 partially done, Plan 03 not started |
+| 29. Vehicle Pre-Trip Checklist | ✅ Complete | Schema + Zod schemas, Claude generation, GET/POST/PATCH API routes, VehicleChecklistCard in TripPrepClient |
 | 30. Product Research Agent | ○ Not started | See `.planning/ROADMAP.md` |
 | 31. Astro Conditions | ○ Not started | See `.planning/ROADMAP.md` |
 | 32. Deals & Restocks | ✅ Complete | targetPrice field, Claude price check, GearDealsTab, Deals modal tab, dashboard deals card |
