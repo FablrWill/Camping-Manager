@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-04-01)
 Phase: 35
 Plan: Not started
 Status: Ready to execute
-Last activity: 2026-04-04 - Completed S31 destination discovery, S32 scheduled intelligence, S34 trip intelligence report
+Last activity: 2026-04-04 - Completed quick task 260404-k7z: Refresh and improve the RAG knowledge base (S36)
 
 Progress: [████░░░░░░] 40%
 
@@ -168,7 +168,6 @@ None yet.
 |---|-------------|------|--------|-----------|
 | 260404-joc | Extend AgentJob with scheduled recurring jobs (scheduledFor, recurringCron), build 4 job handlers, scheduler script, IntelligenceCard dashboard widget | 2026-04-04 | 7ccf6e2 | [260404-joc-extend-agentjob-with-scheduled-recurring](./quick/260404-joc-extend-agentjob-with-scheduled-recurring/) |
 | 260404-j64 | Build shareable trip reports (S28) | 2026-04-04 | 26f743a | [260404-j64-build-shareable-trip-reports-s28](./quick/260404-j64-build-shareable-trip-reports-s28/) |
-
 | 260404-k7z | Refresh and improve RAG knowledge base (S36) | 2026-04-04 | 212254c | [260404-k7z-refresh-and-improve-the-rag-knowledge-ba](./quick/260404-k7z-refresh-and-improve-the-rag-knowledge-ba/) |
 
 ## Session Continuity

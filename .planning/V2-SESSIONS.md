@@ -75,7 +75,7 @@ A self-coordinating work queue for v2.0 features. Each Claude Code session claim
 | S33 | Chat agent memory                    | —     | ⬜ Ready          | Sonnet, normal | S32        |
 | S34 | Trip intelligence report             | —     | ✅ Done 2026-04-04 | Sonnet, normal | —          |
 | S35 | Smart packing v2                     | —     | ⬜ Ready          | Sonnet, normal | —          |
-| S36 | Knowledge base refresh               | —     | 🔄 In Progress    | Sonnet, normal | —          |
+| S36 | Knowledge base refresh               | —     | ✅ Done 2026-04-04 | Sonnet, normal | —          |
 | S10 | Home Assistant integration           | 33    | ⏸ Blocked (~mid-Apr hardware) | Sonnet, normal | S09 |
 
 **Why this order matters (conflict groups):**
