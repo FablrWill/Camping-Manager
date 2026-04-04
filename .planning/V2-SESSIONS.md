@@ -76,7 +76,7 @@ A self-coordinating work queue for v2.0 features. Each Claude Code session claim
 | S34 | Trip intelligence report             | —     | ✅ Done 2026-04-04 | Sonnet, normal | —          |
 | S35 | Smart packing v2                     | —     | ✅ Done 2026-04-04 | Sonnet, normal | —          |
 | S36 | Knowledge base refresh               | —     | ✅ Done 2026-04-04 | Sonnet, normal | —          |
-| S37 | Trip cost tracking                   | 42    | ✅ Done 2026-04-04 | Sonnet, normal | —          |
+| S37 | Personal signal map (39) + Trip cost tracking (42) | 39,42 | ✅ Done 2026-04-04 | Sonnet, normal | —          |
 | S10 | Home Assistant integration           | 33    | ⏸ Blocked (~mid-Apr hardware) | Sonnet, normal | S09 |
 
 **Why this order matters (conflict groups):**
@@ -1728,52 +1728,27 @@ git checkout main && git merge - && git push origin main
 
 ---
 
-### S37 — Trip Cost Tracking (Phase 42)
+### S37a — Personal Signal Map (Phase 39) ✅ Done 2026-04-04
+
+**What to build:** Surface signal quality visually on the spots map. Overlay colored signal badges on location markers, add a "Signal" layer toggle, and add a signal filter chip so Will can see at a glance which campsites have good connectivity.
+
+**Acceptance criteria:** (all met)
+- Toggling "Signal" layer shows colored dot badges on all location markers that have signal data
+- Signal filter chips correctly show/hide locations by connectivity bucket
+- Signal API endpoint returns summaries for all locations in one request
+
+**Constraints:**
+- No new npm packages
+- No schema changes
+- Do not break existing layer toggles (photos, spots, path, places, heatmap)
+
+---
+
+### S37b — Trip Cost Tracking (Phase 42) ✅ Done 2026-04-04
 
 **What to build:** Add expense tracking to trips. Will wants to log fuel, food, campsite fees, and other trip costs inline with trip prep, then see category subtotals and a total cost badge on trip cards.
 
-**User story:** Will gets home from a trip and wants to know what it actually cost. He opens the trip, adds fuel $45, campsite $30, food $80, misc $12. He sees category subtotals and a total of $167 on the trip card so he can budget future trips better.
-
-**Key files:**
-- `prisma/schema.prisma` — new `TripExpense` model
-- `prisma/migrations/` — migration for TripExpense
-- `app/api/trips/[id]/expenses/route.ts` — GET + POST
-- `app/api/trips/[id]/expenses/[expenseId]/route.ts` — DELETE
-- `components/TripExpensePanel.tsx` — new component: expense list, add form, category subtotals
-- `components/TripsClient.tsx` — add cost badge to trip cards, wire in TripExpensePanel
-
-**Data model:**
-```prisma
-model TripExpense {
-  id         Int      @id @default(autoincrement())
-  tripId     Int
-  trip       Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
-  category   String   // "fuel" | "campsite" | "food" | "gear" | "permits" | "misc"
-  amountCents Int     // store in cents to avoid float math
-  note       String?
-  date       DateTime @default(now())
-  createdAt  DateTime @default(now())
-}
-```
-
-Add `expenses TripExpense[]` to the `Trip` model.
-
-**API routes:**
-- `GET /api/trips/[id]/expenses` — return all expenses for trip, sorted by date desc
-- `POST /api/trips/[id]/expenses` — create expense (body: `{ category, amountCents, note?, date? }`)
-- `DELETE /api/trips/[id]/expenses/[expenseId]` — delete expense
-
-**TripExpensePanel component:**
-- Category icons: ⛽ fuel, 🏕️ campsite, 🍔 food, 🛠️ gear, 📋 permits, 💳 misc
-- Expense list: each row shows icon + category + note + amount (formatted as $X.XX) + delete button
-- "Add expense" inline form: category select, amount input (dollars, convert to cents on save), note input, date input (default today)
-- Below list: category subtotals + **Total: $X.XX** in amber, bold
-- Empty state: "No expenses logged" with subtext "Track fuel, campsite fees, and more"
-
-**Trip card badge:**
-- In `TripsClient.tsx`, add a small cost badge to trip cards showing total cost (e.g., `$167`) in stone/muted style if any expenses exist. Fetch total from the existing trip query by aggregating `_sum { amountCents }` on the expenses relation.
-
-**Acceptance criteria:**
+**Acceptance criteria:** (all met)
 - TripExpense model migrated, no data loss
 - Can add and delete expenses via UI
 - Category subtotals and total render correctly

@@ -103,7 +103,7 @@ None — v1.2 Ship It complete as of 2026-04-03.
 
 ## Current State
 
-Phase 34 complete (2026-04-04) — Meal Planning Core: normalized MealPlan schema (Meal rows replacing JSON blob), Claude integration with bringingDog param + per-meal regeneration, full REST API (generate/fetch/delete/regen per-meal), MealPlanClient with day-by-day collapsible UI wired into TripPrepClient, trip card status badges. Human UAT pending (34-HUMAN-UAT.md). Phase 29 also complete: Vehicle Pre-Trip Checklist.
+Phase 39 complete (2026-04-04) — Personal Signal Map: signal summary aggregation library (`lib/signal-summary.ts`) with tier logic (Good/Poor/None/Unknown), GET `/api/locations/signal-summary` endpoint, colored signal dots on SpotMap markers, "Signal" layer toggle (off by default), and filter chips for connectivity quality. 15 unit tests passing.
 
 ## Current Milestone: ✅ v1.2 Ship It — COMPLETE (2026-04-03)
 
@@ -192,4 +192,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-04 after Phase 35 complete — Shopping List, Prep Guide & Feedback shipped*
+*Last updated: 2026-04-04 after Phase 39 complete — Personal Signal Map shipped*
