@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react'
 import GearForm from './GearForm'
 import GearDocumentsTab from './GearDocumentsTab'
 import GearResearchCard from './GearResearchCard'
+import GearDealsTab from './GearDealsTab'
 import KitPresetsPanel from './KitPresetsPanel'
 import ChatContextButton from '@/components/ChatContextButton'
 import { CATEGORY_GROUPS, CATEGORIES, getCategoryEmoji, getCategoryLabel } from '@/lib/gear-categories'
@@ -29,6 +30,8 @@ interface GearItem {
   connectivity: string | null
   researchResult: string | null
   researchedAt: string | null
+  targetPrice: number | null
+  priceCheck: { isAtOrBelowTarget: boolean } | null
   createdAt: string
   updatedAt: string
 }
@@ -70,6 +73,7 @@ export default function GearClient({ initialItems }: { initialItems: GearItem[] 
   const [deleteError, setDeleteError] = useState<string | null>(null)
   const [isResearching, setIsResearching] = useState(false)
   const [showKits, setShowKits] = useState(false)
+  const [detailTab, setDetailTab] = useState<'research' | 'documents' | 'deals'>('research')
 
   // Filter items
   const filtered = useMemo(() => {
@@ -186,6 +190,7 @@ export default function GearClient({ initialItems }: { initialItems: GearItem[] 
 
   function openEdit(item: GearItem) {
     setEditingItem(item)
+    setDetailTab('research')
     setShowForm(true)
   }
 
@@ -333,7 +338,7 @@ export default function GearClient({ initialItems }: { initialItems: GearItem[] 
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2 mb-1">
+                        <div className="flex items-center gap-2 mb-1 flex-wrap">
                           <span className="font-semibold text-stone-900 dark:text-stone-50 truncate">
                             {item.name}
                           </span>
@@ -342,6 +347,11 @@ export default function GearClient({ initialItems }: { initialItems: GearItem[] 
                               className={`text-xs px-2 py-0.5 rounded-full font-medium ${getConditionColor(item.condition)}`}
                             >
                               {item.condition}
+                            </span>
+                          )}
+                          {item.isWishlist && item.priceCheck?.isAtOrBelowTarget && (
+                            <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+                              Deal
                             </span>
                           )}
                         </div>
@@ -412,18 +422,56 @@ export default function GearClient({ initialItems }: { initialItems: GearItem[] 
             setEditingItem(null)
           }}
           extraContent={editingItem ? (
-            <div className="space-y-4 border-t border-stone-200 dark:border-stone-700 pt-4 mt-2">
-              <div>
-                <h3 className="text-sm font-medium text-stone-700 dark:text-stone-300 mb-3">Research</h3>
+            <div className="border-t border-stone-200 dark:border-stone-700 pt-4 mt-2">
+              {/* Tab bar */}
+              <div className="flex gap-1 mb-4 bg-stone-100 dark:bg-stone-800 rounded-lg p-1">
+                <button
+                  type="button"
+                  onClick={() => setDetailTab('research')}
+                  className={`flex-1 py-1.5 px-2 rounded-md text-xs font-medium transition-colors ${
+                    detailTab === 'research'
+                      ? 'bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-50 shadow-sm'
+                      : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-300'
+                  }`}
+                >
+                  Research
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDetailTab('documents')}
+                  className={`flex-1 py-1.5 px-2 rounded-md text-xs font-medium transition-colors ${
+                    detailTab === 'documents'
+                      ? 'bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-50 shadow-sm'
+                      : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-300'
+                  }`}
+                >
+                  Docs
+                </button>
+                {editingItem.isWishlist && (
+                  <button
+                    type="button"
+                    onClick={() => setDetailTab('deals')}
+                    className={`flex-1 py-1.5 px-2 rounded-md text-xs font-medium transition-colors ${
+                      detailTab === 'deals'
+                        ? 'bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-50 shadow-sm'
+                        : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-300'
+                    }`}
+                  >
+                    Deals
+                  </button>
+                )}
+              </div>
+
+              {/* Tab content */}
+              {detailTab === 'research' && (
                 <GearResearchCard
                   researchResult={editingItem.researchResult}
                   researchedAt={editingItem.researchedAt}
                   onResearch={handleResearch}
                   isResearching={isResearching}
                 />
-              </div>
-              <div>
-                <h3 className="text-sm font-medium text-stone-700 dark:text-stone-300 mb-3">Documents</h3>
+              )}
+              {detailTab === 'documents' && (
                 <GearDocumentsTab
                   gearItemId={editingItem.id}
                   gearName={editingItem.name}
@@ -431,7 +479,21 @@ export default function GearClient({ initialItems }: { initialItems: GearItem[] 
                   gearModelNumber={editingItem.modelNumber}
                   gearCategory={editingItem.category}
                 />
-              </div>
+              )}
+              {detailTab === 'deals' && editingItem.isWishlist && (
+                <GearDealsTab
+                  gearItem={{
+                    id: editingItem.id,
+                    name: editingItem.name,
+                    brand: editingItem.brand,
+                    modelNumber: editingItem.modelNumber,
+                    category: editingItem.category,
+                    price: editingItem.price,
+                    targetPrice: editingItem.targetPrice,
+                    isWishlist: editingItem.isWishlist,
+                  }}
+                />
+              )}
             </div>
           ) : undefined}
         />
