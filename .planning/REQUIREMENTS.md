@@ -71,7 +71,7 @@ Requirements for milestone v2.0 "Field Intelligence".
 - [x] **ASTRO-02**: Sunrise/sunset times displayed per night in AstroCard expanded view, sourced from existing DayForecast.sunrise/sunset (no new API call)
 - [x] **ASTRO-03**: Bortle link ("Check light pollution") opens lightpollutionmap.info pre-loaded to trip coordinates; hidden when trip has no location
 - [x] **ASTRO-04**: suncalc used for moon phase computation (client-side, no API key); no new env vars required
-- [ ] **ASTRO-05**: npm run build passes with all new files; no type errors
+- [x] **ASTRO-05**: npm run build passes with all new files; no type errors
 
 ## Future Requirements
 

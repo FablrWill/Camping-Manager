@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Gear Intelligence + Day-Of
-status: executing
-stopped_at: Completed 31-01-PLAN.md
-last_updated: "2026-04-04T04:38:06.752Z"
+status: verifying
+stopped_at: Completed 31-02-PLAN.md — awaiting human-verify checkpoint
+last_updated: "2026-04-04T04:43:53.211Z"
 last_activity: 2026-04-04
 progress:
   total_phases: 24
-  completed_phases: 18
+  completed_phases: 19
   total_plans: 50
-  completed_plans: 48
+  completed_plans: 49
   percent: 40
 ---
 
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-04-01)
 
 Phase: 31 (dark-sky-astro-info) — EXECUTING
 Plan: 2 of 2
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-04-04
 
 Progress: [████░░░░░░] 40%
@@ -73,6 +73,7 @@ Progress: [████░░░░░░] 40%
 | Phase 33-conversational-trip-planner P03 | 20 | 2 tasks | 2 files |
 | Phase 29 P01 | 214 | 2 tasks | 5 files |
 | Phase 31-dark-sky-astro-info P01 | 5 | 2 tasks | 4 files |
+| Phase 31 P02 | 7 | 1 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -122,6 +123,8 @@ Recent decisions affecting current work:
 - [Phase 29]: Migration created manually and applied via prisma migrate deploy due to non-interactive agent environment
 - [Phase 31-dark-sky-astro-info]: UTC noon (T12:00:00Z) used for suncalc Date construction to avoid DST/timezone drift across all system locales
 - [Phase 31-dark-sky-astro-info]: Bortle class implemented as lightpollutionmap.info deep link only — no free no-key API exists, honest placeholder is correct approach
+- [Phase 31]: AstroCard renders for all upcoming trips regardless of location — moon phase is pure math, works without coordinates
+- [Phase 31]: Weather-aware cache guard re-computes astro when weatherByTrip changes so sunrise/sunset merges after async weather fetch
 
 ### Pending Todos
 
@@ -139,6 +142,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-04T04:38:06.745Z
-Stopped at: Completed 31-01-PLAN.md
+Last session: 2026-04-04T04:43:53.206Z
+Stopped at: Completed 31-02-PLAN.md — awaiting human-verify checkpoint
 Resume file: None

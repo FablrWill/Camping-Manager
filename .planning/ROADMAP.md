@@ -71,7 +71,7 @@
 
 **Wave 3 — Depends on Wave 2:**
 - [ ] **Phase 30: Gear Product Research** - AI-powered "Research" button, best-in-class comparison, upgrade recommendations
-- [ ] **Phase 31: Dark Sky & Astro Info** - Bortle class, moon phase, sunrise/sunset per location and trip dates
+- [x] **Phase 31: Dark Sky & Astro Info** - Bortle class, moon phase, sunrise/sunset per location and trip dates (completed 2026-04-04)
 
 **Wave 4 — Depends on Wave 3:**
 - [ ] **Phase 32: Deal Monitoring** - Target price on wishlist items, on-demand price check via Claude, deal alerts
@@ -464,7 +464,7 @@ Plans:
 
 Plans:
 - [x] 31-01-PLAN.md — TDD astro library (suncalc install, tests, lib/astro.ts)
-- [ ] 31-02-PLAN.md — AstroCard component + TripCard/TripsClient integration
+- [x] 31-02-PLAN.md — AstroCard component + TripCard/TripsClient integration
 
 **Parallelization notes:**
 - Wave 3 — can run parallel with Phase 30
@@ -579,7 +579,7 @@ Plans:
 | 28. Weather-Aware Clothing | v3.0 | 1/1 | Complete | 2026-04-03 |
 | 29. Vehicle Pre-Trip Checklist | v3.0 | 3/3 | Complete    | 2026-04-03 |
 | 30. Gear Product Research | v3.0 | 0/TBD | Not started | - |
-| 31. Dark Sky & Astro Info | v3.0 | 1/2 | In Progress|  |
+| 31. Dark Sky & Astro Info | v3.0 | 2/2 | Complete   | 2026-04-04 |
 | 32. Deal Monitoring | v3.0 | 0/TBD | Not started | - |
 | 33. Conversational Trip Planner | v3.0 | 4/4 | Complete    | 2026-04-03 |
 | 34. Home Assistant Integration | v3.0 | 0/TBD | Not started | - |
@@ -599,7 +599,7 @@ Plans:
   5. "Add manually" escape hatch opens the old static form
   6. Trip-creation conversations are persisted to the database
   7. `npm run build` passes
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 
 Plans:
 - [x] 33-00-PLAN.md — Wave 0 test stubs (trip planner tools + ChatBubble extraction)
