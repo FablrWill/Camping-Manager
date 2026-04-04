@@ -306,10 +306,21 @@ model Meal {
   estimatedMinutes Int?
   createdAt        DateTime @default(now())
 
-  mealPlan MealPlan @relation(fields: [mealPlanId], references: [id], onDelete: Cascade)
+  mealPlan MealPlan     @relation(fields: [mealPlanId], references: [id], onDelete: Cascade)
+  feedback MealFeedback?
 
   @@index([mealPlanId])
   @@index([mealPlanId, day, slot])
+}
+
+model MealFeedback {
+  id        String   @id @default(cuid())
+  mealId    String   @unique
+  rating    String   // "loved" | "ok" | "skip"
+  note      String?
+  createdAt DateTime @default(now())
+
+  meal Meal @relation(fields: [mealId], references: [id], onDelete: Cascade)
 }
 
 model TripFeedback {

@@ -14,6 +14,7 @@ export async function GET(
       include: {
         meals: {
           orderBy: [{ day: 'asc' }, { slot: 'asc' }],
+          include: { feedback: true },
         },
       },
     })
