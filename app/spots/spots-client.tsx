@@ -16,6 +16,7 @@ import type {
   SpotMapHandle,
 } from "@/components/SpotMap";
 import ShareLocationButton from "@/components/ShareLocationButton";
+import GmapsImportModal from "@/components/GmapsImportModal";
 import { useOnlineStatus } from "@/lib/use-online-status";
 import { getTripSnapshot, getCachedTripIds } from "@/lib/offline-storage";
 
@@ -46,6 +47,7 @@ export default function SpotsClient({
   const [gpxImporting, setGpxImporting] = useState(false);
   const [gpxMessage, setGpxMessage] = useState<string | null>(null);
   const [showGmapsImport, setShowGmapsImport] = useState(false);
+  const [showGmapsListModal, setShowGmapsListModal] = useState(false);
   const [gmapsText, setGmapsText] = useState('');
   const [gmapsImporting, setGmapsImporting] = useState(false);
   const [gmapsMessage, setGmapsMessage] = useState<string | null>(null);
@@ -453,19 +455,25 @@ export default function SpotsClient({
           )}
           <ShareLocationButton />
           <button
-            onClick={() => { setShowGmapsImport(!showGmapsImport); setShowGpxImport(false); setShowUpload(false) }}
+            onClick={() => { setShowGmapsImport(!showGmapsImport); setShowGpxImport(false); setShowUpload(false); setShowGmapsListModal(false); }}
             className="px-3 py-1.5 border border-stone-300 dark:border-stone-600 text-stone-700 dark:text-stone-300 text-sm font-medium rounded-lg hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors"
           >
             G-Maps
           </button>
           <button
-            onClick={() => { setShowGpxImport(!showGpxImport); setShowGmapsImport(false); setShowUpload(false) }}
+            onClick={() => { setShowGmapsListModal(true); setShowGpxImport(false); setShowGmapsImport(false); setShowUpload(false); }}
+            className="px-3 py-1.5 border border-stone-300 dark:border-stone-600 text-stone-700 dark:text-stone-300 text-sm font-medium rounded-lg hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors"
+          >
+            List Import
+          </button>
+          <button
+            onClick={() => { setShowGpxImport(!showGpxImport); setShowGmapsImport(false); setShowUpload(false); setShowGmapsListModal(false); }}
             className="px-3 py-1.5 border border-stone-300 dark:border-stone-600 text-stone-700 dark:text-stone-300 text-sm font-medium rounded-lg hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors"
           >
             GPX
           </button>
           <button
-            onClick={() => { setShowUpload(!showUpload); setShowGpxImport(false); setShowGmapsImport(false) }}
+            onClick={() => { setShowUpload(!showUpload); setShowGpxImport(false); setShowGmapsImport(false); setShowGmapsListModal(false); }}
             className="px-3 py-1.5 bg-amber-600 text-white text-sm font-medium rounded-lg hover:bg-amber-700 transition-colors"
           >
             + Add Photos
@@ -562,6 +570,19 @@ export default function SpotsClient({
             <p className="text-xs text-red-600 dark:text-red-400 mt-2 font-medium">{gmapsError}</p>
           )}
         </div>
+      )}
+
+      {/* Google Maps List Import modal */}
+      {showGmapsListModal && (
+        <GmapsImportModal
+          onClose={() => setShowGmapsListModal(false)}
+          onImportComplete={async (count) => {
+            setShowGmapsListModal(false);
+            if (count > 0) {
+              await refreshLocations();
+            }
+          }}
+        />
       )}
 
       {/* Upload panel */}
