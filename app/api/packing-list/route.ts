@@ -153,6 +153,14 @@ export async function POST(request: NextRequest) {
       console.error('Feedback query failed (non-blocking):', err)
     }
 
+    // Fetch medications for injection after generation
+    let medications: { name: string; dosesPerDay: number; unitsPerDose: number; unit: string; isForDog: boolean }[] = []
+    try {
+      medications = await prisma.medication.findMany({ orderBy: { createdAt: 'asc' } })
+    } catch (err) {
+      console.error('Medication fetch failed (non-blocking):', err)
+    }
+
     // Generate packing list via Claude (throws on Zod validation failure)
     let packingList
     try {
@@ -177,6 +185,43 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: message }, { status: 422 })
       }
       throw error
+    }
+
+    // Inject medication items deterministically (quantity = dosesPerDay × nights × unitsPerDose)
+    if (medications.length > 0) {
+      const myMeds = medications.filter((m) => !m.isForDog)
+      const dogMeds = medications.filter((m) => m.isForDog)
+
+      function buildMedItem(med: { name: string; dosesPerDay: number; unitsPerDose: number; unit: string }) {
+        const total = Math.ceil(med.dosesPerDay * nights) * med.unitsPerDose
+        const totalDisplay = total % 1 === 0 ? String(total) : total.toFixed(1)
+        const unitPlural = total === 1 ? med.unit : `${med.unit}s`
+        return {
+          name: med.name,
+          fromInventory: false as const,
+          reason: `${totalDisplay} ${unitPlural} (${med.dosesPerDay}x/day × ${nights} night${nights !== 1 ? 's' : ''})`,
+        }
+      }
+
+      if (myMeds.length > 0) {
+        const medItems = myMeds.map(buildMedItem)
+        const healthCat = packingList.categories.find((c) => c.name === 'health')
+        if (healthCat) {
+          healthCat.items = [...medItems, ...healthCat.items]
+        } else {
+          packingList.categories.push({ name: 'health', emoji: '🩺', items: medItems })
+        }
+      }
+
+      if (dogMeds.length > 0) {
+        const dogMedItems = dogMeds.map(buildMedItem)
+        const dogCat = packingList.categories.find((c) => c.name === 'dog')
+        if (dogCat) {
+          dogCat.items = [...dogMedItems, ...dogCat.items]
+        } else {
+          packingList.categories.push({ name: 'dog', emoji: '🐾', items: dogMedItems })
+        }
+      }
     }
 
     // Upsert PackingItems for gear-linked items
