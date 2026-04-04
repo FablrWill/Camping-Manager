@@ -5,6 +5,13 @@ import { Button, Card, Input } from '@/components/ui';
 import PageHeader from '@/components/ui/PageHeader';
 import TripIntelligenceCard from './TripIntelligenceCard';
 
+interface MemoryEntry {
+  id: string;
+  key: string;
+  value: string;
+  updatedAt: string;
+}
+
 export default function SettingsClient() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -15,6 +22,13 @@ export default function SettingsClient() {
   const [testingEmail, setTestingEmail] = useState(false);
   const [testEmailResult, setTestEmailResult] = useState<string | null>(null);
   const [testEmailError, setTestEmailError] = useState<string | null>(null);
+
+  // Memory management state
+  const [memories, setMemories] = useState<MemoryEntry[]>([]);
+  const [memoriesLoading, setMemoriesLoading] = useState(true);
+  const [clearingMemory, setClearingMemory] = useState(false);
+  const [deletingMemoryId, setDeletingMemoryId] = useState<string | null>(null);
+  const [memoryError, setMemoryError] = useState<string | null>(null);
 
   useEffect(() => {
     fetch('/api/settings')
@@ -27,6 +41,63 @@ export default function SettingsClient() {
       .catch(() => {
         setLoading(false);
       });
+  }, []);
+
+  const fetchMemories = useCallback(() => {
+    setMemoriesLoading(true);
+    fetch('/api/agent/memory')
+      .then((res) => res.json())
+      .then((data: { memories?: MemoryEntry[] }) => {
+        setMemories(data.memories ?? []);
+        setMemoriesLoading(false);
+      })
+      .catch(() => {
+        setMemoriesLoading(false);
+      });
+  }, []);
+
+  useEffect(() => {
+    fetchMemories();
+  }, [fetchMemories]);
+
+  const handleDeleteMemory = useCallback(async (id: string) => {
+    setMemoryError(null);
+    setDeletingMemoryId(id);
+    try {
+      const res = await fetch('/api/agent/memory', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      });
+      if (!res.ok) {
+        const data = await res.json() as { error?: string };
+        setMemoryError(data.error ?? 'Failed to delete memory');
+        return;
+      }
+      setMemories((prev) => prev.filter((m) => m.id !== id));
+    } catch {
+      setMemoryError('Failed to delete memory. Please try again.');
+    } finally {
+      setDeletingMemoryId(null);
+    }
+  }, []);
+
+  const handleClearAllMemory = useCallback(async () => {
+    setMemoryError(null);
+    setClearingMemory(true);
+    try {
+      const res = await fetch('/api/agent/memory', { method: 'DELETE' });
+      if (!res.ok) {
+        const data = await res.json() as { error?: string };
+        setMemoryError(data.error ?? 'Failed to clear memory');
+        return;
+      }
+      setMemories([]);
+    } catch {
+      setMemoryError('Failed to clear memory. Please try again.');
+    } finally {
+      setClearingMemory(false);
+    }
   }, []);
 
   const handleSave = useCallback(async () => {
@@ -177,6 +248,64 @@ export default function SettingsClient() {
 
       {/* My Camping Profile */}
       <TripIntelligenceCard />
+
+      {/* Agent Memory */}
+      <Card>
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-sm font-bold text-stone-900 dark:text-stone-50">
+            Agent Memory
+          </p>
+          {memories.length > 0 && (
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={handleClearAllMemory}
+              loading={clearingMemory}
+            >
+              Clear All
+            </Button>
+          )}
+        </div>
+        <p className="text-xs text-stone-500 dark:text-stone-400 mb-3">
+          Facts and preferences the assistant has learned from your conversations.
+        </p>
+        {memoryError && (
+          <p className="text-sm text-red-600 dark:text-red-400 mb-3">{memoryError}</p>
+        )}
+        {memoriesLoading ? (
+          <p className="text-sm text-stone-500 dark:text-stone-400">Loading memories...</p>
+        ) : memories.length === 0 ? (
+          <p className="text-sm text-stone-500 dark:text-stone-400">
+            No memories yet. Chat with the assistant to build up your profile.
+          </p>
+        ) : (
+          <ul className="space-y-2">
+            {memories.map((m) => (
+              <li
+                key={m.id}
+                className="flex items-start justify-between gap-2 rounded-md bg-stone-50 dark:bg-stone-800 px-3 py-2"
+              >
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium text-stone-600 dark:text-stone-400 mb-0.5">
+                    {m.key}
+                  </p>
+                  <p className="text-sm text-stone-900 dark:text-stone-100 break-words">
+                    {m.value}
+                  </p>
+                </div>
+                <button
+                  onClick={() => handleDeleteMemory(m.id)}
+                  disabled={deletingMemoryId === m.id}
+                  className="flex-shrink-0 text-xs text-stone-400 hover:text-red-500 dark:hover:text-red-400 disabled:opacity-50 transition-colors"
+                  aria-label={`Delete memory: ${m.key}`}
+                >
+                  {deletingMemoryId === m.id ? '...' : '✕'}
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Card>
 
     </div>
   );
