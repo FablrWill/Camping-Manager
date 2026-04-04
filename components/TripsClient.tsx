@@ -37,6 +37,7 @@ interface TripData {
   reviewedAt: string | null  // Phase 38: post-trip review timestamp
   journalEntry: string | null  // S20: Voice Ghostwriter
   journalEntryAt: string | null  // S20: when journal was last written
+  shareToken: string | null  // S28: public share token
 }
 
 interface WeatherData {
@@ -91,6 +92,9 @@ export default function TripsClient({ initialTrips, locations, vehicles }: Trips
   const [editPermitUrl, setEditPermitUrl] = useState('')
   const [editPermitNotes, setEditPermitNotes] = useState('')
 
+  // Share state — S28
+  const [sharingTripId, setSharingTripId] = useState<string | null>(null)
+
   // Fallback form state
   const [fallbackForTripId, setFallbackForTripId] = useState<string | null>(null)
   const [fallbackForTripName, setFallbackForTripName] = useState<string | null>(null)
@@ -122,6 +126,38 @@ export default function TripsClient({ initialTrips, locations, vehicles }: Trips
     setFallbackForTripName(trip.name)
     setFallbackOrder(nextOrder)
     setShowForm(true)
+  }
+
+  async function handleShare(tripId: string) {
+    setSharingTripId(tripId)
+    try {
+      const res = await fetch(`/api/trips/${tripId}/share`, { method: 'POST' })
+      if (!res.ok) throw new Error('Failed to share')
+      const data = await res.json() as { shareUrl: string }
+      // Extract the token from the returned share URL and update state
+      const token = data.shareUrl.split('/').pop() ?? null
+      setTrips((prev) =>
+        prev.map((t) => (t.id === tripId ? { ...t, shareToken: token } : t))
+      )
+      const shareUrl = `${window.location.origin}${data.shareUrl}`
+      await navigator.clipboard.writeText(shareUrl).catch(() => undefined)
+    } catch {
+      setError("Couldn't create share link — try again.")
+    } finally {
+      setSharingTripId(null)
+    }
+  }
+
+  async function handleUnshare(tripId: string) {
+    try {
+      const res = await fetch(`/api/trips/${tripId}/share`, { method: 'DELETE' })
+      if (!res.ok) throw new Error('Failed to unshare')
+      setTrips((prev) =>
+        prev.map((t) => (t.id === tripId ? { ...t, shareToken: null } : t))
+      )
+    } catch {
+      setError("Couldn't unshare — try again.")
+    }
   }
 
   const handleAddManually = useCallback(() => {
@@ -529,6 +565,8 @@ export default function TripsClient({ initialTrips, locations, vehicles }: Trips
                       onDebrief={setDebriefTrip}
                       onReview={setReviewingTripId}
                       onGhostwrite={(trip) => setGhostwriterTrip({ id: trip.id, name: trip.name })}
+                      onShare={handleShare}
+                      onUnshare={handleUnshare}
                     />
                     {/* Meal plan status badge — Phase 34 */}
                     <div className="flex items-center gap-1.5 px-1 pt-1">

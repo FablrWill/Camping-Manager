@@ -45,6 +45,7 @@ export default async function TripsPage() {
         reviewedAt: t.reviewedAt?.toISOString() ?? null,
         journalEntry: t.journalEntry ?? null,
         journalEntryAt: t.journalEntryAt?.toISOString() ?? null,
+        shareToken: t.shareToken ?? null,
       }))}
       locations={locations}
       vehicles={vehicles}
