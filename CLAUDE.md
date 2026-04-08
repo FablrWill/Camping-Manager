@@ -58,6 +58,15 @@ A personal car camping assistant and travel guide built as a mobile-friendly web
 - No `alert()` in components — use state-based inline error messages
 - All React hooks must have correct, minimal dependency arrays — never include state that the hook itself updates
 
+## Development Workflow
+
+This project uses a **Claude + Chrome DevTools workflow**:
+
+- **Claude Code (terminal):** Write, modify, and reason about code. Run tests, start the dev server, manage git.
+- **Chrome:** View the running app, inspect UI elements, debug errors, monitor network requests.
+- **Workflow:** Run `npm run dev` to start the local server. Test changes in Chrome. Report issues back with specifics (console errors, network requests, expected vs. actual behavior).
+- **Assumption:** You have access to Chrome and can test features interactively, then provide feedback for Claude to fix.
+
 ## Documentation Standards
 - **TASKS.md** is the single source of truth. Update it every session.
 - **Changelog** is split into one file per session in `docs/changelog/`:
