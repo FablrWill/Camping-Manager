@@ -53,6 +53,14 @@ A self-coordinating work queue for v2.0 features. Each Claude Code session claim
 | S13 | Mac mini agent jobs infrastructure    | 36    | ✅ Done 2026-04-04 | Sonnet, normal | —          |
 | S14 | Gear product research                | 30    | ✅ Done 2026-04-04 | Opus, normal | —          |
 | S15 | Post-trip auto-review                | 38    | ✅ Done 2026-04-04 | Sonnet, normal | S11, S12   |
+| S16 | Personal signal map                  | 39    | ⬜ Ready          | Sonnet, normal | —          |
+| S17 | GPX import                           | 40    | ⬜ Ready          | Sonnet, normal | —          |
+| S18 | Camp kit presets / loadout templates | 41    | ⬜ Ready          | Sonnet, normal | —          |
+| S19 | Cost tracking                        | 42    | ⬜ Ready          | Sonnet, normal | —          |
+| S20 | Gear ROI tracker                     | 43    | ⬜ Ready          | Haiku, normal  | S19        |
+| S21 | Google Maps list import              | 44    | ⬜ Ready          | Sonnet, normal | —          |
+| S22 | Fire ban alerts                      | 45    | ⬜ Ready          | Sonnet, normal | S13        |
+| S23 | Agent orchestration layer            | 46    | ⬜ Ready          | Opus, normal   | —          |
 
 **Why this order matters (conflict groups):**
 
@@ -65,6 +73,10 @@ A self-coordinating work queue for v2.0 features. Each Claude Code session claim
 - S11 touches `schema.prisma`, `lib/claude.ts` (same as S07), `TripsClient.tsx` (same as S07), `TripPrepClient.tsx` (same as S07) — S10 dependency removed (meal planning doesn't need HA; was a merge-conflict precaution only, no longer relevant with sequential execution)
 - S12 touches same files as S11 plus `DashboardClient.tsx` — must wait for S11
 - S13 is mostly new files (`agent_jobs` migration, new API routes, new UI component) — no conflicts with prior sessions
+- S16–S19, S21 are fully independent — no file overlap — safe to run all 5 in parallel
+- S20 depends on S19 (needs TripExpense schema before computing cost-per-trip on gear)
+- S22 depends on S13 (background agent job infrastructure must exist to queue fire ban checks)
+- S23 is architectural and cross-cutting — run after S16–S19 ship so routing rules have real features to route
 
 ---
 
@@ -788,6 +800,285 @@ Pull origin main, then claim S12 in .planning/V2-SESSIONS.md (mark it 🔄 In Pr
 **S13 — Mac mini agent jobs infrastructure**
 ```
 Pull origin main, then claim S13 in .planning/V2-SESSIONS.md (mark it 🔄 In Progress, commit + push the claim). Then run /gsd:plan-phase 36 to plan the Mac mini background agent infrastructure — the full spec is in V2-SESSIONS.md under S13. After planning is approved, run /gsd:execute-phase 36. When done, mark S13 ✅ Done in V2-SESSIONS.md, commit, and push.
+```
+
+---
+
+---
+
+### S16 — Personal Signal Map (Phase 39)
+
+**What to build:** Add the ability to log cell signal quality (carrier + bars) and Starlink quality at each saved location. Over time this builds a personal signal database Will can consult before a trip — "Linville Gorge: AT&T 2 bars, no Starlink LOS."
+
+**User story:** Will visits a campsite, opens the app, and taps "Log Signal" on the location. He enters carrier (AT&T), bars (2), notes "no Starlink LOS — trees." Next trip he checks and knows to download maps offline.
+
+**Key files:**
+- `prisma/schema.prisma` — new `SignalLog` model (id, locationId, carrier, bars 1-5, starlinkQuality, notes, loggedAt)
+- `prisma/migrations/` — migration for SignalLog
+- `app/api/locations/[id]/signal/route.ts` — GET (list logs), POST (add log)
+- `components/LocationDetailModal.tsx` or `SpotsClient.tsx` — add "Signal" tab to location detail with log list + "Add log" button
+- `components/SignalLogForm.tsx` — NEW: small inline form (carrier dropdown, bars 1-5, Starlink toggle, notes)
+
+**Acceptance criteria:**
+- User can log signal at any saved location
+- Signal logs display in location detail (newest first)
+- If 2+ logs exist, show average bars as a summary badge on the location marker popup
+- No external APIs — purely user-entered data
+- Works offline (form submits when reconnected, or just requires connection — acceptable for v1)
+
+**Constraints:**
+- Out of scope: automated signal testing (no browser API for this)
+- Out of scope: map heat-map overlay (future)
+- Carrier list: AT&T, Verizon, T-Mobile, Other (dropdown)
+
+**Session prompt:**
+```
+Pull origin main, then claim S16 in .planning/V2-SESSIONS.md (mark it 🔄 In Progress, commit + push the claim). Then run /gsd:plan-phase 39 to plan the personal signal map feature — the full spec is in V2-SESSIONS.md under S16. After planning is approved, run /gsd:execute-phase 39. When done, mark S16 ✅ Done in V2-SESSIONS.md, commit, and push.
+```
+
+---
+
+### S17 — GPX Import (Phase 40)
+
+**What to build:** Let Will import GPX files exported from AllTrails, Wikiloc, or a GPS device. The imported route overlays on the Spots map as a trail layer, and can be attached to a saved location or trip.
+
+**User story:** Will downloads a GPX from AllTrails for a trail near his campsite. He imports it into Outland OS and the trail appears as a purple line on the map alongside his location pins and photo markers.
+
+**Key files:**
+- `app/api/locations/gpx-import/route.ts` — new POST endpoint: accepts .gpx file, parses trackpoints, returns GeoJSON
+- `lib/gpx.ts` — NEW: GPX → GeoJSON parser (research best approach during research phase)
+- `prisma/schema.prisma` — new `GpxTrack` model (id, name, geoJson JSON, locationId? nullable, tripId? nullable, importedAt)
+- `components/SpotMap.tsx` — add GPX track layer (Leaflet polyline from GeoJSON), toggle in layer controls
+- `components/GpxImportButton.tsx` — NEW: file picker for .gpx, calls import API, shows track name + point count on success
+
+**Research needed (do `/gsd:research-phase 40` first):**
+- Best GPX parser for Node.js/browser: `togeojson`, `@tmcw/togeojson`, `gpx-parser`, or hand-roll with DOMParser?
+- Should parsing happen server-side (API route) or client-side (browser FileReader + DOMParser)?
+- GeoJSON storage: full feature collection in JSON column vs. extracted point array?
+
+**Acceptance criteria:**
+- User can select a .gpx file and import it
+- Imported track appears as a colored polyline on the Spots map
+- Track can be toggled on/off in the layer controls
+- Track can be optionally linked to a location or trip (nullable foreign keys)
+- Track name (from GPX metadata) shown in a layer list or legend
+- Graceful error if file is malformed
+
+**Constraints:**
+- Out of scope: GPX waypoints (just tracks for now)
+- Out of scope: elevation profile chart (future)
+- Out of scope: AllTrails API (file import only)
+
+**Session prompt:**
+```
+Pull origin main, then claim S17 in .planning/V2-SESSIONS.md (mark it 🔄 In Progress, commit + push the claim). Then run /gsd:research-phase 40 to research GPX parsing library options and storage approach — the full spec is in V2-SESSIONS.md under S17. After research, run /gsd:plan-phase 40 and then /gsd:execute-phase 40. When done, mark S17 ✅ Done in V2-SESSIONS.md, commit, and push.
+```
+
+---
+
+### S18 — Camp Kit Presets / Loadout Templates (Phase 41)
+
+**What to build:** Let Will save named packing loadout templates ("Weekend Warrior", "Remote Office Week", "Dog Trip") that pre-populate a packing list. Each preset is a curated subset of gear items. When starting a trip, Will picks a preset and the packing list generates from that base + any trip-specific overrides.
+
+**User story:** Will creates a "Weekend Warrior" preset with his 30 most common items. When creating a short trip, he selects the preset and the packing list is instantly populated — no AI call needed for the base, Claude only adds weather/dog/activity-specific extras on top.
+
+**Key files:**
+- `prisma/schema.prisma` — new `KitPreset` model (id, name, description, items JSON array of gearItemIds)
+- `app/api/presets/route.ts` — GET (list), POST (create)
+- `app/api/presets/[id]/route.ts` — GET, PUT, DELETE
+- `components/KitPresetsClient.tsx` — NEW: list presets, create/edit/delete, gear item multi-select
+- `components/TripsClient.tsx` — add "Start from preset" option in trip creation flow (MODIFY)
+- `lib/claude.ts` — update `generatePackingList()` to accept presetItems context, treat them as confirmed base
+
+**Discuss needed (do `/gsd:discuss-phase 41` first):**
+- Should presets be editable gear lists or just "save current packing list as template"?
+- Where does the preset picker live — trip creation form, or trip prep packing section?
+- Can one trip use multiple presets (e.g. Weekend Warrior + Dog Trip)?
+- Should the preset items bypass AI entirely, or should Claude still review/adjust them?
+
+**Acceptance criteria:**
+- Will can create, name, and save a preset from a multi-select of his gear inventory
+- Preset can be applied when creating or editing a trip
+- Packing list generated with preset shows preset items as pre-checked baseline
+- Claude still runs to add trip-specific extras (weather, dog, activity)
+- Presets editable and deletable
+
+**Constraints:**
+- Out of scope: sharing presets with other users
+- Items JSON stores gearItemIds — if a gear item is deleted, it's silently dropped from presets
+
+**Session prompt:**
+```
+Pull origin main, then claim S18 in .planning/V2-SESSIONS.md (mark it 🔄 In Progress, commit + push the claim). Then run /gsd:discuss-phase 41 to resolve UX questions about presets — the full spec is in V2-SESSIONS.md under S18. After discuss, run /gsd:plan-phase 41 and then /gsd:execute-phase 41. When done, mark S18 ✅ Done in V2-SESSIONS.md, commit, and push.
+```
+
+---
+
+### S19 — Cost Tracking (Phase 42)
+
+**What to build:** Track trip expenses (gas, permits, groceries, gear purchases, campsite fees) and display per-trip cost summaries. Foundation for Gear ROI in S20.
+
+**User story:** Will gets back from a trip and logs: gas $45, groceries $60, permit $10. The trip detail shows "Total: $115" and the dashboard shows spend-per-trip over time.
+
+**Key files:**
+- `prisma/schema.prisma` — new `TripExpense` model (id, tripId, category, amount, note, date)
+- `prisma/migrations/` — migration for TripExpense
+- `app/api/trips/[id]/expenses/route.ts` — GET (list), POST (add)
+- `app/api/trips/[id]/expenses/[expenseId]/route.ts` — PATCH, DELETE
+- `components/TripExpensesTab.tsx` — NEW: expense list with add form, category breakdown, total
+- `components/TripsClient.tsx` or `TripCard.tsx` — show total cost badge on trip (MODIFY)
+- `components/DashboardClient.tsx` — add "Spend" stat card (optional, low priority)
+
+**Categories:** Gas, Food & Groceries, Permits & Fees, Gear, Campsite, Other
+
+**Acceptance criteria:**
+- Will can log expenses against a trip (category, amount, note, date)
+- Trip detail shows expense list + category subtotals + grand total
+- Trip card shows total cost if any expenses logged
+- Expenses editable and deletable
+
+**Constraints:**
+- Out of scope: receipt photo capture
+- Out of scope: budget vs. actual comparison (future)
+- Currency: USD only, stored as cents (integer) to avoid float issues
+
+**Session prompt:**
+```
+Pull origin main, then claim S19 in .planning/V2-SESSIONS.md (mark it 🔄 In Progress, commit + push the claim). Then run /gsd:plan-phase 42 to plan cost tracking — the full spec is in V2-SESSIONS.md under S19. After planning is approved, run /gsd:execute-phase 42. When done, mark S19 ✅ Done in V2-SESSIONS.md, commit, and push.
+```
+
+---
+
+### S20 — Gear ROI Tracker (Phase 43)
+
+**Depends on:** S19 (TripExpense schema must exist)
+
+**What to build:** Surface cost-per-use on gear items. Uses purchase price (already on GearItem), trip count (via PackingItem usage), and trip expenses to show which gear earns its keep and which collects dust.
+
+**User story:** Will opens his tent's gear detail and sees: "Cost: $400. Used on 8 trips. Cost per trip: $50. Trend: declining." His camp chair shows: "Cost: $80. Used on 2 trips. Cost per trip: $40. Last used: 6 months ago." He decides to sell the chair.
+
+**Key files:**
+- `app/api/gear/[id]/roi/route.ts` — GET: compute ROI (purchase price ÷ PackingItem usage count, trip expense contribution)
+- `components/GearDetailModal.tsx` or `GearClient.tsx` — add ROI card to gear detail (MODIFY)
+- No schema changes needed — uses existing `GearItem.price`, `PackingItem` join table counts
+
+**Acceptance criteria:**
+- Gear detail shows: total uses, cost per use (price ÷ uses), days since last use
+- Items with 0 uses show "Never used" warning
+- Items used 10+ times show "High ROI" badge
+- No new dependencies — computed from existing data
+
+**Constraints:**
+- Requires `price` field to be set on gear item (graceful if null: "Add purchase price to see ROI")
+- Out of scope: depreciation curves or resale value estimation
+
+**Session prompt:**
+```
+Pull origin main, then claim S20 in .planning/V2-SESSIONS.md (mark it 🔄 In Progress, commit + push the claim). Then run /gsd:plan-phase 43 to plan the gear ROI tracker — the full spec is in V2-SESSIONS.md under S20. After planning is approved, run /gsd:execute-phase 43. When done, mark S20 ✅ Done in V2-SESSIONS.md, commit, and push.
+```
+
+---
+
+### S21 — Google Maps List Import (Phase 44)
+
+**What to build:** Let Will paste a shared Google Maps list URL (e.g. a saved list of campgrounds or restaurants) and have all pins imported as draft saved locations in Outland OS.
+
+**User story:** Will has a Google Maps list called "NC Campgrounds" with 20 saved spots. He pastes the share URL into Outland OS. 20 draft locations appear on his Spots map — name, coordinates, category pre-filled from Google's data. He reviews and saves the ones he wants.
+
+**Key files:**
+- `app/api/import/google-maps-list/route.ts` — POST: accepts URL, fetches + scrapes/parses the list, returns draft Location array
+- `components/GoogleMapsImportButton.tsx` — NEW: URL input + import button, shows preview of found locations, confirm to save
+- `components/SpotsClient.tsx` — wire in import button (MODIFY)
+
+**Implementation approach:**
+- Google Maps shared lists are public HTML pages — fetch + parse with a DOM/regex approach
+- Extract: name, lat/lon (from the URL or page data), category, address
+- Return as draft Location objects (not saved until Will confirms)
+- Fall back gracefully if Google changes their URL format
+
+**Acceptance criteria:**
+- Will can paste a Google Maps list URL and see a preview of importable locations
+- Each location shows name, coordinates, address
+- Will can select all or individual locations to import
+- Imported locations appear on the Spots map as new Location records
+- Graceful error if URL format not recognized
+
+**Constraints:**
+- Out of scope: OAuth / Google Maps API (scraping only — personal tool, no rate limits)
+- Out of scope: ongoing sync / "re-import to update"
+- This is fragile by nature — document that it may break if Google changes their HTML
+
+**Session prompt:**
+```
+Pull origin main, then claim S21 in .planning/V2-SESSIONS.md (mark it 🔄 In Progress, commit + push the claim). Then run /gsd:plan-phase 44 to plan the Google Maps list import — the full spec is in V2-SESSIONS.md under S21. After planning is approved, run /gsd:execute-phase 44. When done, mark S21 ✅ Done in V2-SESSIONS.md, commit, and push.
+```
+
+---
+
+### S22 — Fire Ban Alerts (Phase 45)
+
+**Depends on:** S13 (agent job infrastructure)
+
+**What to build:** Before a trip, surface the current fire restriction status for the trip's destination region. Uses the Mac mini background agent to scrape USFS / InciWeb fire restriction pages on a schedule and store the result. Surfaces an alert in trip prep if restrictions are active.
+
+**User story:** Will is planning a Pisgah trip. 5 days out, the trip prep page shows: "⚠️ Fire Restrictions: Stage 1 in Pisgah NF — no campfires. Check fs.usda.gov for details." He adjusts his meal plan to not rely on the campfire.
+
+**Key files:**
+- `prisma/schema.prisma` — new `FireRestriction` model (id, region, level, summary, sourceUrl, checkedAt)
+- `app/api/agent-jobs/fire-ban-check/route.ts` — new job type handler (POST from Mac mini agent runner)
+- `app/api/trips/[id]/fire-status/route.ts` — GET: match trip location to nearest FireRestriction record
+- `components/TripPrepClient.tsx` — add fire status alert card (MODIFY)
+- Mac mini agent runner script — add fire ban check job type (`tools/agent-runner/jobs/fire-ban.ts`)
+
+**Acceptance criteria:**
+- Mac mini agent checks fire status for relevant NC regions weekly (or on-demand)
+- Trip prep shows fire restriction level if active restrictions found for trip region
+- If no data or check is stale (>7 days), shows "Fire status unknown — check fs.usda.gov"
+- Alert includes source URL so Will can read the actual restriction
+
+**Constraints:**
+- Out of scope: real-time scraping on page load — cached/scheduled only
+- Region matching is fuzzy (lat/lon → county → USFS unit) — acceptable approximation
+- Start with NC national forests only (Pisgah, Nantahala, Cherokee)
+
+**Session prompt:**
+```
+Pull origin main, then claim S22 in .planning/V2-SESSIONS.md (mark it 🔄 In Progress, commit + push the claim). Then run /gsd:plan-phase 45 to plan fire ban alerts — the full spec is in V2-SESSIONS.md under S22. After planning is approved, run /gsd:execute-phase 45. When done, mark S22 ✅ Done in V2-SESSIONS.md, commit, and push.
+```
+
+---
+
+### S23 — Agent Orchestration Layer (Phase 46)
+
+**What to build:** Route AI calls to the right model (Haiku/Sonnet/Opus) by task complexity, and add per-feature cost tracking so Will can see what the AI is actually costing him. This is cross-cutting infrastructure — every Claude call benefits.
+
+**User story:** Will opens a new "AI Usage" section in settings and sees: "This month: $1.24 — Packing lists (Sonnet): $0.40, Gear research (Opus): $0.62, Shopping list (Haiku): $0.22." He can tune the model routing if costs are too high.
+
+**Key files:**
+- `lib/claude.ts` — add model routing wrapper: `callClaude(task, prompt, options)` selects model by task type
+- `prisma/schema.prisma` — new `AiUsageLog` model (id, feature, model, inputTokens, outputTokens, estimatedCostUsd, createdAt)
+- `app/api/ai-usage/route.ts` — GET: aggregate by feature + model + time period
+- `components/SettingsClient.tsx` — add AI Usage tab: monthly cost breakdown by feature, model routing config (MODIFY)
+
+**Model routing rules (starting point):**
+- Haiku: shopping list generation, signal log summaries, simple lookups
+- Sonnet: packing lists, meal plans, gear research summaries, fire ban parsing
+- Opus: gear product research comparison, agent orchestration decisions, complex trip planning
+
+**Acceptance criteria:**
+- All Claude calls go through the routing wrapper
+- Each call logs model, tokens, estimated cost to AiUsageLog
+- Settings page shows monthly spend breakdown by feature
+- Will can see which features are expensive and optionally downgrade (future config)
+
+**Constraints:**
+- Cost estimation uses published token prices (hardcoded constants, updated manually)
+- Out of scope: real-time budget alerts or spending caps in v1
+- Out of scope: streaming token counting (estimate from response, not live)
+
+**Session prompt:**
+```
+Pull origin main, then claim S23 in .planning/V2-SESSIONS.md (mark it 🔄 In Progress, commit + push the claim). Then run /gsd:discuss-phase 46 to align on routing rules and cost log schema, then /gsd:research-phase 46 for model pricing and routing patterns, then /gsd:plan-phase 46. After planning is approved, run /gsd:execute-phase 46. When done, mark S23 ✅ Done in V2-SESSIONS.md, commit, and push.
 ```
 
 ---
