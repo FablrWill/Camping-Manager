@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  com.lisaos.camping-capture — runs remember_camping.py hourly on the Mac Mini
+  to emit Outland post-trip debriefs into LisaBrain memory (source='camping').
+
+  COMMITTED FOR REFERENCE — DO NOT assume the paths below are correct on the
+  Mini. Before loading, verify both absolute paths against the live machine:
+    1. Interpreter: must be the venv python that has `lisabrain` installed.
+       Find it from an existing job:
+         grep -A2 ProgramArguments ~/Library/LaunchAgents/com.lisaos.facet-summary.plist
+    2. Script path: must match where the Camping Manager repo lives on the Mini.
+  Full procedure: automation/MINI-RUNBOOK-camping-to-lisa.md
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.lisaos.camping-capture</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Users/lisa/lisaos-env/bin/python3</string>
+    <string>/Users/lisa/Camping Manager/automation/remember_camping.py</string>
+  </array>
+
+  <key>StartInterval</key>
+  <integer>3600</integer>
+
+  <key>RunAtLoad</key>
+  <true/>
+
+  <key>StandardOutPath</key>
+  <string>/Users/lisa/Library/Logs/camping-capture.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/lisa/Library/Logs/camping-capture.log</string>
+</dict>
+</plist>
