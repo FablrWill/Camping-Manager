@@ -62,23 +62,35 @@ Both must exist. If `~/outland-data/db.sqlite` is elsewhere, set `OUTLAND_DB=/co
 
 ---
 
-## 4. Phase B — Dry-run the bridge by hand (pre-flight)
+## 4. Phase B — Seed for go-forward-only, then dry-run
 
-> ⚠️ **Backfill notice:** the first successful run emits **every existing** `TripFeedback` debrief into Lisa (one-time). That is intended. If Will wants only go-forward capture, ask him first; to skip the backfill, pre-seed the ledger with the current ids before running (ask Will / see note at bottom).
+**Decision (Will, 2026-06-03): GO-FORWARD ONLY — do NOT backfill.** Will has one historical trip; he does not want its debrief imported. So we seed the ledger with all existing `TripFeedback` ids *first*, so the bridge treats them as already-seen and only emits **future** debriefs.
 
+**1. Seed the ledger** (marks every current debrief as already-emitted):
+```bash
+source ~/.env.lisaos 2>/dev/null
+mkdir -p ~/.lisabrain
+python3 - "$HOME/outland-data/db.sqlite" <<'PY'
+import json, sqlite3, sys, datetime, pathlib
+db = sqlite3.connect(f"file:{sys.argv[1]}?mode=ro", uri=True)
+ids = [str(r[0]) for r in db.execute("SELECT id FROM TripFeedback")]
+out = pathlib.Path.home()/".lisabrain"/"camping_state.json"
+out.write_text(json.dumps({"emitted_ids": sorted(ids),
+    "updated_at": datetime.datetime.now().isoformat()}, indent=2))
+print(f"seeded {len(ids)} existing id(s) into {out}")
+PY
+```
+> ⚠️ Use the right DB path if `~/outland-data/db.sqlite` isn't it (see §3b).
+
+**2. Dry-run** — with the ledger seeded this should emit nothing:
 ```bash
 "$LISA_PY" "$CAMP/automation/remember_camping.py"
 ```
-Expect lines like `[remember_camping] stored id=… trip='…'` and a final `done — N new debrief(s) emitted`.
+Expect `done — 0 new debrief(s) emitted`. **`0 new` is the correct, expected result here** — it proves the DB read + ledger path work and confirms go-forward-only is in effect. (If it emits rows, the seed didn't take — STOP and re-check the DB path.)
 
-Confirm rows landed (read `DATABASE_URL` from `~/.env.lisaos` if not already exported):
-```bash
-source ~/.env.lisaos 2>/dev/null
-psql "$DATABASE_URL" -c "SELECT count(*), max(created_at) FROM memories WHERE source='camping';"
-```
-Count must be ≥ the number of debriefs that existed. Run the script **a second time** — it should report `0 new` (idempotency check). If it re-emits, STOP (ledger isn't working).
+**Verification caveat:** seeding means the *write* path (actually inserting a `source='camping'` memory) is NOT exercised at deploy time. That's fine — it will fire the first time Will records a **new** post-trip debrief in Outland, which is the true end-to-end test (Phase D step 4). Do not create a fake `TripFeedback` row to test it — Outland's DB is read-only for us.
 
-**Only proceed if the dry-run + idempotency check both pass.**
+**Only proceed once the dry-run reports `0 new` cleanly.**
 
 ---
 
@@ -101,15 +113,20 @@ Count must be ≥ the number of debriefs that existed. Run the script **a second
 
 ---
 
-## 6. Phase D — Verify it's truly live
+## 6. Phase D — Verify the job is healthy (live write is deferred)
 
 1. Confirm the **scheduled** run actually executed (not just your manual run):
    ```bash
    tail -20 ~/Library/Logs/camping-capture.log
    ```
-   Should show a `[remember_camping] … done` line timestamped at/after load.
-2. Confirm exit health: `launchctl list | grep camping-capture` — the first column (last exit status) should be `0`.
-3. Surface check: ask Hermes on Telegram `/recall camping` (or "what do you know about my camping trips?") — camping debriefs should come back. The 2am `com.lisaos.facet-summary` run will also fold them into the `me.episodes` facet.
+   Should show a `[remember_camping] … done — 0 new debrief(s) emitted` line timestamped at/after load. **`0 new` is expected** under go-forward-only with no new trips yet.
+2. Confirm exit health: `launchctl list | grep camping-capture` — the last-exit-status column should be `0`.
+3. **Deferred end-to-end test (the real proof):** the first time Will records a **new** post-trip debrief in Outland, the next hourly run will emit one `source='camping'` row. After that trip, confirm:
+   ```bash
+   source ~/.env.lisaos 2>/dev/null
+   psql "$DATABASE_URL" -c "SELECT count(*) FROM memories WHERE source='camping';"   # ≥ 1
+   ```
+   and ask Hermes `/recall camping` — it should return the new debrief. (Until then, `/recall camping` is expected to be empty.) The 2am `com.lisaos.facet-summary` run folds it into the `me.episodes` facet.
 
 ---
 
@@ -117,28 +134,19 @@ Count must be ≥ the number of debriefs that existed. Run the script **a second
 
 - [ ] Both repos pulled on the Mini.
 - [ ] `$LISA_PY` imports `lisabrain` and `dotenv`.
-- [ ] Manual run emitted debriefs; second run reported `0 new` (idempotent).
-- [ ] `memories` has `source='camping'` rows.
+- [ ] Ledger seeded (`~/.lisabrain/camping_state.json` lists the existing id(s)).
+- [ ] Dry-run reported `0 new` (go-forward-only confirmed; read + ledger work).
 - [ ] `com.lisaos.camping-capture` loaded; `plutil -lint` clean.
-- [ ] Scheduled run logged a successful execution (exit status 0).
-- [ ] `/recall camping` in Hermes returns camping content.
+- [ ] Scheduled run logged a clean execution (exit status 0, `0 new`).
+- [ ] (Deferred) first real future debrief produces a `source='camping'` row + shows in `/recall camping`.
 
-Report the final `memories` camping count + the log tail to Will, then stop. (Live read-tools over Outland's HTTP API — "step b" — are a separate future task; not in scope here.)
+Report the seed count + the log tail to Will, then stop. The bridge is installed and healthy; the live write is verified on Will's next camping debrief. (Live read-tools over Outland's HTTP API — "step b" — are a separate future task; not in scope here.)
 
 ---
 
-### Appendix — skip the one-time backfill (only if Will asks)
-To capture only *future* debriefs, seed the ledger with the ids that already exist so the first run treats them as seen:
+### Appendix — if Will later DOES want the historical trip imported
+Reverse the go-forward seed by clearing the ledger, then run once (it will emit any not-yet-seen debriefs):
 ```bash
-source ~/.env.lisaos 2>/dev/null
-mkdir -p ~/.lisabrain
-python3 - "$HOME/outland-data/db.sqlite" <<'PY'
-import json, sqlite3, sys, datetime, pathlib
-db = sqlite3.connect(f"file:{sys.argv[1]}?mode=ro", uri=True)
-ids = [str(r[0]) for r in db.execute("SELECT id FROM TripFeedback")]
-out = pathlib.Path.home()/".lisabrain"/"camping_state.json"
-out.write_text(json.dumps({"emitted_ids": sorted(ids),
-    "updated_at": datetime.datetime.now().isoformat()}, indent=2))
-print(f"seeded {len(ids)} ids into {out}")
-PY
+rm -f ~/.lisabrain/camping_state.json
+"$LISA_PY" "$CAMP/automation/remember_camping.py"   # emits all existing debriefs, then resumes go-forward
 ```
