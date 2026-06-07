@@ -1,4 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk'
+import { callGemini } from '@/lib/gemini'
 import { parseClaudeJSON, PackingListResultSchema, MealPlanResultSchema, DepartureChecklistResultSchema, DepartureChecklistResult, TripSummaryResultSchema, type TripSummaryResult, GearDocumentResultSchema, type GearDocumentResult, VehicleChecklistResultSchema, type VehicleChecklistResult, NormalizedMealPlanResultSchema, type NormalizedMealPlanResult, SingleMealSchema, type SingleMeal, GearResearchResultSchema, type GearResearchResult, ShoppingListResultSchema, type ShoppingListResult, PrepGuideResultSchema, type PrepGuideResult, GearPriceCheckResultSchema, type GearPriceCheckResult, LNTChecklistResultSchema, type LNTChecklistResult } from '@/lib/parse-claude'
 import { CATEGORY_EMOJI, CATEGORIES } from '@/lib/gear-categories'
 import type { PackingContext } from '@/lib/packing-intelligence'
@@ -550,13 +551,7 @@ Respond ONLY with valid JSON (no markdown):
   "disclaimer": "Prices based on training data and may not reflect current sales or promotions."
 }`
 
-  const message = await anthropic.messages.create({
-    model: 'claude-sonnet-4-6',
-    max_tokens: 1024,
-    messages: [{ role: 'user', content: prompt }],
-  })
-
-  const text = message.content[0].type === 'text' ? message.content[0].text : ''
+  const text = await callGemini('gemini-2.0-flash', prompt, { maxOutputTokens: 1024 })
 
   return parseClaudeJSON(text, GearPriceCheckResultSchema)
 }
@@ -594,13 +589,9 @@ export async function regenerateMeal(params: {
     ? '\nDOG ON TRIP: Will is bringing his dog. Prefer meals that don\'t require long unattended cooking.'
     : ''
 
-  const response = await anthropic.messages.create({
-    model: 'claude-sonnet-4-20250514',
-    max_tokens: 1024,
-    messages: [
-      {
-        role: 'user',
-        content: `You are a camping meal planner. Generate ONE replacement ${slot} meal for Day ${day} of a camping trip.
+  const text = await callGemini(
+    'gemini-2.0-flash',
+    `You are a camping meal planner. Generate ONE replacement ${slot} meal for Day ${day} of a camping trip.
 
 TRIP: "${tripName}" from ${startDate} to ${endDate}${locationName ? ` at ${locationName}` : ''}
 CURRENT MEAL TO REPLACE: "${currentMealName}" — generate something DIFFERENT.
@@ -621,11 +612,9 @@ Return a JSON object (no markdown) with this exact shape:
 }
 
 Each ingredient must be an object with "item" (name), "quantity" (amount as string), and "unit" (measurement unit, empty string if none).`,
-      },
-    ],
-  })
+    { maxOutputTokens: 1024 }
+  )
 
-  const text = response.content[0].type === 'text' ? response.content[0].text : ''
   const parseResult = parseClaudeJSON(text, SingleMealSchema)
   if (!parseResult.success) {
     throw new Error(parseResult.error)
@@ -841,12 +830,7 @@ Respond ONLY with valid JSON (no markdown code blocks):
   ]
 }`;
 
-  const message = await anthropic.messages.create({
-    model: 'claude-sonnet-4-20250514',
-    max_tokens: 1500,
-    messages: [{ role: 'user', content: prompt }],
-  });
-  const text = message.content[0].type === 'text' ? message.content[0].text : '';
+  const text = await callGemini('gemini-2.0-flash', prompt, { maxOutputTokens: 1500 });
   const parseResult = parseClaudeJSON(text, GearDocumentResultSchema);
   if (!parseResult.success) {
     throw new Error(parseResult.error);
@@ -902,13 +886,7 @@ INSTRUCTIONS:
 Respond ONLY with valid JSON (no markdown):
 {"items": [{"id": "vc-0", "text": "Check tire pressure (front/rear)", "checked": false}]}`
 
-  const message = await anthropic.messages.create({
-    model: 'claude-sonnet-4-20250514',
-    max_tokens: 1024,
-    messages: [{ role: 'user', content: prompt }],
-  })
-
-  const text = message.content[0].type === 'text' ? message.content[0].text : ''
+  const text = await callGemini('gemini-2.0-flash', prompt, { maxOutputTokens: 1024 })
 
   const parseResult = parseClaudeJSON(text, VehicleChecklistResultSchema)
   if (!parseResult.success) {
