@@ -21,7 +21,7 @@ Rules:
 export async function extractInsights(transcription: string): Promise<InsightPayload> {
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
   const response = await client.messages.create({
-    model: 'claude-haiku-4-20250514',
+    model: 'claude-haiku-4-5',
     max_tokens: 1024,
     system: EXTRACTION_SYSTEM_PROMPT,
     messages: [{ role: 'user', content: transcription }],

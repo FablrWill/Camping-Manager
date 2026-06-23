@@ -325,8 +325,8 @@ Rules for the JSON:
 - Do NOT wrap JSON in markdown code blocks`
 
   const message = await anthropic.messages.create({
-    model: 'claude-sonnet-4-20250514',
-    max_tokens: 2000,
+    model: 'claude-sonnet-4-6',
+    max_tokens: 8000,
     messages: [{ role: 'user', content: prompt }],
   })
 
@@ -498,8 +498,8 @@ Rules for the JSON:
 - Do NOT wrap JSON in markdown code blocks`
 
   const message = await anthropic.messages.create({
-    model: 'claude-sonnet-4-20250514',
-    max_tokens: 4000,
+    model: 'claude-sonnet-4-6',
+    max_tokens: 8000,
     messages: [{ role: 'user', content: prompt }],
   })
 
@@ -595,7 +595,7 @@ export async function regenerateMeal(params: {
     : ''
 
   const response = await anthropic.messages.create({
-    model: 'claude-sonnet-4-20250514',
+    model: 'claude-sonnet-4-6',
     max_tokens: 1024,
     messages: [
       {
@@ -742,8 +742,8 @@ Rules:
 - Do NOT wrap JSON in markdown code blocks`
 
   const message = await anthropic.messages.create({
-    model: 'claude-sonnet-4-20250514',
-    max_tokens: 2000,
+    model: 'claude-sonnet-4-6',
+    max_tokens: 4000,
     messages: [{ role: 'user', content: prompt }],
   })
 
@@ -793,7 +793,7 @@ Return ONLY valid JSON, no markdown.`
 
   const client = new Anthropic()
   const response = await client.messages.create({
-    model: 'claude-haiku-4-20250514',
+    model: 'claude-haiku-4-5',
     max_tokens: 500,
     messages: [{ role: 'user', content: prompt }],
   })
@@ -842,7 +842,7 @@ Respond ONLY with valid JSON (no markdown code blocks):
 }`;
 
   const message = await anthropic.messages.create({
-    model: 'claude-sonnet-4-20250514',
+    model: 'claude-sonnet-4-6',
     max_tokens: 1500,
     messages: [{ role: 'user', content: prompt }],
   });
@@ -903,7 +903,7 @@ Respond ONLY with valid JSON (no markdown):
 {"items": [{"id": "vc-0", "text": "Check tire pressure (front/rear)", "checked": false}]}`
 
   const message = await anthropic.messages.create({
-    model: 'claude-sonnet-4-20250514',
+    model: 'claude-sonnet-4-6',
     max_tokens: 1024,
     messages: [{ role: 'user', content: prompt }],
   })
@@ -965,8 +965,8 @@ Respond ONLY with valid JSON (no markdown code blocks):
 }`
 
   const message = await anthropic.messages.create({
-    model: 'claude-sonnet-4-20250514',
-    max_tokens: 2000,
+    model: 'claude-sonnet-4-6',
+    max_tokens: 4000,
     messages: [{ role: 'user', content: prompt }],
   })
 
