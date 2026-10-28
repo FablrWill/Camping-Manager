@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # deploy.sh -- One-command production deploy for Outland OS
-# Usage: ssh mac-mini 'cd ~/outland && ./deploy.sh'
+# Usage: ssh lisa-mini 'cd ~/outland && ./deploy.sh'
 # Safety: set -e exits on build failure -- PM2 keeps running old version
 set -euo pipefail
 
