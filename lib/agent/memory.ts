@@ -52,7 +52,7 @@ export async function refreshMemorySummary(): Promise<void> {
     const pairs = memories.map((m) => `${m.key}: ${m.value}`).join('\n');
 
     const summary = await callGemini(
-      'gemini-2.0-flash',
+      'gemini-3.6-flash',
       `Condense these user memory entries into a single concise paragraph under 400 tokens. Preserve all specific facts (dietary needs, preferences, companions, gear, regions). Write in second person ("You prefer...", "You don't eat..."). Return only the paragraph, no markdown.
 
 ${pairs}`,
@@ -130,7 +130,7 @@ export async function extractAndSaveMemory(assistantMessage: string, userMessage
     if (userMessage.length < 20) return;
 
     const text = await callGemini(
-      'gemini-2.0-flash',
+      'gemini-3.6-flash',
       `Extract any user preferences or facts worth remembering from this message exchange. Return JSON array of {key, value} pairs. Keys should be snake_case categories like "dietary_needs", "camping_style", "gear_preferences", "camping_companions", "preferred_regions", "vehicle_info". Return [] if nothing worth remembering.
 
 User said: "${userMessage}"

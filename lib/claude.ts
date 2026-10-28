@@ -551,7 +551,7 @@ Respond ONLY with valid JSON (no markdown):
   "disclaimer": "Prices based on training data and may not reflect current sales or promotions."
 }`
 
-  const text = await callGemini('gemini-2.0-flash', prompt, { maxOutputTokens: 1024 })
+  const text = await callGemini('gemini-3.6-flash', prompt, { maxOutputTokens: 1024 })
 
   return parseClaudeJSON(text, GearPriceCheckResultSchema)
 }
@@ -590,7 +590,7 @@ export async function regenerateMeal(params: {
     : ''
 
   const text = await callGemini(
-    'gemini-2.0-flash',
+    'gemini-3.6-flash',
     `You are a camping meal planner. Generate ONE replacement ${slot} meal for Day ${day} of a camping trip.
 
 TRIP: "${tripName}" from ${startDate} to ${endDate}${locationName ? ` at ${locationName}` : ''}
@@ -830,7 +830,7 @@ Respond ONLY with valid JSON (no markdown code blocks):
   ]
 }`;
 
-  const text = await callGemini('gemini-2.0-flash', prompt, { maxOutputTokens: 1500 });
+  const text = await callGemini('gemini-3.6-flash', prompt, { maxOutputTokens: 1500 });
   const parseResult = parseClaudeJSON(text, GearDocumentResultSchema);
   if (!parseResult.success) {
     throw new Error(parseResult.error);
@@ -886,7 +886,7 @@ INSTRUCTIONS:
 Respond ONLY with valid JSON (no markdown):
 {"items": [{"id": "vc-0", "text": "Check tire pressure (front/rear)", "checked": false}]}`
 
-  const text = await callGemini('gemini-2.0-flash', prompt, { maxOutputTokens: 1024 })
+  const text = await callGemini('gemini-3.6-flash', prompt, { maxOutputTokens: 1024 })
 
   const parseResult = parseClaudeJSON(text, VehicleChecklistResultSchema)
   if (!parseResult.success) {
