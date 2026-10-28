@@ -1,4 +1,4 @@
-import Anthropic from '@anthropic-ai/sdk';
+import { callGemini } from '@/lib/gemini';
 import { prisma } from '@/lib/db';
 
 export interface PreTripAlertPayload {
@@ -20,8 +20,6 @@ export interface PreTripAlertResult {
   alerts: PreTripAlert[];
   checkedAt: string;
 }
-
-const client = new Anthropic();
 
 export async function runPreTripAlert(
   jobId: string,
@@ -60,14 +58,7 @@ Rules:
 - Maximum 5 alerts total`;
 
   try {
-    const message = await client.messages.create({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 1024,
-      messages: [{ role: 'user', content: prompt }],
-    });
-
-    const textBlock = message.content.find((b) => b.type === 'text');
-    const rawText = textBlock && 'text' in textBlock ? textBlock.text : '';
+    const rawText = await callGemini('gemini-2.0-flash', prompt, { maxOutputTokens: 1024 });
 
     // Strip markdown fences if present
     const cleaned = rawText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();

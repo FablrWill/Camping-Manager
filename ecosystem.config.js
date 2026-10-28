@@ -15,6 +15,7 @@ module.exports = {
         NODE_ENV: 'production',
         PORT: '3000',
         HOSTNAME: '0.0.0.0',   // Required for Tailscale access (not just localhost)
+        DATABASE_URL: 'file:/Users/lisa/outland-data/db.sqlite', // Explicit — overrides shell env (DEPLOY-06)
       },
       // Secrets (DATABASE_URL, API keys) loaded from .env file in cwd
       error_file: '/Users/lisa/outland-data/logs/pm2-error.log',

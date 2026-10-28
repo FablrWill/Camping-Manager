@@ -1,4 +1,4 @@
-import Anthropic from '@anthropic-ai/sdk';
+import { callGemini } from '@/lib/gemini';
 import { prisma } from '@/lib/db';
 import { MemoryArraySchema } from '@/lib/parse-claude';
 
@@ -51,22 +51,13 @@ export async function refreshMemorySummary(): Promise<void> {
 
     const pairs = memories.map((m) => `${m.key}: ${m.value}`).join('\n');
 
-    const haiku = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-    const response = await haiku.messages.create({
-      model: 'claude-3-5-haiku-20241022',
-      max_tokens: 256,
-      messages: [
-        {
-          role: 'user',
-          content: `Condense these user memory entries into a single concise paragraph under 400 tokens. Preserve all specific facts (dietary needs, preferences, companions, gear, regions). Write in second person ("You prefer...", "You don't eat..."). Return only the paragraph, no markdown.
+    const summary = await callGemini(
+      'gemini-2.0-flash',
+      `Condense these user memory entries into a single concise paragraph under 400 tokens. Preserve all specific facts (dietary needs, preferences, companions, gear, regions). Write in second person ("You prefer...", "You don't eat..."). Return only the paragraph, no markdown.
 
 ${pairs}`,
-        },
-      ],
-    });
-
-    const summary =
-      response.content[0]?.type === 'text' ? response.content[0].text.trim() : '';
+      { maxOutputTokens: 256 }
+    );
 
     if (!summary) return;
 
@@ -79,8 +70,6 @@ ${pairs}`,
     console.error('Memory summary refresh failed:', err);
   }
 }
-
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 /**
  * Assemble the messages array for an API call.
@@ -140,23 +129,16 @@ export async function extractAndSaveMemory(assistantMessage: string, userMessage
     // Only attempt extraction if user message is substantive (>20 chars)
     if (userMessage.length < 20) return;
 
-    const response = await client.messages.create({
-      model: 'claude-3-5-haiku-20241022',
-      max_tokens: 256,
-      messages: [
-        {
-          role: 'user',
-          content: `Extract any user preferences or facts worth remembering from this message exchange. Return JSON array of {key, value} pairs. Keys should be snake_case categories like "dietary_needs", "camping_style", "gear_preferences", "camping_companions", "preferred_regions", "vehicle_info". Return [] if nothing worth remembering.
+    const text = await callGemini(
+      'gemini-2.0-flash',
+      `Extract any user preferences or facts worth remembering from this message exchange. Return JSON array of {key, value} pairs. Keys should be snake_case categories like "dietary_needs", "camping_style", "gear_preferences", "camping_companions", "preferred_regions", "vehicle_info". Return [] if nothing worth remembering.
 
 User said: "${userMessage}"
 Assistant said: "${assistantMessage.slice(0, 500)}"
 
 Return ONLY valid JSON array, no markdown fences.`,
-        },
-      ],
-    });
-
-    const text = response.content[0]?.type === 'text' ? response.content[0].text : '';
+      { maxOutputTokens: 256 }
+    );
     if (!text || text.trim() === '[]') return;
 
     let parsed: unknown;

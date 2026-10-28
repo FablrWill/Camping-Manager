@@ -10,11 +10,12 @@ Usage:
 
 Requirements:
     export ANTHROPIC_API_KEY=your_key_here
-    pip install anthropic pillow
+    pip install google-genai pillow
 """
 
 import argparse
-import base64
+from google import genai as _genai
+from google.genai import types as genai_types
 import json
 import sys
 import time
@@ -77,14 +78,12 @@ def resize_for_vision(image_path: str, max_px: int = 1500) -> bytes:
 
 
 def identify_map_location(client, image_path: str) -> dict | None:
-    """Send an image to Claude's vision API and parse the location response."""
+    """Send an image to Gemini's vision API and parse the location response."""
     try:
         image_bytes = resize_for_vision(image_path)
     except Exception as e:
         print(f"    Could not open image: {e}")
         return None
-
-    image_data = base64.standard_b64encode(image_bytes).decode("utf-8")
 
     ext = Path(image_path).suffix.lower()
     media_type = {
@@ -95,23 +94,18 @@ def identify_map_location(client, image_path: str) -> dict | None:
     }.get(ext, "image/jpeg")
 
     try:
-        response = client.messages.create(
-            model="claude-sonnet-4-20250514",
-            max_tokens=512,
-            messages=[{
-                "role": "user",
-                "content": [
-                    {"type": "image", "source": {"type": "base64", "media_type": media_type, "data": image_data}},
-                    {"type": "text", "text": VISION_PROMPT},
-                ],
-            }],
+        image_part = genai_types.Part.from_bytes(data=image_bytes, mime_type=media_type)
+        response = client.models.generate_content(
+            model="gemini-2.0-flash",
+            contents=[image_part, VISION_PROMPT],
+            config=genai_types.GenerateContentConfig(max_output_tokens=512),
         )
 
-        if not response.content or not hasattr(response.content[0], "text"):
+        if not response.text:
             print(f"    Unexpected API response format")
             return None
 
-        text = response.content[0].text.strip()
+        text = response.text.strip()
 
         # Try to extract JSON from the response
         try:
@@ -160,9 +154,9 @@ Cost: ~$0.003 per image with claude-sonnet-4-20250514. 100 images ≈ $0.30.
 
     # Check dependencies
     try:
-        import anthropic  # noqa: F401
+        from google import genai  # noqa: F401
     except ImportError:
-        print("Error: anthropic package required. Install with: pip install anthropic", file=sys.stderr)
+        print("Error: google-genai package required. Install with: pip install google-genai", file=sys.stderr)
         sys.exit(1)
 
     try:
@@ -227,8 +221,9 @@ Cost: ~$0.003 per image with claude-sonnet-4-20250514. 100 images ≈ $0.30.
         return
 
     # Initialize API client
-    import anthropic
-    client = anthropic.Anthropic()
+    import os
+    from google import genai
+    client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 
     # Process each candidate
     maps_found = 0
