@@ -5,16 +5,60 @@ import { z, ZodSchema } from 'zod';
  * Strips markdown code fences, parses JSON, validates against schema.
  * Returns typed result or error string — never throws.
  */
+/**
+ * Extract the first balanced JSON object or array from a string that may
+ * contain surrounding prose. Respects string literals and escapes so braces
+ * inside quoted values don't throw off the depth count. Returns null if no
+ * balanced structure is found.
+ */
+function extractJsonBody(text: string): string | null {
+  const start = text.search(/[{[]/);
+  if (start === -1) return null;
+
+  const open = text[start];
+  const close = open === '{' ? '}' : ']';
+  let depth = 0;
+  let inString = false;
+  let escaped = false;
+
+  for (let i = start; i < text.length; i++) {
+    const ch = text[i];
+    if (inString) {
+      if (escaped) escaped = false;
+      else if (ch === '\\') escaped = true;
+      else if (ch === '"') inString = false;
+      continue;
+    }
+    if (ch === '"') inString = true;
+    else if (ch === open) depth++;
+    else if (ch === close) {
+      depth--;
+      if (depth === 0) return text.slice(start, i + 1);
+    }
+  }
+  return null;
+}
+
 export function parseClaudeJSON<T>(
   raw: string,
   schema: ZodSchema<T>
 ): { success: true; data: T } | { success: false; error: string } {
   let parsed: unknown;
+  const cleaned = raw.replace(/^```(?:json)?\n?/m, '').replace(/\n?```$/m, '').trim();
   try {
-    const cleaned = raw.replace(/^```(?:json)?\n?/m, '').replace(/\n?```$/m, '').trim();
     parsed = JSON.parse(cleaned);
   } catch {
-    return { success: false, error: 'Claude returned non-JSON response' };
+    // Newer models sometimes wrap the JSON in a prose preamble/epilogue. Fall
+    // back to extracting the first balanced JSON object/array from the text.
+    const extracted = extractJsonBody(cleaned);
+    if (extracted === null) {
+      return { success: false, error: 'Claude returned non-JSON response' };
+    }
+    try {
+      parsed = JSON.parse(extracted);
+    } catch {
+      return { success: false, error: 'Claude returned non-JSON response' };
+    }
   }
 
   const result = schema.safeParse(parsed);

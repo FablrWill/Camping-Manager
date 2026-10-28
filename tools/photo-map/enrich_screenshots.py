@@ -96,7 +96,7 @@ def identify_map_location(client, image_path: str) -> dict | None:
     try:
         image_part = genai_types.Part.from_bytes(data=image_bytes, mime_type=media_type)
         response = client.models.generate_content(
-            model="gemini-2.0-flash",
+            model="gemini-3.6-flash",
             contents=[image_part, VISION_PROMPT],
             config=genai_types.GenerateContentConfig(max_output_tokens=512),
         )

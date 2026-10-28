@@ -58,7 +58,7 @@ Rules:
 - Maximum 5 alerts total`;
 
   try {
-    const rawText = await callGemini('gemini-2.0-flash', prompt, { maxOutputTokens: 1024 });
+    const rawText = await callGemini('gemini-3.6-flash', prompt, { maxOutputTokens: 1024 });
 
     // Strip markdown fences if present
     const cleaned = rawText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();

@@ -91,7 +91,7 @@ export async function POST(req: NextRequest): Promise<Response> {
 
           // BetaToolRunner with SDK-native max_iterations cap (CHAT-04)
           const runner = client.beta.messages.toolRunner({
-            model: 'claude-sonnet-4-20250514',
+            model: 'claude-sonnet-4-6',
             max_tokens: 2048,
             system: CAMPING_EXPERT_SYSTEM_PROMPT,
             tools: runnableTools,

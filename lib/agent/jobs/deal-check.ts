@@ -39,7 +39,7 @@ async function callHaiku(prompt: string, maxTokens = 1500): Promise<string> {
       'anthropic-version': '2023-06-01',
     },
     body: JSON.stringify({
-      model: 'claude-haiku-4-5-20250514',
+      model: 'claude-haiku-4-5',
       max_tokens: maxTokens,
       messages: [{ role: 'user', content: prompt }],
     }),
